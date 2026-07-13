@@ -1,0 +1,4 @@
+[29-Jan-2026 11:27:35 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function env() in /home/npcbangladesh/public_html/config/services.php:18
+Stack trace:
+#0 {main}
+  thrown in /home/npcbangladesh/public_html/config/services.php on line 18
