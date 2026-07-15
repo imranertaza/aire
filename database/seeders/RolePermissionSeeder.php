@@ -123,6 +123,13 @@ class RolePermissionSeeder extends Seeder
             'edit-attribute-groups',
             'delete-attribute-groups',
 
+            // ✅ Options CRUD
+            'view-options',
+            'create-options',
+            'edit-options',
+            'delete-options',
+
+
             // ✅ News
             'view-news',
             'create-news',
@@ -232,6 +239,13 @@ class RolePermissionSeeder extends Seeder
                         'create-attribute-groups',
                         'edit-attribute-groups',
                         'delete-attribute-groups',
+
+                        // ✅ Options CRUD
+                        'view-options',
+                        'create-options',
+                        'edit-options',
+                        'delete-options',
+
 
                         // ✅ Galleries CRUD
                         'view-galleries',
@@ -374,6 +388,11 @@ class RolePermissionSeeder extends Seeder
                         'view-attribute-groups',
                         'create-attribute-groups',
                         'edit-attribute-groups',
+
+                        // ✅ Options CRUD
+                        'view-options',
+                        'create-options',
+                        'edit-options',
                     ]);
                     break;
 

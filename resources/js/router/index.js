@@ -88,6 +88,7 @@ import UpdateProductCategory from "../pages/admin/Catalog/ProductCategory/Update
 import ShowProductCategory from "../pages/admin/Catalog/ProductCategory/ShowProductCategory.vue";
 
 import AttributeGroups from "../pages/admin/Catalog/AttributeGroup/AttributeGroups.vue";
+import Options from "../pages/admin/Catalog/Option/Options.vue";
 
 const routes = [{
     path: "/admin",
@@ -771,6 +772,14 @@ const routes = [{
                 component: AttributeGroups,
                 meta: {
                     permission: "view-attribute-groups"
+                },
+            },
+            {
+                path: "manage-options",
+                name: "Options",
+                component: Options,
+                meta: {
+                    permission: "view-options"
                 },
             },
         ],

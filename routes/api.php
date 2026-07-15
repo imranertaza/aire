@@ -266,6 +266,16 @@ Route::prefix('product-attribute-groups')->middleware(['auth:user'])->controller
     Route::delete('{id}', 'destroy')->name('product-attribute-groups.destroy')->middleware('permission:delete-attribute-groups');
 });
 
+/* Options */
+Route::prefix('options')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\OptionController::class)->group(function () {
+    Route::get('/', 'index')->name('options.index')->middleware('permission:view-options');
+    Route::post('/', 'store')->name('options.store')->middleware('permission:create-options');
+    Route::get('{id}', 'show')->name('options.show')->middleware('permission:view-options');
+    Route::put('{id}', 'update')->name('options.update')->middleware('permission:edit-options');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('options.toggle')->middleware('permission:edit-options');
+    Route::delete('{id}', 'destroy')->name('options.destroy')->middleware('permission:delete-options');
+});
+
 /* Players */
 Route::prefix('players')->middleware(['auth:user'])->controller(PlayerController::class)->group(function () {
     Route::get('/', 'index')->name('players.index')->middleware('permission:view-players');

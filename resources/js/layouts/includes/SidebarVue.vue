@@ -84,6 +84,14 @@
                                     <p>Attribute Groups</p>
                                 </router-link>
                             </li>
+                            <!-- Options -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-options')">
+                                <router-link :to="{ name: 'Options' }" class="nav-link"
+                                    :class="{ active: $route.name === 'Options' }">
+                                    <i class="fas fa-sliders-h nav-icon"></i>
+                                    <p>Options</p>
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
 
@@ -601,6 +609,9 @@ const openParentMenus = () => {
 
         // Attribute Groups
         'AttributeGroups': ['catalog'],
+
+        // Options
+        'Options': ['catalog'],
 
         // Pages
         'Pages': ['pages'],
