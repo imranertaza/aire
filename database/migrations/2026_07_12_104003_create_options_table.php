@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('options', function (Blueprint $table) {
             $table->id();
             $table->string('name', 155);
-            $table->string('type', 32);
+            $table->string('type', 32)->comment("checkbox|radio");
             $table->integer('sort_order')->default(0);
 
             $table->tinyInteger('status')->default(1)

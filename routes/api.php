@@ -255,6 +255,17 @@ Route::prefix('product-categories')->middleware(['auth:user'])->controller(Produ
     Route::delete('{id}', 'destroy')->name('product-categories.destroy')->middleware('permission:delete-product-categories');
 });
 
+/* Product Attribute Groups */
+Route::prefix('product-attribute-groups')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductAttributeGroupController::class)->group(function () {
+    Route::get('/', 'index')->name('product-attribute-groups.index')->middleware('permission:view-attribute-groups');
+    Route::get('all', 'allAttributeGroups')->name('product-attribute-groups.all')->middleware('permission:view-attribute-groups');
+    Route::post('/', 'store')->name('product-attribute-groups.store')->middleware('permission:create-attribute-groups');
+    Route::get('{id}', 'show')->name('product-attribute-groups.show')->middleware('permission:view-attribute-groups');
+    Route::put('{id}', 'update')->name('product-attribute-groups.update')->middleware('permission:edit-attribute-groups');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('product-attribute-groups.toggle')->middleware('permission:edit-attribute-groups');
+    Route::delete('{id}', 'destroy')->name('product-attribute-groups.destroy')->middleware('permission:delete-attribute-groups');
+});
+
 /* Players */
 Route::prefix('players')->middleware(['auth:user'])->controller(PlayerController::class)->group(function () {
     Route::get('/', 'index')->name('players.index')->middleware('permission:view-players');

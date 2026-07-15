@@ -76,6 +76,14 @@
                                     </li>
                                 </ul>
                             </li>
+                            <!-- Attribute Group -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-attribute-groups')">
+                                <router-link :to="{ name: 'AttributeGroups' }" class="nav-link"
+                                    :class="{ active: $route.name === 'AttributeGroups' }">
+                                    <i class="fas fa-list nav-icon"></i>
+                                    <p>Attribute Groups</p>
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
 
@@ -590,6 +598,9 @@ const openParentMenus = () => {
         'CreateProductCategory': ['catalog', 'product-category'],
         'UpdateProductCategory': ['catalog', 'product-category'],
         'ShowProductCategory': ['catalog', 'product-category'],
+
+        // Attribute Groups
+        'AttributeGroups': ['catalog'],
 
         // Pages
         'Pages': ['pages'],
