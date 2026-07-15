@@ -57,13 +57,19 @@ class FrontendController extends Controller
             ->orderBy('order')
             ->get();
 
+        $productCategories    = \App\Models\ProductCategory::with('icon')
+            ->active()
+            ->orderBy('sort_order', 'asc')
+            ->get();
+
         return view('home', compact(
             'runningEvent',
             'about_mission_vision',
             'blogs',
             'topNews',
             'gamesNews',
-            'slides'
+            'slides',
+            'productCategories'
         ));
     }
 

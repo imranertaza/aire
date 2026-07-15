@@ -52,6 +52,30 @@
                                     </li>
                                 </ul>
                             </li>
+                            <!-- Nested: Manage Product Category -->
+                            <li class="nav-item" :class="{ 'menu-open': isOpen('product-category') }"
+                                v-if="authStore.hasPermission('view-product-categories')">
+                                <a href="#" class="nav-link" @click.prevent="toggle('product-category')">
+                                    <i class="nav-icon fas fa-tags"></i>
+                                    <p>Product Category <i class="fas fa-angle-left right"></i></p>
+                                </a>
+                                <ul class="nav nav-treeview" v-show="isOpen('product-category')">
+                                    <li class="nav-item">
+                                        <router-link :to="{ name: 'ProductCategories' }" class="nav-link"
+                                            :class="{ active: $route.name === 'ProductCategories' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Category List</p>
+                                        </router-link>
+                                    </li>
+                                    <li class="nav-item" v-if="authStore.hasPermission('create-product-categories')">
+                                        <router-link :to="{ name: 'CreateProductCategory' }" class="nav-link"
+                                            :class="{ active: $route.name === 'CreateProductCategory' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Create Category</p>
+                                        </router-link>
+                                    </li>
+                                </ul>
+                            </li>
                         </ul>
                     </li>
 
@@ -560,6 +584,12 @@ const openParentMenus = () => {
         'CreateBrand': ['catalog', 'brand'],
         'UpdateBrand': ['catalog', 'brand'],
         'ShowBrand': ['catalog', 'brand'],
+
+        // Product Categories
+        'ProductCategories': ['catalog', 'product-category'],
+        'CreateProductCategory': ['catalog', 'product-category'],
+        'UpdateProductCategory': ['catalog', 'product-category'],
+        'ShowProductCategory': ['catalog', 'product-category'],
 
         // Pages
         'Pages': ['pages'],

@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SliderController;
 use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\ProductCategoryController;
 use App\Http\Controllers\Api\EventCategoryController;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
@@ -238,6 +239,20 @@ Route::prefix('brands')->middleware(['auth:user'])->controller(BrandController::
     Route::put('{brand}', 'update')->name('brands.update')->middleware('permission:edit-brands');
     Route::patch('{brand}/toggle-status', 'toggleStatus')->name('brands.toggle')->middleware('permission:edit-brands');
     Route::delete('{brand}', 'destroy')->name('brands.destroy')->middleware('permission:delete-brands');
+});
+
+/* Icons */
+Route::middleware(['auth:user'])->get('icons', [\App\Http\Controllers\Api\IconController::class, 'index']);
+
+/* Product Categories */
+Route::prefix('product-categories')->middleware(['auth:user'])->controller(ProductCategoryController::class)->group(function () {
+    Route::get('/', 'index')->name('product-categories.index')->middleware('permission:view-product-categories');
+    Route::get('all', 'allCategories')->name('product-categories.all')->middleware('permission:view-product-categories');
+    Route::post('/', 'store')->name('product-categories.store')->middleware('permission:create-product-categories');
+    Route::get('{id}', 'show')->name('product-categories.show')->middleware('permission:view-product-categories');
+    Route::put('{id}', 'update')->name('product-categories.update')->middleware('permission:edit-product-categories');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('product-categories.toggle')->middleware('permission:edit-product-categories');
+    Route::delete('{id}', 'destroy')->name('product-categories.destroy')->middleware('permission:delete-product-categories');
 });
 
 /* Players */

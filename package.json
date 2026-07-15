@@ -24,6 +24,7 @@
     "vue": "^3.5.22",
     "vue-router": "^4.6.3",
     "vue-sweetalert2": "^5.0.11",
+    "vue3-icon-picker": "^0.3.3",
     "vue3-summernote-editor": "^1.0.2",
     "vue3-toastify": "^0.2.8",
     "vuedraggable": "^4.1.0"

@@ -57,4 +57,12 @@ class ProductCategory extends Model
     {
         return $this->children()->with('childrenRecursive');
     }
+
+    /**
+     * Custom Icon
+     */
+    public function icon(): BelongsTo
+    {
+        return $this->belongsTo(Icon::class, 'icon_id');
+    }
 }

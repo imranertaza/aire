@@ -82,6 +82,10 @@ import Brand from "../pages/admin/Catalog/Brand/Brand.vue";
 import CreateBrand from "../pages/admin/Catalog/Brand/CreateBrand.vue";
 import UpdateBrand from "../pages/admin/Catalog/Brand/UpdateBrand.vue";
 import ShowBrand from "../pages/admin/Catalog/Brand/ShowBrand.vue";
+import ProductCategory from "../pages/admin/Catalog/ProductCategory/ProductCategory.vue";
+import CreateProductCategory from "../pages/admin/Catalog/ProductCategory/CreateProductCategory.vue";
+import UpdateProductCategory from "../pages/admin/Catalog/ProductCategory/UpdateProductCategory.vue";
+import ShowProductCategory from "../pages/admin/Catalog/ProductCategory/ShowProductCategory.vue";
 
 const routes = [{
         path: "/admin",
@@ -723,6 +727,40 @@ const routes = [{
                         component: CreateBrand,
                         meta: {
                             permission: "create-brands"
+                        },
+                    },
+                    {
+                        path: "manage-product-categories",
+                        name: "ProductCategories",
+                        component: ProductCategory,
+                        meta: {
+                            permission: "view-product-categories"
+                        },
+                    },
+                    {
+                        path: "product-categories/:id",
+                        name: "ShowProductCategory",
+                        component: ShowProductCategory,
+                        props: true,
+                        meta: {
+                            permission: "view-product-categories"
+                        },
+                    },
+                    {
+                        path: "edit-product-categories/:id",
+                        name: "UpdateProductCategory",
+                        component: UpdateProductCategory,
+                        props: true,
+                        meta: {
+                            permission: "edit-product-categories"
+                        },
+                    },
+                    {
+                        path: "create-product-categories",
+                        name: "CreateProductCategory",
+                        component: CreateProductCategory,
+                        meta: {
+                            permission: "create-product-categories"
                         },
                     },
                 ],
