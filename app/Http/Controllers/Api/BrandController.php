@@ -35,6 +35,15 @@ class BrandController extends Controller
     }
 
     /**
+     * Retrieve all active brands for dropdown.
+     */
+    public function allBrands()
+    {
+        $brands = Brand::select('id', 'name')->where('status', 1)->orderBy('sort_order', 'asc')->get();
+        return ApiResponse::success($brands, 'All active brands retrieved successfully');
+    }
+
+    /**
      * Retrieve a single brand.
      */
     public function show(Brand $brand)

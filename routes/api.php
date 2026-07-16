@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\SliderController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\ProductCategoryController;
 use App\Http\Controllers\Api\EventCategoryController;
+use App\Http\Controllers\Api\AdvancedProductController;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
@@ -235,6 +236,7 @@ Route::prefix('notices')->middleware(['auth:user'])->controller(NoticeController
 Route::prefix('brands')->middleware(['auth:user'])->controller(BrandController::class)->group(function () {
     Route::get('/', 'index')->name('brands.index')->middleware('permission:view-brands');
     Route::post('/', 'store')->name('brands.store')->middleware('permission:create-brands');
+    Route::get('all', 'allBrands')->name('brands.all');
     Route::get('{brand}', 'show')->name('brands.show')->middleware('permission:view-brands');
     Route::put('{brand}', 'update')->name('brands.update')->middleware('permission:edit-brands');
     Route::patch('{brand}/toggle-status', 'toggleStatus')->name('brands.toggle')->middleware('permission:edit-brands');
@@ -269,11 +271,38 @@ Route::prefix('product-attribute-groups')->middleware(['auth:user'])->controller
 /* Options */
 Route::prefix('options')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\OptionController::class)->group(function () {
     Route::get('/', 'index')->name('options.index')->middleware('permission:view-options');
+    Route::get('all', 'allOptions')->name('options.all')->middleware('permission:view-options');
     Route::post('/', 'store')->name('options.store')->middleware('permission:create-options');
     Route::get('{id}', 'show')->name('options.show')->middleware('permission:view-options');
     Route::put('{id}', 'update')->name('options.update')->middleware('permission:edit-options');
     Route::patch('{id}/toggle-status', 'toggleStatus')->name('options.toggle')->middleware('permission:edit-options');
     Route::delete('{id}', 'destroy')->name('options.destroy')->middleware('permission:delete-options');
+});
+
+/* Products */
+Route::prefix('products')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductController::class)->group(function () {
+    Route::get('all-dropdown', 'dropdownList')->name('products.dropdown');
+    Route::get('/', 'index')->name('products.index')->middleware('permission:view-products');
+    Route::post('/', 'store')->name('products.store')->middleware('permission:create-products');
+    Route::post('/copy', 'copy')->name('products.copy')->middleware('permission:create-products');
+    Route::post('/bulk-status', 'bulkStatus')->name('products.bulk-status')->middleware('permission:edit-products');
+    Route::delete('/bulk-delete', 'bulkDelete')->name('products.bulk-delete')->middleware('permission:delete-products');
+    Route::get('{id}', 'show')->name('products.show')->middleware('permission:view-products');
+    Route::post('{id}', 'update')->name('products.update')->middleware('permission:edit-products'); // using POST because of multipart/form-data for files
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('products.toggle')->middleware('permission:edit-products');
+    Route::delete('{id}', 'destroy')->name('products.destroy')->middleware('permission:delete-products');
+});
+
+/* Advanced Products (Bulk Product Editing) */
+Route::prefix('advanced-products')->middleware(['auth:user', 'permission:edit-products'])->controller(AdvancedProductController::class)->group(function () {
+    Route::get('/', 'index')->name('advanced-products.index');
+    Route::post('update-row', 'updateRow')->name('advanced-products.update-row');
+    Route::post('update-description', 'updateDescription')->name('advanced-products.update-description');
+    Route::post('update-field', 'updateField')->name('advanced-products.update-field');
+    Route::post('bulk/options', 'bulkUpdateOptions')->name('advanced-products.bulk.options');
+    Route::post('bulk/attributes', 'bulkUpdateAttributes')->name('advanced-products.bulk.attributes');
+    Route::post('bulk/categories', 'bulkUpdateCategories')->name('advanced-products.bulk.categories');
+    Route::post('bulk/status', 'bulkUpdateStatus')->name('advanced-products.bulk.status');
 });
 
 /* Players */

@@ -35,7 +35,9 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            "@": "/resources/js", // Adjust if your images are elsewhere
+            "@": "/resources/js",
+            "@jaxtheprime/vue3-dropzone/dist/style.css": "/node_modules/@jaxtheprime/vue3-dropzone/dist/style.css",
+            "@jaxtheprime/vue3-dropzone": "/resources/js/components/DropzoneWrapper.vue",
         },
     },
 });

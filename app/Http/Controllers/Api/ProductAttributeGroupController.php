@@ -46,8 +46,9 @@ class ProductAttributeGroupController extends Controller
         return ApiResponse::success($group, 'Attribute group retrieved successfully');
     }
 
+
     /**
-     * Store a new attribute group.
+     * Display a specific attribute group.
      */
     public function store(Request $request)
     {
@@ -62,7 +63,7 @@ class ProductAttributeGroupController extends Controller
 
         // Convert boolean status to tinyInt
         $validated['status'] = filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
-        
+
         if (!isset($validated['sort_order'])) {
             $validated['sort_order'] = 0;
         }
@@ -89,7 +90,7 @@ class ProductAttributeGroupController extends Controller
 
         // Convert boolean status
         $validated['status'] = filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
-        
+
         if (!isset($validated['sort_order'])) {
             $validated['sort_order'] = 0;
         }

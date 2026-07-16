@@ -40,6 +40,16 @@ class OptionController extends Controller
     }
 
     /**
+     * Retrieve all options for dropdowns.
+     */
+    public function allOptions()
+    {
+        $options = Option::with('optionValues')->where('status', 1)->orderBy('sort_order', 'asc')->get();
+        return ApiResponse::success($options, 'All options retrieved successfully');
+    }
+
+
+    /**
      * Store a new option and its values.
      */
     public function store(Request $request)
@@ -81,7 +91,7 @@ class OptionController extends Controller
             }
 
             DB::commit();
-            
+
             // Reload with relations to return
             $option->load('optionValues');
 

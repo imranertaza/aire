@@ -92,6 +92,14 @@
                                     <p>Options</p>
                                 </router-link>
                             </li>
+                            <!-- Products -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-products')">
+                                <router-link :to="{ name: 'Products' }" class="nav-link"
+                                    :class="{ active: ['Products', 'CreateProduct', 'UpdateProduct', 'AdvancedProducts'].includes($route.name) }">
+                                    <i class="fas fa-box nav-icon"></i>
+                                    <p>Products</p>
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
 
@@ -612,6 +620,12 @@ const openParentMenus = () => {
 
         // Options
         'Options': ['catalog'],
+
+        // Products
+        'Products': ['catalog'],
+        'CreateProduct': ['catalog'],
+        'UpdateProduct': ['catalog'],
+        'AdvancedProducts': ['catalog'],
 
         // Pages
         'Pages': ['pages'],

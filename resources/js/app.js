@@ -26,6 +26,10 @@ import {
 
 
 const app = createApp(App);
+
+import Vue3Dropzone from "./components/DropzoneWrapper.vue";
+app.component("Vue3Dropzone", Vue3Dropzone);
+
 app.use(createPinia());
 app.use(router);
 app.use(VueSweetalert2);

@@ -782,6 +782,38 @@ const routes = [{
                     permission: "view-options"
                 },
             },
+            {
+                path: "products",
+                name: "Products",
+                component: () => import('@/pages/admin/Catalog/Product/Products.vue'),
+                meta: {
+                    permission: "view-products"
+                },
+            },
+            {
+                path: "products/create",
+                name: "CreateProduct",
+                component: () => import('@/pages/admin/Catalog/Product/CreateProduct.vue'),
+                meta: {
+                    permission: "create-products"
+                },
+            },
+            {
+                path: "products/update/:id",
+                name: "UpdateProduct",
+                component: () => import('@/pages/admin/Catalog/Product/UpdateProduct.vue'),
+                meta: {
+                    permission: "edit-products"
+                },
+            },
+            {
+                path: "products/advanced",
+                name: "AdvancedProducts",
+                component: () => import('@/pages/admin/Catalog/Product/AdvancedProducts.vue'),
+                meta: {
+                    permission: "edit-products"
+                },
+            },
         ],
     },
     ],

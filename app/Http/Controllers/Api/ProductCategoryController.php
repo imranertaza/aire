@@ -51,8 +51,10 @@ class ProductCategoryController extends Controller
         return ApiResponse::success($category, 'Category retrieved successfully');
     }
 
+
+
     /**
-     * Store a new category.
+     * Store a newly created category.
      */
     public function store(Request $request)
     {
