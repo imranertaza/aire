@@ -733,6 +733,31 @@ const routes = [{
                 },
             },
             {
+                path: "manage-coupons",
+                name: "Coupons",
+                component: () => import('@/pages/admin/Catalog/Coupon/Coupons.vue'),
+                meta: {
+                    permission: "view-coupons"
+                },
+            },
+            {
+                path: "edit-coupons/:id",
+                name: "UpdateCoupon",
+                component: () => import('@/pages/admin/Catalog/Coupon/UpdateCoupon.vue'),
+                props: true,
+                meta: {
+                    permission: "edit-coupons"
+                },
+            },
+            {
+                path: "create-coupons",
+                name: "CreateCoupon",
+                component: () => import('@/pages/admin/Catalog/Coupon/CreateCoupon.vue'),
+                meta: {
+                    permission: "create-coupons"
+                },
+            },
+            {
                 path: "manage-product-categories",
                 name: "ProductCategories",
                 component: ProductCategory,

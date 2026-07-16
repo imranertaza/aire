@@ -243,6 +243,21 @@ Route::prefix('brands')->middleware(['auth:user'])->controller(BrandController::
     Route::delete('{brand}', 'destroy')->name('brands.destroy')->middleware('permission:delete-brands');
 });
 
+/* Coupons */
+Route::prefix('coupons')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\CouponController::class)->group(function () {
+    Route::get('/', 'index')->name('coupons.index')->middleware('permission:view-coupons');
+    Route::post('/', 'store')->name('coupons.store')->middleware('permission:create-coupons');
+    Route::get('all', 'allCoupons')->name('coupons.all');
+    Route::get('{id}', 'show')->name('coupons.show')->middleware('permission:view-coupons');
+    Route::put('{id}', 'update')->name('coupons.update')->middleware('permission:edit-coupons');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('coupons.toggle')->middleware('permission:edit-coupons');
+    Route::delete('{id}', 'destroy')->name('coupons.destroy')->middleware('permission:delete-coupons');
+});
+
+/* Shipping Methods (Dependencies for Coupons) */
+Route::middleware(['auth:user'])->get('shipping-methods/all', [\App\Http\Controllers\Api\ShippingMethodController::class, 'allMethods']);
+
+
 /* Icons */
 Route::middleware(['auth:user'])->get('icons', [\App\Http\Controllers\Api\IconController::class, 'index']);
 

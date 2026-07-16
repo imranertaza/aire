@@ -100,6 +100,30 @@
                                     <p>Products</p>
                                 </router-link>
                             </li>
+                            <!-- Coupons -->
+                            <li class="nav-item" :class="{ 'menu-open': isOpen('coupon') }"
+                                v-if="authStore.hasPermission('view-coupons')">
+                                <a href="#" class="nav-link" @click.prevent="toggle('coupon')">
+                                    <i class="nav-icon fas fa-ticket-alt"></i>
+                                    <p>Coupons <i class="fas fa-angle-left right"></i></p>
+                                </a>
+                                <ul class="nav nav-treeview" v-show="isOpen('coupon')">
+                                    <li class="nav-item">
+                                        <router-link :to="{ name: 'Coupons' }" class="nav-link"
+                                            :class="{ active: $route.name === 'Coupons' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Coupons List</p>
+                                        </router-link>
+                                    </li>
+                                    <li class="nav-item" v-if="authStore.hasPermission('create-coupons')">
+                                        <router-link :to="{ name: 'CreateCoupon' }" class="nav-link"
+                                            :class="{ active: $route.name === 'CreateCoupon' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Create Coupon</p>
+                                        </router-link>
+                                    </li>
+                                </ul>
+                            </li>
                         </ul>
                     </li>
 
@@ -626,6 +650,11 @@ const openParentMenus = () => {
         'CreateProduct': ['catalog'],
         'UpdateProduct': ['catalog'],
         'AdvancedProducts': ['catalog'],
+
+        // Coupons
+        'Coupons': ['catalog', 'coupon'],
+        'CreateCoupon': ['catalog', 'coupon'],
+        'UpdateCoupon': ['catalog', 'coupon'],
 
         // Pages
         'Pages': ['pages'],
