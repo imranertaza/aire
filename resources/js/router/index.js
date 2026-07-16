@@ -741,6 +741,14 @@ const routes = [{
                 },
             },
             {
+                path: "manage-reviews",
+                name: "Reviews",
+                component: () => import('@/pages/admin/Catalog/Review/Reviews.vue'),
+                meta: {
+                    permission: "view-reviews"
+                },
+            },
+            {
                 path: "edit-coupons/:id",
                 name: "UpdateCoupon",
                 component: () => import('@/pages/admin/Catalog/Coupon/UpdateCoupon.vue'),

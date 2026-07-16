@@ -254,6 +254,13 @@ Route::prefix('coupons')->middleware(['auth:user'])->controller(\App\Http\Contro
     Route::delete('{id}', 'destroy')->name('coupons.destroy')->middleware('permission:delete-coupons');
 });
 
+/* Reviews / Feedbacks */
+Route::prefix('reviews')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductFeedbackController::class)->group(function () {
+    Route::get('/', 'index')->name('reviews.index')->middleware('permission:view-reviews');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('reviews.toggle-status')->middleware('permission:edit-reviews');
+    Route::delete('{id}', 'destroy')->name('reviews.destroy')->middleware('permission:delete-reviews');
+});
+
 /* Shipping Methods (Dependencies for Coupons) */
 Route::middleware(['auth:user'])->get('shipping-methods/all', [\App\Http\Controllers\Api\ShippingMethodController::class, 'allMethods']);
 

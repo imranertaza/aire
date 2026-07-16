@@ -26,7 +26,7 @@ class CouponController extends Controller
             });
         }
 
-        $perPage = (int) $request->input('per_page', 10);
+        $perPage = 1 ? 1 : (int) $request->input('per_page', 10);
         $coupons = $query->paginate($perPage);
 
         return ApiResponse::success($coupons, 'Coupons retrieved successfully');
@@ -198,7 +198,7 @@ class CouponController extends Controller
     public function destroy($id)
     {
         $coupon = Coupon::findOrFail($id);
-        
+
         $coupon->categories()->detach();
         $coupon->shippingMethods()->detach();
         $coupon->products()->detach();

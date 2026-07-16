@@ -1,5 +1,5 @@
 <template>
-  <div v-if="pData?.last_page > 1" class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+  <div v-if="pData?.last_page > 1" class="w-100 d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
     <!-- Showing info -->
     <div>
       <small>

@@ -124,6 +124,14 @@
                                     </li>
                                 </ul>
                             </li>
+                            <!-- Reviews -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-reviews')">
+                                <router-link :to="{ name: 'Reviews' }" class="nav-link"
+                                    :class="{ active: $route.name === 'Reviews' }">
+                                    <i class="fas fa-star nav-icon"></i>
+                                    <p>Reviews</p>
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
 
@@ -655,6 +663,9 @@ const openParentMenus = () => {
         'Coupons': ['catalog', 'coupon'],
         'CreateCoupon': ['catalog', 'coupon'],
         'UpdateCoupon': ['catalog', 'coupon'],
+
+        // Reviews
+        'Reviews': ['catalog'],
 
         // Pages
         'Pages': ['pages'],

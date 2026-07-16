@@ -141,6 +141,11 @@ class RolePermissionSeeder extends Seeder
             'edit-coupons',
             'delete-coupons',
 
+            // ✅ Reviews CRUD
+            'view-reviews',
+            'edit-reviews',
+            'delete-reviews',
+
 
             // ✅ News
             'view-news',
@@ -269,6 +274,11 @@ class RolePermissionSeeder extends Seeder
                         'create-coupons',
                         'edit-coupons',
                         'delete-coupons',
+
+                        // ✅ Reviews CRUD
+                        'view-reviews',
+                        'edit-reviews',
+                        'delete-reviews',
 
 
                         // ✅ Galleries CRUD
@@ -427,6 +437,10 @@ class RolePermissionSeeder extends Seeder
                         'view-coupons',
                         'create-coupons',
                         'edit-coupons',
+
+                        // ✅ Reviews CRUD
+                        'view-reviews',
+                        'edit-reviews',
                     ]);
                     break;
 
@@ -445,6 +459,7 @@ class RolePermissionSeeder extends Seeder
                         'view-options',
                         'view-products',
                         'view-coupons',
+                        'view-reviews',
 
                         'view-news-categories',
                         'view-blog-categories',
