@@ -216,17 +216,7 @@
 
             <!-- Pagination -->
             <div class="card-footer bg-white border-top clearfix">
-                <ul class="pagination pagination-sm m-0 float-right">
-                    <li class="page-item" :class="{ disabled: pagination.current_page === 1 }">
-                        <a class="page-link" href="#" @click.prevent="loadProducts(pagination.current_page - 1)">&laquo;</a>
-                    </li>
-                    <li class="page-item" v-for="page in pagination.last_page" :key="page" :class="{ active: pagination.current_page === page }">
-                        <a class="page-link" href="#" @click.prevent="loadProducts(page)">{{ page }}</a>
-                    </li>
-                    <li class="page-item" :class="{ disabled: pagination.current_page === pagination.last_page }">
-                        <a class="page-link" href="#" @click.prevent="loadProducts(pagination.current_page + 1)">&raquo;</a>
-                    </li>
-                </ul>
+                <Pagination :pData="pagination" @page-change="loadProducts" />
             </div>
         </div>
     </section>
@@ -466,6 +456,7 @@ import { getImageCacheUrl } from '@/layouts/helpers/helpers';
 import { useToast } from '@/composables/useToast';
 import Multiselect from '@vueform/multiselect';
 import '@vueform/multiselect/themes/default.css';
+import Pagination from '@/components/Paginations/Pagination.vue';
 
 const toast = useToast();
 
@@ -478,7 +469,7 @@ const selectedOptionToAdd = ref("");
 
 const searchQuery = ref("");
 const selectedProductIds = ref([]);
-const pagination = ref({ current_page: 1, last_page: 1 });
+const pagination = ref({ current_page: 1, last_page: 1, data: [] });
 
 // Click-to-edit: track which cell is active
 const editingCell = ref(null); // { productId, field }
@@ -577,10 +568,7 @@ const loadProducts = async (page = 1) => {
             params: { page, search: searchQuery.value, per_page: 10 }
         });
         products.value = response.data.data.data;
-        pagination.value = {
-            current_page: response.data.data.current_page,
-            last_page: response.data.data.last_page
-        };
+        pagination.value = response.data.data;
     } catch (error) {
         toast.error("Failed to load products.");
     }
