@@ -26,7 +26,7 @@ class CouponController extends Controller
             });
         }
 
-        $perPage = 1 ? 1 : (int) $request->input('per_page', 10);
+        $perPage = (int) $request->input('per_page', 10);
         $coupons = $query->paginate($perPage);
 
         return ApiResponse::success($coupons, 'Coupons retrieved successfully');
