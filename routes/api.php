@@ -282,6 +282,17 @@ Route::prefix('orders')->middleware(['auth:user'])->controller(\App\Http\Control
     Route::delete('{id}', 'destroy')->name('orders.destroy')->middleware('permission:delete-orders');
 });
 
+/* Offers CRUD */
+Route::prefix('offers')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\OfferController::class)->group(function () {
+    Route::get('/', 'index')->name('offers.index')->middleware('permission:view-offers');
+    Route::post('/', 'store')->name('offers.store')->middleware('permission:create-offers');
+    Route::get('all', 'allOffers')->name('offers.all');
+    Route::get('zone-data', 'getZoneData')->name('offers.zone-data');
+    Route::get('{id}', 'show')->name('offers.show')->middleware('permission:view-offers');
+    Route::post('{id}', 'update')->name('offers.update')->middleware('permission:edit-offers'); // POST for multipart/form-data
+    Route::delete('{id}', 'destroy')->name('offers.destroy')->middleware('permission:delete-offers');
+});
+
 /* Shipping Methods (Dependencies for Coupons) */
 Route::middleware(['auth:user'])->get('shipping-methods/all', [\App\Http\Controllers\Api\ShippingMethodController::class, 'allMethods']);
 

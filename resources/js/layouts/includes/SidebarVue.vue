@@ -124,6 +124,30 @@
                                     </li>
                                 </ul>
                             </li>
+                            <!-- Offers -->
+                            <li class="nav-item" :class="{ 'menu-open': isOpen('offer') }"
+                                v-if="authStore.hasPermission('view-offers')">
+                                <a href="#" class="nav-link" @click.prevent="toggle('offer')">
+                                    <i class="nav-icon fas fa-percentage"></i>
+                                    <p>Offers <i class="fas fa-angle-left right"></i></p>
+                                </a>
+                                <ul class="nav nav-treeview" v-show="isOpen('offer')">
+                                    <li class="nav-item">
+                                        <router-link :to="{ name: 'Offers' }" class="nav-link"
+                                            :class="{ active: $route.name === 'Offers' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Offers List</p>
+                                        </router-link>
+                                    </li>
+                                    <li class="nav-item" v-if="authStore.hasPermission('create-offers')">
+                                        <router-link :to="{ name: 'CreateOffer' }" class="nav-link"
+                                            :class="{ active: $route.name === 'CreateOffer' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Create Offer</p>
+                                        </router-link>
+                                    </li>
+                                </ul>
+                            </li>
                             <!-- Reviews -->
                             <li class="nav-item" v-if="authStore.hasPermission('view-reviews')">
                                 <router-link :to="{ name: 'Reviews' }" class="nav-link"
@@ -679,6 +703,11 @@ const openParentMenus = () => {
         'Coupons': ['catalog', 'coupon'],
         'CreateCoupon': ['catalog', 'coupon'],
         'UpdateCoupon': ['catalog', 'coupon'],
+
+        // Offers
+        'Offers': ['catalog', 'offer'],
+        'CreateOffer': ['catalog', 'offer'],
+        'UpdateOffer': ['catalog', 'offer'],
 
         // Reviews
         'Reviews': ['catalog'],

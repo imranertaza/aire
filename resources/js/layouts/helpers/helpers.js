@@ -64,3 +64,32 @@ export const getImageCacheUrl = (filePath, width = 200, height = 200, format = "
     // Local image - use cache endpoint
     return `${baseUrl}/image/${width}/${height}/${format}/${relativePath.replace(/^\/+/, "")}`;
 };
+
+/**
+ * Format a date string to a readable format (e.g., 18-Jul-2026, 03:15 PM)
+ * @param {string} dateString 
+ * @param {boolean} includeTime - Whether to include time (defaults to false)
+ */
+export const formatDate = (dateString, includeTime = false) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    
+    const datePart = date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    }).replace(/ /g, '-');
+
+    if (!includeTime) {
+        return datePart;
+    }
+
+    const timePart = date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+
+    return `${datePart}, ${timePart}`;
+};

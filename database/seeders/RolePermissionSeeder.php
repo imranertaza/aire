@@ -152,6 +152,12 @@ class RolePermissionSeeder extends Seeder
             'edit-orders',
             'delete-orders',
 
+            // ✅ Offers CRUD
+            'view-offers',
+            'create-offers',
+            'edit-offers',
+            'delete-offers',
+
             // ✅ Reviews CRUD
             'view-reviews',
             'edit-reviews',
@@ -296,6 +302,12 @@ class RolePermissionSeeder extends Seeder
                         'view-orders',
                         'edit-orders',
                         'delete-orders',
+
+                        // ✅ Offers CRUD
+                        'view-offers',
+                        'create-offers',
+                        'edit-offers',
+                        'delete-offers',
 
                         // ✅ Reviews CRUD
                         'view-reviews',
@@ -469,6 +481,11 @@ class RolePermissionSeeder extends Seeder
                         'view-orders',
                         'edit-orders',
 
+                        // ✅ Offers CRUD
+                        'view-offers',
+                        'create-offers',
+                        'edit-offers',
+
                         // ✅ Reviews CRUD
                         'view-reviews',
                         'edit-reviews',
@@ -490,6 +507,7 @@ class RolePermissionSeeder extends Seeder
                         'view-options',
                         'view-products',
                         'view-coupons',
+                        'view-offers',
                         'view-reviews',
                         'view-customers',
                         'view-orders',

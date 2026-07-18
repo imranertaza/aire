@@ -826,6 +826,31 @@ const routes = [{
                 },
             },
             {
+                path: "offers",
+                name: "Offers",
+                component: () => import('@/pages/admin/Catalog/Offer/Offers.vue'),
+                meta: {
+                    permission: "view-offers"
+                },
+            },
+            {
+                path: "offers/create",
+                name: "CreateOffer",
+                component: () => import('@/pages/admin/Catalog/Offer/CreateOffer.vue'),
+                meta: {
+                    permission: "create-offers"
+                },
+            },
+            {
+                path: "offers/edit/:id",
+                name: "UpdateOffer",
+                component: () => import('@/pages/admin/Catalog/Offer/UpdateOffer.vue'),
+                props: true,
+                meta: {
+                    permission: "edit-offers"
+                },
+            },
+            {
                 path: "manage-product-categories",
                 name: "ProductCategories",
                 component: ProductCategory,

@@ -44,6 +44,7 @@ class DatabaseSeeder extends Seeder
         $this->call(PlayerSeeder::class);
         $this->call(CustomerSeeder::class);
         $this->call(OrderSeeder::class);
+        $this->call(OfferSeeder::class);
 
         Artisan::call("optimize:clear");
     }
