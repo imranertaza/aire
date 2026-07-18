@@ -26,7 +26,7 @@ return new class extends Migration
             $table->integer('address_id')->default(0);
             $table->string('ip', 40);
             $table->boolean('status')->default(1);
-            
+
             $table->integer('createdBy')->nullable();
             $table->integer('updatedBy')->nullable();
             $table->timestamps();

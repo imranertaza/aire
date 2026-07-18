@@ -132,6 +132,22 @@
                                     <p>Reviews</p>
                                 </router-link>
                             </li>
+                            <!-- Customers -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-customers')">
+                                <router-link :to="{ name: 'Customers' }" class="nav-link"
+                                    :class="{ active: ['Customers', 'CreateCustomer', 'UpdateCustomer', 'CustomerLedger', 'CustomerPointHistory'].includes($route.name) }">
+                                    <i class="fas fa-users nav-icon"></i>
+                                    <p>Customers</p>
+                                </router-link>
+                            </li>
+                            <!-- Orders -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-orders')">
+                                <router-link :to="{ name: 'Orders' }" class="nav-link"
+                                    :class="{ active: ['Orders', 'OrderView'].includes($route.name) }">
+                                    <i class="fas fa-shopping-cart nav-icon"></i>
+                                    <p>Orders</p>
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
 
@@ -666,6 +682,17 @@ const openParentMenus = () => {
 
         // Reviews
         'Reviews': ['catalog'],
+
+        // Customers
+        'Customers': ['catalog'],
+        'CreateCustomer': ['catalog'],
+        'UpdateCustomer': ['catalog'],
+        'CustomerLedger': ['catalog'],
+        'CustomerPointHistory': ['catalog'],
+
+        // Orders
+        'Orders': ['catalog'],
+        'OrderView': ['catalog'],
 
         // Pages
         'Pages': ['pages'],

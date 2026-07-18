@@ -43,6 +43,7 @@ class DatabaseSeeder extends Seeder
         $this->call(CommitteeMemberSeeder::class);
         $this->call(PlayerSeeder::class);
         $this->call(CustomerSeeder::class);
+        $this->call(OrderSeeder::class);
 
         Artisan::call("optimize:clear");
     }

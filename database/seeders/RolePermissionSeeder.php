@@ -141,6 +141,17 @@ class RolePermissionSeeder extends Seeder
             'edit-coupons',
             'delete-coupons',
 
+            // ✅ Customers CRUD
+            'view-customers',
+            'create-customers',
+            'edit-customers',
+            'delete-customers',
+
+            // ✅ Orders CRUD
+            'view-orders',
+            'edit-orders',
+            'delete-orders',
+
             // ✅ Reviews CRUD
             'view-reviews',
             'edit-reviews',
@@ -274,6 +285,17 @@ class RolePermissionSeeder extends Seeder
                         'create-coupons',
                         'edit-coupons',
                         'delete-coupons',
+
+                        // ✅ Customers CRUD
+                        'view-customers',
+                        'create-customers',
+                        'edit-customers',
+                        'delete-customers',
+
+                        // ✅ Orders CRUD
+                        'view-orders',
+                        'edit-orders',
+                        'delete-orders',
 
                         // ✅ Reviews CRUD
                         'view-reviews',
@@ -438,6 +460,15 @@ class RolePermissionSeeder extends Seeder
                         'create-coupons',
                         'edit-coupons',
 
+                        // ✅ Customers CRUD
+                        'view-customers',
+                        'create-customers',
+                        'edit-customers',
+
+                        // ✅ Orders CRUD
+                        'view-orders',
+                        'edit-orders',
+
                         // ✅ Reviews CRUD
                         'view-reviews',
                         'edit-reviews',
@@ -460,6 +491,8 @@ class RolePermissionSeeder extends Seeder
                         'view-products',
                         'view-coupons',
                         'view-reviews',
+                        'view-customers',
+                        'view-orders',
 
                         'view-news-categories',
                         'view-blog-categories',

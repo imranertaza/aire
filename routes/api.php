@@ -261,6 +261,27 @@ Route::prefix('reviews')->middleware(['auth:user'])->controller(\App\Http\Contro
     Route::delete('{id}', 'destroy')->name('reviews.destroy')->middleware('permission:delete-reviews');
 });
 
+/* Customers CRUD with Ledger and Point History */
+Route::prefix('customers')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\CustomerController::class)->group(function () {
+    Route::get('/', 'index')->name('customers.index')->middleware('permission:view-customers');
+    Route::post('/', 'store')->name('customers.store')->middleware('permission:create-customers');
+    Route::get('{id}', 'show')->name('customers.show')->middleware('permission:view-customers');
+    Route::put('{id}', 'update')->name('customers.update')->middleware('permission:edit-customers');
+    Route::delete('{id}', 'destroy')->name('customers.destroy')->middleware('permission:delete-customers');
+    Route::get('{id}/ledger', 'ledger')->name('customers.ledger')->middleware('permission:view-customers');
+    Route::get('{id}/point', 'point')->name('customers.point')->middleware('permission:view-customers');
+});
+
+/* Orders CRUD and Tracking */
+Route::prefix('orders')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\OrderController::class)->group(function () {
+    Route::get('/', 'index')->name('orders.index')->middleware('permission:view-orders');
+    Route::get('{id}', 'show')->name('orders.show')->middleware('permission:view-orders');
+    Route::post('{id}/history', 'history')->name('orders.history')->middleware('permission:edit-orders');
+    Route::patch('{id}/payment-status', 'paymentStatus')->name('orders.payment-status')->middleware('permission:edit-orders');
+    Route::post('{id}/points', 'updatePoints')->name('orders.points')->middleware('permission:edit-orders');
+    Route::delete('{id}', 'destroy')->name('orders.destroy')->middleware('permission:delete-orders');
+});
+
 /* Shipping Methods (Dependencies for Coupons) */
 Route::middleware(['auth:user'])->get('shipping-methods/all', [\App\Http\Controllers\Api\ShippingMethodController::class, 'allMethods']);
 

@@ -749,6 +749,66 @@ const routes = [{
                 },
             },
             {
+                path: "manage-customers",
+                name: "Customers",
+                component: () => import('@/pages/admin/Catalog/Customer/Customers.vue'),
+                meta: {
+                    permission: "view-customers"
+                },
+            },
+            {
+                path: "create-customer",
+                name: "CreateCustomer",
+                component: () => import('@/pages/admin/Catalog/Customer/CreateCustomer.vue'),
+                meta: {
+                    permission: "create-customers"
+                },
+            },
+            {
+                path: "edit-customer/:id",
+                name: "UpdateCustomer",
+                component: () => import('@/pages/admin/Catalog/Customer/UpdateCustomer.vue'),
+                props: true,
+                meta: {
+                    permission: "edit-customers"
+                },
+            },
+            {
+                path: "customer-ledger/:id",
+                name: "CustomerLedger",
+                component: () => import('@/pages/admin/Catalog/Customer/CustomerLedger.vue'),
+                props: true,
+                meta: {
+                    permission: "view-customers"
+                },
+            },
+            {
+                path: "customer-point/:id",
+                name: "CustomerPointHistory",
+                component: () => import('@/pages/admin/Catalog/Customer/CustomerPointHistory.vue'),
+                props: true,
+                meta: {
+                    permission: "view-customers"
+                },
+            },
+            {
+                path: "manage-orders",
+                name: "Orders",
+                component: () => import('@/pages/admin/Catalog/Order/Orders.vue'),
+                meta: {
+                    permission: "view-orders"
+                },
+            },
+            {
+                path: "view-order/:id",
+                name: "OrderView",
+                component: () => import('@/pages/admin/Catalog/Order/OrderView.vue'),
+                props: true,
+                meta: {
+                    permission: "view-orders"
+                },
+            },
+            {
                 path: "edit-coupons/:id",
                 name: "UpdateCoupon",
                 component: () => import('@/pages/admin/Catalog/Coupon/UpdateCoupon.vue'),
