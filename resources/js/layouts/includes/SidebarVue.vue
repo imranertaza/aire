@@ -172,6 +172,14 @@
                                     <p>Orders</p>
                                 </router-link>
                             </li>
+                            <!-- Shipping Methods -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-shipping-methods')">
+                                <router-link :to="{ name: 'ShippingList' }" class="nav-link"
+                                    :class="{ active: ['ShippingList', 'ShippingSettings'].includes($route.name) }">
+                                    <i class="fas fa-shipping-fast nav-icon"></i>
+                                    <p>Shipping Methods</p>
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
 

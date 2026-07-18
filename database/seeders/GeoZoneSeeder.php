@@ -14,14 +14,15 @@ class GeoZoneSeeder extends Seeder
     public function run(): void
     {
         $zones = [
-            ['geo_zone_name' => 'Dhaka Division', 'geo_zone_description' => 'Inside Dhaka', 'sort_order' => 1],
-            ['geo_zone_name' => 'Chittagong Division', 'geo_zone_description' => 'Port Area', 'sort_order' => 2],
-            ['geo_zone_name' => 'Khulna Division', 'geo_zone_description' => 'South Region', 'sort_order' => 3],
+            ['id' => 1, 'geo_zone_name' => 'bd zone', 'geo_zone_description' => 'bd zone', 'sort_order' => 0, 'status' => '1'],
+            ['id' => 2, 'geo_zone_name' => 'test', 'geo_zone_description' => 'test', 'sort_order' => 0, 'status' => '1'],
+            ['id' => 3, 'geo_zone_name' => 'test 2', 'geo_zone_description' => 'test 2', 'sort_order' => 0, 'status' => '1'],
+            ['id' => 4, 'geo_zone_name' => 'Singapore', 'geo_zone_description' => 'Singapore', 'sort_order' => 0, 'status' => '1'],
         ];
 
         foreach ($zones as $zone) {
             GeoZone::updateOrCreate(
-                ['geo_zone_name' => $zone['geo_zone_name']],
+                ['id' => $zone['id']],
                 $zone
             );
         }

@@ -14,16 +14,20 @@ class ShippingSettingsSeeder extends Seeder
      */
     public function run(): void
     {
-
-        $weightMethod = ShippingMethod::where('code', 'weight')->first();
+        $flatMethod = ShippingMethod::where('code', 'flat')->first();
         $zoneMethod = ShippingMethod::where('code', 'zone')->first();
+        $zoneRateMethod = ShippingMethod::where('code', 'zone_rate')->first();
 
         $settings = [
-            // Example for Weight
-            ['shipping_method_id' => $weightMethod?->id, 'label' => 'tier_1', 'title' => 'Light Weight', 'value' => '0-5kg'],
+            // Flat Rate Setting
+            ['shipping_method_id' => $flatMethod?->id, 'label' => 'flat_rate_price', 'title' => 'Flat Rate', 'value' => '5'],
 
-            // Example for Zone
-            ['shipping_method_id' => $zoneMethod?->id, 'label' => 'zone_a', 'title' => 'Dhaka City', 'value' => '60.00'],
+            // Zone Based Shipping
+            ['shipping_method_id' => $zoneMethod?->id, 'label' => 'in_dhaka', 'title' => 'Inside of Dhaka', 'value' => '20'],
+            ['shipping_method_id' => $zoneMethod?->id, 'label' => 'out_dhaka', 'title' => 'Outside of Dhaka', 'value' => '50'],
+
+            // Zone Rate Shipping
+            ['shipping_method_id' => $zoneRateMethod?->id, 'label' => 'zone_rate_method', 'title' => 'Zone Rate Method', 'value' => '1'],
         ];
 
         foreach ($settings as $setting) {

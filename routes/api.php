@@ -293,9 +293,16 @@ Route::prefix('offers')->middleware(['auth:user'])->controller(\App\Http\Control
     Route::delete('{id}', 'destroy')->name('offers.destroy')->middleware('permission:delete-offers');
 });
 
-/* Shipping Methods (Dependencies for Coupons) */
-Route::middleware(['auth:user'])->get('shipping-methods/all', [\App\Http\Controllers\Api\ShippingMethodController::class, 'allMethods']);
-
+/* Shipping Methods */
+Route::prefix('shipping-methods')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ShippingMethodController::class)->group(function () {
+    Route::get('all', 'allMethods');
+    Route::get('', 'index')->name('shipping.index')->middleware('permission:view-shipping-methods');
+    Route::patch('{id}/status', 'updateStatus')->name('shipping.update-status')->middleware('permission:edit-shipping-methods');
+    Route::get('{id}/settings', 'settings')->name('shipping.settings')->middleware('permission:view-shipping-methods');
+    Route::post('{id}/settings', 'updateSettings')->name('shipping.update-settings')->middleware('permission:edit-shipping-methods');
+    Route::delete('zone-rate/{id}', 'deleteZoneRate')->name('shipping.delete-zone-rate')->middleware('permission:edit-shipping-methods');
+    Route::delete('weight-rate/{id}', 'deleteWeightRate')->name('shipping.delete-weight-rate')->middleware('permission:edit-shipping-methods');
+});
 
 /* Icons */
 Route::middleware(['auth:user'])->get('icons', [\App\Http\Controllers\Api\IconController::class, 'index']);

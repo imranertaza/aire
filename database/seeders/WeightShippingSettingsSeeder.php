@@ -22,9 +22,7 @@ class WeightShippingSettingsSeeder extends Seeder
         }
 
         $settings = [
-            ['label' => 1, 'title' => '0kg - 1kg', 'value' => 50.00],
-            ['label' => 2, 'title' => '1kg - 5kg', 'value' => 150.00],
-            ['label' => 3, 'title' => '5kg+', 'value' => 300.00],
+            ['label' => 5, 'title' => '', 'value' => 50],
         ];
 
         foreach ($settings as $setting) {

@@ -45,6 +45,13 @@ class DatabaseSeeder extends Seeder
         $this->call(CustomerSeeder::class);
         $this->call(OrderSeeder::class);
         $this->call(OfferSeeder::class);
+        
+        // Shipping Seeders
+        $this->call(ShippingMethodSeeder::class);
+        $this->call(ShippingSettingsSeeder::class);
+        $this->call(WeightShippingSettingsSeeder::class);
+        $this->call(GeoZoneSeeder::class);
+        $this->call(GeoZoneShippingRateSeeder::class);
 
         Artisan::call("optimize:clear");
     }

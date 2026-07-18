@@ -851,6 +851,23 @@ const routes = [{
                 },
             },
             {
+                path: "shipping-methods",
+                name: "ShippingList",
+                component: () => import('@/pages/admin/Shipping/ShippingList.vue'),
+                meta: {
+                    permission: "view-shipping-methods"
+                },
+            },
+            {
+                path: "shipping-methods/:id/settings",
+                name: "ShippingSettings",
+                component: () => import('@/pages/admin/Shipping/ShippingSettings.vue'),
+                props: true,
+                meta: {
+                    permission: "edit-shipping-methods"
+                },
+            },
+            {
                 path: "manage-product-categories",
                 name: "ProductCategories",
                 component: ProductCategory,
