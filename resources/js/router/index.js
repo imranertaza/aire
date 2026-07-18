@@ -868,6 +868,23 @@ const routes = [{
                 },
             },
             {
+                path: "payment-methods",
+                name: "PaymentList",
+                component: () => import('@/pages/admin/Payment/PaymentList.vue'),
+                meta: {
+                    permission: "view-payment-methods"
+                },
+            },
+            {
+                path: "payment-methods/:id/settings",
+                name: "PaymentSettings",
+                component: () => import('@/pages/admin/Payment/PaymentSettings.vue'),
+                props: true,
+                meta: {
+                    permission: "edit-payment-methods"
+                },
+            },
+            {
                 path: "manage-product-categories",
                 name: "ProductCategories",
                 component: ProductCategory,

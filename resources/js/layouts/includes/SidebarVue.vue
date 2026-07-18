@@ -180,6 +180,14 @@
                                     <p>Shipping Methods</p>
                                 </router-link>
                             </li>
+                            <!-- Payment Methods -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-payment-methods')">
+                                <router-link :to="{ name: 'PaymentList' }" class="nav-link"
+                                    :class="{ active: ['PaymentList', 'PaymentSettings'].includes($route.name) }">
+                                    <i class="fas fa-credit-card nav-icon"></i>
+                                    <p>Payment Methods</p>
+                                </router-link>
+                            </li>
                         </ul>
                     </li>
 

@@ -53,6 +53,9 @@ class DatabaseSeeder extends Seeder
         $this->call(GeoZoneSeeder::class);
         $this->call(GeoZoneShippingRateSeeder::class);
 
+        // Payment Seeders
+        $this->call(PaymentMethodSeeder::class);
+
         Artisan::call("optimize:clear");
     }
 }

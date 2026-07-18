@@ -167,6 +167,10 @@ class RolePermissionSeeder extends Seeder
             'view-shipping-methods',
             'edit-shipping-methods',
 
+            // ✅ Payment Methods
+            'view-payment-methods',
+            'edit-payment-methods',
+
 
             // ✅ News
             'view-news',
@@ -321,6 +325,10 @@ class RolePermissionSeeder extends Seeder
                         // ✅ Shipping Methods
                         'view-shipping-methods',
                         'edit-shipping-methods',
+
+            // ✅ Payment Methods
+            'view-payment-methods',
+            'edit-payment-methods',
 
 
                         // ✅ Galleries CRUD
@@ -501,6 +509,10 @@ class RolePermissionSeeder extends Seeder
                         // ✅ Shipping Methods
                         'view-shipping-methods',
                         'edit-shipping-methods',
+
+            // ✅ Payment Methods
+            'view-payment-methods',
+            'edit-payment-methods',
                     ]);
                     break;
 

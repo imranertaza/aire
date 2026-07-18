@@ -1,5 +1,5 @@
 <template>
-    <DashboardHeader title="Shipping Methods">
+    <DashboardHeader title="Payment Methods">
         <div class="d-flex justify-content-end align-items-center">
             <select v-model="perPage" @change="onPerPageChange" class="custom-select mr-2" style="width: auto;">
                 <option :value="10">10 per page</option>
@@ -16,14 +16,15 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
-                        <div v-if="methods?.data?.length === 0" class="alert alert-info">No shipping methods found.</div>
+                        <div v-if="methods?.data?.length === 0" class="alert alert-info">No payment methods found.</div>
                         <div v-else class="table-responsive">
                             <table class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
                                         <th style="width: 5%">Sl</th>
-                                        <th style="width: 35%">Name</th>
-                                        <th style="width: 25%">Code</th>
+                                        <th style="width: 15%">Image</th>
+                                        <th style="width: 25%">Name</th>
+                                        <th style="width: 20%">Code</th>
                                         <th style="width: 15%">Status</th>
                                         <th style="width: 20%">Action</th>
                                     </tr>
@@ -31,6 +32,10 @@
                                 <tbody>
                                     <tr v-for="(method, index) in methods?.data" :key="method.id">
                                         <td class="align-middle">{{ index + 1 }}</td>
+                                        <td class="align-middle text-center">
+                                            <img v-if="method.image" :src="`/images/payment/${method.image}`" alt="Payment logo" style="max-height: 40px; max-width: 80px; object-fit: contain;">
+                                            <span v-else class="text-muted">N/A</span>
+                                        </td>
                                         <td class="align-middle">{{ method.name }}</td>
                                         <td class="align-middle">
                                             <span class="badge badge-secondary">{{ method.code }}</span>
@@ -39,12 +44,12 @@
                                             <BootstrapSwitch 
                                                 :modelValue="method.status === 1"
                                                 @update:modelValue="val => toggleStatus(method.id)"
-                                                :disabled="!authStore.hasPermission('edit-shipping-methods')"
+                                                :disabled="!authStore.hasPermission('edit-payment-methods')"
                                             />
                                         </td>
                                         <td class="align-middle">
-                                            <router-link v-if="authStore.hasPermission('view-shipping-methods')"
-                                                :to="{ name: 'ShippingSettings', params: { id: method.id } }"
+                                            <router-link v-if="authStore.hasPermission('view-payment-methods')"
+                                                :to="{ name: 'PaymentSettings', params: { id: method.id } }"
                                                 class="btn btn-sm btn-primary">
                                                 <i class="fas fa-cogs"></i> Settings
                                             </router-link>
@@ -82,11 +87,11 @@ const perPage = ref(10);
 
 const fetchPage = async (page = 1) => {
     try {
-        const res = await axios.get(`/api/shipping-methods?page=${page}&search=${currentSearchTerm.value}&per_page=${perPage.value}`);
+        const res = await axios.get(`/api/payment-methods?page=${page}&search=${currentSearchTerm.value}&per_page=${perPage.value}`);
         methods.value = res.data.data;
     } catch (error) {
         console.error(error);
-        toast.error('Failed to load shipping methods.');
+        toast.error('Failed to load payment methods.');
     }
 };
 
@@ -101,7 +106,7 @@ const onPerPageChange = () => {
 
 const toggleStatus = async (id) => {
     try {
-        await axios.patch(`/api/shipping-methods/${id}/status`);
+        await axios.patch(`/api/payment-methods/${id}/status`);
         toast.success('Status updated successfully');
         fetchPage(methods.value.current_page);
     } catch (error) {

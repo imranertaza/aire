@@ -304,6 +304,15 @@ Route::prefix('shipping-methods')->middleware(['auth:user'])->controller(\App\Ht
     Route::delete('weight-rate/{id}', 'deleteWeightRate')->name('shipping.delete-weight-rate')->middleware('permission:edit-shipping-methods');
 });
 
+/* Payment Methods */
+Route::prefix('payment-methods')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\PaymentMethodController::class)->group(function () {
+    Route::get('all', 'allMethods');
+    Route::get('', 'index')->name('payment.index')->middleware('permission:view-payment-methods');
+    Route::patch('{id}/status', 'updateStatus')->name('payment.update-status')->middleware('permission:edit-payment-methods');
+    Route::get('{id}/settings', 'settings')->name('payment.settings')->middleware('permission:view-payment-methods');
+    Route::post('{id}/settings', 'updateSettings')->name('payment.update-settings')->middleware('permission:edit-payment-methods');
+});
+
 /* Icons */
 Route::middleware(['auth:user'])->get('icons', [\App\Http\Controllers\Api\IconController::class, 'index']);
 

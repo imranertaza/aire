@@ -14,16 +14,18 @@
                         <form @submit.prevent="submitSettings">
                             <div class="card-body">
 
-                                <!-- Common Status Toggle -->
-                                <div class="form-group mb-4 pb-4 border-bottom">
-                                    <label>Status</label>
-                                    <div
-                                        class="custom-control custom-switch custom-switch-off-danger custom-switch-on-success">
-                                        <input type="checkbox" class="custom-control-input" id="statusSwitch"
-                                            v-model="formData.status" :true-value="1" :false-value="0">
-                                        <label class="custom-control-label" for="statusSwitch">
-                                            {{ formData.status === 1 ? 'Enabled' : 'Disabled' }}
-                                        </label>
+                                <div class="row border-bottom mb-4 pb-4">
+                                    <!-- Common Status Toggle -->
+                                    <div class="col-sm-12 col-md-5">
+                                        <div class="card shadow-sm h-100 border-0 bg-light">
+                                            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                                                <h6 class="font-weight-bold text-secondary mb-4"><i class="fas fa-power-off mr-2"></i>Shipping Method Status</h6>
+                                                <BootstrapSwitch :modelValue="formData.status === 1"
+                                                    @update:modelValue="val => formData.status = val ? 1 : 0" />
+                                                <small class="text-muted mt-4">Enable or disable this shipping method for the
+                                                    checkout page.</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -165,6 +167,7 @@
 
 <script setup>
 import DashboardHeader from '@/components/DashboardHeader.vue';
+import BootstrapSwitch from '@/components/BootstrapSwitch.vue';
 import axios from 'axios';
 import { onMounted, reactive, ref, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
