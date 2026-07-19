@@ -1,4 +1,22 @@
+import AdminLayout from "@/layouts/AdminLayout.vue";
+import AdminUserUpdate from "@/pages/admin/users/AdminUserUpdate.vue";
+import AdminLogin from "@/pages/admin/auth/Login.vue";
+import AdminDashboard from "@/pages/admin/auth/Profile.vue";
+import Dashboard from "@/pages/admin/Dashboard.vue";
+import RolePermission from "@/pages/admin/users/ManageUser.vue";
+import CreatePage from "@/pages/admin/Pages/CreatePage.vue";
+import Pages from "@/pages/admin/Pages/Pages.vue";
+import ShowPage from "@/pages/admin/Pages/ShowPage.vue";
+import UpdatePages from "@/pages/admin/Pages/UpdatePages.vue";
+import CreatePost from "@/pages/admin/Post/CreatePost.vue";
+import Post from "@/pages/admin/Post/Post.vue";
+import ShowPost from "@/pages/admin/Post/ShowPost.vue";
+import UpdatePost from "@/pages/admin/Post/UpdatePost.vue";
+import RolePermissionManager from "@/pages/admin/users/RolePermissionManager.vue";
+import GeneralSettings from "@/pages/admin/Settings/GeneralSettings.vue";
 
+import NotFound from "@/pages/NotFound.vue";
+import Unauthorized from "@/pages/Unauthorized.vue";
 import {
     useAuthStore
 } from "@/store/auth";
@@ -6,18 +24,90 @@ import {
     createRouter,
     createWebHistory
 } from "vue-router";
+import MenuManager from "../pages/admin/menu/MenuManager.vue";
+import MenusIndex from "../pages/admin/menu/MenusIndex.vue";
+import NewsCategoryEdit from "../pages/admin/News/NewsCategory/NewsCategoryEdit.vue";
+import NewsCategory from "../pages/admin/News/NewsCategory/NewsCategory.vue";
+import NewsCategoryCreate from "../pages/admin/News/NewsCategory/NewsCategoryCreate.vue";
+import NewsCategoryShow from "../pages/admin/News/NewsCategory/NewsCategoryShow.vue";
+import CategoryEdit from "../pages/admin/Post/Category/CategoryEdit.vue";
+import CategoryCreate from "../pages/admin/Post/Category/CategoryCreate.vue";
+import Category from "../pages/admin/Post/Category/Category.vue";
+import CategoryShow from "../pages/admin/Post/Category/CategoryShow.vue";
+import Gallery from "../pages/admin/Gallery/Gallery.vue";
+import ShowGallery from "../pages/admin/Gallery/ShowGallery.vue";
+import UpdateGallery from "../pages/admin/Gallery/UpdateGallery.vue";
+import CreateGallery from "../pages/admin/Gallery/CreateGallery.vue";
+import EventCategory from "../pages/admin/Event/EventsCategory/EventCategory.vue";
+import EventCategoryCreate from "../pages/admin/Event/EventsCategory/EventCategoryCreate.vue";
+import EventCategoryEdit from "../pages/admin/Event/EventsCategory/EventCategoryEdit.vue";
+import EventCategoryShow from "../pages/admin/Event/EventsCategory/EventCategoryShow.vue";
+import CreateEvent from "../pages/admin/Event/CreateEvent.vue";
+import UpdateEvent from "../pages/admin/Event/UpdateEvent.vue";
+import ShowEvent from "../pages/admin/Event/ShowEvent.vue";
+import Event from "../pages/admin/Event/Event.vue";
+import CreateNotice from "../pages/admin/Notice/CreateNotice.vue";
+import UpdateNotice from "../pages/admin/Notice/UpdateNotice.vue";
+import ShowNotice from "../pages/admin/Notice/ShowNotice.vue";
+import Notice from "../pages/admin/Notice/Notice.vue";
+import CreateNews from "../pages/admin/News/CreateNews.vue";
+import UpdateNews from "../pages/admin/News/UpdateNews.vue";
+import ShowNews from "../pages/admin/News/ShowNews.vue";
+import News from "../pages/admin/News/News.vue";
+import Result from "../pages/admin/Result/Result.vue";
+import ShowResult from "../pages/admin/Result/ShowResult.vue";
+import UpdateResult from "../pages/admin/Result/UpdateResult.vue";
+import CreateResult from "../pages/admin/Result/CreateResult.vue";
+import Blog from "../pages/admin/Blog/Blog.vue";
+import ShowBlog from "../pages/admin/Blog/ShowBlog.vue";
+import UpdateBlog from "../pages/admin/Blog/UpdateBlog.vue";
+import CreateBlog from "../pages/admin/Blog/CreateBlog.vue";
+import BlogCategory from "../pages/admin/Blog/BlogCategory/BlogCategory.vue";
+import BlogCategoryCreate from "../pages/admin/Blog/BlogCategory/BlogCategoryCreate.vue";
+import BlogCategoryEdit from "../pages/admin/Blog/BlogCategory/BlogCategoryEdit.vue";
+import BlogCategoryShow from "../pages/admin/Blog/BlogCategory/BlogCategoryShow.vue";
+import UpdateSection from "../pages/admin/Section/UpdateSection.vue";
+import Section from "../pages/admin/Section/Section.vue";
+import Sliders from "../pages/admin/Sliders/Sliders.vue";
+import CreateSlider from "../pages/admin/Sliders/CreateSlider.vue";
+import UpdateSlider from "../pages/admin/Sliders/UpdateSlider.vue";
+import CommitteeMembers from "../pages/admin/CommitteeMember/CommitteeMembers.vue";
+import UpdateCommitteeMembers from "../pages/admin/CommitteeMember/UpdateCommitteeMembers.vue";
+import CreateCommitteeMembers from "../pages/admin/CommitteeMember/CreateCommitteeMembers.vue";
+import CreatePlayer from "../pages/admin/Player/CreatePlayer.vue";
+import UpdatePlayer from "../pages/admin/Player/UpdatePlayer.vue";
+import ShowPlayer from "../pages/admin/Player/ShowPlayer.vue";
+import Player from "../pages/admin/Player/Player.vue";
+import Brand from "../pages/admin/Catalog/Brand/Brand.vue";
+import CreateBrand from "../pages/admin/Catalog/Brand/CreateBrand.vue";
+import UpdateBrand from "../pages/admin/Catalog/Brand/UpdateBrand.vue";
+import ShowBrand from "../pages/admin/Catalog/Brand/ShowBrand.vue";
+import ProductCategory from "../pages/admin/Catalog/ProductCategory/ProductCategory.vue";
+import CreateProductCategory from "../pages/admin/Catalog/ProductCategory/CreateProductCategory.vue";
+import UpdateProductCategory from "../pages/admin/Catalog/ProductCategory/UpdateProductCategory.vue";
+import ShowProductCategory from "../pages/admin/Catalog/ProductCategory/ShowProductCategory.vue";
+
+import AttributeGroups from "../pages/admin/Catalog/AttributeGroup/AttributeGroups.vue";
+import Options from "../pages/admin/Catalog/Option/Options.vue";
+
+import GeoZoneList from "../pages/admin/Localisation/GeoZone/GeoZoneList.vue";
+import CreateGeoZone from "../pages/admin/Localisation/GeoZone/CreateGeoZone.vue";
+import UpdateGeoZone from "../pages/admin/Localisation/GeoZone/UpdateGeoZone.vue";
+
+import ModuleList from "../pages/admin/Module/ModuleList.vue";
+import ModuleSettings from "../pages/admin/Module/ModuleSettings.vue";
 
 const routes = [{
     path: "/admin",
     children: [{
         path: "login",
         name: "AdminLogin",
-        component: () => import('@/pages/admin/auth/Login.vue')
+        component: AdminLogin
     },
     {
         path: "",
         prefix: "admin",
-        component: () => import('@/layouts/AdminLayout.vue'),
+        component: AdminLayout,
         meta: {
             requiresAuth: true,
             role: "admin"
@@ -28,7 +118,7 @@ const routes = [{
             {
                 path: "",
                 name: "Dashboard",
-                component: () => import('@/pages/admin/Dashboard.vue'),
+                component: Dashboard,
                 meta: {
                     permission: "view-dashboard"
                 },
@@ -37,7 +127,7 @@ const routes = [{
             {
                 path: "admin-profile",
                 name: "adminProfile",
-                component: () => import('@/pages/admin/auth/Profile.vue'),
+                component: AdminDashboard,
                 meta: {
                     permission: "view-dashboard"
                 },
@@ -47,7 +137,7 @@ const routes = [{
             {
                 path: "manage-admins-roles",
                 name: "RolePermission",
-                component: () => import('@/pages/admin/users/ManageUser.vue'),
+                component: RolePermission,
                 meta: {
                     permission: "view-users"
                 }, // viewing admins/roles
@@ -55,7 +145,7 @@ const routes = [{
             {
                 path: "admins/:id/edit",
                 name: "AdminUserUpdate",
-                component: () => import('@/pages/admin/users/AdminUserUpdate.vue'),
+                component: AdminUserUpdate,
                 meta: {
                     permission: "update-users"
                 },
@@ -63,7 +153,7 @@ const routes = [{
             {
                 path: "manage-role-permissions",
                 name: "RolePermissionManager",
-                component: () => import('@/pages/admin/users/RolePermissionManager.vue'),
+                component: RolePermissionManager,
                 meta: {
                     permission: "update-user-role"
                 }, // updating role permissions
@@ -73,7 +163,7 @@ const routes = [{
             {
                 path: "manage-pages",
                 name: "Pages",
-                component: () => import('@/pages/admin/Pages/Pages.vue'),
+                component: Pages,
                 meta: {
                     permission: "view-pages"
                 },
@@ -81,7 +171,7 @@ const routes = [{
             {
                 path: "pages/:id",
                 name: "ShowPage",
-                component: () => import('@/pages/admin/Pages/ShowPage.vue'),
+                component: ShowPage,
                 props: true,
                 meta: {
                     permission: "view-pages"
@@ -90,7 +180,7 @@ const routes = [{
             {
                 path: "edit-pages/:id",
                 name: "UpdatePages",
-                component: () => import('@/pages/admin/Pages/UpdatePages.vue'),
+                component: UpdatePages,
                 props: true,
                 meta: {
                     permission: "edit-pages"
@@ -99,7 +189,7 @@ const routes = [{
             {
                 path: "create-page",
                 name: "CreatePage",
-                component: () => import('@/pages/admin/Pages/CreatePage.vue'),
+                component: CreatePage,
                 meta: {
                     permission: "create-pages"
                 },
@@ -108,7 +198,7 @@ const routes = [{
             {
                 path: "manage-posts",
                 name: "Posts",
-                component: () => import('@/pages/admin/Post/Post.vue'),
+                component: Post,
                 meta: {
                     permission: "view-posts"
                 },
@@ -116,7 +206,7 @@ const routes = [{
             {
                 path: "posts/:id",
                 name: "ShowPost",
-                component: () => import('@/pages/admin/Post/ShowPost.vue'),
+                component: ShowPost,
                 props: true,
                 meta: {
                     permission: "view-posts"
@@ -125,7 +215,7 @@ const routes = [{
             {
                 path: "edit-posts/:id",
                 name: "UpdatePost",
-                component: () => import('@/pages/admin/Post/UpdatePost.vue'),
+                component: UpdatePost,
                 props: true,
                 meta: {
                     permission: "edit-posts"
@@ -134,7 +224,7 @@ const routes = [{
             {
                 path: "create-posts",
                 name: "CreatePost",
-                component: () => import('@/pages/admin/Post/CreatePost.vue'),
+                component: CreatePost,
                 meta: {
                     permission: "create-posts"
                 },
@@ -144,7 +234,7 @@ const routes = [{
             {
                 path: "generale-settings",
                 name: "GeneralSettings",
-                component: () => import('@/pages/admin/Settings/GeneralSettings.vue'),
+                component: GeneralSettings,
                 meta: {
                     permission: "update-settings"
                 },
@@ -153,7 +243,7 @@ const routes = [{
             {
                 path: "categories",
                 name: "CategoryIndex",
-                component: () => import('@/pages/admin/Post/Category/Category.vue'),
+                component: Category,
                 meta: {
                     permission: "view-categories",
                 },
@@ -161,7 +251,7 @@ const routes = [{
             {
                 path: "categories/create",
                 name: "CategoryCreate",
-                component: () => import('@/pages/admin/Post/Category/CategoryCreate.vue'),
+                component: CategoryCreate,
                 meta: {
                     permission: "create-categories",
                 },
@@ -169,7 +259,7 @@ const routes = [{
             {
                 path: "categories/:id/edit",
                 name: "UpdateCategory",
-                component: () => import('@/pages/admin/Post/Category/CategoryEdit.vue'),
+                component: CategoryEdit,
                 props: true,
                 meta: {
                     permission: "edit-categories",
@@ -178,7 +268,7 @@ const routes = [{
             {
                 path: "admin/categories/:id",
                 name: "CategoryShow",
-                component: () => import('@/pages/admin/Post/Category/CategoryShow.vue'),
+                component: CategoryShow,
                 props: true,
                 meta: {
                     permission: "view-categories",
@@ -188,7 +278,7 @@ const routes = [{
             {
                 path: "manage-news",
                 name: "News",
-                component: () => import('@/pages/admin/News/News.vue'),
+                component: News,
                 meta: {
                     permission: "view-news"
                 },
@@ -196,7 +286,7 @@ const routes = [{
             {
                 path: "news/:id",
                 name: "ShowNews",
-                component: () => import('@/pages/admin/News/ShowNews.vue'),
+                component: ShowNews,
                 props: true,
                 meta: {
                     permission: "view-news"
@@ -205,7 +295,7 @@ const routes = [{
             {
                 path: "edit-news/:id",
                 name: "UpdateNews",
-                component: () => import('@/pages/admin/News/UpdateNews.vue'),
+                component: UpdateNews,
                 props: true,
                 meta: {
                     permission: "edit-news"
@@ -214,7 +304,7 @@ const routes = [{
             {
                 path: "create-news",
                 name: "CreateNews",
-                component: () => import('@/pages/admin/News/CreateNews.vue'),
+                component: CreateNews,
                 meta: {
                     permission: "create-news"
                 },
@@ -223,7 +313,7 @@ const routes = [{
             {
                 path: "news-categories",
                 name: "NewsCategoryIndex",
-                component: () => import('@/pages/admin/News/NewsCategory/NewsCategory.vue'),
+                component: NewsCategory,
                 meta: {
                     permission: "view-news-categories",
                 },
@@ -231,7 +321,7 @@ const routes = [{
             {
                 path: "news-categories/create",
                 name: "NewsCategoryCreate",
-                component: () => import('@/pages/admin/News/NewsCategory/NewsCategoryCreate.vue'),
+                component: NewsCategoryCreate,
                 meta: {
                     permission: "create-news-categories",
                 },
@@ -239,7 +329,7 @@ const routes = [{
             {
                 path: "news-categories/edit/:id",
                 name: "UpdateNewsCategory",
-                component: () => import('@/pages/admin/News/NewsCategory/NewsCategoryEdit.vue'),
+                component: NewsCategoryEdit,
                 props: true,
                 meta: {
                     permission: "edit-news-categories",
@@ -248,7 +338,7 @@ const routes = [{
             {
                 path: "admin/news-categories/:id",
                 name: "NewsCategoryShow",
-                component: () => import('@/pages/admin/News/NewsCategory/NewsCategoryShow.vue'),
+                component: NewsCategoryShow,
                 props: true,
                 meta: {
                     permission: "view-news-categories",
@@ -258,7 +348,7 @@ const routes = [{
             {
                 path: "manage-blogs",
                 name: "Blog",
-                component: () => import('@/pages/admin/Blog/Blog.vue'),
+                component: Blog,
                 meta: {
                     permission: "view-blog"
                 },
@@ -266,7 +356,7 @@ const routes = [{
             {
                 path: "blogs/:id",
                 name: "ShowBlog",
-                component: () => import('@/pages/admin/Blog/ShowBlog.vue'),
+                component: ShowBlog,
                 props: true,
                 meta: {
                     permission: "view-blog"
@@ -275,7 +365,7 @@ const routes = [{
             {
                 path: "edit-blogs/:id",
                 name: "UpdateBlog",
-                component: () => import('@/pages/admin/Blog/UpdateBlog.vue'),
+                component: UpdateBlog,
                 props: true,
                 meta: {
                     permission: "edit-blog"
@@ -284,7 +374,7 @@ const routes = [{
             {
                 path: "create-blogs",
                 name: "CreateBlog",
-                component: () => import('@/pages/admin/Blog/CreateBlog.vue'),
+                component: CreateBlog,
                 meta: {
                     permission: "create-blog"
                 },
@@ -293,7 +383,7 @@ const routes = [{
             {
                 path: "blog-categories",
                 name: "BlogCategoryIndex",
-                component: () => import('@/pages/admin/Blog/BlogCategory/BlogCategory.vue'),
+                component: BlogCategory,
                 meta: {
                     permission: "view-blog-categories",
                 },
@@ -301,7 +391,7 @@ const routes = [{
             {
                 path: "blog-categories/create",
                 name: "BlogCategoryCreate",
-                component: () => import('@/pages/admin/Blog/BlogCategory/BlogCategoryCreate.vue'),
+                component: BlogCategoryCreate,
                 meta: {
                     permission: "create-blog-categories",
                 },
@@ -309,7 +399,7 @@ const routes = [{
             {
                 path: "blog-categories/edit/:id",
                 name: "UpdateBlogCategory",
-                component: () => import('@/pages/admin/Blog/BlogCategory/BlogCategoryEdit.vue'),
+                component: BlogCategoryEdit,
                 props: true,
                 meta: {
                     permission: "edit-blog-categories",
@@ -318,7 +408,7 @@ const routes = [{
             {
                 path: "admin/blog-categories/:id",
                 name: "BlogCategoryShow",
-                component: () => import('@/pages/admin/Blog/BlogCategory/BlogCategoryShow.vue'),
+                component: BlogCategoryShow,
                 props: true,
                 meta: {
                     permission: "view-blog-categories",
@@ -328,7 +418,7 @@ const routes = [{
             {
                 path: "menus",
                 name: "MenuManager",
-                component: () => import('@/pages/admin/menu/MenusIndex.vue'),
+                component: MenusIndex,
                 meta: {
                     permission: "manage-menus",
                 },
@@ -336,7 +426,7 @@ const routes = [{
             {
                 path: "menu/view/:id",
                 name: "ShowMenu",
-                component: () => import('@/pages/admin/menu/MenuManager.vue'),
+                component: MenuManager,
                 meta: {
                     permission: "manage-menus",
                 },
@@ -345,7 +435,7 @@ const routes = [{
             {
                 path: "manage-galleries",
                 name: "Gallery",
-                component: () => import('@/pages/admin/Gallery/Gallery.vue'),
+                component: Gallery,
                 meta: {
                     permission: "view-galleries"
                 },
@@ -353,7 +443,7 @@ const routes = [{
             {
                 path: "galleries/:id",
                 name: "ShowGallery",
-                component: () => import('@/pages/admin/Gallery/ShowGallery.vue'),
+                component: ShowGallery,
                 props: true,
                 meta: {
                     permission: "view-galleries"
@@ -362,7 +452,7 @@ const routes = [{
             {
                 path: "edit-galleries/:id",
                 name: "UpdateGallery",
-                component: () => import('@/pages/admin/Gallery/UpdateGallery.vue'),
+                component: UpdateGallery,
                 props: true,
                 meta: {
                     permission: "edit-galleries"
@@ -371,7 +461,7 @@ const routes = [{
             {
                 path: "create-gallery",
                 name: "CreateGallery",
-                component: () => import('@/pages/admin/Gallery/CreateGallery.vue'),
+                component: CreateGallery,
                 meta: {
                     permission: "create-galleries"
                 },
@@ -379,7 +469,7 @@ const routes = [{
             {
                 path: "manage-events",
                 name: "Events",
-                component: () => import('@/pages/admin/Event/Event.vue'),
+                component: Event,
                 meta: {
                     permission: "view-events"
                 },
@@ -387,7 +477,7 @@ const routes = [{
             {
                 path: "events/:id",
                 name: "ShowEvent",
-                component: () => import('@/pages/admin/Event/ShowEvent.vue'),
+                component: ShowEvent,
                 props: true,
                 meta: {
                     permission: "view-events"
@@ -396,7 +486,7 @@ const routes = [{
             {
                 path: "edit-events/:id",
                 name: "UpdateEvent",
-                component: () => import('@/pages/admin/Event/UpdateEvent.vue'),
+                component: UpdateEvent,
                 props: true,
                 meta: {
                     permission: "edit-events"
@@ -405,7 +495,7 @@ const routes = [{
             {
                 path: "create-events",
                 name: "CreateEvent",
-                component: () => import('@/pages/admin/Event/CreateEvent.vue'),
+                component: CreateEvent,
                 meta: {
                     permission: "create-events"
                 },
@@ -413,7 +503,7 @@ const routes = [{
             {
                 path: "event-categories",
                 name: "EventCategoryIndex",
-                component: () => import('@/pages/admin/Event/EventsCategory/EventCategory.vue'),
+                component: EventCategory,
                 meta: {
                     permission: "view-events-categories",
                 },
@@ -421,7 +511,7 @@ const routes = [{
             {
                 path: "event-categories/create",
                 name: "EventCategoryCreate",
-                component: () => import('@/pages/admin/Event/EventsCategory/EventCategoryCreate.vue'),
+                component: EventCategoryCreate,
                 meta: {
                     permission: "create-events-categories",
                 },
@@ -429,7 +519,7 @@ const routes = [{
             {
                 path: "event-categories/edit/:id",
                 name: "UpdateEventCategory",
-                component: () => import('@/pages/admin/Event/EventsCategory/EventCategoryEdit.vue'),
+                component: EventCategoryEdit,
                 props: true,
                 meta: {
                     permission: "edit-events-categories",
@@ -438,7 +528,7 @@ const routes = [{
             {
                 path: "event-categories/:id",
                 name: "EventCategoryShow",
-                component: () => import('@/pages/admin/Event/EventsCategory/EventCategoryShow.vue'),
+                component: EventCategoryShow,
                 props: true,
                 meta: {
                     permission: "view-events-categories",
@@ -447,7 +537,7 @@ const routes = [{
             {
                 path: "manage-notices",
                 name: "Notices",
-                component: () => import('@/pages/admin/Notice/Notice.vue'),
+                component: Notice,
                 meta: {
                     permission: "view-notices"
                 },
@@ -455,7 +545,7 @@ const routes = [{
             {
                 path: "notices/:id",
                 name: "ShowNotice",
-                component: () => import('@/pages/admin/Notice/ShowNotice.vue'),
+                component: ShowNotice,
                 props: true,
                 meta: {
                     permission: "view-notices"
@@ -464,7 +554,7 @@ const routes = [{
             {
                 path: "edit-notices/:id",
                 name: "UpdateNotice",
-                component: () => import('@/pages/admin/Notice/UpdateNotice.vue'),
+                component: UpdateNotice,
                 props: true,
                 meta: {
                     permission: "edit-notices"
@@ -473,7 +563,7 @@ const routes = [{
             {
                 path: "create-notices",
                 name: "CreateNotice",
-                component: () => import('@/pages/admin/Notice/CreateNotice.vue'),
+                component: CreateNotice,
                 meta: {
                     permission: "create-notices"
                 },
@@ -481,7 +571,7 @@ const routes = [{
             {
                 path: "manage-players",
                 name: "Players",
-                component: () => import('@/pages/admin/Player/Player.vue'),
+                component: Player,
                 meta: {
                     permission: "view-players"
                 },
@@ -489,7 +579,7 @@ const routes = [{
             {
                 path: "players/:id",
                 name: "ShowPlayer",
-                component: () => import('@/pages/admin/Player/ShowPlayer.vue'),
+                component: ShowPlayer,
                 props: true,
                 meta: {
                     permission: "view-players"
@@ -498,7 +588,7 @@ const routes = [{
             {
                 path: "edit-players/:id",
                 name: "UpdatePlayer",
-                component: () => import('@/pages/admin/Player/UpdatePlayer.vue'),
+                component: UpdatePlayer,
                 props: true,
                 meta: {
                     permission: "edit-players"
@@ -507,7 +597,7 @@ const routes = [{
             {
                 path: "create-players",
                 name: "CreatePlayer",
-                component: () => import('@/pages/admin/Player/CreatePlayer.vue'),
+                component: CreatePlayer,
                 meta: {
                     permission: "create-players"
                 },
@@ -515,7 +605,7 @@ const routes = [{
             {
                 path: "manage-results",
                 name: "Results",
-                component: () => import('@/pages/admin/Result/Result.vue'),
+                component: Result,
                 meta: {
                     permission: "view-results"
                 },
@@ -523,7 +613,7 @@ const routes = [{
             {
                 path: "results/:id",
                 name: "ShowResult",
-                component: () => import('@/pages/admin/Result/ShowResult.vue'),
+                component: ShowResult,
                 props: true,
                 meta: {
                     permission: "view-results"
@@ -532,7 +622,7 @@ const routes = [{
             {
                 path: "edit-results/:id",
                 name: "UpdateResult",
-                component: () => import('@/pages/admin/Result/UpdateResult.vue'),
+                component: UpdateResult,
                 props: true,
                 meta: {
                     permission: "edit-results"
@@ -541,7 +631,7 @@ const routes = [{
             {
                 path: "create-results",
                 name: "CreateResult",
-                component: () => import('@/pages/admin/Result/CreateResult.vue'),
+                component: CreateResult,
                 meta: {
                     permission: "create-results"
                 },
@@ -549,7 +639,7 @@ const routes = [{
             {
                 path: "manage-sections",
                 name: "Section",
-                component: () => import('@/pages/admin/Section/Section.vue'),
+                component: Section,
                 meta: {
                     permission: "manage-frontend"
                 },
@@ -557,7 +647,7 @@ const routes = [{
             {
                 path: "edit-sections/:id",
                 name: "UpdateSection",
-                component: () => import('@/pages/admin/Section/UpdateSection.vue'),
+                component: UpdateSection,
                 props: true,
                 meta: {
                     permission: "manage-frontend"
@@ -566,7 +656,7 @@ const routes = [{
             {
                 path: "banner-sliders",
                 name: "Sliders",
-                component: () => import('@/pages/admin/Sliders/Sliders.vue'),
+                component: Sliders,
                 props: true,
                 meta: {
                     permission: "manage-frontend"
@@ -575,7 +665,7 @@ const routes = [{
             {
                 path: "edit-sliders/:id",
                 name: "UpdateSlider",
-                component: () => import('@/pages/admin/Sliders/UpdateSlider.vue'),
+                component: UpdateSlider,
                 props: true,
                 meta: {
                     permission: "manage-frontend"
@@ -584,7 +674,7 @@ const routes = [{
             {
                 path: "create-sliders",
                 name: "CreateSlider",
-                component: () => import('@/pages/admin/Sliders/CreateSlider.vue'),
+                component: CreateSlider,
                 meta: {
                     permission: "manage-frontend"
                 },
@@ -592,7 +682,7 @@ const routes = [{
             {
                 path: "manage-committee-members",
                 name: "CommitteeMembers",
-                component: () => import('@/pages/admin/CommitteeMember/CommitteeMembers.vue'),
+                component: CommitteeMembers,
                 props: true,
                 meta: {
                     permission: "manage-committee-members"
@@ -601,7 +691,7 @@ const routes = [{
             {
                 path: "edit-committee-members/:id",
                 name: "UpdateCommitteeMembers",
-                component: () => import('@/pages/admin/CommitteeMember/UpdateCommitteeMembers.vue'),
+                component: UpdateCommitteeMembers,
                 props: true,
                 meta: {
                     permission: "manage-committee-members"
@@ -610,7 +700,7 @@ const routes = [{
             {
                 path: "create-committee-members",
                 name: "CreateCommitteeMembers",
-                component: () => import('@/pages/admin/CommitteeMember/CreateCommitteeMembers.vue'),
+                component: CreateCommitteeMembers,
                 meta: {
                     permission: "manage-committee-members"
                 },
@@ -618,7 +708,7 @@ const routes = [{
             {
                 path: "manage-brands",
                 name: "Brands",
-                component: () => import('@/pages/admin/Catalog/Brand/Brand.vue'),
+                component: Brand,
                 meta: {
                     permission: "view-brands"
                 },
@@ -626,7 +716,7 @@ const routes = [{
             {
                 path: "brands/:id",
                 name: "ShowBrand",
-                component: () => import('@/pages/admin/Catalog/Brand/ShowBrand.vue'),
+                component: ShowBrand,
                 props: true,
                 meta: {
                     permission: "view-brands"
@@ -635,7 +725,7 @@ const routes = [{
             {
                 path: "edit-brands/:id",
                 name: "UpdateBrand",
-                component: () => import('@/pages/admin/Catalog/Brand/UpdateBrand.vue'),
+                component: UpdateBrand,
                 props: true,
                 meta: {
                     permission: "edit-brands"
@@ -644,7 +734,7 @@ const routes = [{
             {
                 path: "create-brands",
                 name: "CreateBrand",
-                component: () => import('@/pages/admin/Catalog/Brand/CreateBrand.vue'),
+                component: CreateBrand,
                 meta: {
                     permission: "create-brands"
                 },
@@ -810,19 +900,19 @@ const routes = [{
             {
                 path: "geo-zones",
                 name: "GeoZones",
-                component: () => import('@/pages/admin/Localisation/GeoZone/GeoZoneList.vue'),
+                component: GeoZoneList,
                 meta: { permission: "view-geo-zones" }
             },
             {
                 path: "geo-zones/create",
                 name: "CreateGeoZone",
-                component: () => import('@/pages/admin/Localisation/GeoZone/CreateGeoZone.vue'),
+                component: CreateGeoZone,
                 meta: { permission: "create-geo-zones" }
             },
             {
                 path: "geo-zones/:id/edit",
                 name: "UpdateGeoZone",
-                component: () => import('@/pages/admin/Localisation/GeoZone/UpdateGeoZone.vue'),
+                component: UpdateGeoZone,
                 meta: { permission: "edit-geo-zones" }
             },
             {
@@ -845,19 +935,19 @@ const routes = [{
             {
                 path: "modules",
                 name: "Modules",
-                component: () => import('@/pages/admin/Module/ModuleList.vue'),
+                component: ModuleList,
                 meta: { permission: "view-modules" }
             },
             {
                 path: "modules/:id/settings",
                 name: "ModuleSettings",
-                component: () => import('@/pages/admin/Module/ModuleSettings.vue'),
+                component: ModuleSettings,
                 meta: { permission: "edit-modules" }
             },
             {
                 path: "manage-product-categories",
                 name: "ProductCategories",
-                component: () => import('@/pages/admin/Catalog/ProductCategory/ProductCategory.vue'),
+                component: ProductCategory,
                 meta: {
                     permission: "view-product-categories"
                 },
@@ -865,7 +955,7 @@ const routes = [{
             {
                 path: "product-categories/:id",
                 name: "ShowProductCategory",
-                component: () => import('@/pages/admin/Catalog/ProductCategory/ShowProductCategory.vue'),
+                component: ShowProductCategory,
                 props: true,
                 meta: {
                     permission: "view-product-categories"
@@ -874,7 +964,7 @@ const routes = [{
             {
                 path: "edit-product-categories/:id",
                 name: "UpdateProductCategory",
-                component: () => import('@/pages/admin/Catalog/ProductCategory/UpdateProductCategory.vue'),
+                component: UpdateProductCategory,
                 props: true,
                 meta: {
                     permission: "edit-product-categories"
@@ -883,7 +973,7 @@ const routes = [{
             {
                 path: "create-product-categories",
                 name: "CreateProductCategory",
-                component: () => import('@/pages/admin/Catalog/ProductCategory/CreateProductCategory.vue'),
+                component: CreateProductCategory,
                 meta: {
                     permission: "create-product-categories"
                 },
@@ -891,7 +981,7 @@ const routes = [{
             {
                 path: "manage-attribute-groups",
                 name: "AttributeGroups",
-                component: () => import('@/pages/admin/Catalog/AttributeGroup/AttributeGroups.vue'),
+                component: AttributeGroups,
                 meta: {
                     permission: "view-attribute-groups"
                 },
@@ -899,7 +989,7 @@ const routes = [{
             {
                 path: "manage-options",
                 name: "Options",
-                component: () => import('@/pages/admin/Catalog/Option/Options.vue'),
+                component: Options,
                 meta: {
                     permission: "view-options"
                 },
@@ -951,12 +1041,12 @@ const routes = [{
 {
     path: "/unauthorized",
     name: "Unauthorized",
-    component: () => import('@/pages/Unauthorized.vue'),
+    component: Unauthorized,
 },
 {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
-    component: () => import('@/pages/NotFound.vue'),
+    component: NotFound,
 },
 ];
 const router = createRouter({

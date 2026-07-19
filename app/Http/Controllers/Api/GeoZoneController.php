@@ -32,7 +32,7 @@ class GeoZoneController extends Controller
 
         if ($request->has('search') && $request->search != '') {
             $query->where('geo_zone_name', 'like', '%' . $request->search . '%')
-                  ->orWhere('geo_zone_description', 'like', '%' . $request->search . '%');
+                ->orWhere('geo_zone_description', 'like', '%' . $request->search . '%');
         }
 
         $perPage = $request->get('per_page', 10);
@@ -54,13 +54,13 @@ class GeoZoneController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return ApiResponse::validationError('Validation Error', $validator->errors()->toArray());
+            return ApiResponse::error('Validation Error', $validator->errors()->toArray());
         }
 
         $data = $validator->validated();
-        
+
         $details = $request->get('details', []);
-        
+
         if ($this->check_exist_to_create($details)) {
             $geoZone = GeoZone::create([
                 'geo_zone_name' => $data['geo_zone_name'],
@@ -106,15 +106,15 @@ class GeoZoneController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return ApiResponse::validationError('Validation Error', $validator->errors()->toArray());
+            return ApiResponse::error('Validation Error', $validator->errors()->toArray());
         }
 
         $data = $validator->validated();
-        
+
         $details = $request->get('details', []);
-        
+
         // We only check for existence if there are NEW details (no id)
-        $newDetails = array_filter($details, function($d) {
+        $newDetails = array_filter($details, function ($d) {
             return empty($d['id']);
         });
 
@@ -151,7 +151,7 @@ class GeoZoneController extends Controller
                 $existingDetailIds[] = $newDetail->id;
             }
         }
-        
+
         // Delete any details that were removed
         GeoZoneDetail::where('geo_zone_id', $geoZone->id)
             ->whereNotIn('id', $existingDetailIds)
@@ -175,12 +175,12 @@ class GeoZoneController extends Controller
 
         return ApiResponse::success($geoZone, 'Status updated successfully');
     }
-    
+
     public function removeDetail($id)
     {
         $detail = GeoZoneDetail::findOrFail($id);
         $detail->delete();
-        
+
         return ApiResponse::success(null, 'Detail removed successfully');
     }
 

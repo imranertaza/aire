@@ -21,7 +21,7 @@ class SendMassEmailJob implements ShouldQueue
     public $audiences;
     public $subject;
     public $messageBody;
-    
+
     protected $sentCount = 0;
     protected $failedCount = 0;
 
