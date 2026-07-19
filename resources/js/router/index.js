@@ -1056,14 +1056,17 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
 
+    const isHttpOnly = import.meta.env.VITE_IS_HTTPONLY === 'true';
     const token = localStorage.getItem("token");
+    const isAuthenticated = localStorage.getItem("isAuthenticated") === 'true';
     const role = localStorage.getItem("role");
 
     authStore.token = token;
     authStore.role = role;
 
     // 1. Require authentication
-    if (to.meta.requiresAuth && !token) {
+    const hasAuth = isHttpOnly ? isAuthenticated : !!token;
+    if (to.meta.requiresAuth && !hasAuth) {
         // redirect to role‑specific login, or fallback
         const loginRoute = to.meta.role ? `/${to.meta.role}/login` : "/login";
         return next(loginRoute);

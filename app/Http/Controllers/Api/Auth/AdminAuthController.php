@@ -30,14 +30,26 @@ class AdminAuthController extends Controller
     public function login(Request $request)
     {
         $request->validate(['email' => 'required|email', 'password' => 'required']);
-        $admin = User::where('email', $request->email)->first();
-        if (!$admin || !Hash::check($request->password, $admin->password)) {
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
 
-        // $admin->tokens()->delete(); --- IGNORE ---
-        $token = $admin->createToken('admin-token', ['*'])->plainTextToken;
-        return ApiResponse::success(['admin' => $admin, 'token' => $token], 'Login successful');
+        $isHttpOnly = filter_var(env('IS_HTTPONLY', false), FILTER_VALIDATE_BOOLEAN);
+
+        if ($isHttpOnly) {
+            if (Auth::guard('web')->attempt($request->only('email', 'password'))) {
+                $admin = Auth::guard('web')->user();
+                $request->session()->regenerate();
+                return ApiResponse::success(['admin' => $admin], 'Login successful');
+            }
+            return response()->json(['message' => 'Invalid credentials'], 401);
+        } else {
+            $admin = User::where('email', $request->email)->first();
+            if (!$admin || !Hash::check($request->password, $admin->password)) {
+                return response()->json(['message' => 'Invalid credentials'], 401);
+            }
+
+            // $admin->tokens()->delete(); --- IGNORE ---
+            $token = $admin->createToken('admin-token', ['*'])->plainTextToken;
+            return ApiResponse::success(['admin' => $admin, 'token' => $token], 'Login successful');
+        }
     }
 
     /**
@@ -79,7 +91,16 @@ class AdminAuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->tokens()->delete();
+        $isHttpOnly = filter_var(env('IS_HTTPONLY', false), FILTER_VALIDATE_BOOLEAN);
+
+        if ($isHttpOnly) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        } else {
+            $request->user()->tokens()->delete();
+        }
+
         return response()->json(['message' => 'Logged out']);
     }
 }

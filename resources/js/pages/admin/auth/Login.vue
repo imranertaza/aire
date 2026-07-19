@@ -3,7 +3,7 @@
     <div class="login-box">
       <div class="card card-outline card-primary">
         <div class="card-header text-center">
-          <a href="#" class="h1"><b>NPC</b>Bangladesh</a>
+          <a href="#" class="h1"><b>Aire</b></a>
         </div>
         <div class="card-body">
           <p class="login-box-msg">Sign in to start your session</p>
@@ -77,12 +77,16 @@ const login = async () => {
       remember: remember.value // Optional: persist login if supported by backend
     })
 
-    // Store authentication data
-    localStorage.setItem('token', data.data.token)
+    // Store authentication data conditionally
+    const isHttpOnly = import.meta.env.VITE_IS_HTTPONLY === 'true';
+    if (isHttpOnly) {
+      localStorage.setItem('isAuthenticated', 'true')
+    } else {
+      localStorage.setItem('token', data.data.token)
+      // Set default Authorization header for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${data.data.token}`
+    }
     localStorage.setItem('role', 'admin')
-
-    // Set default Authorization header for future requests
-    axios.defaults.headers.common['Authorization'] = `Bearer ${data.data.token}`
 
     // Redirect to admin dashboard on success
     router.push({ name: 'Dashboard' })

@@ -91,7 +91,9 @@ axios.interceptors.response.use(
         return Promise.reject(error);
     }
 );
-if (token) {
+const isHttpOnly = import.meta.env.VITE_IS_HTTPONLY === 'true';
+
+if (!isHttpOnly && token) {
     axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 }
 app.mount("#app");

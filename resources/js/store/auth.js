@@ -9,6 +9,7 @@ import { defineStore } from "pinia";
  */
 export const useAuthStore = defineStore('auth', {
     state: () => ({
+      isHttponly: import.meta.env.VITE_IS_HTTPONLY === 'true', // Config flag
       token: null,           // Sanctum API token
       role: null,            // Current user role (e.g., 'admin', 'editor')
       permissions: [],       // Array of permission strings
