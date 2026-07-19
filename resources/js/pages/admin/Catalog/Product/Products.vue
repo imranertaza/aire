@@ -12,7 +12,8 @@
                 :to="{ name: 'CreateProduct' }" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add Product
             </router-link>
-            <router-link :to="{ name: 'AdvancedProducts' }" class="btn btn-success ml-2">
+            <router-link v-if="authStore.isModuleEnabled('bulk_edit_products')" 
+                :to="{ name: 'AdvancedProducts' }" class="btn btn-success ml-2">
                 <i class="fas fa-edit"></i> Advanced Editor
             </router-link>
         </div>

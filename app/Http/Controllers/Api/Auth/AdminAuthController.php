@@ -60,9 +60,14 @@ class AdminAuthController extends Controller
     public function me(Request $request)
     {
         $admin = $request->user();
+        $modules = \Illuminate\Support\Facades\DB::table('modules')
+            ->where('status', 1)
+            ->pluck('module_key');
+
         return response()->json([
             'role' => $admin->roles->pluck('name')->first(),
             'permissions' => $admin->getAllPermissions()->pluck('name'),
+            'modules' => $modules,
         ]);
     }
 

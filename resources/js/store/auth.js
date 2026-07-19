@@ -12,6 +12,7 @@ export const useAuthStore = defineStore('auth', {
       token: null,           // Sanctum API token
       role: null,            // Current user role (e.g., 'admin', 'editor')
       permissions: [],       // Array of permission strings
+      modules: [],           // Array of enabled module keys
     }),
     actions: {
       /**
@@ -21,6 +22,7 @@ export const useAuthStore = defineStore('auth', {
         const res = await axios.get('/api/admin/me');
         this.role = res.data.role;
         this.permissions = res.data.permissions;
+        this.modules = res.data.modules || [];
       },
       /**
        * Check if current user has a specific permission.
@@ -30,6 +32,15 @@ export const useAuthStore = defineStore('auth', {
        */
       hasPermission(permission) {
         return this.permissions.includes(permission);
+      },
+      /**
+       * Check if a specific module is enabled.
+       *
+       * @param {string} moduleKey - Module key to check
+       * @returns {boolean} True if module is enabled
+       */
+      isModuleEnabled(moduleKey) {
+        return this.modules.includes(moduleKey);
       }
     }
   });

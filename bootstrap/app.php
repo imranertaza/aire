@@ -22,9 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             // ✅ Spatie permission middleware
-            'role' =>RoleMiddleware::class,
+            'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
-            'role_or_permission' =>RoleOrPermissionMiddleware::class,
+            'role_or_permission' => RoleOrPermissionMiddleware::class,
+            // Custom modules middleware
+            'module' => \App\Http\Middleware\CheckModuleEnabled::class,
         ]);
 
         //

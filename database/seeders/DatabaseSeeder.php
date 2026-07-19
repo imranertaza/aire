@@ -48,6 +48,9 @@ class DatabaseSeeder extends Seeder
         
         // Shipping Seeders
         $this->call(ShippingMethodSeeder::class);
+
+        // Modules Seeder
+        $this->call(ModuleSeeder::class);
         $this->call(ShippingSettingsSeeder::class);
         $this->call(WeightShippingSettingsSeeder::class);
         $this->call(GeoZoneSeeder::class);

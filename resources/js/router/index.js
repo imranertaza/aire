@@ -94,6 +94,9 @@ import GeoZoneList from "../pages/admin/Localisation/GeoZone/GeoZoneList.vue";
 import CreateGeoZone from "../pages/admin/Localisation/GeoZone/CreateGeoZone.vue";
 import UpdateGeoZone from "../pages/admin/Localisation/GeoZone/UpdateGeoZone.vue";
 
+import ModuleList from "../pages/admin/Module/ModuleList.vue";
+import ModuleSettings from "../pages/admin/Module/ModuleSettings.vue";
+
 const routes = [{
     path: "/admin",
     children: [{
@@ -830,6 +833,30 @@ const routes = [{
                 },
             },
             {
+                path: 'newsletters',
+                name: 'NewsletterList',
+                component: () => import('@/pages/admin/Newsletter/NewsletterList.vue'),
+                meta: { title: 'Newsletters' }
+            },
+            {
+                path: 'email-send',
+                name: 'EmailSend',
+                component: () => import('@/pages/admin/EmailSend/EmailSend.vue'),
+                meta: { title: 'Send Email' }
+            },
+            {
+                path: 'fund-requests',
+                name: 'FundRequestList',
+                component: () => import('@/pages/admin/FundRequest/FundRequestList.vue'),
+                meta: { title: 'Fund Requests' }
+            },
+            {
+                path: 'color-families',
+                name: 'ColorFamilyList',
+                component: () => import('@/pages/admin/ColorFamily/ColorFamilyList.vue'),
+                meta: { title: 'Color Families' }
+            },
+            {
                 path: "offers",
                 name: "Offers",
                 component: () => import('@/pages/admin/Catalog/Offer/Offers.vue'),
@@ -904,6 +931,18 @@ const routes = [{
                 meta: {
                     permission: "edit-payment-methods"
                 },
+            },
+            {
+                path: "modules",
+                name: "Modules",
+                component: ModuleList,
+                meta: { permission: "view-modules" }
+            },
+            {
+                path: "modules/:id/settings",
+                name: "ModuleSettings",
+                component: ModuleSettings,
+                meta: { permission: "edit-modules" }
             },
             {
                 path: "manage-product-categories",
@@ -985,6 +1024,14 @@ const routes = [{
                 component: () => import('@/pages/admin/Catalog/Product/AdvancedProducts.vue'),
                 meta: {
                     permission: "edit-products"
+                },
+            },
+            {
+                path: "email-campaigns",
+                name: "EmailCampaigns",
+                component: () => import('@/pages/admin/EmailSend/EmailCampaigns.vue'),
+                meta: {
+                    permission: "send-emails"
                 },
             },
         ],

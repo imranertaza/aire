@@ -179,6 +179,16 @@ class RolePermissionSeeder extends Seeder
             'view-payment-methods',
             'edit-payment-methods',
 
+            // Modules
+            'view-modules',
+            'edit-modules',
+
+            // ✅ Custom Modules
+            'view-newsletters',
+            'send-emails',
+            'view-fund-requests',
+            'view-color-families',
+
 
             // ✅ News
             'view-news',
@@ -345,6 +355,13 @@ class RolePermissionSeeder extends Seeder
                         // ✅ Payment Methods
                         'view-payment-methods',
                         'edit-payment-methods',
+                        
+                        // ✅ Custom Modules
+                        'view-newsletters',
+                        'send-emails',
+                        'view-fund-requests',
+                        'view-color-families',
+
                         // ✅ Galleries CRUD
                         'view-galleries',
                         'create-galleries',
@@ -527,6 +544,16 @@ class RolePermissionSeeder extends Seeder
                         // ✅ Payment Methods
                         'view-payment-methods',
                         'edit-payment-methods',
+
+                        // ✅ Modules
+                        'view-modules',
+                        'edit-modules',
+
+                        // ✅ Custom Modules
+                        'view-newsletters',
+                        'send-emails',
+                        'view-fund-requests',
+                        'view-color-families',
                     ]);
                     break;
 
@@ -579,6 +606,11 @@ class RolePermissionSeeder extends Seeder
 
                         // ✅ Product Attribute Groups CRUD
                         'view-attribute-groups',
+
+                        // ✅ Custom Modules
+                        'view-newsletters',
+                        'view-fund-requests',
+                        'view-color-families',
                     ]);
                     break;
             }

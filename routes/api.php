@@ -13,6 +13,10 @@ use App\Http\Controllers\Api\MediaController;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\NewsCategoryController;
+use App\Http\Controllers\Api\FundRequestController;
+use App\Http\Controllers\Api\ColorFamilyController;
+use App\Http\Controllers\Api\EmailSendController;
+use App\Http\Controllers\Api\EmailCampaignController;
 use App\Http\Controllers\Api\NewsController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\PageController;
@@ -56,6 +60,28 @@ Route::middleware(['auth:user'])->controller(AdminRoleController::class)->group(
     Route::get('roles-with-permissions', 'rolesWithPermissions');
     Route::put('roles/{role}/permissions', 'updatePermissions')->middleware('permission:update-permissions');
     Route::get('permissions', 'permissions');
+});
+
+Route::middleware(['auth:user'])->group(function () {
+    Route::get('modules', [\App\Http\Controllers\Api\ModuleController::class, 'index']);
+    Route::post('modules/{module}/toggle', [\App\Http\Controllers\Api\ModuleController::class, 'toggle']);
+    
+    // Newsletters
+    Route::apiResource('newsletters', \App\Http\Controllers\Api\NewsletterController::class);
+    Route::post('newsletters/{newsletter}/toggle', [\App\Http\Controllers\Api\NewsletterController::class, 'toggleStatus']);
+
+    // Email Send
+    Route::get('email-send/recipients', [\App\Http\Controllers\Api\EmailSendController::class, 'getRecipients']);
+    Route::post('email-send', [EmailSendController::class, 'send']);
+    
+    // Email Campaigns
+    Route::get('email-campaigns', [EmailCampaignController::class, 'index']);
+
+    // Fund Requests
+    Route::apiResource('fund-requests', \App\Http\Controllers\Api\FundRequestController::class);
+
+    // Color Families
+    Route::apiResource('color-families', \App\Http\Controllers\Api\ColorFamilyController::class);
 });
 
 /* Posts Management */
@@ -137,7 +163,7 @@ Route::prefix('news-categories')->middleware(['auth:user'])->controller(NewsCate
 });
 
 /* Blogs & Blog Categories */
-Route::middleware('auth:user')->prefix('blogs')->controller(BlogController::class)->group(function () {
+Route::middleware(['auth:user', 'module:blog'])->prefix('blogs')->controller(BlogController::class)->group(function () {
     Route::get('/', 'index')->middleware('permission:view-blog');
     Route::post('/', 'store')->middleware('permission:create-blog');
     Route::get('{id}', 'show')->middleware('permission:view-blog');
@@ -146,7 +172,7 @@ Route::middleware('auth:user')->prefix('blogs')->controller(BlogController::clas
     Route::patch('{id}/status', 'toggleStatus')->middleware('permission:publish-blog');
 });
 
-Route::prefix('blog-categories')->middleware(['auth:user'])->controller(BlogCategoryController::class)->group(function () {
+Route::prefix('blog-categories')->middleware(['auth:user', 'module:blog'])->controller(BlogCategoryController::class)->group(function () {
     Route::get('/', 'index')->middleware('permission:view-blog-categories');
     Route::post('/', 'store')->middleware('permission:create-blog-categories');
 
@@ -186,7 +212,7 @@ Route::middleware(['auth:user'])->prefix('media')->controller(MediaController::c
 });
 
 /* Gallery Management */
-Route::middleware(['auth:user'])->prefix('gallery')->controller(GalleryController::class)->group(function () {
+Route::middleware(['auth:user', 'module:album'])->prefix('gallery')->controller(GalleryController::class)->group(function () {
     Route::get('/', 'index')->name('gallery.index')->middleware('permission:view-galleries');
     Route::post('/', 'store')->name('gallery.store')->middleware('permission:create-galleries');
     Route::get('{gallery}', 'show')->name('gallery.show')->middleware('permission:view-galleries');
@@ -244,7 +270,7 @@ Route::prefix('brands')->middleware(['auth:user'])->controller(BrandController::
 });
 
 /* Coupons */
-Route::prefix('coupons')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\CouponController::class)->group(function () {
+Route::prefix('coupons')->middleware(['auth:user', 'module:coupon'])->controller(\App\Http\Controllers\Api\CouponController::class)->group(function () {
     Route::get('/', 'index')->name('coupons.index')->middleware('permission:view-coupons');
     Route::post('/', 'store')->name('coupons.store')->middleware('permission:create-coupons');
     Route::get('all', 'allCoupons')->name('coupons.all');
@@ -255,7 +281,7 @@ Route::prefix('coupons')->middleware(['auth:user'])->controller(\App\Http\Contro
 });
 
 /* Reviews / Feedbacks */
-Route::prefix('reviews')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductFeedbackController::class)->group(function () {
+Route::prefix('reviews')->middleware(['auth:user', 'module:review'])->controller(\App\Http\Controllers\Api\ProductFeedbackController::class)->group(function () {
     Route::get('/', 'index')->name('reviews.index')->middleware('permission:view-reviews');
     Route::patch('{id}/toggle-status', 'toggleStatus')->name('reviews.toggle-status')->middleware('permission:edit-reviews');
     Route::delete('{id}', 'destroy')->name('reviews.destroy')->middleware('permission:delete-reviews');
@@ -269,7 +295,7 @@ Route::prefix('customers')->middleware(['auth:user'])->controller(\App\Http\Cont
     Route::put('{id}', 'update')->name('customers.update')->middleware('permission:edit-customers');
     Route::delete('{id}', 'destroy')->name('customers.destroy')->middleware('permission:delete-customers');
     Route::get('{id}/ledger', 'ledger')->name('customers.ledger')->middleware('permission:view-customers');
-    Route::get('{id}/point', 'point')->name('customers.point')->middleware('permission:view-customers');
+    Route::get('{id}/point', 'point')->name('customers.point')->middleware(['permission:view-customers', 'module:point']);
 });
 
 /* Orders CRUD and Tracking */
@@ -278,7 +304,7 @@ Route::prefix('orders')->middleware(['auth:user'])->controller(\App\Http\Control
     Route::get('{id}', 'show')->name('orders.show')->middleware('permission:view-orders');
     Route::post('{id}/history', 'history')->name('orders.history')->middleware('permission:edit-orders');
     Route::patch('{id}/payment-status', 'paymentStatus')->name('orders.payment-status')->middleware('permission:edit-orders');
-    Route::post('{id}/points', 'updatePoints')->name('orders.points')->middleware('permission:edit-orders');
+    Route::post('{id}/points', 'updatePoints')->name('orders.points')->middleware(['permission:edit-orders', 'module:point']);
     Route::delete('{id}', 'destroy')->name('orders.destroy')->middleware('permission:delete-orders');
 });
 
@@ -377,7 +403,7 @@ Route::prefix('products')->middleware(['auth:user'])->controller(\App\Http\Contr
 });
 
 /* Advanced Products (Bulk Product Editing) */
-Route::prefix('advanced-products')->middleware(['auth:user', 'permission:edit-products'])->controller(AdvancedProductController::class)->group(function () {
+Route::prefix('advanced-products')->middleware(['auth:user', 'permission:edit-products', 'module:bulk_edit_products'])->controller(AdvancedProductController::class)->group(function () {
     Route::get('/', 'index')->name('advanced-products.index');
     Route::post('update-row', 'updateRow')->name('advanced-products.update-row');
     Route::post('update-description', 'updateDescription')->name('advanced-products.update-description');
@@ -432,6 +458,14 @@ Route::prefix('geo-zones')->middleware(['auth:user'])->controller(\App\Http\Cont
     Route::patch('{id}/status', 'updateStatus')->middleware('permission:edit-geo-zones');
     Route::delete('{id}', 'destroy')->middleware('permission:delete-geo-zones');
     Route::delete('details/{detailId}', 'removeDetail')->middleware('permission:edit-geo-zones');
+});
+
+/* Modules */
+Route::prefix('modules')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ModuleController::class)->group(function () {
+    Route::get('', 'index')->middleware('permission:view-modules');
+    Route::get('{id}', 'show')->middleware('permission:view-modules');
+    Route::put('{id}/settings', 'updateSettings')->middleware('permission:edit-modules');
+    Route::patch('{id}/status', 'updateStatus')->middleware('permission:edit-modules');
 });
 
 /* Utility: List available frontend template files */

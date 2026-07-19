@@ -24,7 +24,10 @@ Route::get('/clear', function () {
 
 /* Frontend Routes - Public website pages */
 Route::controller(FrontendController::class)->group(function () {
-    Route::get('/', 'index')->name('home');
+    // Route::get('/', 'index')->name('home');
+    Route::get('/', function () {
+        return view('welcome12');
+    })->name('home');
     Route::get('match-fixtures', 'matchFixtures')->name('match-fixtures');
     Route::get('notice-board', 'noticeBoard')->name('notice-board');
     // Route::get('tournament-result', 'tournamentResult')->name('tournament-result');
