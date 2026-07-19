@@ -165,7 +165,15 @@ class RolePermissionSeeder extends Seeder
 
             // ✅ Shipping Methods
             'view-shipping-methods',
+            'create-shipping-methods',
             'edit-shipping-methods',
+            'delete-shipping-methods',
+
+            // Geo Zones
+            'view-geo-zones',
+            'create-geo-zones',
+            'edit-geo-zones',
+            'delete-geo-zones',
 
             // ✅ Payment Methods
             'view-payment-methods',
@@ -324,13 +332,19 @@ class RolePermissionSeeder extends Seeder
 
                         // ✅ Shipping Methods
                         'view-shipping-methods',
+                        'create-shipping-methods',
                         'edit-shipping-methods',
+                        'delete-shipping-methods',
 
-            // ✅ Payment Methods
-            'view-payment-methods',
-            'edit-payment-methods',
+                        // Geo Zones
+                        'view-geo-zones',
+                        'create-geo-zones',
+                        'edit-geo-zones',
+                        'delete-geo-zones',
 
-
+                        // ✅ Payment Methods
+                        'view-payment-methods',
+                        'edit-payment-methods',
                         // ✅ Galleries CRUD
                         'view-galleries',
                         'create-galleries',
@@ -505,14 +519,14 @@ class RolePermissionSeeder extends Seeder
                         // ✅ Reviews CRUD
                         'view-reviews',
                         'edit-reviews',
-                        
+
                         // ✅ Shipping Methods
                         'view-shipping-methods',
                         'edit-shipping-methods',
 
-            // ✅ Payment Methods
-            'view-payment-methods',
-            'edit-payment-methods',
+                        // ✅ Payment Methods
+                        'view-payment-methods',
+                        'edit-payment-methods',
                     ]);
                     break;
 

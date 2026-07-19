@@ -90,6 +90,10 @@ import ShowProductCategory from "../pages/admin/Catalog/ProductCategory/ShowProd
 import AttributeGroups from "../pages/admin/Catalog/AttributeGroup/AttributeGroups.vue";
 import Options from "../pages/admin/Catalog/Option/Options.vue";
 
+import GeoZoneList from "../pages/admin/Localisation/GeoZone/GeoZoneList.vue";
+import CreateGeoZone from "../pages/admin/Localisation/GeoZone/CreateGeoZone.vue";
+import UpdateGeoZone from "../pages/admin/Localisation/GeoZone/UpdateGeoZone.vue";
+
 const routes = [{
     path: "/admin",
     children: [{
@@ -861,11 +865,28 @@ const routes = [{
             {
                 path: "shipping-methods/:id/settings",
                 name: "ShippingSettings",
-                component: () => import('@/pages/admin/Shipping/ShippingSettings.vue'),
-                props: true,
-                meta: {
-                    permission: "edit-shipping-methods"
-                },
+                component: () => import("../pages/admin/Shipping/ShippingSettings.vue"),
+                meta: { permission: "view-shipping-methods" }
+            },
+
+            // Geo Zones
+            {
+                path: "geo-zones",
+                name: "GeoZones",
+                component: GeoZoneList,
+                meta: { permission: "view-geo-zones" }
+            },
+            {
+                path: "geo-zones/create",
+                name: "CreateGeoZone",
+                component: CreateGeoZone,
+                meta: { permission: "create-geo-zones" }
+            },
+            {
+                path: "geo-zones/:id/edit",
+                name: "UpdateGeoZone",
+                component: UpdateGeoZone,
+                meta: { permission: "edit-geo-zones" }
             },
             {
                 path: "payment-methods",

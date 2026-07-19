@@ -313,6 +313,19 @@ Route::prefix('payment-methods')->middleware(['auth:user'])->controller(\App\Htt
     Route::post('{id}/settings', 'updateSettings')->name('payment.update-settings')->middleware('permission:edit-payment-methods');
 });
 
+/* Geo Zones */
+Route::prefix('geo-zones')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\GeoZoneController::class)->group(function () {
+    Route::get('/countries', 'getCountries');
+    Route::get('/countries/{countryId}/zones', 'getZones');
+    Route::get('', 'index')->middleware('permission:view-geo-zones');
+    Route::post('', 'store')->middleware('permission:edit-geo-zones');
+    Route::get('{id}', 'show')->middleware('permission:view-geo-zones');
+    Route::put('{id}', 'update')->middleware('permission:edit-geo-zones');
+    Route::delete('{id}', 'destroy')->middleware('permission:delete-geo-zones');
+    Route::patch('{id}/status', 'updateStatus')->middleware('permission:edit-geo-zones');
+    Route::delete('details/{id}', 'removeDetail')->middleware('permission:edit-geo-zones');
+});
+
 /* Icons */
 Route::middleware(['auth:user'])->get('icons', [\App\Http\Controllers\Api\IconController::class, 'index']);
 
@@ -407,6 +420,19 @@ Route::prefix('committee-members')
         Route::patch('{id}/toggle-status', 'toggleStatus')->name('committee-members.toggle');
         Route::delete('{id}', 'destroy')->name('committee-members.destroy');
     });
+
+/* Geo Zones */
+Route::prefix('geo-zones')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\GeoZoneController::class)->group(function () {
+    Route::get('/countries', 'getCountries');
+    Route::get('/countries/{countryId}/zones', 'getZones');
+    Route::get('', 'index')->middleware('permission:view-geo-zones');
+    Route::post('', 'store')->middleware('permission:create-geo-zones');
+    Route::get('{id}', 'show')->middleware('permission:view-geo-zones');
+    Route::put('{id}', 'update')->middleware('permission:edit-geo-zones');
+    Route::patch('{id}/status', 'updateStatus')->middleware('permission:edit-geo-zones');
+    Route::delete('{id}', 'destroy')->middleware('permission:delete-geo-zones');
+    Route::delete('details/{detailId}', 'removeDetail')->middleware('permission:edit-geo-zones');
+});
 
 /* Utility: List available frontend template files */
 Route::middleware(['auth:user'])->get('templates', function () {

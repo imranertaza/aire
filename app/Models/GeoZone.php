@@ -12,4 +12,9 @@ class GeoZone extends Model
     {
         return $query->where('status', 1);
     }
+
+    public function details()
+    {
+        return $this->hasMany(GeoZoneDetail::class, 'geo_zone_id');
+    }
 }

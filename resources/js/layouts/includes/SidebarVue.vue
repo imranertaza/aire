@@ -643,6 +643,13 @@
                                     <p>General Settings</p>
                                 </router-link>
                             </li>
+                            <li class="nav-item" v-if="authStore.hasPermission('view-geo-zones')">
+                                <router-link :to="{ name: 'GeoZones' }" class="nav-link"
+                                    :class="{ active: $route.name === 'GeoZones' }">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Geo Zones</p>
+                                </router-link>
+                            </li>
                             <li class="nav-item" v-if="authStore.hasPermission('update-settings')">
                                 <router-link :to="{ name: 'MenuManager' }" class="nav-link"
                                     :class="{ active: $route.name === 'MenuManager' }">
@@ -799,6 +806,9 @@ const openParentMenus = () => {
         // Settings
         'GeneralSettings': ['settings'],
         'MenuManager': ['settings'],
+        'GeoZones': ['settings'],
+        'CreateGeoZone': ['settings'],
+        'UpdateGeoZone': ['settings'],
         'ShowMenu': ['settings'],
 
         // Galleries
