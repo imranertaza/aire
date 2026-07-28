@@ -116,8 +116,7 @@
                             <!-- Price — click to edit -->
                             <td class="align-middle editable-cell" @click="startEdit(product.id, 'price')">
                                 <template v-if="isEditing(product.id, 'price')">
-                                    <input
-                                        type="number"
+                                    <input min="0" type="number"
                                         step="0.01"
                                         class="form-control form-control-sm cell-input text-right"
                                         v-model="product.price"
@@ -136,8 +135,7 @@
                             <!-- Quantity — click to edit -->
                             <td class="align-middle editable-cell text-center" @click="startEdit(product.id, 'quantity')">
                                 <template v-if="isEditing(product.id, 'quantity')">
-                                    <input
-                                        type="number"
+                                    <input min="0" type="number"
                                         class="form-control form-control-sm cell-input text-center"
                                         v-model="product.quantity"
                                         @blur="stopEdit"
@@ -321,7 +319,7 @@
                                         <option v-for="val in prodOpt.available_values" :key="val.id" :value="val.id">{{ val.name }}</option>
                                     </select>
                                 </td>
-                                <td><input type="number" class="form-control form-control-sm" v-model="prodOpt.quantity" style="width:70px;" /></td>
+                                <td><input min="0" type="number" class="form-control form-control-sm" v-model="prodOpt.quantity" style="width:70px;" /></td>
                                 <td>
                                     <select class="form-control form-control-sm" v-model="prodOpt.subtract" style="width:70px;">
                                         <option :value="1">Yes</option>
@@ -334,7 +332,7 @@
                                         <option value="-">-</option>
                                     </select>
                                 </td>
-                                <td><input type="number" step="0.01" class="form-control form-control-sm" v-model="prodOpt.price" style="width:80px;" /></td>
+                                <td><input min="0" type="number" step="0.01" class="form-control form-control-sm" v-model="prodOpt.price" style="width:80px;" /></td>
                                 <td class="text-center">
                                     <button type="button" class="btn btn-xs btn-danger" @click="removeOptionRow(index)">
                                         <i class="fas fa-trash"></i>
@@ -386,7 +384,7 @@
                                 </td>
                                 <td><input type="text" class="form-control form-control-sm" v-model="attr.name" /></td>
                                 <td><textarea class="form-control form-control-sm" v-model="attr.details" rows="1"></textarea></td>
-                                <td><input type="number" class="form-control form-control-sm text-center" v-model="attr.sort_order" /></td>
+                                <td><input min="0" type="number" class="form-control form-control-sm text-center" v-model="attr.sort_order" /></td>
                                 <td class="text-center align-middle">
                                     <button type="button" class="btn btn-xs btn-danger" @click="removeAttributeRow(index)">
                                         <i class="fas fa-trash"></i>

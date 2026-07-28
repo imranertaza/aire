@@ -6,6 +6,7 @@ use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class PaymentMethodController extends Controller
 {
@@ -33,7 +34,9 @@ class PaymentMethodController extends Controller
      */
     public function allMethods()
     {
-        $methods = PaymentMethod::active()->select('id', 'name', 'code', 'image')->get();
+        $methods = Cache::rememberForever('all_payment_methods', function () {
+            return PaymentMethod::active()->select('id', 'name', 'code', 'image')->get();
+        });
         return ApiResponse::success($methods, 'Active payment methods retrieved successfully');
     }
 

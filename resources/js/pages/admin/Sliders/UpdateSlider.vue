@@ -83,7 +83,7 @@ import axios from "axios";
 import { onMounted, reactive, ref } from "vue";
 import { useToast } from "@/composables/useToast";
 import { useRoute } from "vue-router";
-import { getImageUrl } from "../../../layouts/helpers/helpers";
+import { getImageCacheUrl } from "../../../layouts/helpers/helpers";
 
 /* Edit Banner Slide Page */
 
@@ -116,7 +116,7 @@ const getSlider = async () => {
         const response = await axios.get(`/api/sliders/${form.id}/show`);
         Object.assign(form, response.data.data);
 
-        previews.value = [getImageUrl(form.image)];
+        previews.value = [getImageCacheUrl(form.image)];
     } catch (error) {
         toast.error("Failed to fetch slide details");
     }

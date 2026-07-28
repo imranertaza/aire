@@ -98,7 +98,7 @@
                                 </div>
                                 <div class="col-md-6 form-group">
                                     <label>Sort Order</label>
-                                    <input v-model="form.sort_order" type="number" class="form-control" />
+                                    <input min="0" v-model="form.sort_order" type="number" class="form-control" />
                                 </div>
                                 <div class="col-md-6 form-group">
                                     <label>Status <span class="text-danger">*</span></label>
@@ -133,7 +133,7 @@
                                                 <input v-model="val.name" type="text" class="form-control form-control-sm" required />
                                             </td>
                                             <td>
-                                                <input v-model="val.sort_order" type="number" class="form-control form-control-sm" />
+                                                <input min="0" v-model="val.sort_order" type="number" class="form-control form-control-sm" />
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-sm btn-danger" @click="removeOptionValue(index)">

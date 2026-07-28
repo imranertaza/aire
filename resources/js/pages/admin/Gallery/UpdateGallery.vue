@@ -38,7 +38,7 @@
                                     <!-- Sort Order -->
                                     <div class="form-group">
                                         <label>Sort Order</label>
-                                        <input v-model="form.sort_order" type="number" class="form-control" />
+                                        <input min="0" v-model="form.sort_order" type="number" class="form-control" />
                                     </div>
 
                                     <div class="row">
@@ -155,7 +155,7 @@
                         </div>
                         <div class="form-group">
                             <label>Sort Order</label>
-                            <input v-model="editDetail.sort_order" type="number" class="form-control" />
+                            <input min="0" v-model="editDetail.sort_order" type="number" class="form-control" />
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -228,7 +228,7 @@ const fetchGallery = async () => {
 
         // Set existing thumbnail preview
         if (form.thumb) {
-            previews.value = [getImageUrl(form.thumb)];
+            previews.value = [getImageCacheUrl(form.thumb)];
         }
     } catch (err) {
         console.error(err);

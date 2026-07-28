@@ -143,7 +143,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import { useToast } from '@/composables/useToast';
-import { getImageUrl } from '@/layouts/helpers/helpers';
+import { getImageCacheUrl } from '@/layouts/helpers/helpers';
 import Vue3Dropzone from '@jaxtheprime/vue3-dropzone';
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import RichTextEditor from '../../../components/RichTextEditor.vue';
@@ -206,10 +206,10 @@ const fetchNews = async () => {
 
         // Set existing image previews for Dropzone
         if (blog.image) {
-            previews.value = [getImageUrl(blog.image)];
+            previews.value = [getImageCacheUrl(blog.image)];
         }
         if (blog.f_image) {
-            f_previews.value = [getImageUrl(blog.f_image)];
+            f_previews.value = [getImageCacheUrl(blog.f_image)];
         }
     } catch (err) {
         toast.error('Failed to load blog');

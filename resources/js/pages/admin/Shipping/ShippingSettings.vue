@@ -71,11 +71,11 @@
                                                 <tr v-for="(ws, index) in formData.weight_settings"
                                                     :key="ws.id || index">
                                                     <td>
-                                                        <input v-model="ws.label" type="number" class="form-control"
+                                                        <input min="0" v-model="ws.label" type="number" class="form-control"
                                                             required placeholder="Weight Limit" />
                                                     </td>
                                                     <td>
-                                                        <input v-model="ws.value" type="number" step="0.01"
+                                                        <input min="0" v-model="ws.value" type="number" step="0.01"
                                                             class="form-control" required placeholder="Cost" />
                                                     </td>
                                                     <td class="text-center">
@@ -124,11 +124,11 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input v-model="zr.up_to_value" type="number" step="0.01"
+                                                        <input min="0" v-model="zr.up_to_value" type="number" step="0.01"
                                                             class="form-control" required />
                                                     </td>
                                                     <td>
-                                                        <input v-model="zr.cost" type="number" step="0.01"
+                                                        <input min="0" v-model="zr.cost" type="number" step="0.01"
                                                             class="form-control" required />
                                                     </td>
                                                     <td class="text-center">

@@ -172,7 +172,7 @@ import { onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DashboardHeader from "@/components/DashboardHeader.vue";
 import { useToast } from "@/composables/useToast";
-import { getImageUrl } from "@/layouts/helpers/helpers";
+import { getImageCacheUrl } from "@/layouts/helpers/helpers";
 import Vue3Dropzone from "@jaxtheprime/vue3-dropzone";
 import "@jaxtheprime/vue3-dropzone/dist/style.css";
 import RichTextEditor from "../../../components/RichTextEditor.vue";
@@ -241,10 +241,10 @@ const fetchNews = async () => {
 
         // Set existing image previews
         if (news.image) {
-            previews.value = [getImageUrl(news.image)];
+            previews.value = [getImageCacheUrl(news.image)];
         }
         if (news.f_image) {
-            f_previews.value = [getImageUrl(news.f_image)];
+            f_previews.value = [getImageCacheUrl(news.f_image)];
         }
     } catch (err) {
         toast.error("Failed to load news");

@@ -174,7 +174,7 @@ import { onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DashboardHeader from "@/components/DashboardHeader.vue";
 import { useToast } from "@/composables/useToast";
-import { getImageUrl } from "@/layouts/helpers/helpers";
+import { getImageCacheUrl } from "@/layouts/helpers/helpers";
 import Vue3Dropzone from "@jaxtheprime/vue3-dropzone";
 import "@jaxtheprime/vue3-dropzone/dist/style.css";
 
@@ -208,7 +208,7 @@ const fetchPlayer = async () => {
     const res = await axios.get(`/api/players/${route.params.id}`);
     Object.assign(form, res.data.data);
     if (form.image) {
-      previews.value = [getImageUrl(form.image)];
+      previews.value = [getImageCacheUrl(form.image)];
     }
   } catch (err) {
     toast.error("Failed to load player");

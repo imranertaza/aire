@@ -97,7 +97,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import { useToast } from '@/composables/useToast';
-import { getImageUrl } from '@/layouts/helpers/helpers';
+import { getImageCacheUrl } from '@/layouts/helpers/helpers';
 import Vue3Dropzone from '@jaxtheprime/vue3-dropzone';
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import RichTextEditor from '@/components/RichTextEditor.vue';
@@ -130,10 +130,10 @@ const fetchNotice = async () => {
         const res = await axios.get(`/api/notices/${route.params.id}`);
         Object.assign(form, res.data.data);
         if (form.file && !isPdf(form.file)) {
-            previews.value = [getImageUrl(form.file)];
+            previews.value = [getImageCacheUrl(form.file)];
         } else if (form.file && isPdf(form.file)) {
-            previewsPdf.value = [getImageUrl(form.file)];
-            previews.value = [getImageUrl(form.file)];
+            previewsPdf.value = [getImageCacheUrl(form.file)];
+            previews.value = [getImageCacheUrl(form.file)];
         }
     } catch (err) {
         toast.error('Failed to load notice');

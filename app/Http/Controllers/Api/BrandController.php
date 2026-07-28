@@ -8,6 +8,7 @@ use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
@@ -39,7 +40,9 @@ class BrandController extends Controller
      */
     public function allBrands()
     {
-        $brands = Brand::select('id', 'name')->where('status', 1)->orderBy('sort_order', 'asc')->get();
+        $brands = Cache::rememberForever('all_brands', function () {
+            return Brand::select('id', 'name')->where('status', 1)->orderBy('sort_order', 'asc')->get();
+        });
         return ApiResponse::success($brands, 'All active brands retrieved successfully');
     }
 

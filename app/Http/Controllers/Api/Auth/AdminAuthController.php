@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -72,15 +74,19 @@ class AdminAuthController extends Controller
     public function me(Request $request)
     {
         $admin = $request->user();
-        $modules = \Illuminate\Support\Facades\DB::table('modules')
-            ->where('status', 1)
-            ->pluck('module_key');
+        $data = Cache::remember("admin_me_{$admin->id}", 3600, function () use ($admin) {
+            $modules = DB::table('modules')
+                ->where('status', 1)
+                ->pluck('module_key');
 
-        return response()->json([
-            'role' => $admin->roles->pluck('name')->first(),
-            'permissions' => $admin->getAllPermissions()->pluck('name'),
-            'modules' => $modules,
-        ]);
+            return [
+                'role' => $admin->roles->pluck('name')->first(),
+                'permissions' => $admin->getAllPermissions()->pluck('name'),
+                'modules' => $modules,
+            ];
+        });
+
+        return response()->json($data);
     }
 
     /**

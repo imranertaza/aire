@@ -4,12 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Offer extends Model
 {
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    protected static function booted()
+    {
+        static::saved(function ($offer) {
+            Cache::forget('all_offers');
+        });
+
+        static::deleted(function ($offer) {
+            Cache::forget('all_offers');
+        });
+    }
 
     protected $casts = [
         'start_date' => 'datetime',

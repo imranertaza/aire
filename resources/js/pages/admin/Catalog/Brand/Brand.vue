@@ -7,7 +7,11 @@
                 <option :value="50">50 per page</option>
                 <option :value="100">100 per page</option>
             </select>
-            <SearchBox @search="onSearch" />
+            <SearchBox @search="onSearch" class="mr-2" />
+            <router-link v-if="authStore.hasPermission('create-attribute-groups')" :to="{ name: 'CreateBrand' }"
+                class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Brand
+            </router-link>
         </div>
     </DashboardHeader>
 
@@ -33,7 +37,8 @@
                                 <tr v-for="(brand, index) in brands?.data" :key="brand.id">
                                     <td class="align-middle">{{ index + 1 }}</td>
                                     <td class="align-middle">
-                                        <img v-if="brand.image" :src="getImageUrl(brand.image)" height="50" class="rounded object-fit-cover" :alt="brand.name" />
+                                        <img v-if="brand.image" :src="getImageCacheUrl(brand.image)" width="100"
+                                            class="rounded object-fit-cover" :alt="brand.name" />
                                         <span v-else>No Image</span>
                                     </td>
                                     <td class="align-middle">{{ brand.name }}</td>
@@ -86,6 +91,7 @@ import { useToast } from '@/composables/useToast';
 import { getImageUrl } from '@/layouts/helpers/helpers';
 import { useAuthStore } from '@/store/auth';
 import SearchBox from '@/components/SearchBox.vue';
+import { getImageCacheUrl } from '../../../../layouts/helpers/helpers';
 
 const router = useRouter();
 const route = useRoute();

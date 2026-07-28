@@ -34,7 +34,8 @@
                                 <tr v-for="(category, index) in categories?.data" :key="category.id">
                                     <td class="align-middle">{{ index + 1 }}</td>
                                     <td class="align-middle">
-                                        <img v-if="category.image" :src="getImageUrl(category.image)" height="50" class="rounded object-fit-cover" :alt="category.category_name" />
+                                        <img v-if="category.image" :src="getImageCacheUrl(category.image)" height="50"
+                                            class="rounded object-fit-cover" :alt="category.category_name" />
                                         <span v-else>No Image</span>
                                     </td>
                                     <td class="align-middle">{{ category.category_name }}</td>
@@ -91,6 +92,7 @@ import { useToast } from '@/composables/useToast';
 import { getImageUrl } from '@/layouts/helpers/helpers';
 import { useAuthStore } from '@/store/auth';
 import SearchBox from '@/components/SearchBox.vue';
+import { getImageCacheUrl } from '../../../../layouts/helpers/helpers';
 
 const router = useRouter();
 const route = useRoute();

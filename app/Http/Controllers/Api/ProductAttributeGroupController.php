@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductAttributeGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ProductAttributeGroupController extends Controller
 {
@@ -33,7 +34,9 @@ class ProductAttributeGroupController extends Controller
      */
     public function allAttributeGroups()
     {
-        $groups = ProductAttributeGroup::select('id', 'name')->orderBy('sort_order', 'asc')->get();
+        $groups = Cache::rememberForever('all_attribute_groups', function () {
+            return ProductAttributeGroup::select('id', 'name')->orderBy('sort_order', 'asc')->get();
+        });
         return ApiResponse::success($groups, 'All attribute groups retrieved successfully');
     }
 
@@ -54,7 +57,7 @@ class ProductAttributeGroupController extends Controller
     {
         $validated = $request->validate([
             'name'       => 'required|string|max:155',
-            'sort_order' => 'nullable|integer',
+            'sort_order' => 'nullable|integer|min:0',
             'status'     => 'required|in:0,1,true,false',
         ]);
 
@@ -82,7 +85,7 @@ class ProductAttributeGroupController extends Controller
 
         $validated = $request->validate([
             'name'       => 'required|string|max:155',
-            'sort_order' => 'nullable|integer',
+            'sort_order' => 'nullable|integer|min:0',
             'status'     => 'required|in:0,1,true,false',
         ]);
 

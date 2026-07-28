@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Setting;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,5 +23,9 @@ class AppServiceProvider extends ServiceProvider
         $settings = $settings = Setting::allCached();
         View::share('settings', $settings);
         \Illuminate\Pagination\Paginator::useBootstrapFive();
+
+        Auth::provider('cached', function ($app, array $config) {
+            return new \App\Providers\CachedUserProvider($app['hash'], $config['model']);
+        });
     }
 }

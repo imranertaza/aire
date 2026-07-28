@@ -28,29 +28,13 @@
                             <p>Catalog <i class="fas fa-angle-left right"></i></p>
                         </a>
                         <ul class="nav nav-treeview" v-show="isOpen('catalog')">
-                            <!-- Nested: Manage Brand -->
-                            <li class="nav-item" :class="{ 'menu-open': isOpen('brand') }"
-                                v-if="authStore.hasPermission('view-brands')">
-                                <a href="#" class="nav-link" @click.prevent="toggle('brand')">
-                                    <i class="nav-icon fas fa-folder"></i>
-                                    <p>Brand <i class="fas fa-angle-left right"></i></p>
-                                </a>
-                                <ul class="nav nav-treeview" v-show="isOpen('brand')">
-                                    <li class="nav-item">
-                                        <router-link :to="{ name: 'Brands' }" class="nav-link"
-                                            :class="{ active: $route.name === 'Brands' }">
-                                            <i class="far fa-dot-circle nav-icon"></i>
-                                            <p>Brands List</p>
-                                        </router-link>
-                                    </li>
-                                    <li class="nav-item" v-if="authStore.hasPermission('create-brands')">
-                                        <router-link :to="{ name: 'CreateBrand' }" class="nav-link"
-                                            :class="{ active: $route.name === 'CreateBrand' }">
-                                            <i class="far fa-dot-circle nav-icon"></i>
-                                            <p>Create Brand</p>
-                                        </router-link>
-                                    </li>
-                                </ul>
+                            <!-- Products -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-products')">
+                                <router-link :to="{ name: 'Products' }" class="nav-link"
+                                    :class="{ active: ['Products', 'CreateProduct', 'UpdateProduct', 'AdvancedProducts'].includes($route.name) }">
+                                    <i class="fas fa-box nav-icon"></i>
+                                    <p>Products</p>
+                                </router-link>
                             </li>
                             <!-- Nested: Manage Product Category -->
                             <li class="nav-item" :class="{ 'menu-open': isOpen('product-category') }"
@@ -76,6 +60,30 @@
                                     </li>
                                 </ul>
                             </li>
+                            <!-- Nested: Manage Brand -->
+                            <li class="nav-item" :class="{ 'menu-open': isOpen('brand') }"
+                                v-if="authStore.hasPermission('view-brands')">
+                                <a href="#" class="nav-link" @click.prevent="toggle('brand')">
+                                    <i class="nav-icon fas fa-folder"></i>
+                                    <p>Brand <i class="fas fa-angle-left right"></i></p>
+                                </a>
+                                <ul class="nav nav-treeview" v-show="isOpen('brand')">
+                                    <li class="nav-item">
+                                        <router-link :to="{ name: 'Brands' }" class="nav-link"
+                                            :class="{ active: $route.name === 'Brands' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Brands List</p>
+                                        </router-link>
+                                    </li>
+                                    <li class="nav-item" v-if="authStore.hasPermission('create-brands')">
+                                        <router-link :to="{ name: 'CreateBrand' }" class="nav-link"
+                                            :class="{ active: $route.name === 'CreateBrand' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Create Brand</p>
+                                        </router-link>
+                                    </li>
+                                </ul>
+                            </li>
                             <!-- Attribute Group -->
                             <li class="nav-item" v-if="authStore.hasPermission('view-attribute-groups')">
                                 <router-link :to="{ name: 'AttributeGroups' }" class="nav-link"
@@ -92,14 +100,7 @@
                                     <p>Options</p>
                                 </router-link>
                             </li>
-                            <!-- Products -->
-                            <li class="nav-item" v-if="authStore.hasPermission('view-products')">
-                                <router-link :to="{ name: 'Products' }" class="nav-link"
-                                    :class="{ active: ['Products', 'CreateProduct', 'UpdateProduct', 'AdvancedProducts'].includes($route.name) }">
-                                    <i class="fas fa-box nav-icon"></i>
-                                    <p>Products</p>
-                                </router-link>
-                            </li>
+
                             <!-- Coupons -->
                             <li class="nav-item" :class="{ 'menu-open': isOpen('coupon') }"
                                 v-if="authStore.hasPermission('view-coupons') && authStore.isModuleEnabled('coupon')">
@@ -602,7 +603,7 @@
                             <p>Newsletters</p>
                         </router-link>
                     </li>
-                    
+
                     <!-- Email Send -->
                     <li class="nav-item" v-if="authStore.hasPermission('send-emails')"
                         :class="{ 'menu-open': isOpen('emails') }">
@@ -627,7 +628,7 @@
                             </li>
                         </ul>
                     </li>
-                    
+
                     <!-- Fund Requests -->
                     <li class="nav-item" v-if="authStore.hasPermission('view-fund-requests')">
                         <router-link :to="{ name: 'FundRequestList' }" class="nav-link"
@@ -636,7 +637,7 @@
                             <p>Fund Requests</p>
                         </router-link>
                     </li>
-                    
+
                     <!-- Color Families -->
                     <li class="nav-item" v-if="authStore.hasPermission('view-color-families')">
                         <router-link :to="{ name: 'ColorFamilyList' }" class="nav-link"

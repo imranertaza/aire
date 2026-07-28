@@ -6,6 +6,7 @@ use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -63,7 +64,9 @@ class AdminRoleController extends Controller
      */
     public function roles()
     {
-        $roles = Role::where('guard_name', 'user')->pluck('name');
+        $roles = Cache::rememberForever('all_roles_list', function () {
+            return Role::where('guard_name', 'user')->pluck('name');
+        });
 
         return ApiResponse::success($roles, 'Available roles retrieved successfully');
     }
@@ -155,6 +158,8 @@ class AdminRoleController extends Controller
         }
 
         $admin->syncRoles([$validated['role']]);
+        Cache::forget("admin_me_{$admin->id}");
+        Cache::forget("user_{$admin->id}");
 
         return ApiResponse::success([
             'id'   => $admin->id,
@@ -169,15 +174,17 @@ class AdminRoleController extends Controller
      */
     public function rolesWithPermissions()
     {
-        $roles = Role::with('permissions')
-            ->where('guard_name', 'user')
-            ->get()
-            ->map(function ($role) {
-                return [
-                    'name'        => $role->name,
-                    'permissions' => $role->permissions->pluck('name'),
-                ];
-            });
+        $roles = Cache::rememberForever('all_roles_with_permissions_list', function () {
+            return Role::with('permissions')
+                ->where('guard_name', 'user')
+                ->get()
+                ->map(function ($role) {
+                    return [
+                        'name'        => $role->name,
+                        'permissions' => $role->permissions->pluck('name'),
+                    ];
+                });
+        });
 
         return ApiResponse::success($roles, 'Roles with permissions retrieved successfully');
     }
@@ -207,6 +214,16 @@ class AdminRoleController extends Controller
 
         $roleModel->syncPermissions($validated['permissions']);
 
+        // Clear cache for all users holding this role
+        $users = User::role($roleModel->name)->get();
+        foreach ($users as $user) {
+            Cache::forget("admin_me_{$user->id}");
+            Cache::forget("user_{$user->id}");
+        }
+
+        // Clear the global roles list cache
+        Cache::forget('all_roles_with_permissions_list');
+
         return ApiResponse::success([
             'role'        => $roleModel->name,
             'permissions' => $roleModel->permissions->pluck('name'),
@@ -220,7 +237,9 @@ class AdminRoleController extends Controller
      */
     public function permissions()
     {
-        $permissions = Permission::where('guard_name', 'user')->pluck('name');
+        $permissions = Cache::rememberForever('all_permissions_list', function () {
+            return Permission::where('guard_name', 'user')->pluck('name');
+        });
 
         return ApiResponse::success($permissions, 'Available permissions retrieved successfully');
     }

@@ -90,27 +90,27 @@
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Price <span class="text-danger">*</span></label>
-                                            <input type="number" step="0.01" class="form-control" v-model="form.price" required />
+                                            <input min="0" type="number" step="0.01" class="form-control" v-model="form.price" required />
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Quantity <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" v-model="form.quantity" required />
+                                            <input min="0" type="number" class="form-control" v-model="form.quantity" required />
                                         </div>
                                         <div class="col-md-3 form-group">
                                             <label>Weight</label>
-                                            <input type="number" step="0.0001" class="form-control" v-model="form.weight" />
+                                            <input min="0" type="number" step="0.0001" class="form-control" v-model="form.weight" />
                                         </div>
                                         <div class="col-md-3 form-group">
                                             <label>Length</label>
-                                            <input type="number" step="0.0001" class="form-control" v-model="form.length" />
+                                            <input min="0" type="number" step="0.0001" class="form-control" v-model="form.length" />
                                         </div>
                                         <div class="col-md-3 form-group">
                                             <label>Width</label>
-                                            <input type="number" step="0.0001" class="form-control" v-model="form.width" />
+                                            <input min="0" type="number" step="0.0001" class="form-control" v-model="form.width" />
                                         </div>
                                         <div class="col-md-3 form-group">
                                             <label>Height</label>
-                                            <input type="number" step="0.0001" class="form-control" v-model="form.height" />
+                                            <input min="0" type="number" step="0.0001" class="form-control" v-model="form.height" />
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>Date Available</label>
@@ -118,7 +118,7 @@
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>Sort Order</label>
-                                            <input type="number" class="form-control" v-model="form.sort_order" />
+                                            <input min="0" type="number" class="form-control" v-model="form.sort_order" />
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>Status</label>
@@ -230,7 +230,7 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="number" class="form-control" v-model="prodOpt.quantity" required />
+                                                        <input min="0" type="number" class="form-control" v-model="prodOpt.quantity" required />
                                                     </td>
                                                     <td>
                                                         <select class="form-control" v-model="prodOpt.subtract">
@@ -245,7 +245,7 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="number" step="0.01" class="form-control" v-model="prodOpt.price" />
+                                                        <input min="0" type="number" step="0.01" class="form-control" v-model="prodOpt.price" />
                                                     </td>
                                                     <td>
                                                         <button type="button" class="btn btn-sm btn-danger" @click="removeOptionRow(index)">
@@ -287,7 +287,7 @@
                                                         <textarea class="form-control" v-model="attr.details" rows="2"></textarea>
                                                     </td>
                                                     <td>
-                                                        <input type="number" class="form-control" v-model="attr.sort_order" />
+                                                        <input min="0" type="number" class="form-control" v-model="attr.sort_order" />
                                                     </td>
                                                     <td>
                                                         <button type="button" class="btn btn-sm btn-danger" @click="removeAttributeRow(index)">
@@ -315,7 +315,7 @@
                                     <div class="row">
                                         <div class="col-md-4 form-group">
                                             <label>Special Price</label>
-                                            <input type="number" step="0.01" class="form-control" v-model="form.special_price" placeholder="Special Price" />
+                                            <input min="0" type="number" step="0.01" class="form-control" v-model="form.special_price" placeholder="Special Price" />
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>Start Date</label>

@@ -8,6 +8,7 @@ use App\Models\Option;
 use App\Models\OptionValue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class OptionController extends Controller
@@ -44,7 +45,9 @@ class OptionController extends Controller
      */
     public function allOptions()
     {
-        $options = Option::with('optionValues')->where('status', 1)->orderBy('sort_order', 'asc')->get();
+        $options = Cache::rememberForever('all_options', function () {
+            return Option::with('optionValues')->where('status', 1)->orderBy('sort_order', 'asc')->get();
+        });
         return ApiResponse::success($options, 'All options retrieved successfully');
     }
 
@@ -57,11 +60,11 @@ class OptionController extends Controller
         $validated = $request->validate([
             'name'                     => 'required|string|max:155',
             'type'                     => 'required|string|max:32',
-            'sort_order'               => 'nullable|integer',
+            'sort_order'               => 'nullable|integer|min:0',
             'status'                   => 'required|in:0,1,true,false',
             'option_values'            => 'nullable|array',
-            'option_values.*.name'       => 'required|string|max:155',
-            'option_values.*.sort_order' => 'nullable|integer',
+            'option_values.*.name'       => 'required_with:option_values|string|max:155',
+            'option_values.*.sort_order' => 'nullable|integer|min:0',
         ]);
 
         try {
@@ -112,12 +115,12 @@ class OptionController extends Controller
         $validated = $request->validate([
             'name'                     => 'required|string|max:155',
             'type'                     => 'required|string|max:32',
-            'sort_order'               => 'nullable|integer',
+            'sort_order'               => 'nullable|integer|min:0',
             'status'                   => 'required|in:0,1,true,false',
             'option_values'            => 'nullable|array',
             'option_values.*.id'         => 'nullable|integer',
-            'option_values.*.name'       => 'required|string|max:155',
-            'option_values.*.sort_order' => 'nullable|integer',
+            'option_values.*.name'       => 'required_with:option_values|string|max:155',
+            'option_values.*.sort_order' => 'nullable|integer|min:0',
         ]);
 
         try {

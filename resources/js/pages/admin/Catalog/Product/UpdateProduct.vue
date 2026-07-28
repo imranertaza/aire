@@ -17,38 +17,49 @@
                     <div class="card-header p-0 border-bottom-0">
                         <ul class="nav nav-tabs" id="product-tabs" role="tablist">
                             <li class="nav-item">
-                                <a class="nav-link active" id="tab-general" data-toggle="pill" href="#custom-tabs-general" role="tab" aria-controls="custom-tabs-general" aria-selected="true">General</a>
+                                <a class="nav-link active" id="tab-general" data-toggle="pill"
+                                    href="#custom-tabs-general" role="tab" aria-controls="custom-tabs-general"
+                                    aria-selected="true">General</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-data" data-toggle="pill" href="#custom-tabs-data" role="tab" aria-controls="custom-tabs-data" aria-selected="false">Data</a>
+                                <a class="nav-link" id="tab-data" data-toggle="pill" href="#custom-tabs-data" role="tab"
+                                    aria-controls="custom-tabs-data" aria-selected="false">Data</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-links" data-toggle="pill" href="#custom-tabs-links" role="tab" aria-controls="custom-tabs-links" aria-selected="false">Links</a>
+                                <a class="nav-link" id="tab-links" data-toggle="pill" href="#custom-tabs-links"
+                                    role="tab" aria-controls="custom-tabs-links" aria-selected="false">Links</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-options" data-toggle="pill" href="#custom-tabs-options" role="tab" aria-controls="custom-tabs-options" aria-selected="false">Options</a>
+                                <a class="nav-link" id="tab-options" data-toggle="pill" href="#custom-tabs-options"
+                                    role="tab" aria-controls="custom-tabs-options" aria-selected="false">Options</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-attributes" data-toggle="pill" href="#custom-tabs-attributes" role="tab" aria-controls="custom-tabs-attributes" aria-selected="false">Attributes</a>
+                                <a class="nav-link" id="tab-attributes" data-toggle="pill"
+                                    href="#custom-tabs-attributes" role="tab" aria-controls="custom-tabs-attributes"
+                                    aria-selected="false">Attributes</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-specials" data-toggle="pill" href="#custom-tabs-specials" role="tab" aria-controls="custom-tabs-specials" aria-selected="false">Specials</a>
+                                <a class="nav-link" id="tab-specials" data-toggle="pill" href="#custom-tabs-specials"
+                                    role="tab" aria-controls="custom-tabs-specials" aria-selected="false">Specials</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-others" data-toggle="pill" href="#custom-tabs-others" role="tab" aria-controls="custom-tabs-others" aria-selected="false">Others</a>
+                                <a class="nav-link" id="tab-others" data-toggle="pill" href="#custom-tabs-others"
+                                    role="tab" aria-controls="custom-tabs-others" aria-selected="false">Others</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-images" data-toggle="pill" href="#custom-tabs-images" role="tab" aria-controls="custom-tabs-images" aria-selected="false">Images</a>
+                                <a class="nav-link" id="tab-images" data-toggle="pill" href="#custom-tabs-images"
+                                    role="tab" aria-controls="custom-tabs-images" aria-selected="false">Images</a>
                             </li>
                         </ul>
                     </div>
-                    
+
                     <div class="card-body">
                         <form @submit.prevent="submitForm" id="productForm">
                             <div class="tab-content" id="product-tabs-content">
-                                
+
                                 <!-- General Tab -->
-                                <div class="tab-pane fade show active" id="custom-tabs-general" role="tabpanel" aria-labelledby="tab-general">
+                                <div class="tab-pane fade show active" id="custom-tabs-general" role="tabpanel"
+                                    aria-labelledby="tab-general">
                                     <div class="row">
                                         <div class="col-md-12 form-group">
                                             <label>Product Name <span class="text-danger">*</span></label>
@@ -60,7 +71,8 @@
                                         </div>
                                         <div class="col-md-12 form-group">
                                             <label>Tags</label>
-                                            <input type="text" class="form-control" v-model="form.tag" placeholder="Separate tags with commas" />
+                                            <input type="text" class="form-control" v-model="form.tag"
+                                                placeholder="Separate tags with commas" />
                                         </div>
                                         <div class="col-md-12 form-group">
                                             <label>Meta Title</label>
@@ -68,7 +80,8 @@
                                         </div>
                                         <div class="col-md-12 form-group">
                                             <label>Meta Description</label>
-                                            <textarea class="form-control" rows="3" v-model="form.meta_description"></textarea>
+                                            <textarea class="form-control" rows="3"
+                                                v-model="form.meta_description"></textarea>
                                         </div>
                                         <div class="col-md-12 form-group">
                                             <label>Meta Keywords</label>
@@ -76,9 +89,10 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Data Tab -->
-                                <div class="tab-pane fade" id="custom-tabs-data" role="tabpanel" aria-labelledby="tab-data">
+                                <div class="tab-pane fade" id="custom-tabs-data" role="tabpanel"
+                                    aria-labelledby="tab-data">
                                     <div class="row">
                                         <div class="col-md-6 form-group">
                                             <label>Model <span class="text-danger">*</span></label>
@@ -90,27 +104,33 @@
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Price <span class="text-danger">*</span></label>
-                                            <input type="number" step="0.01" class="form-control" v-model="form.price" required />
+                                            <input min="0" type="number" step="0.01" class="form-control"
+                                                v-model="form.price" required />
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Quantity <span class="text-danger">*</span></label>
-                                            <input type="number" class="form-control" v-model="form.quantity" required />
+                                            <input min="0" type="number" class="form-control" v-model="form.quantity"
+                                                required />
                                         </div>
                                         <div class="col-md-3 form-group">
                                             <label>Weight</label>
-                                            <input type="number" step="0.0001" class="form-control" v-model="form.weight" />
+                                            <input min="0" type="number" step="0.0001" class="form-control"
+                                                v-model="form.weight" />
                                         </div>
                                         <div class="col-md-3 form-group">
                                             <label>Length</label>
-                                            <input type="number" step="0.0001" class="form-control" v-model="form.length" />
+                                            <input min="0" type="number" step="0.0001" class="form-control"
+                                                v-model="form.length" />
                                         </div>
                                         <div class="col-md-3 form-group">
                                             <label>Width</label>
-                                            <input type="number" step="0.0001" class="form-control" v-model="form.width" />
+                                            <input min="0" type="number" step="0.0001" class="form-control"
+                                                v-model="form.width" />
                                         </div>
                                         <div class="col-md-3 form-group">
                                             <label>Height</label>
-                                            <input type="number" step="0.0001" class="form-control" v-model="form.height" />
+                                            <input min="0" type="number" step="0.0001" class="form-control"
+                                                v-model="form.height" />
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>Date Available</label>
@@ -118,7 +138,8 @@
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>Sort Order</label>
-                                            <input type="number" class="form-control" v-model="form.sort_order" />
+                                            <input min="0" type="number" class="form-control"
+                                                v-model="form.sort_order" />
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>Status</label>
@@ -131,7 +152,8 @@
                                 </div>
 
                                 <!-- Links Tab -->
-                                <div class="tab-pane fade" id="custom-tabs-links" role="tabpanel" aria-labelledby="tab-links">
+                                <div class="tab-pane fade" id="custom-tabs-links" role="tabpanel"
+                                    aria-labelledby="tab-links">
                                     <div class="row">
                                         <div class="col-md-6 form-group">
                                             <label>Product Featured</label>
@@ -151,59 +173,48 @@
                                             <label>Brand</label>
                                             <select class="form-control" v-model="form.brand_id">
                                                 <option value="">-- Select Brand --</option>
-                                                <option v-for="b in brands" :key="b.id" :value="b.id">{{ b.name }}</option>
+                                                <option v-for="b in brands" :key="b.id" :value="b.id">{{ b.name }}
+                                                </option>
                                             </select>
                                         </div>
-                                        
+
                                         <!-- Multiple Categories Dropdown -->
                                         <div class="col-md-6 form-group">
                                             <label>Category <span class="text-danger">*</span></label>
-                                            <Multiselect 
-                                                v-model="form.category_ids" 
-                                                :options="categoriesOptions" 
-                                                mode="tags" 
-                                                placeholder="Select Category" 
-                                                searchable 
-                                                class="multiselect-custom"
-                                            />
+                                            <Multiselect v-model="form.category_ids" :options="categoriesOptions"
+                                                mode="tags" placeholder="Select Category" searchable
+                                                class="multiselect-custom" />
                                         </div>
 
                                         <!-- Related Products -->
                                         <div class="col-md-6 form-group">
                                             <label>Related Product</label>
-                                            <Multiselect 
-                                                v-model="form.related_ids" 
-                                                :options="productsOptions" 
-                                                mode="tags" 
-                                                placeholder="Select Related Product" 
-                                                searchable 
-                                                class="multiselect-custom"
-                                            />
+                                            <Multiselect v-model="form.related_ids" :options="productsOptions"
+                                                mode="tags" placeholder="Select Related Product" searchable
+                                                class="multiselect-custom" />
                                         </div>
 
                                         <!-- Bought Together Products -->
                                         <div class="col-md-6 form-group">
                                             <label>Bought Together Products</label>
-                                            <Multiselect 
-                                                v-model="form.bought_together_ids" 
-                                                :options="productsOptions" 
-                                                mode="tags" 
-                                                placeholder="Select Bought Together Products" 
-                                                searchable 
-                                                class="multiselect-custom"
-                                            />
+                                            <Multiselect v-model="form.bought_together_ids" :options="productsOptions"
+                                                mode="tags" placeholder="Select Bought Together Products" searchable
+                                                class="multiselect-custom" />
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Options Tab -->
-                                <div class="tab-pane fade" id="custom-tabs-options" role="tabpanel" aria-labelledby="tab-options">
+                                <div class="tab-pane fade" id="custom-tabs-options" role="tabpanel"
+                                    aria-labelledby="tab-options">
                                     <div class="row mb-3">
                                         <div class="col-md-4">
                                             <label>Add Option</label>
-                                            <select class="form-control" v-model="selectedOptionToAdd" @change="addOptionRow">
+                                            <select class="form-control" v-model="selectedOptionToAdd"
+                                                @change="addOptionRow">
                                                 <option value="">-- Select Option to Add --</option>
-                                                <option v-for="opt in availableOptions" :key="opt.id" :value="opt">{{ opt.name }}</option>
+                                                <option v-for="opt in availableOptions" :key="opt.id" :value="opt">{{
+                                                    opt.name }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -224,13 +235,16 @@
                                                 <tr v-for="(prodOpt, index) in form.options" :key="index">
                                                     <td>{{ prodOpt.option_name }}</td>
                                                     <td>
-                                                        <select class="form-control" v-model="prodOpt.option_value_id" required>
+                                                        <select class="form-control" v-model="prodOpt.option_value_id"
+                                                            required>
                                                             <option value="">-- Select Value --</option>
-                                                            <option v-for="val in prodOpt.available_values" :key="val.id" :value="val.id">{{ val.name }}</option>
+                                                            <option v-for="val in prodOpt.available_values"
+                                                                :key="val.id" :value="val.id">{{ val.name }}</option>
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="number" class="form-control" v-model="prodOpt.quantity" required />
+                                                        <input min="0" type="number" class="form-control"
+                                                            v-model="prodOpt.quantity" required />
                                                     </td>
                                                     <td>
                                                         <select class="form-control" v-model="prodOpt.subtract">
@@ -245,10 +259,12 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="number" step="0.01" class="form-control" v-model="prodOpt.price" />
+                                                        <input min="0" type="number" step="0.01" class="form-control"
+                                                            v-model="prodOpt.price" />
                                                     </td>
                                                     <td>
-                                                        <button type="button" class="btn btn-sm btn-danger" @click="removeOptionRow(index)">
+                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                            @click="removeOptionRow(index)">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -258,9 +274,10 @@
                                     </div>
                                     <div v-else class="alert alert-info">No options added yet.</div>
                                 </div>
-                                
+
                                 <!-- Attributes Tab -->
-                                <div class="tab-pane fade" id="custom-tabs-attributes" role="tabpanel" aria-labelledby="tab-attributes">
+                                <div class="tab-pane fade" id="custom-tabs-attributes" role="tabpanel"
+                                    aria-labelledby="tab-attributes">
                                     <div class="table-responsive">
                                         <table class="table table-bordered">
                                             <thead class="bg-light">
@@ -275,22 +292,28 @@
                                             <tbody>
                                                 <tr v-for="(attr, index) in form.attributes" :key="index">
                                                     <td>
-                                                        <select class="form-control" v-model="attr.attribute_group_id" required>
+                                                        <select class="form-control" v-model="attr.attribute_group_id"
+                                                            required>
                                                             <option value="">-- Select Group --</option>
-                                                            <option v-for="g in attributeGroups" :key="g.id" :value="g.id">{{ g.name }}</option>
+                                                            <option v-for="g in attributeGroups" :key="g.id"
+                                                                :value="g.id">{{ g.name }}</option>
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <input type="text" class="form-control" v-model="attr.name" required />
+                                                        <input type="text" class="form-control" v-model="attr.name"
+                                                            required />
                                                     </td>
                                                     <td>
-                                                        <textarea class="form-control" v-model="attr.details" rows="2"></textarea>
+                                                        <textarea class="form-control" v-model="attr.details"
+                                                            rows="2"></textarea>
                                                     </td>
                                                     <td>
-                                                        <input type="number" class="form-control" v-model="attr.sort_order" />
+                                                        <input min="0" type="number" class="form-control"
+                                                            v-model="attr.sort_order" />
                                                     </td>
                                                     <td>
-                                                        <button type="button" class="btn btn-sm btn-danger" @click="removeAttributeRow(index)">
+                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                            @click="removeAttributeRow(index)">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </td>
@@ -300,7 +323,8 @@
                                                 <tr>
                                                     <td colspan="4"></td>
                                                     <td>
-                                                        <button type="button" class="btn btn-sm btn-primary" @click="addAttributeRow">
+                                                        <button type="button" class="btn btn-sm btn-primary"
+                                                            @click="addAttributeRow">
                                                             <i class="fas fa-plus"></i> Add
                                                         </button>
                                                     </td>
@@ -311,11 +335,13 @@
                                 </div>
 
                                 <!-- Specials Tab -->
-                                <div class="tab-pane fade" id="custom-tabs-specials" role="tabpanel" aria-labelledby="tab-specials">
+                                <div class="tab-pane fade" id="custom-tabs-specials" role="tabpanel"
+                                    aria-labelledby="tab-specials">
                                     <div class="row">
                                         <div class="col-md-4 form-group">
                                             <label>Special Price</label>
-                                            <input type="number" step="0.01" class="form-control" v-model="form.special_price" placeholder="Special Price" />
+                                            <input min="0" type="number" step="0.01" class="form-control"
+                                                v-model="form.special_price" placeholder="Special Price" />
                                         </div>
                                         <div class="col-md-4 form-group">
                                             <label>Start Date</label>
@@ -329,46 +355,60 @@
                                 </div>
 
                                 <!-- Others Tab -->
-                                <div class="tab-pane fade" id="custom-tabs-others" role="tabpanel" aria-labelledby="tab-others">
+                                <div class="tab-pane fade" id="custom-tabs-others" role="tabpanel"
+                                    aria-labelledby="tab-others">
                                     <div class="row">
                                         <div class="col-md-12 form-group">
                                             <label>Video Embedded Code</label>
-                                            <input type="text" class="form-control" v-model="form.video" placeholder="Video code" />
+                                            <input type="text" class="form-control" v-model="form.video"
+                                                placeholder="Video code" />
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Documentation Pdf</label>
-                                            <Vue3Dropzone v-model="docPdfFile" v-model:previews="docPdfPreviews" mode="edit" :allowSelectOnPreview="true" @previewRemoved="() => handleFileRemoved('documentation_pdf')" />
+                                            <Vue3Dropzone v-model="docPdfFile" v-model:previews="docPdfPreviews"
+                                                mode="edit" :allowSelectOnPreview="true"
+                                                @previewRemoved="() => handleFileRemoved('documentation_pdf')" />
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Safety Pdf</label>
-                                            <Vue3Dropzone v-model="safetyPdfFile" v-model:previews="safetyPdfPreviews" mode="edit" :allowSelectOnPreview="true" @previewRemoved="() => handleFileRemoved('safety_pdf')" />
+                                            <Vue3Dropzone v-model="safetyPdfFile" v-model:previews="safetyPdfPreviews"
+                                                mode="edit" :allowSelectOnPreview="true"
+                                                @previewRemoved="() => handleFileRemoved('safety_pdf')" />
                                         </div>
                                         <div class="col-md-6 form-group">
                                             <label>Instructions Pdf</label>
-                                            <Vue3Dropzone v-model="instPdfFile" v-model:previews="instPdfPreviews" mode="edit" :allowSelectOnPreview="true" @previewRemoved="() => handleFileRemoved('instructions_pdf')" />
+                                            <Vue3Dropzone v-model="instPdfFile" v-model:previews="instPdfPreviews"
+                                                mode="edit" :allowSelectOnPreview="true"
+                                                @previewRemoved="() => handleFileRemoved('instructions_pdf')" />
                                         </div>
                                         <div class="col-md-6 form-group">
-                                            <label>Description Image</label> 
-                                            <Vue3Dropzone v-model="descImageFile" v-model:previews="descImagePreviews" mode="edit" :allowSelectOnPreview="true" @previewRemoved="() => handleFileRemoved('description_image')" />
+                                            <label>Description Image</label>
+                                            <Vue3Dropzone v-model="descImageFile" v-model:previews="descImagePreviews"
+                                                mode="edit" :allowSelectOnPreview="true"
+                                                @previewRemoved="() => handleFileRemoved('description_image')" />
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Images Tab -->
-                                <div class="tab-pane fade" id="custom-tabs-images" role="tabpanel" aria-labelledby="tab-images">
+                                <div class="tab-pane fade" id="custom-tabs-images" role="tabpanel"
+                                    aria-labelledby="tab-images">
                                     <div class="row">
                                         <div class="col-md-4 form-group">
                                             <label>Default Main Image</label>
-                                            <Vue3Dropzone v-model="mainImageFile" v-model:previews="mainImagePreviews" mode="edit" :allowSelectOnPreview="true" />
+                                            <Vue3Dropzone v-model="mainImageFile" v-model:previews="mainImagePreviews"
+                                                mode="edit" :allowSelectOnPreview="true" />
                                         </div>
                                         <div class="col-md-8 form-group">
                                             <label>Multiple Gallery Images</label>
-                                            <Vue3Dropzone v-model="galleryImageFiles" v-model:previews="galleryPreviews" mode="edit" :multiple="true" :allowSelectOnPreview="true" selectFileStrategy="merge" @previewRemoved="handlePreviewRemoved" />
+                                            <Vue3Dropzone v-model="galleryImageFiles" v-model:previews="galleryPreviews"
+                                                mode="edit" :multiple="true" :allowSelectOnPreview="true"
+                                                selectFileStrategy="merge" @previewRemoved="handlePreviewRemoved" />
                                         </div>
                                     </div>
                                 </div>
-                                
-                             </div>
+
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -390,6 +430,7 @@ import { useToast } from '@/composables/useToast';
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import Multiselect from '@vueform/multiselect';
 import '@vueform/multiselect/themes/default.css';
+import { getImageCacheUrl } from '../../../../layouts/helpers/helpers';
 
 const router = useRouter();
 const route = useRoute();
@@ -499,18 +540,18 @@ onMounted(async () => {
             featured: p.featured,
             sort_order: p.sort_order || 0,
             date_available: p.date_available ? p.date_available.substring(0, 10) : '',
-            
+
             description: descInfo.description || '',
             tag: descInfo.tag || '',
             meta_title: descInfo.meta_title || '',
             meta_description: descInfo.meta_description || '',
             meta_keyword: descInfo.meta_keyword || '',
             video: descInfo.video || '',
-            
+
             special_price: special ? special.special_price : '',
             special_start_date: special ? (special.start_date ? special.start_date.substring(0, 10) : '') : '',
             special_end_date: special ? (special.end_date ? special.end_date.substring(0, 10) : '') : '',
-            
+
             product_free_delivery: p.free_delivery ? 1 : 0,
             category_ids: categoryIds,
             related_ids: relatedIds,
@@ -538,23 +579,23 @@ onMounted(async () => {
         };
 
         if (p.main_image) {
-            mainImagePreviews.value = ['/storage/' + p.main_image];
+            mainImagePreviews.value = [getImageCacheUrl(p.main_image, 400, 400, 'webp')];
         }
 
         existingGalleryImages.value = p.images;
-        galleryPreviews.value = p.images.map(img => '/storage/' + img.image);
+        galleryPreviews.value = p.images.map(img => getImageCacheUrl(img.image, 300, 300, 'webp'));
 
         if (descInfo.documentation_pdf) {
-            docPdfPreviews.value = ['/storage/' + descInfo.documentation_pdf];
+            docPdfPreviews.value = [getImageCacheUrl(descInfo.documentation_pdf, 60, 60, 'webp')];
         }
         if (descInfo.safety_pdf) {
-            safetyPdfPreviews.value = ['/storage/' + descInfo.safety_pdf];
+            safetyPdfPreviews.value = [getImageCacheUrl(descInfo.safety_pdf, 60, 60, 'webp')];
         }
         if (descInfo.instructions_pdf) {
-            instPdfPreviews.value = ['/storage/' + descInfo.instructions_pdf];
+            instPdfPreviews.value = [getImageCacheUrl(descInfo.instructions_pdf, 60, 60, 'webp')];
         }
         if (descInfo.description_image) {
-            descImagePreviews.value = ['/storage/' + descInfo.description_image];
+            descImagePreviews.value = [getImageCacheUrl(descInfo.description_image, 60, 60, 'webp')];
         }
 
     } catch (error) {
@@ -610,7 +651,7 @@ const handleFileRemoved = (fieldName) => {
 
 const addOptionRow = () => {
     if (!selectedOptionToAdd.value) return;
-    
+
     form.value.options.push({
         option_id: selectedOptionToAdd.value.id,
         option_name: selectedOptionToAdd.value.name,
@@ -621,7 +662,7 @@ const addOptionRow = () => {
         price: 0,
         available_values: selectedOptionToAdd.value.option_values || []
     });
-    
+
     selectedOptionToAdd.value = "";
 };
 
@@ -654,7 +695,7 @@ const submitForm = async () => {
     }
 
     loading.value = true;
-    
+
     const formData = new FormData();
     Object.keys(form.value).forEach(key => {
         if (['options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids'].includes(key)) {
@@ -733,10 +774,12 @@ const submitForm = async () => {
     --ms-tag-color: #2f3542;
     --ms-tag-radius: 4px;
 }
+
 .multiselect-custom .multiselect-tags-search {
     background-color: transparent !important;
 }
-.img-details{
- display: none;   
+
+.img-details {
+    display: none;
 }
 </style>

@@ -18,7 +18,7 @@ export function getImageUrl(path) {
 
     return path.startsWith("http://") || path.startsWith("https://") ?
         // path : `/storage/${path.replace(/^\/+/, "")}`;
-        path : `/public/storage/${path.replace(/^\/+/, "")}`;
+        path : `/storage/${path.replace(/^\/+/, "")}`;
 }
 
 /**
@@ -45,6 +45,7 @@ const getImagePath = (path) => {
     }
 
     // Otherwise prepend /storage/
+    // return '/storage/' + path.replace(/^\/+/, '');
     return '/storage/' + path.replace(/^\/+/, '');
 }
 

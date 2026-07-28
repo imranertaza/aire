@@ -4,10 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Cache;
 
 class Coupon extends Model
 {
     protected $guarded = ['id'];
+
+    protected static function booted()
+    {
+        static::saved(function ($coupon) {
+            Cache::forget('all_coupons');
+        });
+
+        static::deleted(function ($coupon) {
+            Cache::forget('all_coupons');
+        });
+    }
 
 
     public function categories(): BelongsToMany

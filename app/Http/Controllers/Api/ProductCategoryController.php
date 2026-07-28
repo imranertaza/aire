@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 
@@ -38,7 +39,9 @@ class ProductCategoryController extends Controller
      */
     public function allCategories()
     {
-        $categories = ProductCategory::select('id', 'category_name', 'parent_id')->get();
+        $categories = Cache::rememberForever('all_categories', function () {
+            return ProductCategory::select('id', 'category_name', 'parent_id')->get();
+        });
         return ApiResponse::success($categories, 'All categories retrieved successfully');
     }
 
@@ -70,7 +73,7 @@ class ProductCategoryController extends Controller
             'alt_name'         => 'nullable|string|max:255',
             'header_menu'      => 'nullable|in:0,1,true,false',
             'side_menu'        => 'nullable|in:0,1,true,false',
-            'sort_order'       => 'nullable|integer',
+            'sort_order'       => 'nullable|integer|min:0',
             'status'           => 'required|in:0,1,true,false',
             'parent_id'        => 'nullable|exists:product_categories,id',
         ]);
@@ -125,7 +128,7 @@ class ProductCategoryController extends Controller
             'alt_name'         => 'nullable|string|max:255',
             'header_menu'      => 'nullable|in:0,1,true,false',
             'side_menu'        => 'nullable|in:0,1,true,false',
-            'sort_order'       => 'nullable|integer',
+            'sort_order'       => 'nullable|integer|min:0',
             'status'           => 'required|in:0,1,true,false',
             'parent_id'        => 'nullable|exists:product_categories,id',
         ]);

@@ -5,10 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class ProductCategory extends Model
 {
     protected $guarded = ['id'];
+
+    protected static function booted()
+    {
+        static::saved(function ($category) {
+            Cache::forget('all_categories');
+        });
+
+        static::deleted(function ($category) {
+            Cache::forget('all_categories');
+        });
+    }
 
     /**
      * Parent Category (Self-referential)

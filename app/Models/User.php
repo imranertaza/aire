@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable
 {
@@ -15,6 +16,19 @@ class User extends Authenticatable
     use HasApiTokens,HasFactory, Notifiable, HasRoles;
     
     protected $guard_name = 'user';
+
+    protected static function booted()
+    {
+        static::saved(function ($user) {
+            Cache::forget("user_{$user->id}");
+            Cache::forget("admin_me_{$user->id}");
+        });
+
+        static::deleted(function ($user) {
+            Cache::forget("user_{$user->id}");
+            Cache::forget("admin_me_{$user->id}");
+        });
+    }
     /**
      * The attributes that are mass assignable.
      *

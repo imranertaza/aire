@@ -57,7 +57,7 @@
 
                             <div class="mb-3">
                                 <label class="form-label">Sort Order</label>
-                                <input v-model="form.sort_order" type="number" class="form-control" />
+                                <input min="0" v-model="form.sort_order" type="number" class="form-control" />
                             </div>
 
                             <div class="mb-3">
@@ -93,7 +93,7 @@ import { useRoute } from 'vue-router';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import Vue3Dropzone from "@jaxtheprime/vue3-dropzone";
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
-import { getImageUrl } from '@/layouts/helpers/helpers';
+import { getImageCacheUrl } from '@/layouts/helpers/helpers';
 import { useToast } from '@/composables/useToast';
 import Multiselect from '@vueform/multiselect';
 
@@ -121,7 +121,7 @@ const fetchCategory = async () => {
         const res = await axios.get(`/api/news-categories/${route.params.id}`);
         form.value = res.data.data;
         if (form.value.image) {
-            previews.value = [getImageUrl(form.value.image)];
+            previews.value = [getImageCacheUrl(form.value.image)];
         }
     } catch (error) {
         toast.error('Failed to load category');

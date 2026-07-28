@@ -10,6 +10,7 @@ use App\Models\WeightShippingSetting;
 use App\Models\GeoZoneShippingRate;
 use App\Models\GeoZone;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ShippingMethodController extends Controller
@@ -19,7 +20,9 @@ class ShippingMethodController extends Controller
      */
     public function allMethods()
     {
-        $methods = ShippingMethod::select('id', 'name')->get();
+        $methods = Cache::rememberForever('all_shipping_methods', function () {
+            return ShippingMethod::select('id', 'name')->get();
+        });
         return ApiResponse::success($methods, 'All shipping methods retrieved successfully');
     }
 

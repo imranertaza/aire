@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
@@ -6,15 +7,16 @@ use Illuminate\Support\Facades\File;
 use Intervention\Image\ImageManager;
 
 class ImageService
-{/**
- * Resize and cache an image.
- *
- * @param string $path   Original image path (relative to storage/app/public or full path)
- * @param int    $width  Desired width
- * @param int    $height Desired height
- * @param string $format Output format (jpg|png|webp)
- * @return string        URL to cached image
- */
+{
+    /**
+     * Resize and cache an image.
+     *
+     * @param string $path   Original image path (relative to storage/app/public or full path)
+     * @param int    $width  Desired width
+     * @param int    $height Desired height
+     * @param string $format Output format (jpg|png|webp)
+     * @return string        URL to cached image
+     */
     public static function resizeAndCache(string $path, int $width, int $height, string $format = 'webp'): string
     {
         // Unique hash for this image + size + format

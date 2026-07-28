@@ -71,16 +71,16 @@ class ProductController extends Controller
             'product_code'        => 'nullable|string|max:255',
             'brand_id'            => 'nullable|integer|exists:brands,id',
             'product_category_id' => 'nullable|integer|exists:product_categories,id',
-            'price'               => 'required|numeric',
-            'quantity'            => 'required|integer',
+            'price'               => 'required|numeric|min:0',
+            'quantity'            => 'required|integer|min:0',
             'featured'            => 'nullable|in:0,1,true,false',
             'status'              => 'nullable|in:0,1,true,false',
             'date_available'      => 'nullable|date',
-            'weight'              => 'nullable|numeric',
-            'length'              => 'nullable|numeric',
-            'width'               => 'nullable|numeric',
-            'height'              => 'nullable|numeric',
-            'sort_order'          => 'nullable|integer',
+            'weight'              => 'nullable|numeric|min:0',
+            'length'              => 'nullable|numeric|min:0',
+            'width'               => 'nullable|numeric|min:0',
+            'height'              => 'nullable|numeric|min:0',
+            'sort_order'          => 'nullable|integer|min:0',
 
             // Image
             'main_image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -98,7 +98,7 @@ class ProductController extends Controller
             'meta_description'    => 'nullable|string|max:255',
             'meta_keyword'        => 'nullable|string|max:255',
             'video'               => 'nullable|string|max:255',
-            'special_price'       => 'nullable|numeric',
+            'special_price'       => 'nullable|numeric|min:0',
             'special_start_date'  => 'nullable|date',
             'special_end_date'    => 'nullable|date',
             'product_free_delivery'=> 'nullable|in:0,1,true,false',
@@ -313,16 +313,16 @@ class ProductController extends Controller
             'product_code'        => 'nullable|string|max:255',
             'brand_id'            => 'nullable|integer|exists:brands,id',
             'product_category_id' => 'nullable|integer|exists:product_categories,id',
-            'price'               => 'required|numeric',
-            'quantity'            => 'required|integer',
+            'price'               => 'required|numeric|min:0',
+            'quantity'            => 'required|integer|min:0',
             'featured'            => 'nullable|in:0,1,true,false',
             'status'              => 'nullable|in:0,1,true,false',
             'date_available'      => 'nullable|date',
-            'weight'              => 'nullable|numeric',
-            'length'              => 'nullable|numeric',
-            'width'               => 'nullable|numeric',
-            'height'              => 'nullable|numeric',
-            'sort_order'          => 'nullable|integer',
+            'weight'              => 'nullable|numeric|min:0',
+            'length'              => 'nullable|numeric|min:0',
+            'width'               => 'nullable|numeric|min:0',
+            'height'              => 'nullable|numeric|min:0',
+            'sort_order'          => 'nullable|integer|min:0',
 
             // Image
             'main_image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -341,7 +341,7 @@ class ProductController extends Controller
             'meta_description'    => 'nullable|string|max:255',
             'meta_keyword'        => 'nullable|string|max:255',
             'video'               => 'nullable|string|max:255',
-            'special_price'       => 'nullable|numeric',
+            'special_price'       => 'nullable|numeric|min:0',
             'special_start_date'  => 'nullable|date',
             'special_end_date'    => 'nullable|date',
             'product_free_delivery'=> 'nullable|in:0,1,true,false',
@@ -584,7 +584,7 @@ class ProductController extends Controller
             'product_ids.*' => 'integer|exists:products,id'
         ]);
 
-        $products = Product::whereIn('id', $validated['product_ids'])->get();
+        $products = Product::with('images')->whereIn('id', $validated['product_ids'])->get();
 
         foreach ($products as $product) {
             if ($product->main_image && Storage::disk('public')->exists($product->main_image)) {
@@ -701,19 +701,29 @@ class ProductController extends Controller
                 $newProduct->boughtTogether()->sync($original->boughtTogether->pluck('id'));
 
                 // Copy Options
+                $newOptionsData = [];
                 foreach ($original->productOptions as $opt) {
-                    $newOpt = $opt->replicate();
-                    $newOpt->product_id = $newProduct->id;
-                    $newOpt->save();
+                    $newOpt = $opt->toArray();
+                    unset($newOpt['id'], $newOpt['created_at'], $newOpt['updated_at']);
+                    $newOpt['product_id'] = $newProduct->id;
+                    $newOptionsData[] = $newOpt;
+                }
+                if (!empty($newOptionsData)) {
+                    ProductOption::insert($newOptionsData);
                 }
 
                 // Copy Attributes
+                $newAttributesData = [];
                 foreach ($original->productAttributes as $attr) {
-                    $newAttr = $attr->replicate();
-                    $newAttr->product_id = $newProduct->id;
-                    $newAttr->createdBy = Auth::id();
-                    $newAttr->updatedBy = Auth::id();
-                    $newAttr->save();
+                    $newAttr = $attr->toArray();
+                    unset($newAttr['id'], $newAttr['created_at'], $newAttr['updated_at']);
+                    $newAttr['product_id'] = $newProduct->id;
+                    $newAttr['createdBy'] = Auth::id();
+                    $newAttr['updatedBy'] = Auth::id();
+                    $newAttributesData[] = $newAttr;
+                }
+                if (!empty($newAttributesData)) {
+                    ProductAttribute::insert($newAttributesData);
                 }
 
                 // Copy Images (physically copy file and set new product_image id)

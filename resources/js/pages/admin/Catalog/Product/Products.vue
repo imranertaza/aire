@@ -8,12 +8,12 @@
                 <option :value="100">100 per page</option>
             </select>
             <SearchBox @search="onSearch" class="mr-2" />
-            <router-link v-if="authStore.hasPermission('create-products')" 
-                :to="{ name: 'CreateProduct' }" class="btn btn-primary">
+            <router-link v-if="authStore.hasPermission('create-products')" :to="{ name: 'CreateProduct' }"
+                class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add Product
             </router-link>
-            <router-link v-if="authStore.isModuleEnabled('bulk_edit_products')" 
-                :to="{ name: 'AdvancedProducts' }" class="btn btn-success ml-2">
+            <router-link v-if="authStore.isModuleEnabled('bulk_edit_products')" :to="{ name: 'AdvancedProducts' }"
+                class="btn btn-success ml-2">
                 <i class="fas fa-edit"></i> Advanced Editor
             </router-link>
         </div>
@@ -47,15 +47,17 @@
                                             <input type="checkbox" :value="product.id" v-model="selectedProducts" />
                                         </td>
                                         <td class="align-middle text-center">
-                                            <img :src="product.main_image ? getImageCacheUrl(product.main_image, 60, 60, 'webp') : '/images/no-image.jpg'" 
-                                                 class="img-thumbnail" style="width: 60px; height: 60px; object-fit: cover;" 
-                                                 alt="Product Image" />
+                                            <img :src="product.main_image ? getImageCacheUrl(product.main_image, 60, 60, 'webp') : '/images/no-image.jpg'"
+                                                class="img-thumbnail"
+                                                style="width: 60px; height: 60px; object-fit: cover;"
+                                                alt="Product Image" />
                                         </td>
                                         <td class="align-middle">{{ product.name }}</td>
                                         <td class="align-middle">{{ product.model }}</td>
                                         <td class="align-middle">{{ product.price }}</td>
                                         <td class="align-middle">
-                                            <span :class="{'badge bg-danger': product.quantity <= 0, 'badge bg-success': product.quantity > 0}">
+                                            <span
+                                                :class="{ 'badge bg-danger': product.quantity <= 0, 'badge bg-success': product.quantity > 0 }">
                                                 {{ product.quantity }}
                                             </span>
                                         </td>
@@ -85,7 +87,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+
                         <div class="d-flex justify-content-between align-items-center mt-3">
                             <div class="d-flex align-items-center">
                                 <button v-if="authStore.hasPermission('create-products') && selectedProducts.length > 0"
@@ -96,14 +98,16 @@
                                     class="btn btn-sm btn-outline-danger mr-2" @click="deleteSelected">
                                     <i class="fas fa-trash-alt"></i> Delete
                                 </button>
-                                <div v-if="authStore.hasPermission('edit-products') && selectedProducts.length > 0" class="input-group input-group-sm" style="width: auto;">
+                                <div v-if="authStore.hasPermission('edit-products') && selectedProducts.length > 0"
+                                    class="input-group input-group-sm" style="width: auto;">
                                     <select v-model="bulkStatus" class="custom-select">
                                         <option value="" disabled>Update Status</option>
                                         <option :value="1">Active</option>
                                         <option :value="0">Inactive</option>
                                     </select>
                                     <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="button" @click="updateSelectedStatus">Apply</button>
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            @click="updateSelectedStatus">Apply</button>
                                     </div>
                                 </div>
                             </div>
@@ -227,7 +231,7 @@ const confirmDelete = async (product) => {
 
 const copySelected = async () => {
     if (selectedProducts.value.length === 0) return;
-    
+
     try {
         await axios.post('/api/products/copy', { product_ids: selectedProducts.value });
         toast.success('Selected products copied successfully!');
@@ -239,7 +243,7 @@ const copySelected = async () => {
 
 const deleteSelected = async () => {
     if (selectedProducts.value.length === 0) return;
-    
+
     const result = await $swal({
         title: `Delete ${selectedProducts.value.length} products?`,
         text: 'This action cannot be undone.',
@@ -265,9 +269,9 @@ const deleteSelected = async () => {
 
 const updateSelectedStatus = async () => {
     if (selectedProducts.value.length === 0 || bulkStatus.value === "") return;
-    
+
     try {
-        await axios.post('/api/products/bulk-status', { 
+        await axios.post('/api/products/bulk-status', {
             product_ids: selectedProducts.value,
             status: bulkStatus.value
         });

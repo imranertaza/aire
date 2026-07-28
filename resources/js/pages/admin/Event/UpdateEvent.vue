@@ -110,7 +110,7 @@ import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import { useToast } from '@/composables/useToast';
-import { getImageUrl } from '@/layouts/helpers/helpers';
+import { getImageCacheUrl } from '@/layouts/helpers/helpers';
 import Vue3Dropzone from '@jaxtheprime/vue3-dropzone';
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import RichTextEditor from '@/components/RichTextEditor.vue';
@@ -181,10 +181,10 @@ const fetchEvent = async () => {
 
         // Set existing image previews for Dropzone
         if (event.banner_image) {
-            previews.value = [getImageUrl(event.banner_image)];
+            previews.value = [getImageCacheUrl(event.banner_image)];
         }
         if (event.featured_image) {
-            previewsImage.value = [getImageUrl(event.featured_image)];
+            previewsImage.value = [getImageCacheUrl(event.featured_image)];
         }
     } catch (err) {
         toast.error('Failed to load event');

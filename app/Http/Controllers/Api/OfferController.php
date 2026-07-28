@@ -10,6 +10,7 @@ use App\Models\Offer;
 use App\Models\OfferDiscount;
 use App\Models\OfferOnProduct;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -45,7 +46,9 @@ class OfferController extends Controller
      */
     public function allOffers()
     {
-        $offers = Offer::select('id', 'name', 'slug')->get();
+        $offers = Cache::rememberForever('all_offers', function () {
+            return Offer::select('id', 'name', 'slug')->get();
+        });
         return ApiResponse::success($offers, 'All offers retrieved successfully');
     }
 
@@ -85,8 +88,8 @@ class OfferController extends Controller
             'alt_name'               => 'nullable|string|max:155',
             'offer_type'             => 'required|in:1,2',
             'offer_on'               => 'required|in:1,2',
-            'qty'                    => 'nullable|integer',
-            'on_amount'              => 'nullable|numeric',
+            'qty'                    => 'nullable|integer|min:0',
+            'on_amount'              => 'nullable|numeric|min:0',
             'discount_on'            => 'required|in:1,2,3',
             'start_date'             => 'required|date',
             'expire_date'            => 'required|date',
@@ -202,8 +205,8 @@ class OfferController extends Controller
             'alt_name'               => 'nullable|string|max:155',
             'offer_type'             => 'required|in:1,2',
             'offer_on'               => 'required|in:1,2',
-            'qty'                    => 'nullable|integer',
-            'on_amount'              => 'nullable|numeric',
+            'qty'                    => 'nullable|integer|min:0',
+            'on_amount'              => 'nullable|numeric|min:0',
             'discount_on'            => 'required|in:1,2,3',
             'start_date'             => 'required|date',
             'expire_date'            => 'required|date',

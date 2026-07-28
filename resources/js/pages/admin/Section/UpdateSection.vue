@@ -80,7 +80,7 @@ import { useRoute, useRouter } from "vue-router";
 
 import DashboardHeader from "@/components/DashboardHeader.vue";
 import { useToast } from "@/composables/useToast";
-import { getImageUrl } from "@/layouts/helpers/helpers";
+import { getImageCacheUrl } from "@/layouts/helpers/helpers";
 import Vue3Dropzone from "@jaxtheprime/vue3-dropzone";
 import "@jaxtheprime/vue3-dropzone/dist/style.css";
 import RichTextEditor from "@/components/RichTextEditor.vue";
@@ -132,11 +132,11 @@ const fetchSections = async () => {
 
         // Set image preview if exists
         if (form.image) {
-            previews.value = [getImageUrl(form.image)];
+            previews.value = [getImageCacheUrl(form.image)];
         } else if (form.file && isPdf(form.file)) {
             // Note: previewsPdf is referenced but not declared — likely a bug in original
             // Assuming it should use previews.value for consistency
-            previews.value = [getImageUrl(form.file)];
+            previews.value = [getImageCacheUrl(form.file)];
         }
     } catch (err) {
         toast.error("Failed to load section data");

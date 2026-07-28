@@ -67,7 +67,7 @@
                             <!-- Sort Order -->
                             <div class="mb-3">
                                 <label class="form-label">Sort Order</label>
-                                <input v-model="form.sort_order" type="number" class="form-control" />
+                                <input min="0" v-model="form.sort_order" type="number" class="form-control" />
                             </div>
 
                             <!-- Status -->

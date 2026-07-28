@@ -95,7 +95,7 @@
                                 <div class="col-md-4 border-left">
                                     <div class="form-group">
                                         <label>Sort Order</label>
-                                        <input type="number" class="form-control" v-model="formData.sort_order"
+                                        <input min="0" type="number" class="form-control" v-model="formData.sort_order"
                                             :class="{ 'is-invalid': errors.sort_order }">
                                         <div class="invalid-feedback" v-if="errors.sort_order">{{ errors.sort_order[0] }}</div>
                                     </div>

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class CouponController extends Controller
@@ -37,7 +38,9 @@ class CouponController extends Controller
      */
     public function allCoupons()
     {
-        $coupons = Coupon::select('id', 'name', 'code')->where('status', 1)->get();
+        $coupons = Cache::rememberForever('all_coupons', function () {
+            return Coupon::select('id', 'name', 'code')->where('status', 1)->get();
+        });
         return ApiResponse::success($coupons, 'All active coupons retrieved successfully');
     }
 
@@ -60,10 +63,10 @@ class CouponController extends Controller
             'code'                => 'required|string|max:255|unique:coupons,code',
             'discount_type'       => 'required|in:1,2',
             'discount_on'         => 'required|in:1,2',
-            'discount'            => 'required|numeric',
+            'discount'            => 'required|numeric|min:0',
             'for_subscribed_user' => 'nullable|in:0,1',
             'for_registered_user' => 'nullable|in:0,1',
-            'total_useable'       => 'nullable|integer',
+            'total_useable'       => 'nullable|integer|min:0',
             'date_start'          => 'required|date',
             'date_end'            => 'required|date',
             'status'              => 'required|in:0,1',
@@ -131,10 +134,10 @@ class CouponController extends Controller
             'code'                => 'required|string|max:255|unique:coupons,code,' . $coupon->id,
             'discount_type'       => 'required|in:1,2',
             'discount_on'         => 'required|in:1,2',
-            'discount'            => 'required|numeric',
+            'discount'            => 'required|numeric|min:0',
             'for_subscribed_user' => 'nullable|in:0,1',
             'for_registered_user' => 'nullable|in:0,1',
-            'total_useable'       => 'nullable|integer',
+            'total_useable'       => 'nullable|integer|min:0',
             'date_start'          => 'required|date',
             'date_end'            => 'required|date',
             'status'              => 'required|in:0,1',

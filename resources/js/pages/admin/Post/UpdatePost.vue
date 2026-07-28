@@ -144,7 +144,7 @@ import { computed, onMounted, reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import DashboardHeader from "@/components/DashboardHeader.vue";
 import { useToast } from "@/composables/useToast";
-import { getImageUrl } from "@/layouts/helpers/helpers";
+import { getImageCacheUrl } from "@/layouts/helpers/helpers";
 import Vue3Dropzone from "@jaxtheprime/vue3-dropzone";
 import "@jaxtheprime/vue3-dropzone/dist/style.css";
 import RichTextEditor from "../../../components/RichTextEditor.vue";
@@ -185,9 +185,11 @@ const fetchPost = async () => {
 
         form.categories = res.data.data.categories.map((c) => c.id);
         if (form.image) {
-            previews.value = [getImageUrl(form.image)];
+            previews.value = [getImageCacheUrl(form.image)];
         }
-        f_previews.value = [getImageUrl(form.f_image)];
+        if (form.f_image) {
+            f_previews.value = [getImageCacheUrl(form.f_image)];
+        }
     } catch (err) {
         toast.error("Failed to load post");
         console.error(err);

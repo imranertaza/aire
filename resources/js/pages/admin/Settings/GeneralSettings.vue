@@ -273,11 +273,11 @@
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">OG Image Width</label>
-                                <input v-model="form.og_image_width" type="number" class="form-control" />
+                                <input min="0" v-model="form.og_image_width" type="number" class="form-control" />
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">OG Image Height</label>
-                                <input v-model="form.og_image_height" type="number" class="form-control" />
+                                <input min="0" v-model="form.og_image_height" type="number" class="form-control" />
                             </div>
                         </div>
                     </div>
@@ -327,7 +327,7 @@
 <script setup>
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import { useToast } from '@/composables/useToast';
-import { getImageUrl } from '@/layouts/helpers/helpers';
+import { getImageCacheUrl } from '@/layouts/helpers/helpers';
 import Vue3Dropzone from '@jaxtheprime/vue3-dropzone';
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import axios from 'axios';
@@ -425,12 +425,12 @@ const fetchSettings = async () => {
             }
 
             // Generate preview URLs for existing images
-            if (key === 'store_logo' && value) logoPreview.value = [getImageUrl(value)];
-            if (key === 'footer_logo' && value) footerLogoPreview.value = [getImageUrl(value)];
-            if (key === 'store_icon' && value) faviconPreview.value = [getImageUrl(value)];
-            if (key === 'breadcrumb' && value) BreadcrumbFilePreview.value = [getImageUrl(value)];
-            if (key === 'og_image' && value) ogImagePreview.value = [getImageUrl(value)];
-            if (key === 'twitter_image' && value) twitterImagePreview.value = [getImageUrl(value)];
+            if (key === 'store_logo' && value) logoPreview.value = [getImageCacheUrl(value)];
+            if (key === 'footer_logo' && value) footerLogoPreview.value = [getImageCacheUrl(value)];
+            if (key === 'store_icon' && value) faviconPreview.value = [getImageCacheUrl(value)];
+            if (key === 'breadcrumb' && value) BreadcrumbFilePreview.value = [getImageCacheUrl(value)];
+            if (key === 'og_image' && value) ogImagePreview.value = [getImageCacheUrl(value)];
+            if (key === 'twitter_image' && value) twitterImagePreview.value = [getImageCacheUrl(value)];
         });
     } catch (e) {
         toast.validationError(e);

@@ -97,7 +97,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import DashboardHeader from '@/components/DashboardHeader.vue';
-import { getImageUrl } from '@/layouts/helpers/helpers';
+import { getImageCacheUrl } from '@/layouts/helpers/helpers';
 import Vue3Dropzone from '@jaxtheprime/vue3-dropzone';
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import { useToast } from '@/composables/useToast';
@@ -134,7 +134,7 @@ const fetchPage = async () => {
         const normalized = Object.fromEntries(Object.entries(res.data.data).map(([key, value]) => [key, value ?? ""]));
         Object.assign(form, normalized);
         if (form.f_image) {
-            previews.value = [getImageUrl(form.f_image)];
+            previews.value = [getImageCacheUrl(form.f_image)];
         }
     } catch (err) {
         console.error(err);

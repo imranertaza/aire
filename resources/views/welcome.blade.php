@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ env('APP_NAME') }}</title>
+    @if(!empty($settings['store_icon']))
     <link rel="icon" href="{{ getImageUrl($settings['store_icon']) }}" type="image/x-icon">
+    @endif
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"

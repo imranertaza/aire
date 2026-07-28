@@ -108,12 +108,12 @@
                                                 </div>
                                                 <div class="form-group" v-if="form.offer_on == 2">
                                                     <label>Minimum Amount</label>
-                                                    <input v-model="form.on_amount" type="number" step="0.01"
+                                                    <input min="0" v-model="form.on_amount" type="number" step="0.01"
                                                         class="form-control" placeholder="0.00" />
                                                 </div>
                                                 <div class="form-group" v-if="form.offer_on == 1">
                                                     <label>Minimum Quantity</label>
-                                                    <input v-model="form.qty" type="number" class="form-control"
+                                                    <input min="0" v-model="form.qty" type="number" class="form-control"
                                                         placeholder="e.g. 1" />
                                                 </div>
 
@@ -176,7 +176,7 @@
                                                     <label>Discount Amount / Percentage <span
                                                             class="text-danger">*</span></label>
                                                     <div class="input-group">
-                                                        <input v-model="form.discount_amount" type="number" step="0.01"
+                                                        <input min="0" v-model="form.discount_amount" type="number" step="0.01"
                                                             class="form-control" placeholder="0.00" :required="form.key === 'general_offer'" />
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">
@@ -213,7 +213,7 @@
                                                                 <td class="font-weight-bold">{{ zone.geo_zone_name }}</td>
                                                                 <td>
                                                                     <div class="input-group input-group-sm">
-                                                                        <input v-model="zoneDiscounts[zone.id].discount_amount" 
+                                                                        <input min="0" v-model="zoneDiscounts[zone.id].discount_amount" 
                                                                                type="number" step="0.01" class="form-control" placeholder="0.00" />
                                                                     </div>
                                                                 </td>
