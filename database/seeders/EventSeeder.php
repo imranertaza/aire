@@ -6,6 +6,7 @@ use App\Models\Event;
 use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class EventSeeder extends Seeder
@@ -15,7 +16,9 @@ class EventSeeder extends Seeder
      */
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
         Event::truncate();
+        Schema::enableForeignKeyConstraints();
         $now = Carbon::now();
 
         for ($i = 1; $i <= 10; $i++) {

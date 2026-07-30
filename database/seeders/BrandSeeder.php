@@ -15,7 +15,7 @@ class BrandSeeder extends Seeder
         $brands = [
             [
                 'name'       => 'Apple',
-                'image'      => 'brands/apple.png',
+                'image'      => 'https://placehold.co/300x150?text=Apple',
                 'alt_name'   => 'Apple Inc',
                 'status'     => 1,
                 'sort_order' => 1,
@@ -23,7 +23,7 @@ class BrandSeeder extends Seeder
             ],
             [
                 'name'       => 'Samsung',
-                'image'      => 'brands/samsung.png',
+                'image'      => 'https://placehold.co/300x150?text=Samsung',
                 'alt_name'   => 'Samsung Electronics',
                 'status'     => 1,
                 'sort_order' => 2,
@@ -31,7 +31,7 @@ class BrandSeeder extends Seeder
             ],
             [
                 'name'       => 'Xiaomi',
-                'image'      => 'brands/xiaomi.png',
+                'image'      => 'https://placehold.co/300x150?text=Xiaomi',
                 'alt_name'   => 'Mi',
                 'status'     => 1,
                 'sort_order' => 3,
@@ -39,7 +39,7 @@ class BrandSeeder extends Seeder
             ],
             [
                 'name'       => 'Huawei',
-                'image'      => 'brands/huawei.png',
+                'image'      => 'https://placehold.co/300x150?text=Huawei',
                 'alt_name'   => null,
                 'status'     => 0,
                 'sort_order' => 4,

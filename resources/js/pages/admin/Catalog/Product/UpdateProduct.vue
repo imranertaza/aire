@@ -453,7 +453,6 @@ const form = ref({
     model: '',
     product_code: '',
     brand_id: '',
-    product_category_id: '',
     price: '',
     quantity: '',
     weight: 0,
@@ -529,7 +528,6 @@ onMounted(async () => {
             model: p.model,
             product_code: p.product_code || '',
             brand_id: p.brand_id || '',
-            product_category_id: p.product_category_id || '',
             price: p.price,
             quantity: p.quantity,
             weight: p.weight || 0,
@@ -706,10 +704,6 @@ const submitForm = async () => {
             }
         }
     });
-
-    if (form.value.category_ids.length > 0) {
-        formData.append('product_category_id', form.value.category_ids[0]);
-    }
 
     if (mainImageFile.value && mainImageFile.value[0]) {
         formData.append('main_image', mainImageFile.value[0].file);
