@@ -16,9 +16,4 @@ class ModuleSetting extends Model
     {
         return $this->belongsTo(Module::class, 'module_id');
     }
-
-    public function settings()
-    {
-        return $this->hasMany(ModuleSetting::class, 'module_id');
-    }
 }

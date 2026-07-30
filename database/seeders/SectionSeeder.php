@@ -18,7 +18,7 @@ class SectionSeeder extends Seeder
             [
                 'data' => [
                     'title' => 'Vision',
-                    'image' => 'web/about/vission.png',
+                    'image' => 'https://placehold.co/700x450?text=Vision',
                     'content' => '<p class="content-text text-dark-emphasis">
             Through its programs and events, the NPCB’s vision is to foster a truly inclusive Bangladesh,
             where Para athletes have equal opportunities to participate in sports at all levels and are
@@ -32,7 +32,7 @@ class SectionSeeder extends Seeder
             [
                 'data' => [
                     'title' => 'Our mission and vision',
-                    'image' => 'web/about/mission-visson.png',
+                    'image' => 'https://placehold.co/1000x400?text=Mission+Vision',
                     'content' => '<p class="content-text text-white opacity-75">
                         The mission & vision of the National Paralympic Committee of Bangladesh (NPCB) is aligned with
                         International Paralympic Committee\'s mission & vision. NPCB promotes the Paralympic movement
@@ -51,7 +51,7 @@ class SectionSeeder extends Seeder
             [
                 'data' => [
                     'title' => 'Mission',
-                    'image' => 'web/about/mission.png',
+                    'image' => 'https://placehold.co/700x500?text=Mission',
                     'content' => '<ul class=" ps-3 ">
                         <li class="text-dark-emphasis content-text mb-4">Supporting members and providing platforms
                             for Para athletes to achieve their best in
@@ -74,7 +74,7 @@ class SectionSeeder extends Seeder
             [
                 'data' => [
                     'title' => 'History',
-                    'image' => 'web/history/description.png',
+                    'image' => 'https://placehold.co/800x450?text=History',
                     'content' => ' <p class="content-text text-white opacity-75">The history of the National Paralympic Committee of Bangladesh (NPCB) was formed in 1981. Bangladesh\'s debut at the Summer Paralympics was in 2004, where it sent one athlete to compete in athletics. The NPCB was formally established in 2004 and became the official national organization for para-sports, affiliated with the International Paralympic Committee (IPC). The country has since participated in every Summer Paralympics, though it has yet to win a medal.</p>
                     <ul class=" ps-3 text-white opacity-75 content-tex">
                         <li class=" t mb-4"><strong>2004: </strong>Bangladesh makes its first appearance at the 2004 Athens Summer Paralympics, sending a single athlete to compete in the men\'s 400m T46 event.</li>

@@ -5,19 +5,22 @@ namespace Database\Seeders;
 use App\Models\PaymentMethod;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class PaymentMethodSeeder extends Seeder
 {
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
         DB::table('payment_methods')->truncate();
+        Schema::enableForeignKeyConstraints();
 
         $methods = [
             [
                 'id' => 1,
                 'name' => 'Cash On Delivery',
                 'code' => 'cash_on',
-                'image' => 'cash_1759055968_1465e094942ee20fb670.png',
+                'image' => 'https://placehold.co/200x100?text=Cash+On+Delivery',
                 'status' => 0,
                 'settings' => []
             ],
@@ -25,7 +28,7 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 2,
                 'name' => 'Bank Transfer',
                 'code' => 'bank_transfer',
-                'image' => 'bank_1692269261_e30f1169975c89545ff2.png',
+                'image' => 'https://placehold.co/200x100?text=Bank+Transfer',
                 'status' => 1,
                 'settings' => [
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazingadgets@gmail.com'
@@ -35,7 +38,7 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 3,
                 'name' => 'Paypal',
                 'code' => 'paypal',
-                'image' => 'paypal_1692681576_8816a976c4c15e75aeb4.png',
+                'image' => 'https://placehold.co/200x100?text=Paypal',
                 'status' => 1,
                 'settings' => [
                     'api_url' => 'sandbox',
@@ -48,7 +51,7 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 4,
                 'name' => 'Western Union',
                 'code' => 'western_union',
-                'image' => 'western_union_1693227784_6fff290ee998d1951995.png',
+                'image' => 'https://placehold.co/200x100?text=Western+Union',
                 'status' => 1,
                 'settings' => [
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazinggadgets@gmail.com'
@@ -58,7 +61,7 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 5,
                 'name' => 'MoneyGram',
                 'code' => 'moneyGram',
-                'image' => 'moneyGram_1693228242_b037b4cb9fcab1d64b21.png',
+                'image' => 'https://placehold.co/200x100?text=MoneyGram',
                 'status' => 1,
                 'settings' => [
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazinggadgets@gmail.com'

@@ -34,7 +34,7 @@ class OfferSeeder extends Seeder
                 'name'         => 'Buy One Get 20 % off',
                 'key'          => 'general_offer',
                 'description'  => 'Buy One Get 20 % off',
-                'banner'       => 'pro_1757156031_01be31c7a3bbdead6cd0.jpg',
+                'banner'       => 'https://placehold.co/1200x400?text=Buy+1+Get+20+Off',
                 'alt_name'     => 'Buy One Get 20 % off',
                 'slug'         => 'buy-one-get-20--off',
                 'offer_type'   => 1,     // distinct
@@ -52,7 +52,7 @@ class OfferSeeder extends Seeder
                 'name'         => 'Offer all products',
                 'key'          => 'zone_based_offer',
                 'description'  => 'Offer all products',
-                'banner'       => 'pro_1757158462_4ad75d816bba54c4ea23.jpg',
+                'banner'       => 'https://placehold.co/1200x400?text=Offer+All+Products',
                 'alt_name'     => 'Offer all products',
                 'slug'         => 'offer-all-products',
                 'offer_type'   => 1,     // distinct

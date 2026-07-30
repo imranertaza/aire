@@ -29,7 +29,7 @@ class ProductController extends Controller
         $query = Product::select('id', 'name', 'model');
         if ($search) {
             $query->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('model', 'LIKE', "%{$search}%");
+                ->orWhere('model', 'LIKE', "%{$search}%");
         }
         $products = $query->limit(50)->get();
         return ApiResponse::success($products, 'Products list retrieved successfully');
@@ -40,7 +40,7 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'brand'])->latest('id');
+        $query = Product::with(['brand'])->latest('id');
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -70,7 +70,6 @@ class ProductController extends Controller
             'model'               => 'required|string|max:255',
             'product_code'        => 'nullable|string|max:255',
             'brand_id'            => 'nullable|integer|exists:brands,id',
-            'product_category_id' => 'nullable|integer|exists:product_categories,id',
             'price'               => 'required|numeric|min:0',
             'quantity'            => 'required|integer|min:0',
             'featured'            => 'nullable|in:0,1,true,false',
@@ -101,7 +100,7 @@ class ProductController extends Controller
             'special_price'       => 'nullable|numeric|min:0',
             'special_start_date'  => 'nullable|date',
             'special_end_date'    => 'nullable|date',
-            'product_free_delivery'=> 'nullable|in:0,1,true,false',
+            'product_free_delivery' => 'nullable|in:0,1,true,false',
             'documentation_pdf'   => 'nullable|file|mimes:pdf|max:5120',
             'safety_pdf'          => 'nullable|file|mimes:pdf|max:5120',
             'instructions_pdf'    => 'nullable|file|mimes:pdf|max:5120',
@@ -127,7 +126,6 @@ class ProductController extends Controller
                 'model'               => $validated['model'],
                 'product_code'        => $validated['product_code'] ?? null,
                 'brand_id'            => $validated['brand_id'] ?? null,
-                'product_category_id' => $validated['product_category_id'] ?? null,
                 'price'               => $validated['price'],
                 'quantity'            => $validated['quantity'],
                 'featured'            => filter_var($validated['featured'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
@@ -279,10 +277,9 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with([
-            'productOptions', 
-            'productAttributes', 
-            'images', 
-            'category', 
+            'productOptions',
+            'productAttributes',
+            'images',
             'brand',
             'description',
             'freeDelivery',
@@ -312,7 +309,6 @@ class ProductController extends Controller
             'model'               => 'required|string|max:255',
             'product_code'        => 'nullable|string|max:255',
             'brand_id'            => 'nullable|integer|exists:brands,id',
-            'product_category_id' => 'nullable|integer|exists:product_categories,id',
             'price'               => 'required|numeric|min:0',
             'quantity'            => 'required|integer|min:0',
             'featured'            => 'nullable|in:0,1,true,false',
@@ -344,7 +340,7 @@ class ProductController extends Controller
             'special_price'       => 'nullable|numeric|min:0',
             'special_start_date'  => 'nullable|date',
             'special_end_date'    => 'nullable|date',
-            'product_free_delivery'=> 'nullable|in:0,1,true,false',
+            'product_free_delivery' => 'nullable|in:0,1,true,false',
             'documentation_pdf'   => 'nullable|file|mimes:pdf|max:5120',
             'safety_pdf'          => 'nullable|file|mimes:pdf|max:5120',
             'instructions_pdf'    => 'nullable|file|mimes:pdf|max:5120',
@@ -362,7 +358,6 @@ class ProductController extends Controller
                 'model'               => $validated['model'],
                 'product_code'        => $validated['product_code'] ?? null,
                 'brand_id'            => $validated['brand_id'] ?? null,
-                'product_category_id' => $validated['product_category_id'] ?? null,
                 'price'               => $validated['price'],
                 'quantity'            => $validated['quantity'],
                 'featured'            => filter_var($validated['featured'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,

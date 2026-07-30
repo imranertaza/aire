@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('alt_name', 255)->nullable();
 
             $table->foreignId('brand_id')->nullable()->constrained('brands')->onDelete('cascade');
-            $table->foreignId('product_category_id')->nullable()->constrained('product_categories')->onDelete('cascade');
 
             $table->decimal('price', 10, 2);
             $table->integer('quantity');
@@ -49,7 +48,6 @@ return new class extends Migration
             // Indexes
             $table->index('store_id');
             $table->index('brand_id');
-            $table->index('product_category_id');
             $table->index('status');
             $table->index('featured');
             $table->index('price');

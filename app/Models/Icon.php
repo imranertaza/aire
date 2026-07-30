@@ -4,4 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Icon extends Model {}
+class Icon extends Model
+{
+    protected $guarded = [];
+}

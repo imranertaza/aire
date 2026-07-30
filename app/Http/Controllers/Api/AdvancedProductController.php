@@ -20,7 +20,7 @@ class AdvancedProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'brand', 'categories', 'productOptions', 'productAttributes', 'description'])->latest('id');
+        $query = Product::with(['brand', 'categories', 'productOptions', 'productAttributes', 'description'])->latest('id');
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -126,11 +126,6 @@ class AdvancedProductController extends Controller
             foreach ($request->product_ids as $pid) {
                 $product = Product::findOrFail($pid);
                 $product->categories()->sync($categoryIds);
-
-                // Also update the primary product_category_id to the first selected category
-                if (!empty($categoryIds)) {
-                    $product->update(['product_category_id' => $categoryIds[0]]);
-                }
             }
 
             DB::commit();

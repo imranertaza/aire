@@ -51,7 +51,7 @@ class NoticeSeeder extends Seeder
             [
                 'title' => 'System Downtime Alert',
                 'description' => 'Scheduled system maintenance on Saturday from 1 AM to 5 AM.',
-                'file' => 'downtime_alert.png',
+                'file' => 'https://placehold.co/600x400?text=Downtime+Alert',
                 'createdBy' => 1,
                 'updatedBy' => 1,
                 'type' => 0,
