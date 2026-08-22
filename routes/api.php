@@ -65,7 +65,7 @@ Route::middleware(['auth:user'])->controller(AdminRoleController::class)->group(
 Route::middleware(['auth:user'])->group(function () {
     Route::get('modules', [\App\Http\Controllers\Api\ModuleController::class, 'index']);
     Route::post('modules/{module}/toggle', [\App\Http\Controllers\Api\ModuleController::class, 'toggle']);
-    
+
     // Newsletters
     Route::apiResource('newsletters', \App\Http\Controllers\Api\NewsletterController::class);
     Route::post('newsletters/{newsletter}/toggle', [\App\Http\Controllers\Api\NewsletterController::class, 'toggleStatus']);
@@ -73,7 +73,7 @@ Route::middleware(['auth:user'])->group(function () {
     // Email Send
     Route::get('email-send/recipients', [\App\Http\Controllers\Api\EmailSendController::class, 'getRecipients']);
     Route::post('email-send', [EmailSendController::class, 'send']);
-    
+
     // Email Campaigns
     Route::get('email-campaigns', [EmailCampaignController::class, 'index']);
 
@@ -112,7 +112,7 @@ Route::prefix('sections')->middleware(['auth:user', 'permission:manage-frontend'
 });
 
 Route::prefix('sliders')->middleware(['auth:user', 'permission:manage-frontend'])->controller(SliderController::class)->group(function () {
-    Route::get('/{key}', 'bannerSliders');
+    Route::get('/{key?}', 'bannerSliders');
     Route::get('/{id}/show', 'show');
     Route::post('/', 'store');
     Route::post('/{id}', 'update');

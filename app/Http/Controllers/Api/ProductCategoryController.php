@@ -40,7 +40,7 @@ class ProductCategoryController extends Controller
     public function allCategories()
     {
         $categories = Cache::rememberForever('all_categories', function () {
-            return ProductCategory::select('id', 'category_name', 'parent_id')->get();
+            return ProductCategory::select('id', 'category_name', 'parent_id', 'bg_color')->get();
         });
         return ApiResponse::success($categories, 'All categories retrieved successfully');
     }
@@ -50,8 +50,109 @@ class ProductCategoryController extends Controller
      */
     public function show($id)
     {
-        $category = ProductCategory::with('parent')->findOrFail($id);
-        return ApiResponse::success($category, 'Category retrieved successfully');
+        $category = ProductCategory::with(['parent', 'categoryFeaturedProducts.product'])->findOrFail($id);
+        $data = $category->toArray();
+        $data['featured_top_product_ids'] = $category->categoryFeaturedProducts
+            ->where('position', 'top')
+            ->pluck('product_id')
+            ->values()
+            ->toArray();
+        $data['featured_middle_product_ids'] = $category->categoryFeaturedProducts
+            ->where('position', 'middle')
+            ->pluck('product_id')
+            ->values()
+            ->toArray();
+        $data['featured_bottom_product_ids'] = $category->categoryFeaturedProducts
+            ->where('position', 'bottom')
+            ->pluck('product_id')
+            ->values()
+            ->toArray();
+
+        $data['featured_top_product_id'] = $data['featured_top_product_ids'][0] ?? null;
+        $data['featured_middle_product_id'] = $data['featured_middle_product_ids'][0] ?? null;
+        $data['featured_bottom_product_id'] = $data['featured_bottom_product_ids'][0] ?? null;
+
+        return ApiResponse::success($data, 'Category retrieved successfully');
+    }
+
+    /**
+     * Sync category featured top, middle & bottom products.
+     */
+    protected function syncFeaturedProducts(ProductCategory $category, Request $request)
+    {
+        try {
+            \Illuminate\Support\Facades\DB::statement("ALTER TABLE category_featured_products MODIFY COLUMN position VARCHAR(20) NOT NULL DEFAULT 'top'");
+        } catch (\Throwable $e) {
+            // Ignore if already modified or locked
+        }
+
+        \App\Models\CategoryFeaturedProduct::where('category_id', $category->id)->delete();
+
+        // Top product
+        $topId = $request->input('featured_top_product_id');
+        $topIds = [];
+        if (!is_null($topId) && $topId !== '' && $topId !== 'null') {
+            $topIds = [$topId];
+        } else {
+            $rawTop = $request->input('featured_top_product_ids');
+            if (is_string($rawTop)) $rawTop = json_decode($rawTop, true);
+            if (is_array($rawTop)) $topIds = $rawTop;
+        }
+
+        foreach ($topIds as $index => $pid) {
+            if (!empty($pid)) {
+                \App\Models\CategoryFeaturedProduct::create([
+                    'category_id' => $category->id,
+                    'product_id'  => (int) $pid,
+                    'position'    => 'top',
+                    'sort_order'  => $index,
+                ]);
+            }
+        }
+
+        // Middle product
+        $midId = $request->input('featured_middle_product_id');
+        $midIds = [];
+        if (!is_null($midId) && $midId !== '' && $midId !== 'null') {
+            $midIds = [$midId];
+        } else {
+            $rawMid = $request->input('featured_middle_product_ids');
+            if (is_string($rawMid)) $rawMid = json_decode($rawMid, true);
+            if (is_array($rawMid)) $midIds = $rawMid;
+        }
+
+        foreach ($midIds as $index => $pid) {
+            if (!empty($pid)) {
+                \App\Models\CategoryFeaturedProduct::create([
+                    'category_id' => $category->id,
+                    'product_id'  => (int) $pid,
+                    'position'    => 'middle',
+                    'sort_order'  => $index,
+                ]);
+            }
+        }
+
+        // Bottom product
+        $botId = $request->input('featured_bottom_product_id');
+        $bottomIds = [];
+        if (!is_null($botId) && $botId !== '' && $botId !== 'null') {
+            $bottomIds = [$botId];
+        } else {
+            $rawBot = $request->input('featured_bottom_product_ids');
+            if (is_string($rawBot)) $rawBot = json_decode($rawBot, true);
+            if (is_array($rawBot)) $bottomIds = $rawBot;
+        }
+
+        foreach ($bottomIds as $index => $pid) {
+            if (!empty($pid)) {
+                \App\Models\CategoryFeaturedProduct::create([
+                    'category_id' => $category->id,
+                    'product_id'  => (int) $pid,
+                    'position'    => 'bottom',
+                    'sort_order'  => $index,
+                ]);
+            }
+        }
     }
 
 
@@ -71,14 +172,25 @@ class ProductCategoryController extends Controller
             'icon_id'          => 'nullable|integer|exists:icons,id',
             'image'            => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'alt_name'         => 'nullable|string|max:255',
+            'bg_color'         => 'nullable|string|max:50',
             'header_menu'      => 'nullable|in:0,1,true,false',
             'side_menu'        => 'nullable|in:0,1,true,false',
             'sort_order'       => 'nullable|integer|min:0',
             'status'           => 'required|in:0,1,true,false',
             'parent_id'        => 'nullable|exists:product_categories,id',
+            'features'         => 'nullable',
         ]);
 
+        if ($request->has('features')) {
+            $features = $request->input('features');
+            if (is_string($features)) {
+                $features = json_decode($features, true);
+            }
+            $validated['features'] = is_array($features) ? array_values($features) : null;
+        }
+
         $validated['alt_name'] = $request->input('alt_name') ?: $request->input('category_name');
+        $validated['bg_color'] = $request->input('bg_color') ?: '#00c853';
         $validated['createdBy'] = Auth::id();
         $validated['updatedBy'] = Auth::id();
 
@@ -106,6 +218,8 @@ class ProductCategoryController extends Controller
             $category->update(['image' => $path]);
         }
 
+        $this->syncFeaturedProducts($category, $request);
+
         return ApiResponse::success($category, 'Category created successfully');
     }
 
@@ -126,12 +240,22 @@ class ProductCategoryController extends Controller
             'icon_id'          => 'nullable|integer|exists:icons,id',
             'image'            => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'alt_name'         => 'nullable|string|max:255',
+            'bg_color'         => 'nullable|string|max:50',
             'header_menu'      => 'nullable|in:0,1,true,false',
             'side_menu'        => 'nullable|in:0,1,true,false',
             'sort_order'       => 'nullable|integer|min:0',
             'status'           => 'required|in:0,1,true,false',
             'parent_id'        => 'nullable|exists:product_categories,id',
+            'features'         => 'nullable',
         ]);
+
+        if ($request->has('features')) {
+            $features = $request->input('features');
+            if (is_string($features)) {
+                $features = json_decode($features, true);
+            }
+            $validated['features'] = is_array($features) ? array_values($features) : null;
+        }
 
         if ($request->remove_image == 1) {
             if ($category->image && Storage::disk('public')->exists($category->image)) {
@@ -141,6 +265,9 @@ class ProductCategoryController extends Controller
         }
 
         $validated['alt_name'] = $request->input('alt_name') ?: $request->input('category_name');
+        if ($request->has('bg_color')) {
+            $validated['bg_color'] = $request->input('bg_color') ?: '#00c853';
+        }
         $validated['updatedBy'] = Auth::id();
 
         // Convert booleans
@@ -169,6 +296,8 @@ class ProductCategoryController extends Controller
         }
 
         $category->update($validated);
+
+        $this->syncFeaturedProducts($category, $request);
 
         return ApiResponse::success($category, 'Category updated successfully');
     }

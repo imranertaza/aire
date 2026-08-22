@@ -5,8 +5,10 @@ namespace Database\Seeders;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\ProductDescription;
 use App\Models\Store;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
@@ -17,101 +19,119 @@ class ProductSeeder extends Seeder
     {
         $defaultStore = Store::first();
         $defaultBrand = Brand::first();
+        $storeId = $defaultStore?->id ?? 1;
+        $brandId = $defaultBrand?->id ?? 1;
 
-        $electronics  = ProductCategory::where('alt_name', 'electronics')->first();
-        $fashion      = ProductCategory::where('alt_name', 'fashion')->first();
-        $smartphones  = ProductCategory::where('alt_name', 'smartphones')->first();
-        $laptops      = ProductCategory::where('alt_name', 'laptops')->first();
-        $mensClothing = ProductCategory::where('alt_name', 'mens-clothing')->first();
+        $solutionsCat = ProductCategory::where('slug', 'solutions')->first();
+        $productsCat  = ProductCategory::where('slug', 'products')->first();
 
-        // 1. Samsung Galaxy S23 Ultra
-        $s23 = Product::create([
-            'store_id'         => $defaultStore?->id ?? 1,
-            'name'             => 'Samsung Galaxy S23 Ultra',
-            'model'            => 'SM-S918B',
-            'product_code'     => 'SAMS23U001',
-            'main_image'       => 'https://placehold.co/800x800?text=Samsung+S23+Ultra',
-            'image'            => 'https://placehold.co/800x800?text=S23+Detail+1,https://placehold.co/800x800?text=S23+Detail+2',
-            'alt_name'         => 'samsung-galaxy-s23-ultra',
-            'brand_id'         => $defaultBrand?->id ?? 1,
-            'price'            => 1199.99,
-            'quantity'         => 50,
-            'featured'         => 1,
-            'average_feedback' => 4,
-            'date_available'   => now()->addDays(5),
-            'weight'           => 0.2340,
-            'length'           => 16.30,
-            'width'            => 7.80,
-            'height'           => 0.87,
-            'sort_order'       => 1,
-            'status'           => 1,
-            'createdBy'        => 1,
-            'updatedBy'        => 1,
-        ]);
+        $flagships = [
+            [
+                'name'         => 'AIRE AirPro Mask FB2',
+                'model'        => 'AP-FB2-PRO',
+                'product_code' => 'AIRE-FB2-001',
+                'main_image'   => 'themes/default/assets/img/airpro_mask_fb2.png',
+                'image'        => 'themes/default/assets/img/airpro_mask_fb2.png,themes/default/assets/img/products/AIRE Airpro Mask FB2 Technical Visualization.png',
+                'price'        => 349.00,
+                'quantity'     => 150,
+                'featured'     => 1,
+                'weight'       => 0.32,
+                'description'  => 'The AIRE AirPro Mask FB2 is a groundbreaking active-pressure particulate respirator designed for high-risk clinical environments, precision laboratories, and daily urban resilience.',
+            ],
+            [
+                'name'         => 'AIRE Pro S1 Enterprise Purifier',
+                'model'        => 'AP-S1-MAX',
+                'product_code' => 'AIRE-S1-002',
+                'main_image'   => 'themes/default/assets/img/aire_pro_s1.png',
+                'image'        => 'themes/default/assets/img/aire_pro_s1.png,themes/default/assets/img/AIRE-Pro-S1-Hero.png',
+                'price'        => 1299.00,
+                'quantity'     => 80,
+                'featured'     => 1,
+                'weight'       => 8.50,
+                'description'  => 'Engineered for open corporate offices, healthcare wards, and luxury residential suites. Delivers clinical CADR airflow of 650 m³/h with true H13 HEPA & activated carbon filtration.',
+            ],
+            [
+                'name'         => 'AIRE Pure Studio Mini',
+                'model'        => 'AP-MINI-01',
+                'product_code' => 'AIRE-MINI-003',
+                'main_image'   => 'themes/default/assets/img/aire_mini.png',
+                'image'        => 'themes/default/assets/img/aire_mini.png,themes/default/assets/img/photograph.png',
+                'price'        => 299.00,
+                'quantity'     => 120,
+                'featured'     => 1,
+                'weight'       => 2.10,
+                'description'  => 'Ultra-compact personal air cleaner with whisper-quiet 18.5dB sleep mode, laser particulate sensing, and 360-degree cylindrical air intake.',
+            ],
+            [
+                'name'         => 'AIRE Cleanroom Scrubber 9000',
+                'model'        => 'AIRE-IND-9000',
+                'product_code' => 'AIRE-SCRUB-004',
+                'main_image'   => 'themes/default/assets/img/Air-Purify.png',
+                'image'        => 'themes/default/assets/img/Air-Purify.png,themes/default/assets/img/products/technology.png',
+                'price'        => 3499.00,
+                'quantity'     => 45,
+                'featured'     => 1,
+                'weight'       => 28.00,
+                'description'  => 'High-volume industrial particulate scrubber with continuous positive pressure dynamics and dual-stage H14 ultra-HEPA matrix for cleanroom environments.',
+            ],
+            [
+                'name'         => 'AIRE OptiSense PM2.5 & IAQ Monitor',
+                'model'        => 'AIRE-IAQ-500',
+                'product_code' => 'AIRE-IAQ-005',
+                'main_image'   => 'themes/default/assets/img/HEPA-H13-Macro.png',
+                'image'        => 'themes/default/assets/img/HEPA-H13-Macro.png,themes/default/assets/img/Filter.png',
+                'price'        => 199.00,
+                'quantity'     => 200,
+                'featured'     => 1,
+                'weight'       => 0.45,
+                'description'  => 'Continuous laser spectrometry air quality monitor with OLED diagnostics displaying PM2.5, PM10, TVOC, CO2, temperature, and humidity.',
+            ],
+        ];
 
-        $s23Categories = array_filter([$smartphones?->id, $electronics?->id]);
-        if (!empty($s23Categories)) {
-            $s23->categories()->sync($s23Categories);
-        }
+        foreach ($flagships as $idx => $f) {
+            $slug = Str::slug($f['name']);
+            $product = Product::updateOrCreate(
+                ['product_code' => $f['product_code']],
+                [
+                    'store_id'         => $storeId,
+                    'name'             => $f['name'],
+                    'slug'             => $slug,
+                    'model'            => $f['model'],
+                    'main_image'       => $f['main_image'],
+                    'image'            => $f['image'],
+                    'alt_name'         => $f['name'],
+                    'brand_id'         => $brandId,
+                    'price'            => $f['price'],
+                    'quantity'         => $f['quantity'],
+                    'featured'         => $f['featured'],
+                    'average_feedback' => 5,
+                    'date_available'   => now(),
+                    'weight'           => $f['weight'],
+                    'length'           => 30.00,
+                    'width'            => 25.00,
+                    'height'           => 20.00,
+                    'sort_order'       => $idx + 1,
+                    'status'           => 1,
+                    'createdBy'        => 1,
+                    'updatedBy'        => 1,
+                ]
+            );
 
-        // 2. Nike Air Max 270
-        $nike = Product::create([
-            'store_id'         => $defaultStore?->id ?? 1,
-            'name'             => 'Nike Air Max 270',
-            'model'            => 'AH6789-001',
-            'product_code'     => 'NIKE270001',
-            'main_image'       => 'https://placehold.co/800x800?text=Nike+Air+Max+270',
-            'image'            => 'https://placehold.co/800x800?text=Nike+Detail+1',
-            'alt_name'         => 'nike-air-max-270',
-            'brand_id'         => $defaultBrand?->id ?? 1,
-            'price'            => 149.99,
-            'quantity'         => 120,
-            'featured'         => 1,
-            'average_feedback' => 5,
-            'date_available'   => now(),
-            'weight'           => 0.4500,
-            'length'           => 28.00,
-            'width'            => 12.00,
-            'height'           => 10.00,
-            'sort_order'       => 2,
-            'status'           => 1,
-            'createdBy'        => 1,
-            'updatedBy'        => 1,
-        ]);
+            ProductDescription::updateOrCreate(
+                ['product_id' => $product->id],
+                [
+                    'description'      => $f['description'],
+                    'tag'              => 'flagship',
+                    'meta_title'       => $f['name'] . ' | AIRE Advanced Clean Air Systems',
+                    'meta_description' => $f['description'],
+                    'meta_keyword'     => 'aire, clean air, air purifier, hepa, indoor air quality',
+                ]
+            );
 
-        $nikeCategories = array_filter([$mensClothing?->id, $fashion?->id]);
-        if (!empty($nikeCategories)) {
-            $nike->categories()->sync($nikeCategories);
-        }
-
-        // 3. Dell XPS 13 Laptop
-        $dell = Product::create([
-            'store_id'         => $defaultStore?->id ?? 1,
-            'name'             => 'Dell XPS 13 Laptop',
-            'model'            => 'XPS-13-9315',
-            'product_code'     => 'DELLXPS001',
-            'main_image'       => 'https://placehold.co/800x800?text=Dell+XPS+13',
-            'image'            => 'https://placehold.co/800x800?text=Dell+Detail+1',
-            'alt_name'         => 'dell-xps-13',
-            'brand_id'         => $defaultBrand?->id ?? 1,
-            'price'            => 999.99,
-            'quantity'         => 25,
-            'featured'         => 0,
-            'average_feedback' => 4,
-            'date_available'   => now()->subDays(10),
-            'weight'           => 1.2000,
-            'length'           => 29.60,
-            'width'            => 19.90,
-            'height'           => 1.50,
-            'sort_order'       => 3,
-            'status'           => 1,
-            'createdBy'        => 1,
-            'updatedBy'        => 1,
-        ]);
-
-        $dellCategories = array_filter([$laptops?->id, $electronics?->id]);
-        if (!empty($dellCategories)) {
-            $dell->categories()->sync($dellCategories);
+            $catSync = array_filter([$solutionsCat?->id, $productsCat?->id]);
+            if (!empty($catSync)) {
+                $product->categories()->syncWithoutDetaching($catSync);
+            }
         }
     }
 }

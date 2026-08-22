@@ -33,7 +33,8 @@
                                     <tr v-for="(method, index) in methods?.data" :key="method.id">
                                         <td class="align-middle">{{ index + 1 }}</td>
                                         <td class="align-middle text-center">
-                                            <img v-if="method.image" :src="`/images/payment/${method.image}`" alt="Payment logo" style="max-height: 40px; max-width: 80px; object-fit: contain;">
+                                            <img v-if="method.image" :src="getImageUrl(method.image)" alt="Payment logo"
+                                                style="max-height: 40px; max-width: 80px; object-fit: contain;">
                                             <span v-else class="text-muted">N/A</span>
                                         </td>
                                         <td class="align-middle">{{ method.name }}</td>
@@ -41,11 +42,9 @@
                                             <span class="badge badge-secondary">{{ method.code }}</span>
                                         </td>
                                         <td class="align-middle">
-                                            <BootstrapSwitch 
-                                                :modelValue="method.status === 1"
+                                            <BootstrapSwitch :modelValue="method.status === 1"
                                                 @update:modelValue="val => toggleStatus(method.id)"
-                                                :disabled="!authStore.hasPermission('edit-payment-methods')"
-                                            />
+                                                :disabled="!authStore.hasPermission('edit-payment-methods')" />
                                         </td>
                                         <td class="align-middle">
                                             <router-link v-if="authStore.hasPermission('view-payment-methods')"
@@ -78,6 +77,7 @@ import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/store/auth';
 import SearchBox from '@/components/SearchBox.vue';
 import BootstrapSwitch from '@/components/BootstrapSwitch.vue';
+import { getImageUrl } from '@/layouts/helpers/helpers';
 
 const methods = ref([]);
 const authStore = useAuthStore();

@@ -1,14 +1,28 @@
 <template>
-  <DashboardHeader title="Manage Sliders">
-    <div class="d-flex justify-content-end">
+  <DashboardHeader title="Manage Sliders & Ads">
+    <div class="d-flex align-items-center justify-content-end">
+      <div class="mr-2">
+        <select v-model="selectedKey" @change="onFilterChange" class="custom-select" style="min-width: 220px;">
+          <option value="all">All Placements / Sections</option>
+          <option value="category_sidebar">Category Sidebar Ads</option>
+          <option value="banner_section">Homepage Main Banners</option>
+          <option value="featured_ad">Featured Ads</option>
+        </select>
+      </div>
+
       <SearchBox @search="onSearch" />
+
+      <router-link v-if="authStore.hasPermission('manage-frontend')" :to="{ name: 'CreateSlider' }"
+        class="btn btn-primary ml-2 d-flex align-items-center">
+        <i class="fas fa-plus mr-1"></i> Create Slider / Ad
+      </router-link>
     </div>
   </DashboardHeader>
 
-  <section>
+  <section class="">
     <div class="row">
       <div class="col-md-12">
-        <div v-if="notices?.data?.length === 0" class="alert alert-info">No notices found.</div>
+        <div v-if="notices?.data?.length === 0" class="alert alert-info">No sliders or ads found.</div>
 
         <div v-else>
           <div class="table-responsive">
@@ -16,15 +30,44 @@
               <thead class="thead-light">
                 <tr class="align-middle">
                   <th style="width: 10px">#</th>
+                  <th>Image</th>
                   <th>Title</th>
+                  <th>Subtitle / Badge</th>
+                  <th>Placement</th>
+                  <th>Link</th>
+                  <th style="width: 60px">Order</th>
                   <th v-if="authStore.hasPermission('manage-frontend')">Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(notice, index) in notices?.data" :key="notice.id">
-                  <td class="align-middle">{{ index + 1 }}</td>
-                  <td class="align-middle">{{ truncateText(notice.title, 20) }}</td>
+                  <td class="align-middle">{{ (notices.current_page - 1) * notices.per_page + index + 1 }}</td>
+                  <td class="align-middle">
+                    <img v-if="notice.image" draggable="false"
+                      :src="getImageCacheUrl(notice.image, 100, 100)" alt="Slider Image" height="45"
+                      class="rounded border bg-light" />
+                  </td>
+                  <td class="align-middle">
+                    <div class="font-weight-bold">{{ notice.title }}</div>
+                    <small class="text-muted d-block">{{ truncateText(notice.description, 45) }}</small>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge badge-secondary" v-if="notice.subtitle">{{ notice.subtitle }}</span>
+                    <span class="text-muted" v-else>-</span>
+                  </td>
+                  <td class="align-middle">
+                    <div class="d-flex flex-wrap gap-1">
+                      <span v-for="k in parseKeys(notice.key)" :key="k" class="badge mr-1" :class="getPlacementBadge(k)">
+                        {{ getPlacementLabel(k) }}
+                      </span>
+                    </div>
+                  </td>
+                  <td class="align-middle">
+                    <small class="text-primary font-monospace" v-if="notice.link">{{ notice.link }}</small>
+                    <span class="text-muted" v-else>-</span>
+                  </td>
+                  <td class="align-middle text-center">{{ notice.order }}</td>
 
                   <td v-if="authStore.hasPermission('manage-frontend')" class="align-middle">
                     <select v-model="notice.enabled" @change="toggleStatus(notice)" class="custom-select"
@@ -35,17 +78,13 @@
                   </td>
                   <td class="align-middle">
                     <div class="d-flex">
-                      <!-- <router-link v-if="authStore.hasPermission('edit-sections')"
-                        :to="{ name: 'ShowSliders', params: { id: notice.id } }" class="btn btn-sm btn-outline-dark">
-                        <i class="fas fa-eye"></i>
-                      </router-link> -->
                       <router-link v-if="authStore.hasPermission('manage-frontend')"
                         :to="{ name: 'UpdateSlider', params: { id: notice.id } }"
-                        class="ml-2 btn btn-sm btn-outline-info">
+                        class="btn btn-sm btn-outline-info" title="Edit">
                         <i class="fas fa-pencil-alt"></i>
                       </router-link>
                       <button v-if="authStore.hasPermission('manage-frontend')"
-                        class="ml-2 btn btn-sm btn-outline-danger" @click="confirmDelete(notice)">
+                        class="ml-2 btn btn-sm btn-outline-danger" @click="confirmDelete(notice)" title="Delete">
                         <i class="fas fa-trash-alt"></i>
                       </button>
                     </div>
@@ -68,11 +107,9 @@ import { inject, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Pagination from '@/components/Paginations/Pagination.vue';
 import { useToast } from '@/composables/useToast';
-import { getImageUrl, truncateText } from '@/layouts/helpers/helpers';
+import { getImageCacheUrl, truncateText } from '@/layouts/helpers/helpers';
 import { useAuthStore } from '@/store/auth';
 import SearchBox from '@/components/SearchBox.vue';
-
-/* Banner Slides Management Page */
 
 const router = useRouter();
 const route = useRoute();
@@ -80,17 +117,64 @@ const authStore = useAuthStore();
 const toast = useToast();
 const $swal = inject('$swal');
 
-const notices = ref([]); // banner slides list
+const notices = ref({});
+const selectedKey = ref('all');
+const currentSearch = ref('');
 
-/* Fetch banner slides */
+const parseKeys = (key) => {
+  if (!key) return ['category_sidebar'];
+  if (Array.isArray(key)) return key;
+  if (key.startsWith('[') && key.endsWith(']')) {
+    try { return JSON.parse(key); } catch (e) {}
+  }
+  return key.split(',').map(k => k.trim()).filter(Boolean);
+};
+
+const getPlacementLabel = (key) => {
+  switch (key) {
+    case 'category_sidebar':
+      return 'Category Sidebar Ad';
+    case 'banner_section':
+      return 'Homepage Banner';
+    case 'featured_ad':
+      return 'Featured Ad';
+    default:
+      return key || 'General';
+  }
+};
+
+const getPlacementBadge = (key) => {
+  switch (key) {
+    case 'category_sidebar':
+      return 'badge-info';
+    case 'banner_section':
+      return 'badge-primary';
+    case 'featured_ad':
+      return 'badge-warning';
+    default:
+      return 'badge-secondary';
+  }
+};
+
+/* Fetch sliders */
 const fetchPage = async (page = 1, term = "") => {
   try {
-    const res = await axios.get(`/api/sliders/banner_section`);
+    currentSearch.value = term;
+    const res = await axios.get(`/api/sliders/${selectedKey.value}`, {
+      params: {
+        page,
+        term: currentSearch.value,
+      }
+    });
     notices.value = res.data.data;
   } catch (error) {
     console.error(error);
-    toast.error('Failed to load banner section.');
+    toast.error('Failed to load sliders list.');
   }
+};
+
+const onFilterChange = () => {
+  fetchPage(1, currentSearch.value);
 };
 
 /* Handle search */
@@ -126,12 +210,12 @@ const confirmDelete = async (notice) => {
     try {
       await axios.delete(`/api/sliders/${notice.id}`);
       toast.success('Slider deleted successfully!');
-      notices.value.data = notices.value.data.filter(n => n.id !== notice.id);
+      if (notices.value && notices.value.data) {
+        notices.value.data = notices.value.data.filter(n => n.id !== notice.id);
+      }
     } catch (error) {
       toast.validationError(error);
     }
-  } else {
-    toast.info('Deletion cancelled.');
   }
 };
 

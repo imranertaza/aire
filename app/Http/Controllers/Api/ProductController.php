@@ -26,12 +26,29 @@ class ProductController extends Controller
     public function dropdownList(Request $request)
     {
         $search = $request->query('search');
+        $categoryId = $request->query('category_id');
+
         $query = Product::select('id', 'name', 'model');
-        if ($search) {
-            $query->where('name', 'LIKE', "%{$search}%")
-                ->orWhere('model', 'LIKE', "%{$search}%");
+
+        if ($categoryId) {
+            $query->whereHas('categories', function ($q) use ($categoryId) {
+                $q->where('product_categories.id', $categoryId);
+            });
         }
-        $products = $query->limit(50)->get();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('model', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $limit = $request->query('limit', $categoryId ? null : 100);
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        $products = $query->get();
         return ApiResponse::success($products, 'Products list retrieved successfully');
     }
 
@@ -91,6 +108,7 @@ class ProductController extends Controller
             'gallery_images.*'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
 
             // New fields
+            'slug'                => 'nullable|string|max:255',
             'description'         => 'nullable|string',
             'tag'                 => 'nullable|string|max:255',
             'meta_title'          => 'nullable|string|max:255',
@@ -123,6 +141,7 @@ class ProductController extends Controller
             $product = Product::create([
                 'store_id'            => $store->id,
                 'name'                => $validated['name'],
+                'slug'                => !empty($validated['slug']) ? Str::slug($validated['slug']) : null,
                 'model'               => $validated['model'],
                 'product_code'        => $validated['product_code'] ?? null,
                 'brand_id'            => $validated['brand_id'] ?? null,
@@ -158,6 +177,65 @@ class ProductController extends Controller
                 'meta_description' => $request->input('meta_description'),
                 'meta_keyword'     => $request->input('meta_keyword'),
                 'video'            => $request->input('video'),
+
+                // Specifications Section Fields (Section 2)
+                'specs_badge'          => $request->input('specs_badge'),
+                'specs_title'          => $request->input('specs_title'),
+                'specs_description'    => $request->input('specs_description'),
+                'specs_image'          => $request->input('specs_image'),
+                'spec1_icon'           => $request->input('spec1_icon'),
+                'spec1_badge'          => $request->input('spec1_badge'),
+                'spec1_value'          => $request->input('spec1_value'),
+                'spec1_unit'           => $request->input('spec1_unit'),
+                'spec1_desc'           => $request->input('spec1_desc'),
+                'spec2_icon'           => $request->input('spec2_icon'),
+                'spec2_badge'          => $request->input('spec2_badge'),
+                'spec2_value'          => $request->input('spec2_value'),
+                'spec2_unit'           => $request->input('spec2_unit'),
+                'spec2_desc'           => $request->input('spec2_desc'),
+                'spec3_icon'           => $request->input('spec3_icon'),
+                'spec3_badge'          => $request->input('spec3_badge'),
+                'spec3_value'          => $request->input('spec3_value'),
+                'spec3_unit'           => $request->input('spec3_unit'),
+                'spec3_desc'           => $request->input('spec3_desc'),
+                'spec4_icon'           => $request->input('spec4_icon'),
+                'spec4_badge'          => $request->input('spec4_badge'),
+                'spec4_value'          => $request->input('spec4_value'),
+                'spec4_unit'           => $request->input('spec4_unit'),
+                'spec4_desc'           => $request->input('spec4_desc'),
+
+                // Features Section Fields (Section 3)
+                'features_badge'       => $request->input('features_badge'),
+                'features_title'       => $request->input('features_title'),
+                'features_description' => $request->input('features_description'),
+                'features_image'       => $request->input('features_image'),
+                'feature1_icon'        => $request->input('feature1_icon'),
+                'feature1_title'       => $request->input('feature1_title'),
+                'feature1_desc'        => $request->input('feature1_desc'),
+                'feature2_icon'        => $request->input('feature2_icon'),
+                'feature2_title'       => $request->input('feature2_title'),
+                'feature2_desc'        => $request->input('feature2_desc'),
+                'feature3_icon'        => $request->input('feature3_icon'),
+                'feature3_title'       => $request->input('feature3_title'),
+                'feature3_desc'        => $request->input('feature3_desc'),
+
+                // Applications Section Header
+                'applications_title'       => $request->input('applications_title'),
+                'applications_description' => $request->input('applications_description'),
+
+                // Technology Section Fields
+                'technology_badge'            => $request->input('technology_badge'),
+                'technology_title'            => $request->input('technology_title'),
+                'technology_description'      => $request->input('technology_description'),
+                'technology_image'            => $request->input('technology_image'),
+                'technology_card_title'       => $request->input('technology_card_title'),
+                'technology_card_description' => $request->input('technology_card_description'),
+                'tech_feature1_title'         => $request->input('tech_feature1_title'),
+                'tech_feature1_desc'          => $request->input('tech_feature1_desc'),
+                'tech_feature2_title'         => $request->input('tech_feature2_title'),
+                'tech_feature2_desc'          => $request->input('tech_feature2_desc'),
+                'tech_feature3_title'         => $request->input('tech_feature3_title'),
+                'tech_feature3_desc'          => $request->input('tech_feature3_desc'),
             ];
 
             if ($request->hasFile('documentation_pdf')) {
@@ -180,8 +258,47 @@ class ProductController extends Controller
                 $filename = 'desc_img_' . time() . '.' . $file->getClientOriginalExtension();
                 $descData['description_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
             }
+            if ($request->hasFile('specs_image')) {
+                $file = $request->file('specs_image');
+                $filename = 'specs_bg_' . time() . '.' . $file->getClientOriginalExtension();
+                $descData['specs_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            }
+            if ($request->hasFile('features_image')) {
+                $file = $request->file('features_image');
+                $filename = 'feat_bg_' . time() . '.' . $file->getClientOriginalExtension();
+                $descData['features_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            }
+            if ($request->hasFile('technology_image')) {
+                $file = $request->file('technology_image');
+                $filename = 'tech_' . time() . '.' . $file->getClientOriginalExtension();
+                $descData['technology_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            }
 
             $product->description()->create($descData);
+
+            // Save Overview
+            $overviewData = [
+                'title'          => $request->input('overview_title'),
+                'description'    => $request->input('overview_description'),
+                'image'          => $request->input('overview_image'),
+                'feature1_icon'  => $request->input('overview_feature1_icon'),
+                'feature1_title' => $request->input('overview_feature1_title'),
+                'feature1_desc'  => $request->input('overview_feature1_desc'),
+                'feature2_icon'  => $request->input('overview_feature2_icon'),
+                'feature2_title' => $request->input('overview_feature2_title'),
+                'feature2_desc'  => $request->input('overview_feature2_desc'),
+                'hud_label1'     => $request->input('overview_hud_label1'),
+                'hud_label2'     => $request->input('overview_hud_label2'),
+                'hud_label3'     => $request->input('overview_hud_label3'),
+            ];
+
+            if ($request->hasFile('overview_image')) {
+                $file = $request->file('overview_image');
+                $filename = 'overview_' . time() . '.' . $file->getClientOriginalExtension();
+                $overviewData['image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            }
+
+            $product->overview()->create($overviewData);
 
             // Free Delivery
             $isFreeDelivery = filter_var($request->input('product_free_delivery') ?? 0, FILTER_VALIDATE_BOOLEAN);
@@ -229,20 +346,32 @@ class ProductController extends Controller
             }
 
             // Save Attributes
-            if (!empty($validated['attributes'])) {
+            $attributes = $validated['attributes'] ?? $request->input('attributes');
+            if (is_string($attributes)) {
+                $attributes = json_decode($attributes, true);
+            }
+            if (!empty($attributes) && is_array($attributes)) {
                 $attributeData = [];
-                foreach ($validated['attributes'] as $attr) {
+                $now = now();
+                foreach ($attributes as $attr) {
+                    if (!is_array($attr)) continue;
+                    if (empty($attr['name']) || empty($attr['attribute_group_id'])) continue;
                     $attributeData[] = [
                         'product_id'         => $product->id,
-                        'attribute_group_id' => $attr['attribute_group_id'],
-                        'name'               => $attr['name'],
+                        'attribute_group_id' => (int) $attr['attribute_group_id'],
+                        'name'               => trim($attr['name']),
                         'details'            => $attr['details'] ?? null,
-                        'sort_order'         => $attr['sort_order'] ?? 0,
+                        'sort_order'         => isset($attr['sort_order']) ? (int) $attr['sort_order'] : 0,
+                        'status'             => 1,
                         'createdBy'          => Auth::id(),
                         'updatedBy'          => Auth::id(),
+                        'created_at'         => $now,
+                        'updated_at'         => $now,
                     ];
                 }
-                ProductAttribute::insert($attributeData);
+                if (!empty($attributeData)) {
+                    ProductAttribute::insert($attributeData);
+                }
             }
 
             // Save Gallery Images
@@ -259,6 +388,52 @@ class ProductController extends Controller
                     $filename = Str::slug($product->name) . '-' . $productImage->id . '.' . $file->getClientOriginalExtension();
                     $path = $file->storeAs("product/{$product->id}/gallery", $filename, 'public');
                     $productImage->update(['image' => $path]);
+                }
+            }
+
+
+            // Save Product FAQs
+            if ($request->has('faqs')) {
+                $faqs = is_string($request->faqs) ? json_decode($request->faqs, true) : $request->faqs;
+                if (is_array($faqs)) {
+                    foreach ($faqs as $index => $faq) {
+                        if (!empty($faq['question']) || !empty($faq['answer'])) {
+                            $product->faqs()->create([
+                                'question'   => $faq['question'] ?? '',
+                                'answer'     => $faq['answer'] ?? '',
+                                'sort_order' => isset($faq['sort_order']) ? (int)$faq['sort_order'] : $index,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            // Save Product Applications
+            if ($request->has('applications')) {
+                $apps = is_string($request->applications) ? json_decode($request->applications, true) : $request->applications;
+                if (is_array($apps)) {
+                    foreach ($apps as $index => $appItem) {
+                        if (!empty($appItem['title'])) {
+                            $imagePath = $appItem['bg_image'] ?? $appItem['image'] ?? null;
+                            $uploadedFile = $request->file("applications.{$index}.bg_image_file") 
+                                ?? ($request->file('applications')[$index]['bg_image_file'] ?? null);
+
+                            if ($uploadedFile) {
+                                $filename = 'app_' . $index . '_' . time() . '.' . $uploadedFile->getClientOriginalExtension();
+                                $imagePath = $uploadedFile->storeAs("product/{$product->id}/applications", $filename, 'public');
+                            }
+
+                            $product->applications()->create([
+                                'title'       => $appItem['title'] ?? '',
+                                'description' => $appItem['description'] ?? '',
+                                'badge'       => $appItem['badge'] ?? null,
+                                'image'       => $imagePath,
+                                'bg_image'    => $imagePath,
+                                'grid_width'  => $appItem['grid_width'] ?? ($index === 0 ? 'col-lg-8' : ($index === 1 ? 'col-lg-4' : 'col-12')),
+                                'sort_order'  => isset($appItem['sort_order']) ? (int)$appItem['sort_order'] : $index,
+                            ]);
+                        }
+                    }
                 }
             }
 
@@ -282,12 +457,17 @@ class ProductController extends Controller
             'images',
             'brand',
             'description',
+            'overview',
             'freeDelivery',
             'specials',
             'relatedProducts',
             'boughtTogether',
-            'categories'
+            'categories',
+            'faqs',
+            'applications'
+
         ])->findOrFail($id);
+
         return ApiResponse::success($product, 'Product retrieved successfully');
     }
 
@@ -331,6 +511,7 @@ class ProductController extends Controller
             'deleted_images'      => 'nullable|array', // array of IDs to delete
 
             // New fields
+            'slug'                => 'nullable|string|max:255',
             'description'         => 'nullable|string',
             'tag'                 => 'nullable|string|max:255',
             'meta_title'          => 'nullable|string|max:255',
@@ -372,6 +553,17 @@ class ProductController extends Controller
                 'updatedBy'           => Auth::id(),
             ];
 
+            if (!empty($validated['slug'])) {
+                $baseSlug = Str::slug($validated['slug']);
+                $slug = $baseSlug;
+                $count = 1;
+                while (Product::where('slug', $slug)->where('id', '!=', $product->id)->exists()) {
+                    $slug = $baseSlug . '-' . $count;
+                    $count++;
+                }
+                $updateData['slug'] = $slug;
+            }
+
             // Handle Main Image Update
             if ($request->hasFile('main_image')) {
                 // Delete old
@@ -393,6 +585,65 @@ class ProductController extends Controller
                 'meta_description' => $request->input('meta_description'),
                 'meta_keyword'     => $request->input('meta_keyword'),
                 'video'            => $request->input('video'),
+
+                // Specifications Section Fields (Section 2)
+                'specs_badge'          => $request->input('specs_badge'),
+                'specs_title'          => $request->input('specs_title'),
+                'specs_description'    => $request->input('specs_description'),
+                'specs_image'          => $request->input('specs_image'),
+                'spec1_icon'           => $request->input('spec1_icon'),
+                'spec1_badge'          => $request->input('spec1_badge'),
+                'spec1_value'          => $request->input('spec1_value'),
+                'spec1_unit'           => $request->input('spec1_unit'),
+                'spec1_desc'           => $request->input('spec1_desc'),
+                'spec2_icon'           => $request->input('spec2_icon'),
+                'spec2_badge'          => $request->input('spec2_badge'),
+                'spec2_value'          => $request->input('spec2_value'),
+                'spec2_unit'           => $request->input('spec2_unit'),
+                'spec2_desc'           => $request->input('spec2_desc'),
+                'spec3_icon'           => $request->input('spec3_icon'),
+                'spec3_badge'          => $request->input('spec3_badge'),
+                'spec3_value'          => $request->input('spec3_value'),
+                'spec3_unit'           => $request->input('spec3_unit'),
+                'spec3_desc'           => $request->input('spec3_desc'),
+                'spec4_icon'           => $request->input('spec4_icon'),
+                'spec4_badge'          => $request->input('spec4_badge'),
+                'spec4_value'          => $request->input('spec4_value'),
+                'spec4_unit'           => $request->input('spec4_unit'),
+                'spec4_desc'           => $request->input('spec4_desc'),
+
+                // Features Section Fields (Section 3)
+                'features_badge'       => $request->input('features_badge'),
+                'features_title'       => $request->input('features_title'),
+                'features_description' => $request->input('features_description'),
+                'features_image'       => $request->input('features_image'),
+                'feature1_icon'        => $request->input('feature1_icon'),
+                'feature1_title'       => $request->input('feature1_title'),
+                'feature1_desc'        => $request->input('feature1_desc'),
+                'feature2_icon'        => $request->input('feature2_icon'),
+                'feature2_title'       => $request->input('feature2_title'),
+                'feature2_desc'        => $request->input('feature2_desc'),
+                'feature3_icon'        => $request->input('feature3_icon'),
+                'feature3_title'       => $request->input('feature3_title'),
+                'feature3_desc'        => $request->input('feature3_desc'),
+
+                // Applications Section Header
+                'applications_title'       => $request->input('applications_title'),
+                'applications_description' => $request->input('applications_description'),
+
+                // Technology Section Fields
+                'technology_badge'            => $request->input('technology_badge'),
+                'technology_title'            => $request->input('technology_title'),
+                'technology_description'      => $request->input('technology_description'),
+                'technology_image'            => $request->input('technology_image'),
+                'technology_card_title'       => $request->input('technology_card_title'),
+                'technology_card_description' => $request->input('technology_card_description'),
+                'tech_feature1_title'         => $request->input('tech_feature1_title'),
+                'tech_feature1_desc'          => $request->input('tech_feature1_desc'),
+                'tech_feature2_title'         => $request->input('tech_feature2_title'),
+                'tech_feature2_desc'          => $request->input('tech_feature2_desc'),
+                'tech_feature3_title'         => $request->input('tech_feature3_title'),
+                'tech_feature3_desc'          => $request->input('tech_feature3_desc'),
             ];
 
             $productDesc = $product->description ?: new ProductDescription(['product_id' => $product->id]);
@@ -400,7 +651,7 @@ class ProductController extends Controller
             // Handle deleted files
             $deletedFiles = $request->input('deleted_files') ? (is_array($request->input('deleted_files')) ? $request->input('deleted_files') : json_decode($request->input('deleted_files'), true)) : [];
             foreach ($deletedFiles as $fileField) {
-                if (in_array($fileField, ['documentation_pdf', 'safety_pdf', 'instructions_pdf', 'description_image'])) {
+                if (in_array($fileField, ['documentation_pdf', 'safety_pdf', 'instructions_pdf', 'description_image', 'specs_image', 'features_image', 'technology_image'])) {
                     if ($productDesc->$fileField && Storage::disk('public')->exists($productDesc->$fileField)) {
                         Storage::disk('public')->delete($productDesc->$fileField);
                     }
@@ -440,8 +691,67 @@ class ProductController extends Controller
                 $filename = 'desc_img_' . time() . '.' . $file->getClientOriginalExtension();
                 $descData['description_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
             }
+            if ($request->hasFile('specs_image')) {
+                if ($productDesc->specs_image && Storage::disk('public')->exists($productDesc->specs_image)) {
+                    Storage::disk('public')->delete($productDesc->specs_image);
+                }
+                $file = $request->file('specs_image');
+                $filename = 'specs_bg_' . time() . '.' . $file->getClientOriginalExtension();
+                $descData['specs_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            }
+            if ($request->hasFile('features_image')) {
+                if ($productDesc->features_image && Storage::disk('public')->exists($productDesc->features_image)) {
+                    Storage::disk('public')->delete($productDesc->features_image);
+                }
+                $file = $request->file('features_image');
+                $filename = 'feat_bg_' . time() . '.' . $file->getClientOriginalExtension();
+                $descData['features_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            }
+            if ($request->hasFile('technology_image')) {
+                if ($productDesc->technology_image && Storage::disk('public')->exists($productDesc->technology_image)) {
+                    Storage::disk('public')->delete($productDesc->technology_image);
+                }
+                $file = $request->file('technology_image');
+                $filename = 'tech_' . time() . '.' . $file->getClientOriginalExtension();
+                $descData['technology_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            }
 
             $product->description()->updateOrCreate([], $descData);
+
+            // Save Overview
+            $overviewData = [
+                'title'          => $request->input('overview_title'),
+                'description'    => $request->input('overview_description'),
+                'feature1_icon'  => $request->input('overview_feature1_icon'),
+                'feature1_title' => $request->input('overview_feature1_title'),
+                'feature1_desc'  => $request->input('overview_feature1_desc'),
+                'feature2_icon'  => $request->input('overview_feature2_icon'),
+                'feature2_title' => $request->input('overview_feature2_title'),
+                'feature2_desc'  => $request->input('overview_feature2_desc'),
+                'hud_label1'     => $request->input('overview_hud_label1'),
+                'hud_label2'     => $request->input('overview_hud_label2'),
+                'hud_label3'     => $request->input('overview_hud_label3'),
+            ];
+
+            $productOverview = $product->overview ?: new \App\Models\ProductOverview(['product_id' => $product->id]);
+
+            if (in_array('overview_image', $deletedFiles)) {
+                if ($productOverview->image && Storage::disk('public')->exists($productOverview->image)) {
+                    Storage::disk('public')->delete($productOverview->image);
+                }
+                $overviewData['image'] = null;
+            }
+
+            if ($request->hasFile('overview_image')) {
+                if ($productOverview->image && Storage::disk('public')->exists($productOverview->image)) {
+                    Storage::disk('public')->delete($productOverview->image);
+                }
+                $file = $request->file('overview_image');
+                $filename = 'overview_' . time() . '.' . $file->getClientOriginalExtension();
+                $overviewData['image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            }
+
+            $product->overview()->updateOrCreate([], $overviewData);
 
             // Free Delivery
             $isFreeDelivery = filter_var($request->input('product_free_delivery') ?? 0, FILTER_VALIDATE_BOOLEAN);
@@ -495,25 +805,42 @@ class ProductController extends Controller
 
             // Sync Attributes (Delete old, insert new)
             $product->productAttributes()->delete();
-            if (!empty($validated['attributes'])) {
+            $attributes = $validated['attributes'] ?? $request->input('attributes');
+            if (is_string($attributes)) {
+                $attributes = json_decode($attributes, true);
+            }
+            if (!empty($attributes) && is_array($attributes)) {
                 $attributeData = [];
-                foreach ($validated['attributes'] as $attr) {
+                $now = now();
+                foreach ($attributes as $attr) {
+                    if (!is_array($attr)) continue;
+                    if (empty($attr['name']) || empty($attr['attribute_group_id'])) continue;
                     $attributeData[] = [
                         'product_id'         => $product->id,
-                        'attribute_group_id' => $attr['attribute_group_id'],
-                        'name'               => $attr['name'],
+                        'attribute_group_id' => (int) $attr['attribute_group_id'],
+                        'name'               => trim($attr['name']),
                         'details'            => $attr['details'] ?? null,
-                        'sort_order'         => $attr['sort_order'] ?? 0,
+                        'sort_order'         => isset($attr['sort_order']) ? (int) $attr['sort_order'] : 0,
+                        'status'             => 1,
                         'createdBy'          => Auth::id(),
                         'updatedBy'          => Auth::id(),
+                        'created_at'         => $now,
+                        'updated_at'         => $now,
                     ];
                 }
-                ProductAttribute::insert($attributeData);
+                if (!empty($attributeData)) {
+                    ProductAttribute::insert($attributeData);
+                }
             }
 
             // Handle deleted gallery images
-            if (!empty($validated['deleted_images'])) {
-                $imagesToDelete = ProductImage::whereIn('id', $validated['deleted_images'])
+            $deletedImageIds = $validated['deleted_images'] ?? $request->input('deleted_images');
+            if (is_string($deletedImageIds)) {
+                $decoded = json_decode($deletedImageIds, true);
+                $deletedImageIds = is_array($decoded) ? $decoded : array_filter(explode(',', $deletedImageIds));
+            }
+            if (!empty($deletedImageIds) && is_array($deletedImageIds)) {
+                $imagesToDelete = ProductImage::whereIn('id', $deletedImageIds)
                     ->where('product_id', $product->id)
                     ->get();
                 foreach ($imagesToDelete as $img) {
@@ -541,9 +868,57 @@ class ProductController extends Controller
                 }
             }
 
+
+            // Save Product FAQs
+            if ($request->has('faqs')) {
+                $faqs = is_string($request->faqs) ? json_decode($request->faqs, true) : $request->faqs;
+                $product->faqs()->delete();
+                if (is_array($faqs)) {
+                    foreach ($faqs as $index => $faq) {
+                        if (!empty($faq['question']) || !empty($faq['answer'])) {
+                            $product->faqs()->create([
+                                'question'   => $faq['question'] ?? '',
+                                'answer'     => $faq['answer'] ?? '',
+                                'sort_order' => isset($faq['sort_order']) ? (int)$faq['sort_order'] : $index,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            // Save Product Applications
+            if ($request->has('applications')) {
+                $apps = is_string($request->applications) ? json_decode($request->applications, true) : $request->applications;
+                $product->applications()->delete();
+                if (is_array($apps)) {
+                    foreach ($apps as $index => $appItem) {
+                        if (!empty($appItem['title'])) {
+                            $imagePath = $appItem['bg_image'] ?? $appItem['image'] ?? null;
+                            $uploadedFile = $request->file("applications.{$index}.bg_image_file") 
+                                ?? ($request->file('applications')[$index]['bg_image_file'] ?? null);
+
+                            if ($uploadedFile) {
+                                $filename = 'app_' . $index . '_' . time() . '.' . $uploadedFile->getClientOriginalExtension();
+                                $imagePath = $uploadedFile->storeAs("product/{$product->id}/applications", $filename, 'public');
+                            }
+
+                            $product->applications()->create([
+                                'title'       => $appItem['title'] ?? '',
+                                'description' => $appItem['description'] ?? '',
+                                'badge'       => $appItem['badge'] ?? null,
+                                'image'       => $imagePath,
+                                'bg_image'    => $imagePath,
+                                'grid_width'  => $appItem['grid_width'] ?? ($index === 0 ? 'col-lg-8' : ($index === 1 ? 'col-lg-4' : 'col-12')),
+                                'sort_order'  => isset($appItem['sort_order']) ? (int)$appItem['sort_order'] : $index,
+                            ]);
+                        }
+                    }
+                }
+            }
+
             DB::commit();
 
-            return ApiResponse::success($product->load(['productOptions', 'productAttributes', 'images', 'description', 'freeDelivery', 'specials', 'categories', 'relatedProducts', 'boughtTogether']), 'Product updated successfully');
+            return ApiResponse::success($product->load(['productOptions', 'productAttributes', 'images', 'description', 'freeDelivery', 'specials', 'categories', 'relatedProducts', 'boughtTogether', 'faqs', 'applications']), 'Product updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             return ApiResponse::error('Failed to update product', 500, [$e->getMessage()]);
@@ -737,6 +1112,43 @@ class ProductController extends Controller
 
                         Storage::disk('public')->copy($img->image, $newImgPath);
                         $newImg->update(['image' => $newImgPath]);
+                    }
+                }
+            }
+
+            // Save Product FAQs
+            if ($request->has('faqs')) {
+                $faqs = is_string($request->faqs) ? json_decode($request->faqs, true) : $request->faqs;
+                if (is_array($faqs)) {
+                    foreach ($faqs as $index => $faq) {
+                        if (!empty($faq['question']) || !empty($faq['answer'])) {
+                            $product->faqs()->create([
+                                'question'   => $faq['question'] ?? '',
+                                'answer'     => $faq['answer'] ?? '',
+                                'sort_order' => isset($faq['sort_order']) ? (int)$faq['sort_order'] : $index,
+                            ]);
+                        }
+                    }
+                }
+            }
+
+            // Update Product Applications
+            if ($request->has('applications')) {
+                $apps = is_string($request->applications) ? json_decode($request->applications, true) : $request->applications;
+                $product->applications()->delete();
+                if (is_array($apps)) {
+                    foreach ($apps as $index => $appItem) {
+                        if (!empty($appItem['title'])) {
+                            $product->applications()->create([
+                                'title'       => $appItem['title'] ?? '',
+                                'description' => $appItem['description'] ?? '',
+                                'badge'       => $appItem['badge'] ?? null,
+                                'image'       => $appItem['image'] ?? $appItem['bg_image'] ?? null,
+                                'bg_image'    => $appItem['bg_image'] ?? $appItem['image'] ?? null,
+                                'grid_width'  => $appItem['grid_width'] ?? ($index === 0 ? 'col-lg-8' : ($index === 1 ? 'col-lg-4' : 'col-12')),
+                                'sort_order'  => isset($appItem['sort_order']) ? (int)$appItem['sort_order'] : $index,
+                            ]);
+                        }
                     }
                 }
             }

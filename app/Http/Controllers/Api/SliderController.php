@@ -19,19 +19,38 @@ use Illuminate\Support\Facades\Auth;
 class SliderController extends Controller
 {
     /**
-     * Retrieve paginated sliders for the frontend by key.
+     * Retrieve paginated sliders by group key or all.
      *
-     * Example: /api/sliders/banner_section
+     * Example: /api/sliders/category_sidebar or /api/sliders/all
      *
      * @param Request $request
-     * @param string $key The slider group key (e.g., 'banner_section')
+     * @param string|null $key The slider group key (e.g., 'category_sidebar', 'banner_section', 'all')
      * @return \Illuminate\Http\JsonResponse
      */
-    public function bannerSliders(Request $request, $key)
+    public function bannerSliders(Request $request, $key = null)
     {
-        $slides = Slider::where('key', $key)
-            ->orderBy('order')
-            ->paginate(10); // Adjust per_page if needed via query string
+        $term = $request->query('term');
+
+        $query = Slider::query();
+
+        if ($key && $key !== 'all') {
+            $query->where(function ($q) use ($key) {
+                $q->where('key', $key)
+                  ->orWhere('key', 'like', "%{$key}%");
+            });
+        }
+
+        if ($term) {
+            $query->where(function ($q) use ($term) {
+                $q->where('title', 'like', "%{$term}%")
+                  ->orWhere('subtitle', 'like', "%{$term}%")
+                  ->orWhere('description', 'like', "%{$term}%");
+            });
+        }
+
+        $slides = $query->orderBy('order', 'asc')
+            ->orderBy('id', 'desc')
+            ->paginate($request->query('per_page', 15));
 
         return ApiResponse::success($slides, 'Slides retrieved successfully');
     }
@@ -46,13 +65,24 @@ class SliderController extends Controller
     public function show($id)
     {
         $slide = Slider::findOrFail($id);
-        return ApiResponse::success($slide, 'Slide retrieved successfully');
+        $slideData = $slide->toArray();
+
+        // Convert key to keys array for multiselect
+        if (!empty($slide->key)) {
+            if (str_starts_with($slide->key, '[') && str_ends_with($slide->key, ']')) {
+                $slideData['keys'] = json_decode($slide->key, true) ?? [];
+            } else {
+                $slideData['keys'] = array_map('trim', explode(',', $slide->key));
+            }
+        } else {
+            $slideData['keys'] = ['category_sidebar'];
+        }
+
+        return ApiResponse::success($slideData, 'Slide retrieved successfully');
     }
 
     /**
-     * Store a new banner slide.
-     *
-     * Automatically assigns the 'banner_section' key.
+     * Store a new banner / ad slide.
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -60,23 +90,46 @@ class SliderController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'key'         => 'nullable',
+            'keys'        => 'nullable',
+            'subtitle'    => 'nullable|string|max:255',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
-            'link'        => 'nullable|url|max:255',
+            'link'        => 'nullable|string|max:255',
+            'button_text' => 'nullable|string|max:100',
             'order'       => 'nullable|integer|min:0',
             'enabled'     => 'nullable|in:0,1',
-            'image'       => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            'image'       => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
         ]);
 
-        $data['key'] = 'banner_section';
-        $data['enabled'] = $data['enabled'] ?? 1; // Default to enabled
+        // Process multiselect keys
+        if ($request->has('keys')) {
+            $keysVal = $request->input('keys');
+            if (is_array($keysVal)) {
+                $data['key'] = implode(',', $keysVal);
+            } elseif (is_string($keysVal)) {
+                $data['key'] = $keysVal;
+            }
+        } elseif ($request->has('key')) {
+            $keyVal = $request->input('key');
+            if (is_array($keyVal)) {
+                $data['key'] = implode(',', $keyVal);
+            } else {
+                $data['key'] = (string) $keyVal;
+            }
+        } else {
+            $data['key'] = 'category_sidebar';
+        }
+
+        unset($data['keys']);
+        $data['enabled'] = $data['enabled'] ?? 1;
         $data['createdBy'] = Auth::id();
         $data['updatedBy'] = Auth::id();
 
         $slide = Slider::create($data);
 
         if ($request->hasFile('image')) {
-            $filename = uniqid('banner_image_') . '.' . $request->file('image')->getClientOriginalExtension();
+            $filename = uniqid('slider_image_') . '.' . $request->file('image')->getClientOriginalExtension();
 
             $path = $request->file('image')
                 ->storeAs("sliders/{$slide->id}/images", $filename, 'public');
@@ -89,9 +142,7 @@ class SliderController extends Controller
 
 
     /**
-     * Update an existing banner slide.
-     *
-     * Replaces the image only if a new one is uploaded.
+     * Update an existing banner / ad slide.
      *
      * @param Request $request
      * @param int $id The ID of the slide to update
@@ -102,24 +153,49 @@ class SliderController extends Controller
         $slider = Slider::findOrFail($id);
 
         $data = $request->validate([
+            'key'         => 'nullable',
+            'keys'        => 'nullable',
+            'subtitle'    => 'nullable|string|max:255',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
-            'link'        => 'nullable|url|max:255',
+            'link'        => 'nullable|string|max:255',
+            'button_text' => 'nullable|string|max:100',
             'order'       => 'nullable|integer|min:0',
             'enabled'     => 'required|in:0,1',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
         ]);
+
+        // Process multiselect keys
+        if ($request->has('keys')) {
+            $keysVal = $request->input('keys');
+            if (is_array($keysVal)) {
+                $data['key'] = implode(',', $keysVal);
+            } elseif (is_string($keysVal)) {
+                $data['key'] = $keysVal;
+            }
+        } elseif ($request->has('key')) {
+            $keyVal = $request->input('key');
+            if (is_array($keyVal)) {
+                $data['key'] = implode(',', $keyVal);
+            } else {
+                $data['key'] = (string) $keyVal;
+            }
+        }
+
+        unset($data['keys']);
+
         if ($request->remove_image == 1) {
             $request->validate([
-                'image' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:2048',
+                'image' => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
             ]);
         }
+
         if ($request->hasFile('image')) {
             if ($slider->image && Storage::disk('public')->exists($slider->image)) {
                 Storage::disk('public')->delete($slider->image);
             }
 
-            $filename = uniqid('banner_image_') . '.' . $request->file('image')->getClientOriginalExtension();
+            $filename = uniqid('slider_image_') . '.' . $request->file('image')->getClientOriginalExtension();
 
             $data['image'] = $request->file('image')
                 ->storeAs("sliders/{$slider->id}/images", $filename, 'public');

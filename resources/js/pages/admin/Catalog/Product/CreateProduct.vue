@@ -47,6 +47,30 @@
                                     role="tab" aria-controls="custom-tabs-others" aria-selected="false">Others</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" id="tab-overview" data-toggle="pill" href="#custom-tabs-overview"
+                                    role="tab" aria-controls="custom-tabs-overview" aria-selected="false">Overview</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-specifications" data-toggle="pill" href="#custom-tabs-specifications"
+                                    role="tab" aria-controls="custom-tabs-specifications" aria-selected="false">Specifications</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-features" data-toggle="pill" href="#custom-tabs-features"
+                                    role="tab" aria-controls="custom-tabs-features" aria-selected="false">Features</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-technology" data-toggle="pill" href="#custom-tabs-technology"
+                                    role="tab" aria-controls="custom-tabs-technology" aria-selected="false">Technology</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-applications" data-toggle="pill" href="#custom-tabs-applications"
+                                    role="tab" aria-controls="custom-tabs-applications" aria-selected="false">Applications</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-faqs" data-toggle="pill" href="#custom-tabs-faqs"
+                                    role="tab" aria-controls="custom-tabs-faqs" aria-selected="false">FAQs</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="tab-images" data-toggle="pill" href="#custom-tabs-images"
                                     role="tab" aria-controls="custom-tabs-images" aria-selected="false">Images</a>
                             </li>
@@ -61,9 +85,14 @@
                                 <div class="tab-pane fade show active" id="custom-tabs-general" role="tabpanel"
                                     aria-labelledby="tab-general">
                                     <div class="row">
-                                        <div class="col-md-12 form-group">
+                                        <div class="col-md-6 form-group">
                                             <label>Product Name <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" v-model="form.name" required />
+                                            <input type="text" class="form-control" v-model="form.name"
+                                                @input="form.slug = generateSlug(form.name)" required />
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label>Slug <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" v-model="form.slug" required />
                                         </div>
                                         <div class="col-md-12 form-group">
                                             <label>Description</label>
@@ -382,6 +411,553 @@
                                     </div>
                                 </div>
 
+                                <!-- Overview Tab (Section 1) -->
+                                <div class="tab-pane fade" id="custom-tabs-overview" role="tabpanel"
+                                    aria-labelledby="tab-overview">
+                                    <div class="card card-outline card-primary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">Overview Banner & Narrative (Section 1)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-12 form-group">
+                                                    <label>Overview Title</label>
+                                                    <input type="text" class="form-control" v-model="form.overview_title"
+                                                        placeholder="e.g. Versatility Without Compromise" />
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <label>Overview Narrative / Description</label>
+                                                    <textarea class="form-control" rows="3" v-model="form.overview_description"
+                                                        placeholder="Detailed narrative description for the overview section..."></textarea>
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <label>Overview Banner / Parallax Image</label>
+                                                    <Vue3Dropzone v-model="overviewImageFile" :allowSelectOnPreview="true" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card card-outline card-secondary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">Overview Feature Cards (Section 1)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <!-- Feature Card 1 -->
+                                                <div class="col-md-6 border-right pr-md-4">
+                                                    <h6 class="font-weight-bold text-primary mb-3"><i class="bi bi-shield-check mr-1"></i> Feature Card 01</h6>
+                                                    <div class="form-group">
+                                                        <label>Card 1 Icon (Bootstrap Icon Class)</label>
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text"><i :class="form.overview_feature1_icon || 'bi bi-shield-check'"></i></span>
+                                                            </div>
+                                                            <input type="text" class="form-control" v-model="form.overview_feature1_icon" placeholder="bi bi-shield-check" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Card 1 Title</label>
+                                                        <input type="text" class="form-control" v-model="form.overview_feature1_title" placeholder="e.g. CRITICAL ENVIRONMENTS" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Card 1 Description</label>
+                                                        <textarea class="form-control" rows="3" v-model="form.overview_feature1_desc" placeholder="e.g. Engineered for cleanrooms, laboratories, and precision fabrication facilities."></textarea>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Feature Card 2 -->
+                                                <div class="col-md-6 pl-md-4">
+                                                    <h6 class="font-weight-bold text-primary mb-3"><i class="bi bi-buildings mr-1"></i> Feature Card 02</h6>
+                                                    <div class="form-group">
+                                                        <label>Card 2 Icon (Bootstrap Icon Class)</label>
+                                                        <div class="input-group">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text"><i :class="form.overview_feature2_icon || 'bi bi-buildings'"></i></span>
+                                                            </div>
+                                                            <input type="text" class="form-control" v-model="form.overview_feature2_icon" placeholder="bi bi-buildings" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Card 2 Title</label>
+                                                        <input type="text" class="form-control" v-model="form.overview_feature2_title" placeholder="e.g. URBAN RESILIENCE" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Card 2 Description</label>
+                                                        <textarea class="form-control" rows="3" v-model="form.overview_feature2_desc" placeholder="e.g. Protection against high-density metropolitan particulate and allergens."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Specifications Tab (Section 2) -->
+                                <div class="tab-pane fade" id="custom-tabs-specifications" role="tabpanel"
+                                    aria-labelledby="tab-specifications">
+                                    <div class="card card-outline card-primary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">Header & Exploded Technical Banner (Section 2)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 form-group">
+                                                    <label>Badge / Tag</label>
+                                                    <input type="text" class="form-control" v-model="form.specs_badge"
+                                                        placeholder="e.g. SPECIFICATIONS" />
+                                                </div>
+                                                <div class="col-md-8 form-group">
+                                                    <label>Main Title</label>
+                                                    <input type="text" class="form-control" v-model="form.specs_title"
+                                                        placeholder="e.g. Technical Specifications" />
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <label>Main Description</label>
+                                                    <textarea class="form-control" rows="2" v-model="form.specs_description"
+                                                        placeholder="Laboratory-validated performance metrics..."></textarea>
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <label>Exploded View Parallax Background Image</label>
+                                                    <Vue3Dropzone v-model="specsImageFile" :allowSelectOnPreview="true" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card card-outline card-secondary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">4-Column Stats Grid (Section 2)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <!-- Stat 1 -->
+                                                <div class="col-md-3 border-right">
+                                                    <h6 class="font-weight-bold text-primary mb-2">Stat 01</h6>
+                                                    <div class="form-group">
+                                                        <label>Icon Class</label>
+                                                        <input type="text" class="form-control" v-model="form.spec1_icon" placeholder="bi bi-shield-check" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Badge / Top Label</label>
+                                                        <input type="text" class="form-control" v-model="form.spec1_badge" placeholder="e.g. FILTRATION" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Value</label>
+                                                        <input type="text" class="form-control" v-model="form.spec1_value" placeholder="e.g. 99.97%" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Unit Suffix</label>
+                                                        <input type="text" class="form-control" v-model="form.spec1_unit" placeholder="e.g. %" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Bottom Description</label>
+                                                        <input type="text" class="form-control" v-model="form.spec1_desc" placeholder="e.g. @ 0.3MM EFFICIENCY" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Stat 2 -->
+                                                <div class="col-md-3 border-right">
+                                                    <h6 class="font-weight-bold text-primary mb-2">Stat 02</h6>
+                                                    <div class="form-group">
+                                                        <label>Icon Class</label>
+                                                        <input type="text" class="form-control" v-model="form.spec2_icon" placeholder="bi bi-wind" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Badge / Top Label</label>
+                                                        <input type="text" class="form-control" v-model="form.spec2_badge" placeholder="e.g. VELOCITY" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Value</label>
+                                                        <input type="text" class="form-control" v-model="form.spec2_value" placeholder="e.g. 4.2" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Unit Suffix</label>
+                                                        <input type="text" class="form-control" v-model="form.spec2_unit" placeholder="e.g. L/sec" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Bottom Description</label>
+                                                        <input type="text" class="form-control" v-model="form.spec2_desc" placeholder="e.g. MAX AIRFLOW RATE" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Stat 3 -->
+                                                <div class="col-md-3 border-right">
+                                                    <h6 class="font-weight-bold text-primary mb-2">Stat 03</h6>
+                                                    <div class="form-group">
+                                                        <label>Icon Class</label>
+                                                        <input type="text" class="form-control" v-model="form.spec3_icon" placeholder="bi bi-battery-charging" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Badge / Top Label</label>
+                                                        <input type="text" class="form-control" v-model="form.spec3_badge" placeholder="e.g. ENDURANCE" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Value</label>
+                                                        <input type="text" class="form-control" v-model="form.spec3_value" placeholder="e.g. 12" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Unit Suffix</label>
+                                                        <input type="text" class="form-control" v-model="form.spec3_unit" placeholder="e.g. Hours" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Bottom Description</label>
+                                                        <input type="text" class="form-control" v-model="form.spec3_desc" placeholder="e.g. CONTINUOUS OPERATION" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Stat 4 -->
+                                                <div class="col-md-3">
+                                                    <h6 class="font-weight-bold text-primary mb-2">Stat 04</h6>
+                                                    <div class="form-group">
+                                                        <label>Icon Class</label>
+                                                        <input type="text" class="form-control" v-model="form.spec4_icon" placeholder="bi bi-box-seam" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Badge / Top Label</label>
+                                                        <input type="text" class="form-control" v-model="form.spec4_badge" placeholder="e.g. MASS" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Value</label>
+                                                        <input type="text" class="form-control" v-model="form.spec4_value" placeholder="e.g. 185" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Unit Suffix</label>
+                                                        <input type="text" class="form-control" v-model="form.spec4_unit" placeholder="e.g. Grams" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Bottom Description</label>
+                                                        <input type="text" class="form-control" v-model="form.spec4_desc" placeholder="e.g. TOTAL SYSTEM WEIGHT" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                                                                                <!-- Features Tab (Section 3) -->
+                                <div class="tab-pane fade" id="custom-tabs-features" role="tabpanel"
+                                    aria-labelledby="tab-features">
+                                    <div class="card card-outline card-primary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">Header & Parallax Banner (Section 3)</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 form-group">
+                                                    <label>Badge / Tag</label>
+                                                    <input type="text" class="form-control" v-model="form.features_badge"
+                                                        placeholder="e.g. FEATURES" />
+                                                </div>
+                                                <div class="col-md-8 form-group">
+                                                    <label>Main Title</label>
+                                                    <input type="text" class="form-control" v-model="form.features_title"
+                                                        placeholder="e.g. Precision Engineered Details" />
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <label>Main Description</label>
+                                                    <textarea class="form-control" rows="2" v-model="form.features_description"
+                                                        placeholder="The product is a masterclass in industrial design..."></textarea>
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <label>Features Parallax Background Image</label>
+                                                    <Vue3Dropzone v-model="featuresImageFile" :allowSelectOnPreview="true" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card card-outline card-secondary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">3-Column Glassmorphism Feature Cards</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 border-right">
+                                                    <h6 class="font-weight-bold text-primary mb-2">Card 01</h6>
+                                                    <div class="form-group">
+                                                        <label>Icon Class (e.g. bi bi-shield-lock)</label>
+                                                        <input type="text" class="form-control" v-model="form.feature1_icon"
+                                                            placeholder="bi bi-shield-lock" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Title</label>
+                                                        <input type="text" class="form-control" v-model="form.feature1_title"
+                                                            placeholder="e.g. Medical-Grade Facial Seal" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control" rows="3" v-model="form.feature1_desc"
+                                                            placeholder="Hypoallergenic LSR silicone ensures..."></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 border-right">
+                                                    <h6 class="font-weight-bold text-primary mb-2">Card 02</h6>
+                                                    <div class="form-group">
+                                                        <label>Icon Class (e.g. bi bi-lightbulb)</label>
+                                                        <input type="text" class="form-control" v-model="form.feature2_icon"
+                                                            placeholder="bi bi-lightbulb" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Title</label>
+                                                        <input type="text" class="form-control" v-model="form.feature2_title"
+                                                            placeholder="e.g. Active Feedback Ring" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control" rows="3" v-model="form.feature2_desc"
+                                                            placeholder="Integrated LED halo provides..."></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h6 class="font-weight-bold text-primary mb-2">Card 03</h6>
+                                                    <div class="form-group">
+                                                        <label>Icon Class (e.g. bi bi-funnel)</label>
+                                                        <input type="text" class="form-control" v-model="form.feature3_icon"
+                                                            placeholder="bi bi-funnel" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Title</label>
+                                                        <input type="text" class="form-control" v-model="form.feature3_title"
+                                                            placeholder="e.g. Advanced HEPA Filtration" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control" rows="3" v-model="form.feature3_desc"
+                                                            placeholder="Dual H13 Industrial filters capture..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Applications Tab -->
+                                <div class="tab-pane fade" id="custom-tabs-applications" role="tabpanel"
+                                    aria-labelledby="tab-applications">
+                                    <div class="card card-outline card-info mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">Applications Section Header</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6 form-group">
+                                                    <label>Section Title</label>
+                                                    <input type="text" class="form-control" v-model="form.applications_title"
+                                                        placeholder="e.g. Industrial Excellence, Personal Comfort" />
+                                                </div>
+                                                <div class="col-md-6 form-group">
+                                                    <label>Section Description</label>
+                                                    <textarea class="form-control" rows="2" v-model="form.applications_description"
+                                                        placeholder="Engineered to exceed safety standards in the most demanding environments..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">Application Cards Grid</h5>
+                                        <button type="button" class="btn btn-primary btn-sm" @click="addApplication">
+                                            <i class="fas fa-plus mr-1"></i> Add Application
+                                        </button>
+                                    </div>
+                                    <div v-if="!form.applications || form.applications.length === 0" class="alert alert-light border text-center py-4">
+                                        <i class="fas fa-layer-group fa-2x text-muted mb-2"></i>
+                                        <p class="text-muted mb-0">No application environments added yet. Click "Add Application" above to configure use-case cards.</p>
+                                    </div>
+                                    <div v-else class="table-responsive">
+                                        <table class="table table-bordered table-striped align-middle">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th style="width: 4%;">#</th>
+                                                    <th style="width: 18%;">Title <span class="text-danger">*</span></th>
+                                                    <th style="width: 20%;">Description</th>
+                                                    <th style="width: 12%;">Badge / Tag</th>
+                                                    <th style="width: 22%; min-width: 170px;">Background Image</th>
+                                                    <th style="width: 12%;">Layout Width</th>
+                                                    <th style="width: 7%;">Sort Order</th>
+                                                    <th style="width: 5%;" class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="(appItem, index) in form.applications" :key="index">
+                                                    <td class="text-center font-weight-bold">{{ index + 1 }}</td>
+                                                    <td>
+                                                        <input type="text" class="form-control" v-model="appItem.title" placeholder="e.g. R&D Laboratories" />
+                                                    </td>
+                                                    <td>
+                                                        <textarea class="form-control" rows="2" v-model="appItem.description" placeholder="Application description..."></textarea>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control" v-model="appItem.badge" placeholder="e.g. OPTIMIZED FOR DAILY COMMUTE" />
+                                                    </td>
+                                                    <td>
+                                                        <div style="min-width: 150px;">
+                                                            <Vue3Dropzone v-model="appItem.bg_image_file" :allowSelectOnPreview="true" />
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-control" v-model="appItem.grid_width">
+                                                            <option value="col-lg-8">2/3 Width (col-lg-8)</option>
+                                                            <option value="col-lg-4">1/3 Width (col-lg-4)</option>
+                                                            <option value="col-12">Full Width (col-12)</option>
+                                                            <option value="col-lg-6">Half Width (col-lg-6)</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" min="0" class="form-control" v-model.number="appItem.sort_order" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-danger btn-sm" @click="removeApplication(index)" title="Remove Application">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Technology Tab -->
+                                <div class="tab-pane fade" id="custom-tabs-technology" role="tabpanel"
+                                    aria-labelledby="tab-technology">
+                                    <div class="card card-outline card-primary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">Header & Parallax Banner</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 form-group">
+                                                    <label>Badge / Tag</label>
+                                                    <input type="text" class="form-control" v-model="form.technology_badge"
+                                                        placeholder="e.g. TECHNOLOGY" />
+                                                </div>
+                                                <div class="col-md-8 form-group">
+                                                    <label>Main Title</label>
+                                                    <input type="text" class="form-control" v-model="form.technology_title"
+                                                        placeholder="e.g. The Physics of Pure Air" />
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <label>Main Description</label>
+                                                    <textarea class="form-control" rows="2" v-model="form.technology_description"
+                                                        placeholder="Beyond simple filtration..."></textarea>
+                                                </div>
+                                                <div class="col-md-6 form-group">
+                                                    <label>Technology Parallax Background Image</label>
+                                                    <Vue3Dropzone v-model="technologyImageFile" :allowSelectOnPreview="true" />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label>Parallax Glassmorphism Card Title</label>
+                                                        <input type="text" class="form-control" v-model="form.technology_card_title"
+                                                            placeholder="e.g. ACTIVE POSITIVE PRESSURE" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Parallax Glassmorphism Card Description</label>
+                                                        <textarea class="form-control" rows="2" v-model="form.technology_card_description"
+                                                            placeholder="Smart sensors detect inhalation resistance..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card card-outline card-secondary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">3-Column Numbered Features Grid</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 border-right">
+                                                    <h6 class="font-weight-bold text-primary mb-2">01 Feature</h6>
+                                                    <div class="form-group">
+                                                        <label>Title</label>
+                                                        <input type="text" class="form-control" v-model="form.tech_feature1_title"
+                                                            placeholder="e.g. TURBULENT FLOW CONTROL" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control" rows="2" v-model="form.tech_feature1_desc"
+                                                            placeholder="Internal ducting is modeled using..."></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4 border-right">
+                                                    <h6 class="font-weight-bold text-primary mb-2">02 Feature</h6>
+                                                    <div class="form-group">
+                                                        <label>Title</label>
+                                                        <input type="text" class="form-control" v-model="form.tech_feature2_title"
+                                                            placeholder="e.g. PARTICULATE SENSING" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control" rows="2" v-model="form.tech_feature2_desc"
+                                                            placeholder="Integrated laser-based sensors scan..."></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <h6 class="font-weight-bold text-primary mb-2">03 Feature</h6>
+                                                    <div class="form-group">
+                                                        <label>Title</label>
+                                                        <input type="text" class="form-control" v-model="form.tech_feature3_title"
+                                                            placeholder="e.g. BIO-MECHANICAL FIT" />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control" rows="2" v-model="form.tech_feature3_desc"
+                                                            placeholder="The structural chassis is crafted from..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- FAQs Tab -->
+                                <div class="tab-pane fade" id="custom-tabs-faqs" role="tabpanel"
+                                    aria-labelledby="tab-faqs">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">Product Frequently Asked Questions</h5>
+                                        <button type="button" class="btn btn-primary btn-sm" @click="addFaq">
+                                            <i class="fas fa-plus mr-1"></i> Add FAQ
+                                        </button>
+                                    </div>
+                                    <div v-if="!form.faqs || form.faqs.length === 0" class="alert alert-light border text-center py-4">
+                                        <i class="fas fa-question-circle fa-2x text-muted mb-2"></i>
+                                        <p class="text-muted mb-0">No FAQs added for this product yet. Click "Add FAQ" above to add one.</p>
+                                    </div>
+                                    <div v-else class="table-responsive">
+                                        <table class="table table-bordered table-striped align-middle">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th style="width: 5%;">#</th>
+                                                    <th style="width: 35%;">Question <span class="text-danger">*</span></th>
+                                                    <th style="width: 45%;">Answer <span class="text-danger">*</span></th>
+                                                    <th style="width: 10%;">Sort Order</th>
+                                                    <th style="width: 5%;" class="text-center">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="(faq, index) in form.faqs" :key="index">
+                                                    <td class="text-center font-weight-bold">{{ index + 1 }}</td>
+                                                    <td>
+                                                        <input type="text" class="form-control" v-model="faq.question" placeholder="e.g. How long do filters last?" />
+                                                    </td>
+                                                    <td>
+                                                        <textarea class="form-control" rows="2" v-model="faq.answer" placeholder="Enter detailed answer..."></textarea>
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" min="0" class="form-control" v-model.number="faq.sort_order" />
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-danger btn-sm" @click="removeFaq(index)" title="Remove FAQ">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
                                 <!-- Images Tab -->
                                 <div class="tab-pane fade" id="custom-tabs-images" role="tabpanel"
                                     aria-labelledby="tab-images">
@@ -414,6 +990,7 @@ import DashboardHeader from '@/components/DashboardHeader.vue';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 import { useRouter } from 'vue-router';
 import { useToast } from '@/composables/useToast';
+import { generateSlug } from '@/layouts/helpers/helpers';
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import Multiselect from '@vueform/multiselect';
 import '@vueform/multiselect/themes/default.css';
@@ -432,6 +1009,7 @@ const selectedOptionToAdd = ref("");
 
 const form = ref({
     name: '',
+    slug: '',
     model: '',
     product_code: '',
     brand_id: '',
@@ -447,6 +1025,70 @@ const form = ref({
     date_available: '',
     options: [],
     attributes: [],
+    faqs: [],
+    applications: [],
+
+    specs_badge: '',
+    specs_title: '',
+    specs_description: '',
+    spec1_icon: 'bi bi-shield-check',
+    spec1_badge: 'FILTRATION',
+    spec1_value: '',
+    spec1_unit: '',
+    spec1_desc: '',
+    spec2_icon: 'bi bi-wind',
+    spec2_badge: 'VELOCITY',
+    spec2_value: '',
+    spec2_unit: '',
+    spec2_desc: '',
+    spec3_icon: 'bi bi-battery-charging',
+    spec3_badge: 'ENDURANCE',
+    spec3_value: '',
+    spec3_unit: '',
+    spec3_desc: '',
+    spec4_icon: 'bi bi-box-seam',
+    spec4_badge: 'MASS',
+    spec4_value: '',
+    spec4_unit: '',
+    spec4_desc: '',
+
+    features_badge: '',
+    features_title: '',
+    features_description: '',
+    feature1_icon: 'bi bi-shield-lock',
+    feature1_title: '',
+    feature1_desc: '',
+    feature2_icon: 'bi bi-lightbulb',
+    feature2_title: '',
+    feature2_desc: '',
+    feature3_icon: 'bi bi-funnel',
+    feature3_title: '',
+    feature3_desc: '',
+
+    applications_title: '',
+    applications_description: '',
+
+    technology_badge: '',
+    technology_title: '',
+    technology_description: '',
+    technology_card_title: '',
+    technology_card_description: '',
+    tech_feature1_title: '',
+    tech_feature1_desc: '',
+    tech_feature2_title: '',
+    tech_feature2_desc: '',
+    tech_feature3_title: '',
+    tech_feature3_desc: '',
+
+    // Overview Section Fields (Section 1)
+    overview_title: '',
+    overview_description: '',
+    overview_feature1_icon: 'bi bi-shield-check',
+    overview_feature1_title: '',
+    overview_feature1_desc: '',
+    overview_feature2_icon: 'bi bi-buildings',
+    overview_feature2_title: '',
+    overview_feature2_desc: '',
 
     description: '',
     tag: '',
@@ -470,6 +1112,10 @@ const docPdfFile = ref(null);
 const safetyPdfFile = ref(null);
 const instPdfFile = ref(null);
 const descImageFile = ref(null);
+const overviewImageFile = ref(null);
+const specsImageFile = ref(null);
+const featuresImageFile = ref(null);
+const technologyImageFile = ref(null);
 
 onMounted(async () => {
     try {
@@ -554,6 +1200,38 @@ const removeAttributeRow = (index) => {
     form.value.attributes.splice(index, 1);
 };
 
+const addApplication = () => {
+    if (!form.value.applications) form.value.applications = [];
+    const len = form.value.applications.length;
+    form.value.applications.push({
+        title: '',
+        description: '',
+        badge: '',
+        bg_image: '',
+        image: '',
+        bg_image_file: null,
+        grid_width: len === 0 ? 'col-lg-8' : (len === 1 ? 'col-lg-4' : 'col-12'),
+        sort_order: len
+    });
+};
+
+const removeApplication = (index) => {
+    form.value.applications.splice(index, 1);
+};
+
+const addFaq = () => {
+    if (!form.value.faqs) form.value.faqs = [];
+    form.value.faqs.push({
+        question: '',
+        answer: '',
+        sort_order: form.value.faqs.length
+    });
+};
+
+const removeFaq = (index) => {
+    form.value.faqs.splice(index, 1);
+};
+
 const submitForm = async () => {
     if (!form.value.name || !form.value.model || form.value.price === '' || form.value.quantity === '') {
         toast.error("Please fill in all required fields.");
@@ -571,12 +1249,38 @@ const submitForm = async () => {
     Object.keys(form.value).forEach(key => {
         if (['options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids'].includes(key)) {
             formData.append(key, JSON.stringify(form.value[key]));
+        } else if (['faqs', 'applications'].includes(key)) {
+            // Handled separately below
         } else {
             if (form.value[key] !== null && form.value[key] !== '') {
                 formData.append(key, form.value[key]);
             }
         }
     });
+
+    if (form.value.applications && form.value.applications.length > 0) {
+        form.value.applications.forEach((appItem, index) => {
+            formData.append(`applications[${index}][title]`, appItem.title || '');
+            formData.append(`applications[${index}][description]`, appItem.description || '');
+            formData.append(`applications[${index}][badge]`, appItem.badge || '');
+            formData.append(`applications[${index}][grid_width]`, appItem.grid_width || 'col-lg-4');
+            formData.append(`applications[${index}][sort_order]`, appItem.sort_order || index);
+            if (appItem.bg_image_file && appItem.bg_image_file[0]) {
+                formData.append(`applications[${index}][bg_image_file]`, appItem.bg_image_file[0].file);
+            }
+            if (appItem.bg_image && typeof appItem.bg_image === 'string') {
+                formData.append(`applications[${index}][bg_image]`, appItem.bg_image);
+            }
+        });
+    }
+
+    if (form.value.faqs && form.value.faqs.length > 0) {
+        form.value.faqs.forEach((faq, index) => {
+            formData.append(`faqs[${index}][question]`, faq.question || '');
+            formData.append(`faqs[${index}][answer]`, faq.answer || '');
+            formData.append(`faqs[${index}][sort_order]`, faq.sort_order || index);
+        });
+    }
 
     if (mainImageFile.value && mainImageFile.value[0]) {
         formData.append('main_image', mainImageFile.value[0].file);
@@ -592,22 +1296,10 @@ const submitForm = async () => {
     if (safetyPdfFile.value && safetyPdfFile.value[0]) formData.append('safety_pdf', safetyPdfFile.value[0].file);
     if (instPdfFile.value && instPdfFile.value[0]) formData.append('instructions_pdf', instPdfFile.value[0].file);
     if (descImageFile.value && descImageFile.value[0]) formData.append('description_image', descImageFile.value[0].file);
-
-    form.value.options.forEach((opt, index) => {
-        formData.append(`options[${index}][option_id]`, opt.option_id);
-        formData.append(`options[${index}][option_value_id]`, opt.option_value_id);
-        formData.append(`options[${index}][quantity]`, opt.quantity);
-        formData.append(`options[${index}][subtract]`, opt.subtract);
-        formData.append(`options[${index}][price_prefix]`, opt.price_prefix);
-        formData.append(`options[${index}][price]`, opt.price || 0);
-    });
-
-    form.value.attributes.forEach((attr, index) => {
-        formData.append(`attributes[${index}][attribute_group_id]`, attr.attribute_group_id);
-        formData.append(`attributes[${index}][name]`, attr.name);
-        formData.append(`attributes[${index}][details]`, attr.details || '');
-        formData.append(`attributes[${index}][sort_order]`, attr.sort_order || 0);
-    });
+    if (overviewImageFile.value && overviewImageFile.value[0]) formData.append('overview_image', overviewImageFile.value[0].file);
+    if (specsImageFile.value && specsImageFile.value[0]) formData.append('specs_image', specsImageFile.value[0].file);
+    if (featuresImageFile.value && featuresImageFile.value[0]) formData.append('features_image', featuresImageFile.value[0].file);
+    if (technologyImageFile.value && technologyImageFile.value[0]) formData.append('technology_image', technologyImageFile.value[0].file);
 
     try {
         await axios.post('/api/products', formData, {

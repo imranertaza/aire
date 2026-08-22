@@ -120,6 +120,7 @@ import axios from 'axios';
 import { onMounted, reactive, ref, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useToast } from '@/composables/useToast';
+import { getImageUrl } from '../../../layouts/helpers/helpers';
 
 const toast = useToast();
 const router = useRouter();
@@ -161,7 +162,7 @@ const fetchSettings = async () => {
         }
 
         if (data.image) {
-            previews.value = [`/images/payment/${data.image}`];
+            previews.value = [getImageUrl(data.image)];
         }
     } catch (error) {
         toast.error('Failed to load settings.');

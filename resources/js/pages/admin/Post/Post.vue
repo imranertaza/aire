@@ -31,54 +31,30 @@
                   <td class="align-middle">{{ truncateText(post.post_title, 20) }}</td>
                   <td class="align-middle">{{ truncateText(post.short_des, 50) }}</td>
                   <td class="align-middle">
-                    <img
-                      v-if="post.f_image"
-                      draggable="false"
-                      :src="getImageCacheUrl(post.f_image)"
-                      alt="Post Image"
-                      height="50"
-                      class="rounded"
-                    />
+                    <img v-if="post.f_image" draggable="false" :src="getImageCacheUrl(post.f_image)" alt="Post Image"
+                      height="50" class="rounded" />
                   </td>
-                  <td
-                    v-if="authStore.hasPermission('publish-posts')"
-                    class="align-middle"
-                  >
-                    <select
-                      v-model="post.status"
-                      @change="updateStatus(post)"
-                      class="custom-select"
-                      :class="
-                        post.status == 1
-                          ? 'bg-success text-white'
-                          : 'bg-transparent text-dark'
-                      "
-                    >
+                  <td v-if="authStore.hasPermission('publish-posts')" class="align-middle">
+                    <select v-model="post.status" @change="updateStatus(post)" class="custom-select" :class="post.status == 1
+                        ? 'bg-success text-white'
+                        : 'bg-transparent text-dark'
+                      ">
                       <option :value="1">Active</option>
                       <option :value="0">Inactive</option>
                     </select>
                   </td>
                   <td class="align-middle">
                     <div class="d-flex">
-                      <router-link
-                        v-if="authStore.hasPermission('view-posts')"
-                        :to="{ name: 'ShowPost', params: { id: post.id } }"
-                        class="btn btn-sm btn-outline-dark"
-                      >
+                      <router-link v-if="authStore.hasPermission('view-posts')"
+                        :to="{ name: 'ShowPost', params: { id: post.id } }" class="btn btn-sm btn-outline-dark">
                         <i class="fas fa-eye"></i>
                       </router-link>
-                      <router-link
-                        v-if="authStore.hasPermission('edit-posts')"
-                        :to="{ name: 'UpdatePost', params: { id: post.id } }"
-                        class="ml-2 btn btn-sm btn-outline-info"
-                      >
+                      <router-link v-if="authStore.hasPermission('edit-posts')"
+                        :to="{ name: 'UpdatePost', params: { id: post.id } }" class="ml-2 btn btn-sm btn-outline-info">
                         <i class="fas fa-pencil-alt"></i>
                       </router-link>
-                      <button
-                        v-if="authStore.hasPermission('delete-posts')"
-                        class="ml-2 btn btn-sm btn-outline-danger"
-                        @click="confirmDelete(post)"
-                      >
+                      <button v-if="authStore.hasPermission('delete-posts')" class="ml-2 btn btn-sm btn-outline-danger"
+                        @click="confirmDelete(post)">
                         <i class="fas fa-trash-alt"></i>
                       </button>
                     </div>

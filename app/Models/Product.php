@@ -21,6 +21,27 @@ class Product extends Model
         'average_feedback' => 'integer',
     ];
 
+    protected static function booted()
+    {
+        static::saving(function ($product) {
+            if (empty($product->slug) && !empty($product->name)) {
+                $baseSlug = \Illuminate\Support\Str::slug($product->name);
+                $slug = $baseSlug;
+                $count = 1;
+                while (static::where('slug', $slug)->where('id', '!=', $product->id ?? 0)->exists()) {
+                    $slug = $baseSlug . '-' . $count;
+                    $count++;
+                }
+                $product->slug = $slug;
+            }
+        });
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
     // ========================================
     // Relationships
     // ========================================
@@ -43,6 +64,11 @@ class Product extends Model
     public function description()
     {
         return $this->hasOne(ProductDescription::class);
+    }
+
+    public function overview()
+    {
+        return $this->hasOne(ProductOverview::class);
     }
 
     public function freeDelivery()
@@ -78,6 +104,16 @@ class Product extends Model
     public function productAttributes()
     {
         return $this->hasMany(ProductAttribute::class);
+    }
+
+    public function applications()
+    {
+        return $this->hasMany(ProductApplication::class)->orderBy('sort_order');
+    }
+
+    public function faqs()
+    {
+        return $this->hasMany(ProductFaq::class)->orderBy('sort_order');
     }
 
     public function images()

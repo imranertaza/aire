@@ -13,7 +13,6 @@ class Country extends Model
         return $this->hasMany(Zone::class);
     }
 
-    // Scope for active countries only
     public function scopeActive($query)
     {
         return $query->where('status', true);

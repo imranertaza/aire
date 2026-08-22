@@ -1,0 +1,350 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================================
+   AIRE INDUSTRIES — DESIGN TOKENS (CSS CUSTOM PROPERTIES)
+   Single source of truth for all colors, typography & spacing.
+   ============================================================ */
+:root {
+    /* ── Brand / Primary ─────────────────────────────────── */
+    --color-primary: #1d4ed8;
+    --color-primary-hover: #1e40af;
+    --color-primary-light: #2563eb;
+    --color-primary-bg: #eff6ff;
+    /* active bg */
+    --color-primary-icon: #dbeafe;
+    /* icon box active bg */
+    --color-primary-muted: #60a5fa;
+    /* active small text */
+
+    /* ── Neutral — Dark ──────────────────────────────────── */
+    --color-dark: #0f172a;
+    --color-dark-alt: #1e293b;
+    --color-dark-mid: #334155;
+
+    /* ── Neutral — Mid ───────────────────────────────────── */
+    --color-muted: #64748b;
+    --color-muted-mid: #94a3b8;
+    --color-muted-light: #cbd5e1;
+
+    /* ── Neutral — Surface ───────────────────────────────── */
+    --color-white: #ffffff;
+    --color-bg: #f8fafc;
+    --color-bg-alt: #f1f5f9;
+    --color-bg-input: #232934;
+
+    /* ── Border ──────────────────────────────────────────── */
+    --color-border: #e2e8f0;
+
+    /* ── Footer ──────────────────────────────────────────── */
+    --color-footer-bg: #0b0b0b;
+    --color-footer-dark: #0f0f0f;
+    --color-footer-darker: #1c212a;
+    --color-footer-card: #151515;
+    --color-footer-icon-bg: #262626;
+    --color-footer-hr: #333333;
+    --color-footer-text: #a3a3a3;
+    --color-footer-subtitle: #737373;
+    --color-footer-input: #222934;
+
+    /* ── Transparent overlays (rgba tokens) ─────────────── */
+    --color-white-60: rgba(255, 255, 255, 0.60);
+    --color-white-50: rgba(255, 255, 255, 0.50);
+    --color-white-20: rgba(255, 255, 255, 0.20);
+    --color-white-15: rgba(255, 255, 255, 0.15);
+    --color-white-12: rgba(255, 255, 255, 0.12);
+    --color-white-10: rgba(255, 255, 255, 0.10);
+    --color-white-08: rgba(255, 255, 255, 0.08);
+    --color-white-05: rgba(255, 255, 255, 0.05);
+    --color-white-03: rgba(255, 255, 255, 0.03);
+
+    --color-dark-shadow-sm: rgba(15, 23, 42, 0.04);
+    --color-dark-shadow: rgba(15, 23, 42, 0.08);
+    --color-dark-shadow-md: rgba(15, 23, 42, 0.12);
+
+    --color-primary-shadow: rgba(29, 78, 216, 0.20);
+    --color-primary-shadow-md: rgba(29, 78, 216, 0.30);
+    --color-primary-glow: rgba(37, 99, 235, 0.40);
+
+    /* ── Legacy aliases (kept for backwards compat) ─────── */
+    --primary-color: var(--color-primary);
+    --primary-hover: var(--color-primary-hover);
+    --bg-color: var(--color-bg);
+    --text-dark: var(--color-dark);
+    --text-muted: var(--color-muted);
+    --border-color: var(--color-border);
+    --active-bg: var(--color-primary-bg);
+
+    /* ── Typography Scale ────────────────────────────────── */
+    --fs-h1: 24px;
+    --fs-h2: 20px;
+    --fs-h3: 18px;
+    --fs-body: 14px;
+    --fs-sm: 12px;
+    --fs-xs: 10px;
+}
+
+/* ── Smooth Scroll ───────────────────────────────────────── */
+html {
+    scroll-behavior: smooth !important;
+}
+
+/* Lenis Smooth Scroll */
+html.lenis,
+html.lenis body {
+    height: auto;
+}
+
+.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent],
+[data-lenis-prevent],
+.overflow-y-auto {
+    overscroll-behavior: contain !important;
+    touch-action: pan-y;
+
+}
+
+.lenis.lenis-stopped {
+    overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+    pointer-events: none;
+}
+
+html,
+body {
+    overflow-x: clip;
+    max-width: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif !important;
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    background-color: var(--color-bg);
+    color: var(--color-dark);
+}
+
+/* ── Heading Scale ───────────────────────────────────────── */
+h1,
+.h1 {
+    font-size: var(--fs-h1);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.3px;
+}
+
+h2,
+.h2 {
+    font-size: var(--fs-h2);
+    font-weight: 700;
+    line-height: 1.30;
+    letter-spacing: -0.2px;
+}
+
+h3,
+.h3 {
+    font-size: var(--fs-h3);
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+h4,
+.h4 {
+    font-size: var(--fs-body);
+    font-weight: 600;
+    line-height: 1.40;
+}
+
+h5,
+.h5 {
+    font-size: var(--fs-body);
+    font-weight: 600;
+}
+
+h6,
+.h6 {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+}
+
+p {
+    font-size: var(--fs-body);
+    line-height: 1.6;
+}
+
+small,
+.small {
+    font-size: var(--fs-sm);
+}
+
+/* ── Utility Font-Size Classes ───────────────────────────── */
+.fs-24 {
+    font-size: 24px;
+}
+
+.fs-20 {
+    font-size: 20px;
+}
+
+.fs-18 {
+    font-size: 18px;
+}
+
+.fs-16 {
+    font-size: 16px;
+}
+
+.fs-15 {
+    font-size: 15px;
+}
+
+.fs-14 {
+    font-size: 14px;
+}
+
+.fs-13 {
+    font-size: 13px;
+}
+
+.fs-12 {
+    font-size: 12px;
+}
+
+.fs-11 {
+    font-size: 11px;
+}
+
+.fs-10 {
+    font-size: 10px;
+}
+
+.fs-32 {
+    font-size: 24px;
+}
+
+/* legacy → capped at h1 */
+
+/* ── Heading Alias Utilities ─────────────────────────────── */
+.title-1 {
+    font-size: 24px !important;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+.title-2 {
+    font-size: 20px !important;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+.title-3 {
+    font-size: 18px !important;
+    font-weight: 600;
+}
+
+/* ── Global Section Heading Utility Class ───────────────── */
+.section-heading,
+.section-main-heading,
+.hero-display-title {
+    font-family: var(--font-sans, 'Inter', sans-serif);
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -1.2px;
+    color: var(--color-dark);
+}
+
+.offcanvas {
+    z-index: 9999;
+}
+
+@media (max-width: 1199.98px) {
+
+    .section-heading,
+    .section-main-heading,
+    .hero-display-title {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 991.98px) {
+
+    .section-heading,
+    .section-main-heading,
+    .hero-display-title {
+        font-size: 26px;
+    }
+}
+
+@media (max-width: 575.98px) {
+
+    .section-heading,
+    .section-main-heading,
+    .hero-display-title {
+        font-size: 24px;
+    }
+}
+
+/* ── Text Helpers ────────────────────────────────────────── */
+.text-body {
+    font-size: var(--fs-body) !important;
+}
+
+.text-sm {
+    font-size: var(--fs-sm) !important;
+}
+
+.text-xs {
+    font-size: var(--fs-xs) !important;
+}
+
+/* Perfect Circular Header Action Badges */
+.header-count-badge,
+.cart-count-badge,
+.favorite-count-badge,
+.compare-count-badge {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    max-width: 18px;
+    max-height: 18px;
+    border-radius: 50% !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    text-align: center;
+    color: #ffffff !important;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transform: none !important;
+    z-index: 10;
+    box-sizing: border-box;
+}
+
+.header-count-badge.d-none,
+.cart-count-badge.d-none,
+.favorite-count-badge.d-none,
+.compare-count-badge.d-none {
+    display: none !important;
+}
+
+.cart-count-badge {
+    background-color: #2563eb !important;
+}
+
+.favorite-count-badge,
+.compare-count-badge {
+    background-color: #ef4444 !important;
+}

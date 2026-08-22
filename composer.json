@@ -37,7 +37,8 @@
         },
         "files": [
             "app/Helpers/ApiResponse.php",
-            "app/Helpers/helper.php"
+            "app/Helpers/helper.php",
+            "app/Helpers/ThemeHelper.php"
         ]
     },
     "autoload-dev": {

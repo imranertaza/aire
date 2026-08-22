@@ -28,6 +28,7 @@ Dkaka-1000, Bangladesh', 'createdBy' => $userId, 'updatedBy' => $userId],
             ['label' => 'store_logo', 'title' => 'Store Logo', 'value' => 'https://placehold.co/340x46', 'createdBy' => $userId, 'updatedBy' => $userId],
             ['label' => 'store_icon', 'title' => 'Store Icon', 'value' => 'https://placehold.co/60x60', 'createdBy' => $userId, 'updatedBy' => $userId],
             ['label' => 'footer_logo', 'title' => 'Footer Logo', 'value' => 'https://placehold.co/340x46', 'createdBy' => $userId, 'updatedBy' => $userId],
+            ['label' => 'footer_description', 'title' => 'Footer Description', 'value' => 'Technological mastery in every breath. Leading the future of high-purity air environments for a healthier planet.', 'createdBy' => $userId, 'updatedBy' => $userId],
             ['label' => 'breadcrumb', 'title' => 'Footer Logo', 'value' => 'https://placehold.co/1351x300', 'createdBy' => $userId, 'updatedBy' => $userId],
 
             // Mail settings

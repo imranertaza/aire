@@ -48,34 +48,39 @@ class DatabaseSeeder extends Seeder
         // 3. E-Commerce Prerequisites & Settings
         $this->call(BrandSeeder::class);
         $this->call(ProductCategorySeeder::class);
+        $this->call(ProductsForEveryCategorySeeder::class);
+        $this->call(ProductAttributesAndOptionsSeeder::class);
         $this->call(OptionSeeder::class);
         $this->call(OptionValueSeeder::class);
         $this->call(ProductAttributeGroupSeeder::class);
         $this->call(ShippingMethodSeeder::class);
         $this->call(ShippingSettingsSeeder::class);
         $this->call(WeightShippingSettingsSeeder::class);
+        $this->call(CountrySeeder::class);
+        $this->call(ZoneSeeder::class);
         $this->call(GeoZoneSeeder::class);
         $this->call(GeoZoneShippingRateSeeder::class);
+        $this->call(GeoZoneDetailSeeder::class);
         $this->call(PaymentMethodSeeder::class);
 
-        // 4. Products & Catalog Details (depends on Store, Brand, ProductCategory, Option, OptionValue, ProductAttributeGroup)
+        // 4. Products & Catalog Details
         $this->call(ProductSeeder::class);
-        $this->call(ProductAttributeSeeder::class);
-        $this->call(ProductOptionSeeder::class);
-        $this->call(ProductToCategorySeeder::class);
-
-        // 5. Customers & Customer Interactions
-        $this->call(CustomerSeeder::class);
         $this->call(ProductFeedbackSeeder::class);
+        $this->call(ProductFaqSeeder::class);
+        $this->call(ProductOverviewSeeder::class);
+        $this->call(ProductRelatedSeeder::class);
+        $this->call(ProductApplicationSeeder::class);
+        $this->call(ProductTagSeeder::class);
+        $this->call(FixProductImagesSeeder::class);
 
-        // 6. Coupons & Offers (depends on ProductCategory, Product, ShippingMethod)
+        // 5. Coupons & Offers
         $this->call(CuponSeeder::class);
         $this->call(CouponCategorySeeder::class);
         $this->call(CouponProductSeeder::class);
         $this->call(CouponShippingSeeder::class);
         $this->call(OfferSeeder::class);
 
-        // 7. Orders & Additional Modules (depends on Customer, Product, PaymentMethod)
+        // 6. Orders & Additional Modules
         $this->call(OrderSeeder::class);
         $this->call(NewModulesSeeder::class);
 

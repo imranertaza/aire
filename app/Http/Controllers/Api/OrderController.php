@@ -52,11 +52,11 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = Order::with([
-            'orderStatus', 
-            'items.product', 
+            'orderStatus',
+            'items.product',
             'items.options',
-            'options', 
-            'histories.orderStatus', 
+            'options',
+            'histories.orderStatus',
             'cardDetail',
             'customer'
         ])->findOrFail($id);
@@ -151,7 +151,7 @@ class OrderController extends Controller
                     $pointModule = Module::with('settings')->where('module_key', 'point')->first();
                     if ($pointModule && $pointModule->status == 1) {
                         $setting = $pointModule->settings->where('setting_key', 'point_par_doller')->first();
-                        $multiplier = $setting ? (double)$setting->value : 1.0;
+                        $multiplier = $setting ? (float)$setting->value : 1.0;
 
                         $customer = Customer::find($order->customer_id);
                         if ($customer) {

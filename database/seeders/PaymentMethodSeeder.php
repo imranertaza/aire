@@ -67,11 +67,10 @@ class PaymentMethodSeeder extends Seeder
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazinggadgets@gmail.com'
                 ]
             ],
-            [
-                'id' => 6,
+            [\n                'id' => 6,
                 'name' => 'Bitcoin',
                 'code' => 'bitcoin',
-                'image' => 'bitcoin_1693229111_ab1db8a222a0b4082eb1.png',
+                'image' => 'payment/bitcoin_1693229111_ab1db8a222a0b4082eb1.png',
                 'status' => 0,
                 'settings' => [
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazinggadgets@gmail.com'
@@ -81,7 +80,7 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 7,
                 'name' => 'Credit Card / Debit Card',
                 'code' => 'credit_card',
-                'image' => 'cash_1759055918_f57b29fe04b4f69c505b.png',
+                'image' => 'payment/cash_1759055918_f57b29fe04b4f69c505b.png',
                 'status' => 1,
                 'settings' => []
             ],
@@ -89,7 +88,7 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 8,
                 'name' => 'eWallet',
                 'code' => 'u_wallet',
-                'image' => 'cash_1759055992_1743dfad6cce7df3aa71.png',
+                'image' => 'payment/cash_1759055992_1743dfad6cce7df3aa71.png',
                 'status' => 0,
                 'settings' => []
             ],
@@ -97,7 +96,7 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 9,
                 'name' => 'Stripe',
                 'code' => 'stripe',
-                'image' => 'stripe_1711190105_76334e85265e1bfe92f5.png',
+                'image' => 'payment/stripe_1711190105_76334e85265e1bfe92f5.png',
                 'status' => 1,
                 'settings' => [
                     'key' => '',
@@ -108,7 +107,7 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 10,
                 'name' => 'Ois Bizcraft',
                 'code' => 'oisbizcraft',
-                'image' => 'oisbizcraft_1733202301_f7de86d0599a71d8ccf9.jpg',
+                'image' => 'payment/oisbizcraft_1733202301_f7de86d0599a71d8ccf9.jpg',
                 'status' => 1,
                 'settings' => [
                     'api_key' => '',

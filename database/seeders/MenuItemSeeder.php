@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Menu;
 use App\Models\MenuItem;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class MenuItemSeeder extends Seeder
@@ -14,423 +13,179 @@ class MenuItemSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get existing menus
         $headerMenu = Menu::where('position', 'header')->first();
-        $footerMenu = Menu::where('position', 'footer')->get();
-        $footerMenu1 = $footerMenu[0]->id;
-        $footerMenu2 = $footerMenu[1]->id;
-        /**
-         * Header Menu Items
-         */
-        // fresh the table first
-        $home = MenuItem::updateOrCreate(
-            ['name' => 'Home'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'name'      => 'Home',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/',
-                'enabled'   => true,
-                'order'     => 1,
-            ]
-        );
+        $footerSolutions = Menu::where('name', 'SOLUTIONS')->where('position', 'footer')->first();
+        $footerProducts = Menu::where('name', 'PRODUCTS')->where('position', 'footer')->first();
+        $footerCompany = Menu::where('name', 'COMPANY')->where('position', 'footer')->first();
+        $footerResources = Menu::where('name', 'RESOURCES')->where('position', 'footer')->first();
+        $footerLegal = Menu::where('name', 'Footer Legal')->orWhere('position', 'footer_bottom')->first();
 
-        // About dropdown
-        $about = MenuItem::updateOrCreate(
-            ['name' => 'About'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'name'      => 'About',
-                'icon'      => 'fas fa-info-circle',
-                'link_type' => 'url',
-                'url'       => '#',
-                'enabled'   => true,
-                'order'     => 2,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'About Us'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $about->id,
-                'name'      => 'About Us',
-                'link_type' => 'url',
-                'url'       => '/pages/about-us',
-                'enabled'   => true,
-                'order'     => 1,
-            ]
-        );
-
-        MenuItem::updateOrCreate(
-            ['name' => 'History'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $about->id,
-                'name'      => 'History',
-                'link_type' => 'url',
-                'url'       => '/pages/history',
-                'enabled'   => true,
-                'order'     => 2,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'Executive Committee'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $about->id,
-                'name'      => 'Executive Committee',
-                'link_type' => 'url',
-                'url'       => '/executive-committee',
-                'enabled'   => true,
-                'order'     => 3,
-            ]
-        );
-
-        // Sports dropdown
-        $sports = MenuItem::updateOrCreate(
-            ['name' => 'Sports'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'name'      => 'Sports',
-                'icon'      => 'fas fa-futbol',
-                'link_type' => 'url',
-                'url'       => '/sports',
-                'enabled'   => true,
-                'order'     => 3,
-            ]
-        );
-         MenuItem::updateOrCreate(
-            ['name' => 'Athletics'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $sports->id,
-                'name'      => 'Athletics',
-                'link_type' => 'url',
-                'url'       => '/post-categories/athletics',
-                'enabled'   => true,
-                'order'     => 1,
-            ]
-        );
-         MenuItem::updateOrCreate(
-            ['name' => 'Football'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $sports->id,
-                'name'      => 'Football',
-                'link_type' => 'url',
-                'url'       => '/post-categories/football',
-                'enabled'   => true,
-                'order'     => 2,
-            ]
-        );
-         MenuItem::updateOrCreate(
-            ['name' => 'Cricket'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $sports->id,
-                'name'      => 'Cricket',
-                'link_type' => 'url',
-                'url'       => '/post-categories/cricket',
-                'enabled'   => true,
-                'order'     => 3,
-            ]
-        );
-         MenuItem::updateOrCreate(
-            ['name' => 'Badminton'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $sports->id,
-                'name'      => 'Badminton',
-                'link_type' => 'url',
-                'url'       => '/post-categories/badminton',
-                'enabled'   => true,
-                'order'     => 4,
-            ]
-        );
-         MenuItem::updateOrCreate(
-            ['name' => 'Swimming'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $sports->id,
-                'name'      => 'Swimming',
-                'link_type' => 'url',
-                'url'       => '/post-categories/swimming',
-                'enabled'   => true,
-                'order'     => 5,
-            ]
-        );
-        // Events & Fixtures dropdown
-        $events = MenuItem::updateOrCreate(
-            ['name' => 'Events & Fixtures'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'name'      => 'Events & Fixtures',
-                'icon'      => 'fas fa-calendar-alt',
-                'link_type' => 'url',
-                'url'       => '#',
-                'enabled'   => true,
-                'order'     => 4,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'Running Event'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $events->id,
-                'name'      => 'Running Event',
-                'link_type' => 'url',
-                'url'       => '/running-events',
-                'enabled'   => true,
-                'order'     => 1,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'Upcoming Event'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $events->id,
-                'name'      => 'Upcoming Event',
-                'link_type' => 'url',
-                'url'       => '/upcoming-events',
-                'enabled'   => true,
-                'order'     => 2,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'Match Fixtures'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $events->id,
-                'name'      => 'Match Fixtures',
-                'link_type' => 'url',
-                'url'       => '/match-fixtures',
-                'enabled'   => true,
-                'order'     => 3,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'Tournament Result'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $events->id,
-                'name'      => 'Tournament Result',
-                'link_type' => 'url',
-                'url'       => '/tournament-result',
-                'enabled'   => true,
-                'order'     => 4,
-            ]
-        );
-
-        // News & Updates dropdown
-        $news = MenuItem::updateOrCreate(
-            ['name' => 'News & Updates'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'name'      => 'News & Updates',
-                'icon'      => 'fas fa-newspaper',
-                'link_type' => 'url',
-                'url'       => '#',
-                'enabled'   => true,
-                'order'     => 5,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'Notice Board'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $news->id,
-                'name'      => 'Notice Board',
-                'link_type' => 'url',
-                'url'       => '/notice-board',
-                'enabled'   => true,
-                'order'     => 1,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'News'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $news->id,
-                'name'      => 'News',
-                'link_type' => 'url',
-                'url'       => '/news-and-updates',
-                'enabled'   => true,
-                'order'     => 2,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'Spotlights'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $news->id,
-                'name'      => 'Spotlights',
-                'link_type' => 'url',
-                'url'       => '/spotlights',
-                'enabled'   => true,
-                'order'     => 4,
-            ]
-        );
-        MenuItem::updateOrCreate(
-            ['name' => 'Blog'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'parent_id' => $news->id,
-                'name'      => 'Blog',
-                'link_type' => 'url',
-                'url'       => '/blogs',
-                'enabled'   => true,
-                'order'     => 5,
-            ]
-        );
-
-        // Gallery dropdown
-        $gallery = MenuItem::updateOrCreate(
-            ['name' => 'Gallery'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'name'      => 'Gallery',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/photo-gallery',
-                'enabled'   => true,
-                'order'     => 6,
-            ]
-        );
-        // Contact
-        MenuItem::updateOrCreate(
-            ['name' => 'Contact Us'],
-            [
-                'menu_id'   => $headerMenu->id,
-                'name'      => 'Contact Us',
-                'icon'      => 'fas fa-envelope',
-                'link_type' => 'url',
-                'url'       => '/pages/contact-us',
-                'enabled'   => true,
-                'order'     => 7,
-            ]
-        );
+        // Fallback if footer menus were named lowercase
+        if (!$footerSolutions) $footerSolutions = Menu::where('position', 'footer')->skip(0)->first();
+        if (!$footerProducts) $footerProducts = Menu::where('position', 'footer')->skip(1)->first();
+        if (!$footerCompany) $footerCompany = Menu::where('position', 'footer')->skip(2)->first();
+        if (!$footerResources) $footerResources = Menu::where('position', 'footer')->skip(3)->first();
 
         /**
-         * Footer Menu Items
+         * 1. Header Menu Items
          */
-        // Footer Menu Items
-        MenuItem::updateOrCreate(
-            ['name' => 'About Us', 'menu_id' => $footerMenu1],
-            [
-                'menu_id'   => $footerMenu1,
-                'name'      => 'About Us',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/pages/about-us',
-                'enabled'   => true,
-                'order'     => 1,
-            ]
-        );
+        if ($headerMenu) {
+            MenuItem::where('menu_id', $headerMenu->id)->delete();
 
-        MenuItem::updateOrCreate(
-            ['name' => 'History', 'menu_id' => $footerMenu1],
-            [
-                'menu_id'   => $footerMenu1,
-                'name'      => 'History',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/pages/history',
-                'enabled'   => true,
-                'order'     => 2,
-            ]
-        );
+            $headerItems = [
+                ['name' => 'Solutions', 'url' => '/category/solutions', 'order' => 1],
+                ['name' => 'Products', 'url' => '/category/products', 'order' => 2],
+                ['name' => 'Industries', 'url' => '/category/industries', 'order' => 3],
+                ['name' => 'Technologies', 'url' => '/category/technologies', 'order' => 4],
+                ['name' => 'Resources', 'url' => '/docs', 'order' => 5],
+                ['name' => 'About', 'url' => '/about', 'order' => 6],
+            ];
 
-        MenuItem::updateOrCreate(
-            ['name' => 'Mission & Vision', 'menu_id' => $footerMenu1],
-            [
-                'menu_id'   => $footerMenu1,
-                'name'      => 'Mission & Vision',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/pages/mission-vision',
-                'enabled'   => true,
-                'order'     => 3,
-            ]
-        );
+            foreach ($headerItems as $item) {
+                MenuItem::updateOrCreate(
+                    ['menu_id' => $headerMenu->id, 'name' => $item['name']],
+                    [
+                        'menu_id'   => $headerMenu->id,
+                        'name'      => $item['name'],
+                        'link_type' => 'url',
+                        'url'       => $item['url'],
+                        'enabled'   => true,
+                        'order'     => $item['order'],
+                    ]
+                );
+            }
+        }
 
-        MenuItem::updateOrCreate(
-            ['name' => 'BPC Committee', 'menu_id' => $footerMenu1],
-            [
-                'menu_id'   => $footerMenu1,
-                'name'      => 'BPC Committee',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/executive-committee',
-                'enabled'   => true,
-                'order'     => 4,
-            ]
-        );
+        /**
+         * 2. Footer Menu Column 1: SOLUTIONS
+         */
+        if ($footerSolutions) {
+            $solutionsItems = [
+                ['name' => 'Residential', 'url' => '/solutions', 'order' => 1],
+                ['name' => 'Commercial', 'url' => '/solutions', 'order' => 2],
+                ['name' => 'Healthcare', 'url' => '/solutions', 'order' => 3],
+                ['name' => 'Infrastructure', 'url' => '/solutions', 'order' => 4],
+                ['name' => 'Industrial', 'url' => '/solutions', 'order' => 5],
+                ['name' => 'Site Map', 'url' => '/solutions', 'order' => 6],
+            ];
 
-        MenuItem::updateOrCreate(
-            ['name' => 'FAQs', 'menu_id' => $footerMenu1],
-            [
-                'menu_id'   => $footerMenu1,
-                'name'      => 'FAQs',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/faqs',
-                'enabled'   => true,
-                'order'     => 5,
-            ]
-        );
+            foreach ($solutionsItems as $item) {
+                MenuItem::updateOrCreate(
+                    ['menu_id' => $footerSolutions->id, 'name' => $item['name']],
+                    [
+                        'menu_id'   => $footerSolutions->id,
+                        'name'      => $item['name'],
+                        'link_type' => 'url',
+                        'url'       => $item['url'],
+                        'enabled'   => true,
+                        'order'     => $item['order'],
+                    ]
+                );
+            }
+        }
 
+        /**
+         * 3. Footer Menu Column 2: PRODUCTS
+         */
+        if ($footerProducts) {
+            $productItems = [
+                ['name' => 'Residential', 'url' => '/product-filter?industry=residential', 'order' => 1],
+                ['name' => 'Commercial', 'url' => '/product-filter?industry=commercial', 'order' => 2],
+                ['name' => 'Healthcare', 'url' => '/product-filter?industry=healthcare', 'order' => 3],
+                ['name' => 'Infrastructure', 'url' => '/product-filter', 'order' => 4],
+                ['name' => 'Industrial', 'url' => '/product-filter', 'order' => 5],
+                ['name' => 'Site Map', 'url' => '/products', 'order' => 6],
+            ];
 
-        MenuItem::updateOrCreate(
-            ['name' => 'Corporate', 'menu_id' => $footerMenu2],
-            [
-                'menu_id'   => $footerMenu2,
-                'name'      => 'Corporate',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/corporate',
-                'enabled'   => true,
-                'order'     => 6,
-            ]
-        );
+            foreach ($productItems as $item) {
+                MenuItem::updateOrCreate(
+                    ['menu_id' => $footerProducts->id, 'name' => $item['name']],
+                    [
+                        'menu_id'   => $footerProducts->id,
+                        'name'      => $item['name'],
+                        'link_type' => 'url',
+                        'url'       => $item['url'],
+                        'enabled'   => true,
+                        'order'     => $item['order'],
+                    ]
+                );
+            }
+        }
 
-        MenuItem::updateOrCreate(
-            ['name' => 'Athletes', 'menu_id' => $footerMenu2],
-            [
-                'menu_id'   => $footerMenu2,
-                'name'      => 'Athletes',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/athletes',
-                'enabled'   => true,
-                'order'     => 7,
-            ]
-        );
+        /**
+         * 4. Footer Menu Column 3: COMPANY
+         */
+        if ($footerCompany) {
+            $companyItems = [
+                ['name' => 'About Us', 'url' => '/about', 'order' => 1],
+                ['name' => 'Sustainability', 'url' => '/about', 'order' => 2],
+                ['name' => 'Careers', 'url' => '/about', 'order' => 3],
+                ['name' => 'Global Locations', 'url' => '/about', 'order' => 4],
+            ];
 
-        MenuItem::updateOrCreate(
-            ['name' => 'Event', 'menu_id' => $footerMenu2],
-            [
-                'menu_id'   => $footerMenu2,
-                'name'      => 'Event',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/events',
-                'enabled'   => true,
-                'order'     => 8,
-            ]
-        );
+            foreach ($companyItems as $item) {
+                MenuItem::updateOrCreate(
+                    ['menu_id' => $footerCompany->id, 'name' => $item['name']],
+                    [
+                        'menu_id'   => $footerCompany->id,
+                        'name'      => $item['name'],
+                        'link_type' => 'url',
+                        'url'       => $item['url'],
+                        'enabled'   => true,
+                        'order'     => $item['order'],
+                    ]
+                );
+            }
+        }
 
-        MenuItem::updateOrCreate(
-            ['name' => 'Sports', 'menu_id' => $footerMenu2],
-            [
-                'menu_id'   => $footerMenu2,
-                'name'      => 'Sports',
-                'icon'      => '',
-                'link_type' => 'url',
-                'url'       => '/sports',
-                'enabled'   => true,
-                'order'     => 9,
-            ]
-        );
+        /**
+         * 5. Footer Menu Column 4: RESOURCES
+         */
+        if ($footerResources) {
+            $resourceItems = [
+                ['name' => 'Technology', 'url' => '/solutions', 'order' => 1],
+                ['name' => 'Monitoring', 'url' => '/solutions', 'order' => 2],
+                ['name' => 'Documentation', 'url' => '/docs', 'order' => 3],
+                ['name' => 'Compare Systems', 'url' => '/compare', 'order' => 4],
+            ];
+
+            foreach ($resourceItems as $item) {
+                MenuItem::updateOrCreate(
+                    ['menu_id' => $footerResources->id, 'name' => $item['name']],
+                    [
+                        'menu_id'   => $footerResources->id,
+                        'name'      => $item['name'],
+                        'link_type' => 'url',
+                        'url'       => $item['url'],
+                        'enabled'   => true,
+                        'order'     => $item['order'],
+                    ]
+                );
+            }
+        }
+
+        /**
+         * 6. Footer Legal Links (Bottom bar)
+         */
+        if ($footerLegal) {
+            $legalItems = [
+                ['name' => 'Privacy Policy', 'url' => '/docs', 'order' => 1],
+                ['name' => 'Terms of Service', 'url' => '/docs', 'order' => 2],
+            ];
+
+            foreach ($legalItems as $item) {
+                MenuItem::updateOrCreate(
+                    ['menu_id' => $footerLegal->id, 'name' => $item['name']],
+                    [
+                        'menu_id'   => $footerLegal->id,
+                        'name'      => $item['name'],
+                        'link_type' => 'url',
+                        'url'       => $item['url'],
+                        'enabled'   => true,
+                        'order'     => $item['order'],
+                    ]
+                );
+            }
+        }
     }
 }

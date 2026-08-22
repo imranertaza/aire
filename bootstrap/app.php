@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../app/Helpers/ThemeHelper.php';
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,7 +21,16 @@ return Application::configure(basePath: dirname(__DIR__))
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'compare/*',
+            'favorite/*',
+            'cart/*',
+            'api/*'
+        ]);
+
         $middleware->alias([
+            'customer.auth' => \App\Http\Middleware\CustomerAuth::class,
+            'customer.guest' => \App\Http\Middleware\CustomerGuest::class,
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             // ✅ Spatie permission middleware
             'role' => RoleMiddleware::class,

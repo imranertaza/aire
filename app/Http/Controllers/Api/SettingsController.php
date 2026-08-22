@@ -93,6 +93,7 @@ class SettingsController extends Controller
 
             // Brand
             'brand_name'          => 'sometimes|string|max:255',
+            'footer_description'  => 'sometimes|string|max:1000',
 
             // reCAPTCHA (these will update .env)
             'use_recaptcha'       => 'sometimes|in:0,1',

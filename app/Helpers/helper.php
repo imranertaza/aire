@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/ThemeHelper.php';
+
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
@@ -18,16 +20,24 @@ if (! function_exists('getImageUrl')) {
     {
         // Fallback if no path provided
         if (empty($path)) {
-            return asset('assets/images/default.svg');
+            return asset('themes/default/assets/img/airpro_mask_fb2.png');
         }
 
         // If already an absolute URL
         if (preg_match('/^https?:\/\//i', $path)) {
+            if (str_contains($path, 'placehold.co') || str_contains($path, 'placeholder')) {
+                return asset('themes/default/assets/img/airpro_mask_fb2.png');
+            }
             return $path;
         }
 
         // Normalize path
         $normalized = ltrim($path, '/');
+
+        // Check if file exists directly in public folder (e.g. themes/default/assets/img/...)
+        if (file_exists(public_path($normalized))) {
+            return asset($normalized);
+        }
 
         // Check if file exists in public storage
         if (Storage::disk('public')->exists($normalized)) {
@@ -35,7 +45,19 @@ if (! function_exists('getImageUrl')) {
             return asset("storage/{$normalized}");
         }
 
-        // Fallback if file not found
+        // Check if path starts with storage/
+        if (str_starts_with($normalized, 'storage/')) {
+            $sub = substr($normalized, 8);
+            if (Storage::disk('public')->exists($sub) || file_exists(public_path($normalized))) {
+                return asset($normalized);
+            }
+        }
+
+        // Fallback to real theme product asset
+        if (file_exists(public_path('themes/default/assets/img/airpro_mask_fb2.png'))) {
+            return asset('themes/default/assets/img/airpro_mask_fb2.png');
+        }
+
         return asset('assets/images/default.svg');
     }
 }
@@ -135,4 +157,22 @@ if (! function_exists('getImageCacheUrl')) {
         // Otherwise build dynamic resize route
         return rtrim($baseUrl, '/') . "/image/{$width}/{$height}/{$format}/" . ltrim($relativePath, '/');
     }
+}
+
+function getLimitedText(?string $text, $char = 100): string
+{
+    $text = strip_tags($text);
+
+    if (mb_strlen($text) <= $char) {
+        return $text;
+    }
+
+    $truncated = mb_substr($text, 0, $char);
+
+    $lastSpace = mb_strrpos($truncated, ' ');
+    if ($lastSpace !== false) {
+        $truncated = mb_substr($truncated, 0, $lastSpace);
+    }
+
+    return $truncated . '...';
 }

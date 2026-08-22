@@ -79,6 +79,12 @@
                                 <label class="form-label">Brand Name</label>
                                 <input v-model="form.brand_name" type="text" class="form-control" />
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Footer Description / Tagline</label>
+                                <textarea v-model="form.footer_description" class="form-control" rows="2"
+                                    placeholder="e.g. Technological mastery in every breath. Leading the future of high-purity air environments for a healthier planet."></textarea>
+                                <small class="text-muted">Displayed under the footer logo on the storefront.</small>
+                            </div>
                         </div>
                     </div>
 
@@ -356,6 +362,7 @@ const form = ref({
     phone: '',
     state: '',
     brand_name: '',
+    footer_description: '',
     mail_protocol: '',
     mail_address: '',
     send_from: '',

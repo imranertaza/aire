@@ -11,6 +11,10 @@ class ProductCategory extends Model
 {
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'features' => 'array',
+    ];
+
     protected static function booted()
     {
         static::saved(function ($category) {
@@ -76,5 +80,53 @@ class ProductCategory extends Model
     public function icon(): BelongsTo
     {
         return $this->belongsTo(Icon::class, 'icon_id');
+    }
+
+    /**
+     * Category Featured Products Pivot Entries
+     */
+    public function categoryFeaturedProducts(): HasMany
+    {
+        return $this->hasMany(CategoryFeaturedProduct::class, 'category_id');
+    }
+
+    /**
+     * Featured Top Products
+     */
+    public function featuredTopProducts()
+    {
+        return $this->belongsToMany(Product::class, 'category_featured_products', 'category_id', 'product_id')
+            ->wherePivot('position', 'top')
+            ->withPivot('sort_order')
+            ->orderBy('category_featured_products.sort_order');
+    }
+
+    /**
+     * Featured Middle Products
+     */
+    public function featuredMiddleProducts()
+    {
+        return $this->belongsToMany(Product::class, 'category_featured_products', 'category_id', 'product_id')
+            ->wherePivot('position', 'middle')
+            ->withPivot('sort_order')
+            ->orderBy('category_featured_products.sort_order');
+    }
+
+    /**
+     * Featured Bottom Products
+     */
+    public function featuredBottomProducts()
+    {
+        return $this->belongsToMany(Product::class, 'category_featured_products', 'category_id', 'product_id')
+            ->wherePivot('position', 'bottom')
+            ->withPivot('sort_order')
+            ->orderBy('category_featured_products.sort_order');
+    }
+    /**
+     * Associated Products
+     */
+    public function products()
+    {
+        return $this->belongsToMany(Product::class, 'product_to_categories', 'category_id', 'product_id');
     }
 }

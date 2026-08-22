@@ -23,6 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('icon_id')->nullable();
             $table->string('image', 255)->nullable();
             $table->string('alt_name', 255)->nullable();
+            $table->string('bg_color', 50)->nullable()->default('#00c853');
 
             // Boolean-like fields using tinyInteger (better performance than enum)
             $table->tinyInteger('header_menu')->default(0)

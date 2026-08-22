@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentMethodController extends Controller
 {
@@ -82,8 +83,9 @@ class PaymentMethodController extends Controller
         }
 
         if ($request->remove_image == 1 && !$request->hasFile('image')) {
-            if ($method->image && file_exists(public_path('images/payment/' . $method->image))) {
-                @unlink(public_path('images/payment/' . $method->image));
+            // Delete from storage/app/public/payment
+            if ($method->image) {
+                Storage::disk('public')->delete($method->image);
             }
             $method->image = null;
         }
@@ -93,17 +95,14 @@ class PaymentMethodController extends Controller
                 'image' => 'image|mimes:jpeg,png,jpg,gif,webp|max:2048'
             ]);
 
-            $file = $request->file('image');
-            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-
-            // Delete old image if exists
-            if ($method->image && file_exists(public_path('images/payment/' . $method->image))) {
-                @unlink(public_path('images/payment/' . $method->image));
+            // Delete old image from storage
+            if ($method->image) {
+                Storage::disk('public')->delete($method->image);
             }
 
-            // Move new image
-            $file->move(public_path('images/payment'), $filename);
-            $method->image = $filename;
+            // Store new image at storage/app/public/payment/{filename}
+            $path = $request->file('image')->store('payment', 'public');
+            $method->image = $path; // e.g. "payment/1234567890_abc.webp"
         }
 
         $method->save();

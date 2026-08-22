@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Menu;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class MenuSeeder extends Seeder
@@ -13,7 +12,7 @@ class MenuSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create Header menu
+        // 1. Header Menu
         Menu::updateOrCreate(
             ['name' => 'Main Header'],
             [
@@ -23,26 +22,54 @@ class MenuSeeder extends Seeder
             ]
         );
 
-        // Create Footer menu
+        // 2. AIRE Footer Menus (4 Columns)
         Menu::updateOrCreate(
-            ['name' => 'INFORMATION'],
+            ['name' => 'SOLUTIONS'],
             [
-                'name'     => 'INFORMATION',
-                'position' => 'footer',
-                'enabled'  => true,
-            ]
-        );
-        Menu::updateOrCreate(
-            ['name' => 'NEWS'],
-            [
-                'name'     => 'NEWS',
+                'name'     => 'SOLUTIONS',
                 'position' => 'footer',
                 'enabled'  => true,
             ]
         );
 
+        Menu::updateOrCreate(
+            ['name' => 'PRODUCTS'],
+            [
+                'name'     => 'PRODUCTS',
+                'position' => 'footer',
+                'enabled'  => true,
+            ]
+        );
 
-        // Create Floating Top menu
+        Menu::updateOrCreate(
+            ['name' => 'COMPANY'],
+            [
+                'name'     => 'COMPANY',
+                'position' => 'footer',
+                'enabled'  => true,
+            ]
+        );
+
+        Menu::updateOrCreate(
+            ['name' => 'RESOURCES'],
+            [
+                'name'     => 'RESOURCES',
+                'position' => 'footer',
+                'enabled'  => true,
+            ]
+        );
+
+        // 3. Footer Legal / Bottom Links
+        Menu::updateOrCreate(
+            ['name' => 'Footer Legal'],
+            [
+                'name'     => 'Footer Legal',
+                'position' => 'footer_bottom',
+                'enabled'  => true,
+            ]
+        );
+
+        // 4. Floating Top Menu
         Menu::updateOrCreate(
             ['name' => 'Floating Top Menu'],
             [
