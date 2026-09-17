@@ -7,19 +7,111 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
-/* Utility route for clearing all caches */
+/* =========================================================================
+| Browser Maintenance & Utility Routes
+| ========================================================================= */
 
+// Universal Cache & Image Clear
 Route::get('/clear', function () {
     Artisan::call('optimize:clear');
+    Artisan::call('cache:clear');
     Artisan::call('storage:link');
 
-    // Remove the public/cache directory
-    $cacheDir = public_path('cache');
-    if (File::exists($cacheDir)) {
-        File::deleteDirectory($cacheDir);
+    // Remove the public/cache directory & flush image keys
+    $deletedImages = 0;
+    if (class_exists(\App\Services\ImageService::class)) {
+        $deletedImages = \App\Services\ImageService::clearCache();
+    } else {
+        $cacheDir = public_path('cache');
+        if (File::exists($cacheDir)) {
+            File::deleteDirectory($cacheDir);
+        }
     }
 
-    return "Application cache cleared!";
+    return response()->json([
+        'status'  => true,
+        'message' => 'Application cache cleared, storage linked, and ' . $deletedImages . ' cached image(s) purged successfully!',
+        'cleared' => [
+            'config_cache'      => true,
+            'route_cache'       => true,
+            'view_cache'        => true,
+            'application_cache' => true,
+            'storage_symlink'   => true,
+            'image_cache_files' => $deletedImages,
+        ],
+    ]);
+});
+
+// Image Cache Clear Only
+Route::get('/clear-images', function () {
+    $deleted = \App\Services\ImageService::clearCache();
+    return response()->json([
+        'status'  => true,
+        'message' => "Image cache cleared successfully! Deleted {$deleted} cached image file(s).",
+    ]);
+});
+
+// Re-seed & Refresh CMS Sections (Hero, Benefits, Lifestyle, etc.)
+Route::get('/clear-sections', function () {
+    \Illuminate\Support\Facades\Cache::forget('all_sections');
+    \Illuminate\Support\Facades\Cache::forget('section_home_faq');
+    \Illuminate\Support\Facades\Cache::forget('section_home_lifestyle');
+    \Illuminate\Support\Facades\Cache::forget('section_home_benefits');
+    \Illuminate\Support\Facades\Cache::forget('section_why_choose_aire');
+    \Illuminate\Support\Facades\Cache::forget('section_trust_badges');
+    \Illuminate\Support\Facades\Cache::forget('section_home_video');
+    \Illuminate\Support\Facades\Cache::forget('section_home_new_arrival');
+    \Illuminate\Support\Facades\Cache::forget('section_home_customer_favorites');
+    \Illuminate\Support\Facades\Cache::forget('section_home_best_selling');
+    \Illuminate\Support\Facades\Cache::forget('section_home_living_hero');
+    \Illuminate\Support\Facades\Cache::forget('section_living_hero');
+    Artisan::call('db:seed', ['--class' => 'SectionSeeder', '--force' => true]);
+    return response()->json([
+        'status'  => true,
+        'message' => 'CMS sections re-seeded and cached successfully!',
+    ]);
+});
+
+// Re-seed & Refresh Sliders
+Route::get('/clear-sliders', function () {
+    \Illuminate\Support\Facades\Cache::forget('active_sliders');
+    Artisan::call('db:seed', ['--class' => 'SliderSeeder', '--force' => true]);
+    return response()->json([
+        'status'  => true,
+        'message' => 'Sliders re-seeded and cached successfully!',
+    ]);
+});
+
+// Storage Symlink Route
+Route::get('/storage-link', function () {
+    Artisan::call('storage:link');
+    return response()->json([
+        'status'  => true,
+        'message' => 'Storage symlink created/verified!',
+    ]);
+});
+
+// Production Cache & Optimize
+Route::get('/optimize', function () {
+    Artisan::call('optimize');
+    return response()->json([
+        'status'  => true,
+        'message' => 'Application config, routes, and views compiled & optimized successfully!',
+    ]);
+});
+
+Route::get('/seed-filter-options', function () {
+    if (\App\Models\ProductCategory::where('slug', 'industries')->orWhere('category_name', 'Industries')->doesntExist()) {
+        $catSeeder = new \Database\Seeders\ProductCategorySeeder();
+        $catSeeder->run();
+    }
+    $seeder = new \Database\Seeders\ProductFilterOptionSeeder();
+    $seeder->run();
+    \Illuminate\Support\Facades\Cache::forget('all_filter_options');
+    return response()->json([
+        'status'  => true,
+        'message' => 'Successfully seeded and assigned filter options and Industry categories to all products!'
+    ]);
 });
 
 /* Storefront Multi-Theme Routes */
@@ -29,16 +121,18 @@ Route::controller(\App\Http\Controllers\StorefrontController::class)->group(func
     Route::get('/about', 'about')->name('about');
     Route::get('/docs', 'docs')->name('docs');
     Route::get('/contact', 'contact')->name('contact');
+    Route::post('/newsletter/subscribe', 'subscribeNewsletter')->name('newsletter.subscribe');
 });
 
 Route::controller(\App\Http\Controllers\ProductController::class)->group(function () {
     Route::get('/categories', 'categories')->name('categories');
     Route::get('/products', 'categories')->name('products.index');
     Route::get('/category/{slug?}', 'categories')->name('category.show');
-    Route::get('/product-filter/{sub_category_slug?}', 'productFilter')->name('products.filter');
-    Route::get('/product-landing', 'productLanding')->name('products.landing');
+    Route::get('/category/details/{sub_category_slug}', 'categoriesDetails')->name('category.detail');
+    Route::get('/products-filter/{sub_category_slug?}', 'productFilter')->name('products.filter');
+    Route::get('/product-landing/{slug?}', 'productLanding')->name('products.landing');
     Route::get('/filter', 'filter')->name('products.filter-step');
-    Route::post('/api/filter-wizard/query', 'filterStepApi')->name('api.filter-step.query');
+    Route::match(['get', 'post'], '/api/filter-wizard/query', 'filterStepApi')->name('api.filter-step.query');
     Route::get('/products/{slug}', 'productDetail')->name('products.detail');
     Route::get('/favorite', 'favorite')->name('favorite');
     Route::post('/favorite/toggle', 'toggleFavorite')->name('favorite.toggle');
@@ -133,14 +227,19 @@ Route::controller(FrontendController::class)->group(function () {
         $fullPath = $path;
         $url = ImageService::resizeAndCache($fullPath, (int) $width, (int) $height, $format);
 
-        // Convert URL back to actual file path
-        $filePath = public_path(str_replace(asset(''), '', $url));
+        // Safely extract relative path regardless of scheme/domain
+        $relative = ltrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
+        $filePath = public_path($relative);
 
-        // Return raw file with correct headers
-        return Response::file($filePath, [
-            'Content-Type'  => 'image/' . $format,
-            'Cache-Control' => 'public, max-age=604800' // 1 week cache
-        ]);
+        if (file_exists($filePath) && is_file($filePath)) {
+            // Return raw file with correct headers
+            return Response::file($filePath, [
+                'Content-Type'  => 'image/' . ($format === 'svg' ? 'svg+xml' : $format),
+                'Cache-Control' => 'public, max-age=604800, immutable'
+            ]);
+        }
+
+        return redirect($url, 301);
     })->where('path', '.*');
 
     /* Image resize redirect route (legacy support) */
@@ -148,7 +247,9 @@ Route::controller(FrontendController::class)->group(function () {
         $fullPath = $path;
         $url = ImageService::resizeAndCache($fullPath, (int) $width, (int) $height, $format);
 
-        return redirect($url);
+        return redirect($url, 301, [
+            'Cache-Control' => 'public, max-age=604800, immutable'
+        ]);
     })->where('path', '.*');
 });
 

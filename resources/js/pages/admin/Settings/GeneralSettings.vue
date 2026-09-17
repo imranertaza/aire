@@ -14,6 +14,9 @@
                         <a class="nav-link" id="general-tab" data-toggle="tab" href="#general" role="tab">General</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" id="appearance-tab" data-toggle="tab" href="#appearance" role="tab">Appearance</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" id="mail-tab" data-toggle="tab" href="#mail" role="tab">Mail</a>
                     </li>
                     <li class="nav-item">
@@ -46,7 +49,7 @@
                                 <label class="form-label">Store Logo</label>
                                 <Vue3Dropzone v-model="logoFile" v-model:previews="logoPreview" mode="edit"
                                     :allowSelectOnPreview="true" :maxFiles="1" />
-                                <small class="text-muted">Recommended:300 × 40px</small>
+                                <small class="text-muted d-block mt-1">Recommended: 200 × 60px or 250 × 68px (Transparent PNG / SVG, max-height 28px display)</small>
 
                                 <div v-if="logoPreview.length" class="mt-2">
                                     <img :src="logoPreview[0]" alt="Logo Preview" class="bg-dark img-thumbnail"
@@ -57,7 +60,7 @@
                                 <label class="form-label">Footer Logo</label>
                                 <Vue3Dropzone v-model="footerLogoFile" v-model:previews="footerLogoPreview" mode="edit"
                                     :allowSelectOnPreview="true" :maxFiles="1" />
-                                <small class="text-muted">Recommended:300 × 40px</small>
+                                <small class="text-muted d-block mt-1">Recommended: 200 × 60px or 250 × 68px (Transparent PNG / SVG, max-height 34px display)</small>
 
                                 <div v-if="footerLogoPreview.length" class="mt-2">
                                     <img :src="footerLogoPreview[0]" alt="Footer Logo Preview" class="img-thumbnail"
@@ -68,7 +71,7 @@
                                 <label class="form-label">Store Icon (Favicon)</label>
                                 <Vue3Dropzone v-model="faviconFile" v-model:previews="faviconPreview" mode="edit"
                                     :allowSelectOnPreview="true" :maxFiles="1" />
-                                <small class="text-muted">Recommended:64 × 64px</small>
+                                <small class="text-muted d-block mt-1">Recommended: 64 × 64px or 32 × 32px (PNG / ICO)</small>
 
                                 <div v-if="faviconPreview.length" class="mt-2">
                                     <img :src="faviconPreview[0]" alt="Favicon Preview" class="img-thumbnail"
@@ -118,6 +121,20 @@
                                     <img :src="BreadcrumbFilePreview[0]" alt="Favicon Preview" height="300"
                                         class="img-thumbnail" />
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appearance Tab -->
+                    <div class="tab-pane fade" id="appearance" role="tabpanel">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Global Category Features Visibility</label>
+                                <div class="custom-control custom-switch mt-2">
+                                    <input type="checkbox" class="custom-control-input" id="showCategoryFeaturesGlobally" v-model="form.show_category_features_globally" :true-value="1" :false-value="0">
+                                    <label class="custom-control-label" for="showCategoryFeaturesGlobally">Show Features on Category Pages</label>
+                                </div>
+                                <small class="text-muted d-block mt-1">If disabled, category features will be hidden across the entire storefront, overriding individual category settings.</small>
                             </div>
                         </div>
                     </div>
@@ -221,6 +238,54 @@
                                 <input v-model="form.instagram_url" type="url" class="form-control"
                                     placeholder="https://instagram.com/..." />
                             </div>
+
+                            <!-- Mobile App Store Section -->
+                            <div class="col-12 mt-4">
+                                <h6 class="font-weight-bold text-primary border-bottom pb-2">
+                                    <i class="fas fa-mobile-alt mr-1"></i> Mobile App Store Links (Footer)
+                                </h6>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="showAppDownloadLinks"
+                                        v-model="form.show_app_download_links" :true-value="1" :false-value="0">
+                                    <label class="custom-control-label font-weight-bold" for="showAppDownloadLinks">
+                                        Show Mobile App Download Badges in Footer
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Google Play Store URL</label>
+                                <input v-model="form.google_play_url" type="text" class="form-control"
+                                    placeholder="https://play.google.com/store/apps/details?id=..." />
+                                <small class="text-muted">Link for Google Play store badge in footer.</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Apple App Store URL</label>
+                                <input v-model="form.app_store_url" type="text" class="form-control"
+                                    placeholder="https://apps.apple.com/app/..." />
+                                <small class="text-muted">Link for App Store badge in footer.</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Google Play Badge Image (Optional)</label>
+                                <Vue3Dropzone v-model="googlePlayImageFile" v-model:previews="googlePlayImagePreview"
+                                    mode="edit" :allowSelectOnPreview="true" :maxFiles="1" />
+                                <small class="text-muted d-block mt-1">Leave empty to use default Google Play badge.</small>
+                                <div v-if="googlePlayImagePreview.length" class="mt-2">
+                                    <img :src="googlePlayImagePreview[0]" alt="Google Play Preview" class="img-thumbnail"
+                                        style="max-height:45px;" />
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">App Store Badge Image (Optional)</label>
+                                <Vue3Dropzone v-model="appStoreImageFile" v-model:previews="appStoreImagePreview"
+                                    mode="edit" :allowSelectOnPreview="true" :maxFiles="1" />
+                                <small class="text-muted d-block mt-1">Leave empty to use default App Store badge.</small>
+                                <div v-if="appStoreImagePreview.length" class="mt-2">
+                                    <img :src="appStoreImagePreview[0]" alt="App Store Preview" class="img-thumbnail"
+                                        style="max-height:45px;" />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -270,7 +335,7 @@
                                 <label class="form-label">OG Image</label>
                                 <Vue3Dropzone v-model="ogImageFile" v-model:previews="ogImagePreview" mode="edit"
                                     :allowSelectOnPreview="true" :maxFiles="1" />
-                                <small class="text-muted">Recommended: 1200×630px</small>
+                                <small class="text-muted d-block mt-1">Recommended: 1200 × 630px (Standard social share banner, 1.91:1)</small>
 
                                 <div v-if="ogImagePreview.length" class="mt-2">
                                     <img :src="ogImagePreview[0]" alt="OG Image Preview" class="img-thumbnail"
@@ -308,7 +373,7 @@
                                 <label class="form-label">Twitter Image</label>
                                 <Vue3Dropzone v-model="twitterImageFile" v-model:previews="twitterImagePreview"
                                     mode="edit" :allowSelectOnPreview="true" :maxFiles="1" />
-                                <small class="text-muted">Recommended: 1200×628px</small>
+                                <small class="text-muted d-block mt-1">Recommended: 1200 × 628px or 1200 × 600px (Summary large image, ~2:1)</small>
                                 <div v-if="twitterImagePreview.length" class="mt-2">
                                     <img :src="twitterImagePreview[0]" alt="Twitter Image Preview" class="img-thumbnail"
                                         style="max-width:250px;height:auto;" />
@@ -363,6 +428,7 @@ const form = ref({
     state: '',
     brand_name: '',
     footer_description: '',
+    show_category_features_globally: 1,
     mail_protocol: '',
     mail_address: '',
     send_from: '',
@@ -376,6 +442,10 @@ const form = ref({
     twitter_url: '',
     linkedin_url: '',
     instagram_url: '',
+    // Mobile App Store Links
+    google_play_url: '',
+    app_store_url: '',
+    show_app_download_links: 1,
     meta_title: '',
     meta_keyword: '',
     meta_description: '',
@@ -403,6 +473,8 @@ const faviconFile = ref([]);
 const BreadcrumbFile = ref([]);
 const ogImageFile = ref([]);
 const twitterImageFile = ref([]);
+const googlePlayImageFile = ref([]);
+const appStoreImageFile = ref([]);
 
 // Preview URLs for currently saved images
 const logoPreview = ref([]);
@@ -411,6 +483,8 @@ const faviconPreview = ref([]);
 const BreadcrumbFilePreview = ref([]);
 const ogImagePreview = ref([]);
 const twitterImagePreview = ref([]);
+const googlePlayImagePreview = ref([]);
+const appStoreImagePreview = ref([]);
 
 // Fetch all settings from database and populate form + previews
 const fetchSettings = async () => {
@@ -426,6 +500,8 @@ const fetchSettings = async () => {
             if (form.value.hasOwnProperty(key)) {
                 if (key === 'use_recaptcha') {
                     form.value[key] = value === '1' || value === true;
+                } else if (key === 'show_category_features_globally' || key === 'show_app_download_links') {
+                    form.value[key] = Number(value);
                 } else {
                     form.value[key] = value ?? '';
                 }
@@ -438,6 +514,8 @@ const fetchSettings = async () => {
             if (key === 'breadcrumb' && value) BreadcrumbFilePreview.value = [getImageCacheUrl(value)];
             if (key === 'og_image' && value) ogImagePreview.value = [getImageCacheUrl(value)];
             if (key === 'twitter_image' && value) twitterImagePreview.value = [getImageCacheUrl(value)];
+            if (key === 'google_play_image' && value) googlePlayImagePreview.value = [getImageCacheUrl(value)];
+            if (key === 'app_store_image' && value) appStoreImagePreview.value = [getImageCacheUrl(value)];
         });
     } catch (e) {
         toast.validationError(e);
@@ -476,6 +554,8 @@ const submitSettings = async () => {
     if (BreadcrumbFile.value[0]?.file) payload.append('breadcrumb', BreadcrumbFile.value[0].file);
     if (ogImageFile.value[0]?.file) payload.append('og_image', ogImageFile.value[0].file);
     if (twitterImageFile.value[0]?.file) payload.append('twitter_image', twitterImageFile.value[0].file);
+    if (googlePlayImageFile.value[0]?.file) payload.append('google_play_image', googlePlayImageFile.value[0].file);
+    if (appStoreImageFile.value[0]?.file) payload.append('app_store_image', appStoreImageFile.value[0].file);
 
     // if remove any one
     if (!logoPreview.value[0]) payload.append('remove_store_logo', 1);
@@ -484,6 +564,8 @@ const submitSettings = async () => {
     if (!BreadcrumbFilePreview.value[0]) payload.append('remove_breadcrumb', 1);
     if (!ogImagePreview.value[0]) payload.append('remove_og_image', 1);
     if (!twitterImagePreview.value[0]) payload.append('remove_twitter_image', 1);
+    if (!googlePlayImagePreview.value[0]) payload.append('remove_google_play_image', 1);
+    if (!appStoreImagePreview.value[0]) payload.append('remove_app_store_image', 1);
     try {
         await axios.post('/api/settings/update', payload, {
             headers: { 'Content-Type': 'multipart/form-data' }

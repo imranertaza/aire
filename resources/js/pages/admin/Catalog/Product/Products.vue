@@ -75,6 +75,10 @@
                                                     class="btn btn-sm btn-outline-dark mr-2" title="View Product">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
+                                                <a :href="`/product-landing/${product.slug || product.id}`" target="_blank"
+                                                    class="btn btn-sm btn-outline-primary mr-2" title="View Landing Page">
+                                                    <i class="fas fa-rocket"></i>
+                                                </a>
                                                 <router-link v-if="authStore.hasPermission('edit-products')"
                                                     :to="{ name: 'UpdateProduct', params: { id: product.id } }"
                                                     class="btn btn-sm btn-outline-info">

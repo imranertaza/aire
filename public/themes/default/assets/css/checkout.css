@@ -192,7 +192,7 @@ body {
 
 .shipping-radio-card.active {
     border-color: var(--primary-color);
-    background-color: #eff6ff;
+    background-color: var(--color-primary-bg);
 }
 
 .shipping-radio-card input[type="radio"] {
@@ -253,7 +253,7 @@ body {
 }
 
 .payment-tab.active {
-    background-color: #eff6ff;
+    background-color: var(--color-primary-bg);
     color: var(--primary-color);
     border-bottom: 2px solid var(--primary-color);
 }
@@ -438,7 +438,7 @@ body {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background-color: #eff6ff;
+    background-color: var(--color-primary-bg);
     color: var(--primary-color);
     display: flex;
     align-items: center;
@@ -523,7 +523,7 @@ body {
     width: 26px;
     height: 26px;
     border-radius: 50%;
-    background-color: var(--primary-color, #2563eb);
+    background-color: var(--color-primary);
     color: #ffffff;
     display: inline-flex;
     align-items: center;
@@ -569,13 +569,13 @@ body {
 }
 
 .payment-opt-btn.paypal-opt {
-    color: #2563eb;
+    color: var(--color-primary-light);
 }
 
 .payment-opt-btn.paypal-opt:hover {
-    background-color: #eff6ff;
+    background-color: var(--color-primary-bg);
     border-color: #bfdbfe;
-    color: #1d4ed8;
+    color: var(--color-primary);
 }
 
 .payment-opt-btn.shoppay-opt {
@@ -611,8 +611,8 @@ body {
 
 .checkout-card .form-control:focus,
 .checkout-card .form-select:focus {
-    border-color: #2563eb !important;
-    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.1) !important;
+    border-color: var(--color-primary) !important;
+    box-shadow: 0 0 0 1px var(--color-primary-shadow) !important;
 }
 
 .custom-check-input {

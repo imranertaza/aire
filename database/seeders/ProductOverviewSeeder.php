@@ -62,7 +62,7 @@ class ProductOverviewSeeder extends Seeder
                 'product_id'     => $p->id,
                 'title'          => $title,
                 'description'    => $description,
-                'image'          => $p->main_image,
+                'image'          => "",
                 'feature1_icon'  => $feat1Icon,
                 'feature1_title' => $feat1Title,
                 'feature1_desc'  => $feat1Desc,

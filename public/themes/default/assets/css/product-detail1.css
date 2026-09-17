@@ -82,7 +82,7 @@
 }
 
 .product-desc-scroll {
-    height: 260px;
+    max-height: 260px;
 }
 
 .product-desc-text {

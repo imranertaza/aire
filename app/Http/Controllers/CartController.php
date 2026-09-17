@@ -16,6 +16,25 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
         $savedForLater = session()->get('saved_for_later', []);
 
+        // Refresh cart items with current active pricing/specials
+        $updated = false;
+        foreach ($cart as $key => &$item) {
+            $product = Product::with('special')->find($item['id']);
+            if ($product) {
+                $effectivePrice = $product->final_price;
+                if (!isset($item['price']) || (float)$item['price'] != $effectivePrice) {
+                    $item['price'] = $effectivePrice;
+                    $item['original_price'] = (float) $product->price;
+                    $item['special_price'] = $product->special_price;
+                    $updated = true;
+                }
+            }
+        }
+        unset($item);
+        if ($updated) {
+            session()->put('cart', $cart);
+        }
+
         $subtotal = collect($cart)->sum(function ($item) {
             return $item['price'] * $item['quantity'];
         });
@@ -30,7 +49,7 @@ class CartController extends Controller
 
     public function addToCart(Request $request)
     {
-        $product = Product::find($request->product_id);
+        $product = Product::with('special')->find($request->product_id);
         if (!$product) {
             return response()->json(['success' => false, 'message' => 'Product not found.'], 404);
         }
@@ -60,17 +79,24 @@ class CartController extends Controller
             $cartKey   = $product->id . '_' . $optionKey;
         }
 
+        $effectivePrice = $product->final_price;
+
         if (isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity'] += $quantity;
+            $cart[$cartKey]['price'] = $effectivePrice;
+            $cart[$cartKey]['original_price'] = (float) $product->price;
+            $cart[$cartKey]['special_price'] = $product->special_price;
         } else {
             $cart[$cartKey] = [
-                "id"       => $product->id,
-                "name"     => $product->name,
-                "quantity" => $quantity,
-                "price"    => $product->price,
-                "image"    => $product->main_image ? getImageUrl($product->main_image) : theme_asset('img/Air-Purify.png'),
-                "model"    => $product->model,
-                "options"  => $options,
+                "id"             => $product->id,
+                "name"           => $product->name,
+                "quantity"       => $quantity,
+                "price"          => $effectivePrice,
+                "original_price" => (float) $product->price,
+                "special_price"  => $product->special_price,
+                "image"          => $product->main_image ? getImageUrl($product->main_image) : theme_asset('img/Air-Purify.png'),
+                "model"          => $product->model,
+                "options"        => $options,
             ];
         }
 

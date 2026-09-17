@@ -1,5 +1,5 @@
 // Global Real-Time Header Badges Update Function
-window.updateHeaderBadges = function(type, count) {
+window.updateHeaderBadges = function (type, count) {
     count = parseInt(count) || 0;
     let $badge;
     if (type === 'cart') {
@@ -20,7 +20,7 @@ window.updateHeaderBadges = function(type, count) {
 };
 
 // Global Toast Helpers
-window.showCompareToast = function(message, isInfo = false) {
+window.showCompareToast = function (message, isInfo = false) {
     $('.compare-toast, .cart-toast, .favorite-toast, .toast-notification').remove();
     const title = isInfo ? 'Comparison Notice' : 'Comparison Updated!';
     const iconClass = isInfo ? 'bi-info-circle text-info' : 'bi-check-circle-fill text-success';
@@ -45,7 +45,7 @@ window.showCompareToast = function(message, isInfo = false) {
     }, 4500);
 };
 
-window.showCartToast = function(message, isRemove = false) {
+window.showCartToast = function (message, isRemove = false) {
     $('.compare-toast, .cart-toast, .favorite-toast, .toast-notification').remove();
     const title = isRemove ? 'Removed from Cart' : 'Added to Cart!';
     const iconBg = isRemove ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary';
@@ -81,7 +81,39 @@ window.showCartToast = function(message, isRemove = false) {
     }, 5000);
 };
 
-window.showFavoriteToast = function(message) {
+
+window.showNewsletterToast = function (message, isSuccess = true) {
+    $('.compare-toast, .cart-toast, .favorite-toast, .newsletter-toast, .toast-notification').remove();
+    const title = isSuccess ? 'Newsletter Subscribed' : 'Newsletter';
+    const iconBg = isSuccess ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary';
+    const iconSvg = isSuccess
+        ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+               <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#198754" />
+           </svg>`
+        : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+               <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="#0066cc"/>
+           </svg>`;
+
+    const toastHtml = `
+        <div class="newsletter-toast position-fixed bottom-0 end-0 m-4 bg-white border border-light-subtle shadow-lg rounded-4 p-3 animate__animated animate__slideInRight" style="z-index: 10000; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="${iconBg} rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    ${iconSvg}
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="mb-1 fw-bold text-dark fs-14">${title}</h6>
+                    <p class="mb-0 text-muted fs-12">${message}</p>
+                </div>
+                <button type="button" class="btn-close ms-auto" onclick="$(this).closest('.newsletter-toast').fadeOut(300, function(){ $(this).remove(); })" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+    $('body').append(toastHtml);
+    setTimeout(() => {
+        $('.newsletter-toast').fadeOut(300, function () { $(this).remove(); });
+    }, 5000);
+};
+window.showFavoriteToast = function (message) {
     $('.compare-toast, .cart-toast, .favorite-toast, .toast-notification').remove();
     const toastHtml = `
         <div class="favorite-toast position-fixed bottom-0 end-0 m-4 bg-white border border-light-subtle shadow-lg rounded-4 p-3 animate__animated animate__slideInRight" style="z-index: 10000; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;">
@@ -112,32 +144,32 @@ window.showFavoriteToast = function(message) {
 function getSelectedOptions() {
     const options = {};
     // Collect active color swatches
-    document.querySelectorAll('.color-swatch.active').forEach(function(el) {
-        const optionId   = el.getAttribute('data-option-id');
+    document.querySelectorAll('.color-swatch.active').forEach(function (el) {
+        const optionId = el.getAttribute('data-option-id');
         const optionName = el.getAttribute('data-option-name') || 'Color';
-        const valueId    = el.getAttribute('data-value-id');
-        const valueName  = el.getAttribute('title') || el.getAttribute('data-color') || '';
+        const valueId = el.getAttribute('data-value-id');
+        const valueName = el.getAttribute('title') || el.getAttribute('data-color') || '';
         if (optionId && valueId) {
             options[valueId] = {
-                option_id:  optionId,
-                value_id:   valueId,
-                name:       optionName,
-                value:      valueName
+                option_id: optionId,
+                value_id: valueId,
+                name: optionName,
+                value: valueName
             };
         }
     });
     // Collect active size / generic buttons
-    document.querySelectorAll('.size-btn.active').forEach(function(el) {
-        const optionId   = el.getAttribute('data-option-id');
+    document.querySelectorAll('.size-btn.active').forEach(function (el) {
+        const optionId = el.getAttribute('data-option-id');
         const optionName = el.getAttribute('data-option-name') || 'Option';
-        const valueId    = el.getAttribute('data-value-id');
-        const valueName  = el.textContent.replace(/\(.*?\)/g, '').trim();
+        const valueId = el.getAttribute('data-value-id');
+        const valueName = el.textContent.replace(/\(.*?\)/g, '').trim();
         if (optionId && valueId) {
             options[valueId] = {
-                option_id:  optionId,
-                value_id:   valueId,
-                name:       optionName,
-                value:      valueName
+                option_id: optionId,
+                value_id: valueId,
+                name: optionName,
+                value: valueName
             };
         }
     });
@@ -145,7 +177,7 @@ function getSelectedOptions() {
 }
 
 // Global Compare Add Function (works for guests & logged in customers)
-window.addToCompare = function(productId, btn) {
+window.addToCompare = function (productId, btn) {
     if (!productId) return;
 
     const $btn = btn ? $(btn) : $(`[data-product-id="${productId}"].btn-add-to-compare`);
@@ -452,9 +484,9 @@ $(document).ready(function () {
                     window.updateHeaderBadges('compare', cnt);
                 }
                 window.showCompareToast(response.message, true);
-                
-                $(`#sidebar-item-${productId}`).slideUp(200, function() { $(this).remove(); });
-                btn.closest('.compare-top-card').fadeOut(200, function() {
+
+                $(`#sidebar-item-${productId}`).slideUp(200, function () { $(this).remove(); });
+                btn.closest('.compare-top-card').fadeOut(200, function () {
                     $(this).remove();
                     if ($('.compare-top-card').length === 0 || window.location.pathname.includes('/compare')) {
                         window.location.reload();
@@ -478,7 +510,7 @@ $(document).ready(function () {
             success: function (response) {
                 window.updateHeaderBadges('compare', 0);
                 window.showCompareToast(response.message, true);
-                setTimeout(function() {
+                setTimeout(function () {
                     window.location.reload();
                 }, 300);
             }
@@ -543,33 +575,240 @@ $(document).ready(function () {
             infinite: false,
         });
 
-        function raf(time) {
-            window.lenisInstance.raf(time);
-            requestAnimationFrame(raf);
-        }
-
-        requestAnimationFrame(raf);
-
-        if (typeof $ !== 'undefined') {
-            $('.sticky-sidebar, .sidebar-menu, .filter-sidebar, .featured-card, .overflow-y-auto, .overflow-auto').attr('data-lenis-prevent', 'true');
-
-            $(document).on('wheel mousewheel DOMMouseScroll', '.sticky-sidebar, .sidebar-menu, .filter-sidebar, .featured-card', function (e) {
-                e.stopPropagation();
+        // Synchronize Lenis with GSAP Ticker & ScrollTrigger
+        if (typeof gsap !== 'undefined') {
+            window.lenisInstance.on('scroll', () => {
+                if (typeof ScrollTrigger !== 'undefined') {
+                    ScrollTrigger.update();
+                }
             });
+            gsap.ticker.add((time) => {
+                window.lenisInstance.raf(time * 1000);
+            });
+            gsap.ticker.lagSmoothing(0);
+        } else {
+            function raf(time) {
+                window.lenisInstance.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
 
-            $(document).on('click', 'a[href^="#"]', function (e) {
-                var target = $(this).attr('href');
-                if (target && target.length > 1 && $(target).length) {
-                    e.preventDefault();
-                    window.lenisInstance.scrollTo(target, { offset: -80, duration: 1.2 });
+            document.addEventListener('DOMContentLoaded', function () {
+                if (typeof ScrollTrigger !== 'undefined' && window.lenisInstance) {
+                    window.lenisInstance.on('scroll', () => ScrollTrigger.update());
                 }
             });
         }
+
+        if (typeof $ !== 'undefined') {
+            $('.sticky-sidebar, .sidebar-menu, .filter-sidebar, .featured-card, .overflow-y-auto, .overflow-auto, .modal, .modal-body, .auth-modal, .offcanvas, .bottom-tabs-bar, .sticky-product-header, .mobile-category-scroll-wrapper, .mobile-category-scroll-track, .mobile-cat-pill').attr('data-lenis-prevent', 'true');
+
+            // Pause Lenis momentum scrolling when any modal or offcanvas is opened
+            $(document).on('show.bs.modal shown.bs.modal show.bs.offcanvas shown.bs.offcanvas', function () {
+                if (window.lenisInstance) {
+                    window.lenisInstance.stop();
+                }
+            });
+
+            // Resume Lenis momentum scrolling ONLY after modal/offcanvas is completely hidden
+            $(document).on('hidden.bs.modal hidden.bs.offcanvas', function () {
+                if ($('.modal.show, .offcanvas.show').length === 0 && window.lenisInstance) {
+                    window.lenisInstance.resize();
+                    window.lenisInstance.start();
+                }
+            });
+
+            $(document).on('wheel mousewheel DOMMouseScroll', '[data-lenis-prevent], .sticky-sidebar, .sidebar-menu, .filter-sidebar, .featured-card, .modal, .modal-dialog, .modal-body, .auth-modal, .offcanvas, .bottom-tabs-bar, .sticky-product-header, .mobile-category-scroll-wrapper, .mobile-category-scroll-track, .mobile-cat-pill', function (e) {
+                e.stopPropagation();
+            });
+
+            // Unified Pointer / Touch / Mouse Drag-to-Scroll for horizontal pill tracks
+            $(document).on('pointerdown', '.mobile-category-scroll-track, .bottom-tabs-bar .overflow-auto', function (e) {
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+                var slider = this;
+                var isDown = true;
+                var startX = e.pageX || (e.originalEvent && e.originalEvent.pageX) || 0;
+                var startY = e.pageY || (e.originalEvent && e.originalEvent.pageY) || 0;
+                var startLeft = slider.scrollLeft;
+                var hasDragged = false;
+                var lastX = startX;
+                var lastTime = performance.now();
+                var velX = 0;
+
+                function onPointerMove(ev) {
+                    if (!isDown) return;
+                    var currentX = ev.pageX || (ev.originalEvent && ev.originalEvent.pageX) || 0;
+                    var currentY = ev.pageY || (ev.originalEvent && ev.originalEvent.pageY) || 0;
+                    var walkX = (currentX - startX);
+                    var walkY = (currentY - startY);
+
+                    // If user is intentionally scrolling page vertically before dragging horizontally
+                    if (!hasDragged && Math.abs(walkY) > 8 && Math.abs(walkY) > Math.abs(walkX)) {
+                        isDown = false;
+                        try {
+                            slider.releasePointerCapture(e.pointerId);
+                        } catch (err) { }
+                        return;
+                    }
+
+                    // Defer pointer capture until deliberate drag movement > 7px so child clicks dispatch cleanly
+                    if (!hasDragged && Math.abs(walkX) > 7) {
+                        hasDragged = true;
+                        $(slider).addClass('is-dragging');
+                        try {
+                            slider.setPointerCapture(e.pointerId);
+                        } catch (err) { }
+                    }
+                    var now = performance.now();
+                    var dt = now - lastTime;
+                    if (dt > 0) {
+                        velX = (currentX - lastX) / dt;
+                    }
+                    lastX = currentX;
+                    lastTime = now;
+                    slider.scrollLeft = startLeft - walkX;
+                }
+
+                function onPointerUp(ev) {
+                    if (!isDown) return;
+                    isDown = false;
+                    $(slider).removeClass('is-dragging');
+
+                    if (ev && ev.pointerId) {
+                        try {
+                            slider.releasePointerCapture(ev.pointerId);
+                        } catch (err) { }
+                    }
+
+                    window.removeEventListener('pointermove', onPointerMove);
+                    window.removeEventListener('pointerup', onPointerUp);
+                    window.removeEventListener('pointercancel', onPointerUp);
+
+                    if (hasDragged) {
+                        // Capture phase click suppression
+                        var captureClick = function (clickEv) {
+                            clickEv.preventDefault();
+                            clickEv.stopPropagation();
+                            clickEv.stopImmediatePropagation();
+                            window.removeEventListener('click', captureClick, true);
+                        };
+                        window.addEventListener('click', captureClick, true);
+                        setTimeout(function () {
+                            window.removeEventListener('click', captureClick, true);
+                        }, 150);
+
+                        // Smooth momentum decay
+                        var momentumX = velX * 16;
+                        var friction = 0.92;
+                        function stepMomentum() {
+                            if (Math.abs(momentumX) > 0.4) {
+                                slider.scrollLeft -= momentumX;
+                                momentumX *= friction;
+                                requestAnimationFrame(stepMomentum);
+                            }
+                        }
+                        requestAnimationFrame(stepMomentum);
+                    }
+                }
+
+                window.addEventListener('pointermove', onPointerMove, { passive: true });
+                window.addEventListener('pointerup', onPointerUp, { passive: true });
+                window.addEventListener('pointercancel', onPointerUp, { passive: true });
+            });
+
+        // Convert vertical wheel to horizontal scroll inside horizontal scroll tracks
+        $(document).on('wheel', '.mobile-category-scroll-track, .bottom-tabs-bar .overflow-auto', function (e) {
+            var delta = e.originalEvent.deltaY || e.originalEvent.deltaX;
+            if (delta !== 0 && this.scrollWidth > this.clientWidth) {
+                this.scrollLeft += delta * 0.9;
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        });
+
+        $(document).on('click', 'a[href^="#"]', function (e) {
+            var target = $(this).attr('href');
+            if (target && target.length > 1 && $(target).length) {
+                e.preventDefault();
+                window.lenisInstance.scrollTo(target, { offset: -80, duration: 1.2 });
+            }
+        });
     }
+}
 
     if (typeof Lenis === 'undefined') {
-        loadScript('https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js', initLenisScroll);
-    } else {
-        initLenisScroll();
+    loadScript('https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js', initLenisScroll);
+} else {
+    initLenisScroll();
+}
+
+// Global GSAP ScrollTrigger Lifecycle & Navigation Cleanup
+if (typeof window !== 'undefined') {
+    // Kill all ScrollTriggers before the browser caches this page (bfcache)
+    // This prevents stale .pin-spacer DOM nodes from being captured in the snapshot
+    window.addEventListener('pagehide', function () {
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.getAll().forEach(st => st.kill(true));
+        }
+    });
+
+    // When the page is restored from the back-forward cache (event.persisted === true),
+    // the DOM still has GSAP's stale pin-spacer divs baked in.
+    // The only reliable fix is a hard reload so the page re-renders from scratch.
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            // Page came from bfcache — reload to get fresh DOM without GSAP artifacts
+            window.location.reload();
+            return;
+        }
+        // Normal page show (not from cache): just refresh trigger positions
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.clearScrollMemory('manual');
+            setTimeout(function () {
+                if (typeof window.initWhyChooseScrollTrigger === 'function') {
+                    window.initWhyChooseScrollTrigger();
+                }
+                if (typeof window.initLivingHeroScrollTrigger === 'function') {
+                    window.initLivingHeroScrollTrigger();
+                }
+                ScrollTrigger.refresh(true);
+            }, 50);
+        }
+    });
+
+    // ── Mobile Offcanvas Active Menu Indicator Auto-sync ──────────
+    function syncMobileMenuActiveItem() {
+        var currentPath = window.location.pathname.replace(/\/$/, '') || '/';
+        $('.offcanvas .mobile-nav').each(function () {
+            var $nav = $(this);
+            // Clean up any stray indicator spans from DOM so CSS ::after exclusively renders the dot
+            $nav.find('.mobile-nav-link__indicator').remove();
+
+            var $activeLinks = $nav.find('.mobile-nav-link.active');
+            // If exactly one link is already active from Blade SSR, keep it
+            if ($activeLinks.length === 1) {
+                return;
+            }
+
+            // If 0 or multiple are marked active, clear all and find the single exact match
+            $nav.find('.mobile-nav-link').removeClass('active');
+            $nav.find('.mobile-nav-link').each(function () {
+                var href = $(this).attr('href');
+                if (!href || href === '#' || href.startsWith('javascript:')) return;
+                try {
+                    var linkPath = new URL(href, window.location.origin).pathname.replace(/\/$/, '') || '/';
+                    if (linkPath === currentPath) {
+                        $(this).addClass('active');
+                        return false; // Break after single exact match
+                    }
+                } catch (e) { }
+            });
+        });
     }
-})();
+
+    $(document).on('show.bs.offcanvas', function () {
+        syncMobileMenuActiveItem();
+    });
+}
+}) ();

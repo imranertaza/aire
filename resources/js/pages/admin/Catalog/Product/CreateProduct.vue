@@ -34,6 +34,10 @@
                                     role="tab" aria-controls="custom-tabs-options" aria-selected="false">Options</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" id="tab-filter-options" data-toggle="pill" href="#custom-tabs-filter-options"
+                                    role="tab" aria-controls="custom-tabs-filter-options" aria-selected="false">Filter Options</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="tab-attributes" data-toggle="pill"
                                     href="#custom-tabs-attributes" role="tab" aria-controls="custom-tabs-attributes"
                                     aria-selected="false">Attributes</a>
@@ -304,6 +308,53 @@
                                     <div v-else class="alert alert-info">No options added yet.</div>
                                 </div>
 
+                                <!-- Filter Options Tab -->
+                                <div class="tab-pane fade" id="custom-tabs-filter-options" role="tabpanel"
+                                    aria-labelledby="tab-filter-options">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label>Add Filter Option</label>
+                                            <select class="form-control" v-model="selectedFilterOptionToAdd"
+                                                @change="addFilterOptionRow">
+                                                <option value="">-- Select Filter Option to Add --</option>
+                                                <option v-for="opt in availableFilterOptions" :key="opt.id" :value="opt">{{
+                                                    opt.name }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive" v-if="form.filter_options.length > 0">
+                                        <table class="table table-bordered">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th>Filter Option</th>
+                                                    <th>Filter Option Value</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="(fOpt, index) in form.filter_options" :key="index">
+                                                    <td>{{ fOpt.filter_option_name }}</td>
+                                                    <td>
+                                                        <select class="form-control" v-model="fOpt.filter_option_value_id"
+                                                            required>
+                                                            <option value="">-- Select Value --</option>
+                                                            <option v-for="val in fOpt.available_values"
+                                                                :key="val.id" :value="val.id">{{ val.name }}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                            @click="removeFilterOptionRow(index)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div v-else class="alert alert-info">No filter options added yet.</div>
+                                </div>
+
                                 <!-- Attributes Tab -->
                                 <div class="tab-pane fade" id="custom-tabs-attributes" role="tabpanel"
                                     aria-labelledby="tab-attributes">
@@ -407,6 +458,7 @@
                                         <div class="col-md-6 form-group">
                                             <label>Description Image</label>
                                             <Vue3Dropzone v-model="descImageFile" :allowSelectOnPreview="true" />
+                                            <small class="text-muted d-block mt-1">Recommended: 800 × 600px or 1200 × 800px</small>
                                         </div>
                                     </div>
                                 </div>
@@ -433,6 +485,7 @@
                                                 <div class="col-md-12 form-group">
                                                     <label>Overview Banner / Parallax Image</label>
                                                     <Vue3Dropzone v-model="overviewImageFile" :allowSelectOnPreview="true" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 800 × 600px or 1000 × 700px (Landscape ~4:3)</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -519,6 +572,7 @@
                                                 <div class="col-md-12 form-group">
                                                     <label>Exploded View Parallax Background Image</label>
                                                     <Vue3Dropzone v-model="specsImageFile" :allowSelectOnPreview="true" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 1200 × 600px or 1024 × 686px (Technical diagram / exploded view)</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -661,6 +715,7 @@
                                                 <div class="col-md-12 form-group">
                                                     <label>Features Parallax Background Image</label>
                                                     <Vue3Dropzone v-model="featuresImageFile" :allowSelectOnPreview="true" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 1400 × 600px or 1200 × 500px (Panoramic wide banner)</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -793,6 +848,7 @@
                                                     <td>
                                                         <div style="min-width: 150px;">
                                                             <Vue3Dropzone v-model="appItem.bg_image_file" :allowSelectOnPreview="true" />
+                                                            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Recommended: 800 × 400px or 1200 × 500px</small>
                                                         </div>
                                                     </td>
                                                     <td>
@@ -844,6 +900,7 @@
                                                 <div class="col-md-6 form-group">
                                                     <label>Technology Parallax Background Image</label>
                                                     <Vue3Dropzone v-model="technologyImageFile" :allowSelectOnPreview="true" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 1400 × 700px or 1200 × 600px (Wide landscape banner)</small>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -965,11 +1022,13 @@
                                         <div class="col-md-4 form-group">
                                             <label>Default Main Image</label>
                                             <Vue3Dropzone v-model="mainImageFile" :allowSelectOnPreview="true" />
+                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, clean/transparent background for interactive zoom)</small>
                                         </div>
                                         <div class="col-md-8 form-group">
                                             <label>Multiple Gallery Images</label>
                                             <Vue3Dropzone v-model="galleryImageFiles" :multiple="true"
                                                 :allowSelectOnPreview="true" selectFileStrategy="merge" />
+                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, matching main image)</small>
                                         </div>
                                     </div>
                                 </div>
@@ -1003,9 +1062,11 @@ const brands = ref([]);
 const categories = ref([]);
 const attributeGroups = ref([]);
 const availableOptions = ref([]);
+const availableFilterOptions = ref([]);
 const allProducts = ref([]);
 
 const selectedOptionToAdd = ref("");
+const selectedFilterOptionToAdd = ref("");
 
 const form = ref({
     name: '',
@@ -1024,6 +1085,7 @@ const form = ref({
     sort_order: 0,
     date_available: '',
     options: [],
+    filter_options: [],
     attributes: [],
     faqs: [],
     applications: [],
@@ -1107,7 +1169,6 @@ const form = ref({
 
 const mainImageFile = ref(null);
 const galleryImageFiles = ref([]);
-
 const docPdfFile = ref(null);
 const safetyPdfFile = ref(null);
 const instPdfFile = ref(null);
@@ -1119,18 +1180,27 @@ const technologyImageFile = ref(null);
 
 onMounted(async () => {
     try {
-        const [resBrands, resCats, resAttrGroups, resOpts, resProducts] = await Promise.all([
+        const [
+            { data: { data: b } },
+            { data: { data: c } },
+            { data: { data: ag } },
+            { data: { data: o } },
+            { data: { data: fo } },
+            { data: { data: p } }
+        ] = await Promise.all([
             axios.get('/api/brands/all'),
             axios.get('/api/product-categories/all'),
             axios.get('/api/product-attribute-groups/all'),
             axios.get('/api/options/all'),
+            axios.get('/api/filter-options/all'),
             axios.get('/api/products/all-dropdown')
         ]);
-        brands.value = resBrands.data.data;
-        categories.value = resCats.data.data;
-        attributeGroups.value = resAttrGroups.data.data;
-        availableOptions.value = resOpts.data.data;
-        allProducts.value = resProducts.data.data;
+        brands.value = b;
+        categories.value = c;
+        attributeGroups.value = ag;
+        availableOptions.value = o;
+        availableFilterOptions.value = fo;
+        allProducts.value = p;
     } catch (error) {
         toast.error("Failed to load dependencies.");
         console.error(error);
@@ -1169,15 +1239,16 @@ const productsOptions = computed(() => {
 const addOptionRow = () => {
     if (!selectedOptionToAdd.value) return;
 
+    const opt = selectedOptionToAdd.value;
     form.value.options.push({
-        option_id: selectedOptionToAdd.value.id,
-        option_name: selectedOptionToAdd.value.name,
+        option_id: Number(opt.id),
+        option_name: opt.name,
         option_value_id: '',
         quantity: 0,
         subtract: 1,
         price_prefix: '+',
         price: 0,
-        available_values: selectedOptionToAdd.value.option_values || []
+        available_values: opt.option_values || opt.optionValues || []
     });
 
     selectedOptionToAdd.value = "";
@@ -1185,6 +1256,24 @@ const addOptionRow = () => {
 
 const removeOptionRow = (index) => {
     form.value.options.splice(index, 1);
+};
+
+const addFilterOptionRow = () => {
+    if (!selectedFilterOptionToAdd.value) return;
+
+    const opt = selectedFilterOptionToAdd.value;
+    form.value.filter_options.push({
+        filter_option_id: Number(opt.id),
+        filter_option_name: opt.name,
+        filter_option_value_id: '',
+        available_values: opt.option_values || opt.optionValues || []
+    });
+
+    selectedFilterOptionToAdd.value = "";
+};
+
+const removeFilterOptionRow = (index) => {
+    form.value.filter_options.splice(index, 1);
 };
 
 const addAttributeRow = () => {
@@ -1247,7 +1336,7 @@ const submitForm = async () => {
 
     const formData = new FormData();
     Object.keys(form.value).forEach(key => {
-        if (['options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids'].includes(key)) {
+        if (['options', 'filter_options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids'].includes(key)) {
             formData.append(key, JSON.stringify(form.value[key]));
         } else if (['faqs', 'applications'].includes(key)) {
             // Handled separately below
@@ -1282,24 +1371,30 @@ const submitForm = async () => {
         });
     }
 
-    if (mainImageFile.value && mainImageFile.value[0]) {
+    if (mainImageFile.value?.[0]?.file) {
         formData.append('main_image', mainImageFile.value[0].file);
     }
 
-    if (galleryImageFiles.value && galleryImageFiles.value.length > 0) {
+    if (galleryImageFiles.value?.length) {
         galleryImageFiles.value.forEach((item, index) => {
-            formData.append(`gallery_images[${index}]`, item.file);
+            if (item.file) formData.append(`gallery_images[${index}]`, item.file);
         });
     }
 
-    if (docPdfFile.value && docPdfFile.value[0]) formData.append('documentation_pdf', docPdfFile.value[0].file);
-    if (safetyPdfFile.value && safetyPdfFile.value[0]) formData.append('safety_pdf', safetyPdfFile.value[0].file);
-    if (instPdfFile.value && instPdfFile.value[0]) formData.append('instructions_pdf', instPdfFile.value[0].file);
-    if (descImageFile.value && descImageFile.value[0]) formData.append('description_image', descImageFile.value[0].file);
-    if (overviewImageFile.value && overviewImageFile.value[0]) formData.append('overview_image', overviewImageFile.value[0].file);
-    if (specsImageFile.value && specsImageFile.value[0]) formData.append('specs_image', specsImageFile.value[0].file);
-    if (featuresImageFile.value && featuresImageFile.value[0]) formData.append('features_image', featuresImageFile.value[0].file);
-    if (technologyImageFile.value && technologyImageFile.value[0]) formData.append('technology_image', technologyImageFile.value[0].file);
+    const additionalFiles = {
+        documentation_pdf: docPdfFile.value,
+        safety_pdf: safetyPdfFile.value,
+        instructions_pdf: instPdfFile.value,
+        description_image: descImageFile.value,
+        overview_image: overviewImageFile.value,
+        specs_image: specsImageFile.value,
+        features_image: featuresImageFile.value,
+        technology_image: technologyImageFile.value
+    };
+
+    Object.entries(additionalFiles).forEach(([field, fileVal]) => {
+        if (fileVal?.[0]?.file) formData.append(field, fileVal[0].file);
+    });
 
     try {
         await axios.post('/api/products', formData, {

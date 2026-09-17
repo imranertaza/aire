@@ -17,6 +17,7 @@ use Illuminate\Support\Str;
 use App\Models\ProductDescription;
 use App\Models\ProductFreeDelivery;
 use App\Models\ProductSpecial;
+use App\Models\ProductLanding;
 
 class ProductController extends Controller
 {
@@ -28,7 +29,7 @@ class ProductController extends Controller
         $search = $request->query('search');
         $categoryId = $request->query('category_id');
 
-        $query = Product::select('id', 'name', 'model');
+        $query = Product::select('id', 'name', 'model', 'price', 'main_image', 'status');
 
         if ($categoryId) {
             $query->whereHas('categories', function ($q) use ($categoryId) {
@@ -43,12 +44,12 @@ class ProductController extends Controller
             });
         }
 
-        $limit = $request->query('limit', $categoryId ? null : 100);
+        $limit = $request->query('limit', ($categoryId || $request->has('all')) ? null : 500);
         if ($limit) {
             $query->limit($limit);
         }
 
-        $products = $query->get();
+        $products = $query->orderBy('name')->get();
         return ApiResponse::success($products, 'Products list retrieved successfully');
     }
 
@@ -76,7 +77,7 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        foreach (['category_ids', 'related_ids', 'bought_together_ids', 'options', 'attributes', 'deleted_images'] as $field) {
+        foreach (['category_ids', 'related_ids', 'bought_together_ids', 'options', 'filter_options', 'attributes', 'deleted_images'] as $field) {
             if ($request->has($field) && is_string($request->input($field))) {
                 $request->merge([$field => json_decode($request->input($field), true)]);
             }
@@ -103,6 +104,7 @@ class ProductController extends Controller
 
             // Arrays for relations
             'options'             => 'nullable|array',
+            'filter_options'      => 'nullable|array',
             'attributes'          => 'nullable|array',
             'gallery_images'      => 'nullable|array',
             'gallery_images.*'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -345,6 +347,19 @@ class ProductController extends Controller
                 ProductOption::insert($optionData);
             }
 
+            // Save Filter Options
+            if (!empty($validated['filter_options'])) {
+                $filterOptionData = [];
+                foreach ($validated['filter_options'] as $fOpt) {
+                    $filterOptionData[] = [
+                        'product_id'             => $product->id,
+                        'filter_option_id'       => $fOpt['filter_option_id'],
+                        'filter_option_value_id' => $fOpt['filter_option_value_id'],
+                    ];
+                }
+                \App\Models\ProductFilterOption::insert($filterOptionData);
+            }
+
             // Save Attributes
             $attributes = $validated['attributes'] ?? $request->input('attributes');
             if (is_string($attributes)) {
@@ -415,7 +430,7 @@ class ProductController extends Controller
                     foreach ($apps as $index => $appItem) {
                         if (!empty($appItem['title'])) {
                             $imagePath = $appItem['bg_image'] ?? $appItem['image'] ?? null;
-                            $uploadedFile = $request->file("applications.{$index}.bg_image_file") 
+                            $uploadedFile = $request->file("applications.{$index}.bg_image_file")
                                 ?? ($request->file('applications')[$index]['bg_image_file'] ?? null);
 
                             if ($uploadedFile) {
@@ -439,7 +454,7 @@ class ProductController extends Controller
 
             DB::commit();
 
-            return ApiResponse::success($product->load(['productOptions', 'productAttributes', 'images', 'description', 'freeDelivery', 'specials', 'categories', 'relatedProducts', 'boughtTogether']), 'Product created successfully');
+            return ApiResponse::success($product->load(['productOptions', 'productFilterOptions', 'productAttributes', 'images', 'description', 'freeDelivery', 'specials', 'categories', 'relatedProducts', 'boughtTogether']), 'Product created successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             return ApiResponse::error('Failed to create product', 500, [$e->getMessage()]);
@@ -452,7 +467,10 @@ class ProductController extends Controller
     public function show($id)
     {
         $product = Product::with([
-            'productOptions',
+            'productOptions.option',
+            'productOptions.optionValue',
+            'productFilterOptions.filterOption',
+            'productFilterOptions.filterOptionValue',
             'productAttributes',
             'images',
             'brand',
@@ -464,8 +482,8 @@ class ProductController extends Controller
             'boughtTogether',
             'categories',
             'faqs',
-            'applications'
-
+            'applications',
+            'productLanding'
         ])->findOrFail($id);
 
         return ApiResponse::success($product, 'Product retrieved successfully');
@@ -478,7 +496,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
 
-        foreach (['category_ids', 'related_ids', 'bought_together_ids', 'options', 'attributes', 'deleted_images', 'deleted_files'] as $field) {
+        foreach (['category_ids', 'related_ids', 'bought_together_ids', 'options', 'filter_options', 'attributes', 'deleted_images', 'deleted_files'] as $field) {
             if ($request->has($field) && is_string($request->input($field))) {
                 $request->merge([$field => json_decode($request->input($field), true)]);
             }
@@ -505,6 +523,7 @@ class ProductController extends Controller
 
             // Arrays for relations
             'options'             => 'nullable|array',
+            'filter_options'      => 'nullable|array',
             'attributes'          => 'nullable|array',
             'gallery_images'      => 'nullable|array',
             'gallery_images.*'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -803,6 +822,20 @@ class ProductController extends Controller
                 ProductOption::insert($optionData);
             }
 
+            // Sync Filter Options (Delete old, insert new)
+            \App\Models\ProductFilterOption::where('product_id', $product->id)->delete();
+            if (!empty($validated['filter_options'])) {
+                $filterOptionData = [];
+                foreach ($validated['filter_options'] as $fOpt) {
+                    $filterOptionData[] = [
+                        'product_id'             => $product->id,
+                        'filter_option_id'       => $fOpt['filter_option_id'],
+                        'filter_option_value_id' => $fOpt['filter_option_value_id'],
+                    ];
+                }
+                \App\Models\ProductFilterOption::insert($filterOptionData);
+            }
+
             // Sync Attributes (Delete old, insert new)
             $product->productAttributes()->delete();
             $attributes = $validated['attributes'] ?? $request->input('attributes');
@@ -894,7 +927,7 @@ class ProductController extends Controller
                     foreach ($apps as $index => $appItem) {
                         if (!empty($appItem['title'])) {
                             $imagePath = $appItem['bg_image'] ?? $appItem['image'] ?? null;
-                            $uploadedFile = $request->file("applications.{$index}.bg_image_file") 
+                            $uploadedFile = $request->file("applications.{$index}.bg_image_file")
                                 ?? ($request->file('applications')[$index]['bg_image_file'] ?? null);
 
                             if ($uploadedFile) {
@@ -916,9 +949,158 @@ class ProductController extends Controller
                 }
             }
 
+            // Save or Update Product Landing
+            if ($request->has('landing_enabled')) {
+                $landingEnabled = filter_var($request->input('landing_enabled'), FILTER_VALIDATE_BOOLEAN)
+                    || $request->input('landing_enabled') === '1'
+                    || $request->input('landing_enabled') === 1;
+
+                if ($landingEnabled) {
+                    $landing = ProductLanding::firstOrNew(['product_id' => $product->id]);
+                    $landing->status = 1;
+
+                    // 1. Process deleted landing files FIRST (only if no replacement file is being uploaded)
+                    $delFiles = $request->input('deleted_files');
+                    if (!empty($delFiles)) {
+                        if (is_string($delFiles)) {
+                            $delFiles = json_decode($delFiles, true) ?: [];
+                        }
+                        if (is_array($delFiles)) {
+                            $landingFileFields = [
+                                'landing_hero_image'        => ['col' => 'hero_image',        'file' => 'landing_hero_image_file'],
+                                'landing_science_image'     => ['col' => 'science_image',     'file' => 'landing_science_image_file'],
+                                'landing_lifestyle_image'   => ['col' => 'lifestyle_image',   'file' => 'landing_lifestyle_image_file'],
+                                'landing_filter_tech_image' => ['col' => 'filter_tech_image', 'file' => 'landing_filter_tech_image_file'],
+                                'landing_specs_image'       => ['col' => 'specs_image',       'file' => 'landing_specs_image_file'],
+                            ];
+
+                            foreach ($delFiles as $delFile) {
+                                if (isset($landingFileFields[$delFile])) {
+                                    $col = $landingFileFields[$delFile]['col'];
+                                    $fileKey = $landingFileFields[$delFile]['file'];
+
+                                    // Only delete and nullify if a new replacement file is NOT uploaded in this request
+                                    if (!$request->hasFile($fileKey)) {
+                                        if ($landing->$col && Storage::disk('public')->exists($landing->$col)) {
+                                            Storage::disk('public')->delete($landing->$col);
+                                        }
+                                        $landing->$col = null;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Hero Section (Reused by Bottom CTA)
+                    $landing->hero_tag = $request->input('landing_hero_tag');
+                    $landing->hero_title = $request->input('landing_hero_title');
+                    $landing->hero_description = $request->input('landing_hero_description');
+                    $landing->hero_button_text = $request->input('landing_hero_button_text');
+                    $landing->hero_button_url = $request->input('landing_hero_button_url');
+
+                    if ($request->hasFile('landing_hero_image_file')) {
+                        if ($landing->hero_image && Storage::disk('public')->exists($landing->hero_image)) {
+                            Storage::disk('public')->delete($landing->hero_image);
+                        }
+                        $file = $request->file('landing_hero_image_file');
+                        $filename = 'hero_' . time() . '.' . $file->getClientOriginalExtension();
+                        $landing->hero_image = $file->storeAs("product/{$product->id}/landing", $filename, 'public');
+                    } elseif ($request->filled('landing_hero_image')) {
+                        $landing->hero_image = $request->input('landing_hero_image');
+                    }
+
+                    // 3. Science Section
+                    $landing->science_tag = $request->input('landing_science_tag');
+                    $landing->science_title = $request->input('landing_science_title');
+                    $landing->science_description = $request->input('landing_science_description');
+                    $landing->science_stat1_value = $request->input('landing_science_stat1_value');
+                    $landing->science_stat1_label = $request->input('landing_science_stat1_label');
+                    $landing->science_stat2_value = $request->input('landing_science_stat2_value');
+                    $landing->science_stat2_label = $request->input('landing_science_stat2_label');
+
+                    if ($request->hasFile('landing_science_image_file')) {
+                        if ($landing->science_image && Storage::disk('public')->exists($landing->science_image)) {
+                            Storage::disk('public')->delete($landing->science_image);
+                        }
+                        $file = $request->file('landing_science_image_file');
+                        $filename = 'science_' . time() . '.' . $file->getClientOriginalExtension();
+                        $landing->science_image = $file->storeAs("product/{$product->id}/landing", $filename, 'public');
+                    } elseif ($request->filled('landing_science_image')) {
+                        $landing->science_image = $request->input('landing_science_image');
+                    }
+
+                    $scienceFeatures = $request->input('landing_science_features');
+                    if (is_string($scienceFeatures)) {
+                        $scienceFeatures = json_decode($scienceFeatures, true);
+                    }
+                    $landing->science_features = is_array($scienceFeatures) ? $scienceFeatures : null;
+
+                    // 4. Lifestyle Section
+                    $landing->lifestyle_tag = $request->input('landing_lifestyle_tag');
+                    $landing->lifestyle_title = $request->input('landing_lifestyle_title');
+                    $landing->lifestyle_description = $request->input('landing_lifestyle_description');
+                    $landing->lifestyle_button_text = $request->input('landing_lifestyle_button_text');
+                    $landing->lifestyle_button_url = $request->input('landing_lifestyle_button_url');
+
+                    if ($request->hasFile('landing_lifestyle_image_file')) {
+                        if ($landing->lifestyle_image && Storage::disk('public')->exists($landing->lifestyle_image)) {
+                            Storage::disk('public')->delete($landing->lifestyle_image);
+                        }
+                        $file = $request->file('landing_lifestyle_image_file');
+                        $filename = 'lifestyle_' . time() . '.' . $file->getClientOriginalExtension();
+                        $landing->lifestyle_image = $file->storeAs("product/{$product->id}/landing", $filename, 'public');
+                    } elseif ($request->filled('landing_lifestyle_image')) {
+                        $landing->lifestyle_image = $request->input('landing_lifestyle_image');
+                    }
+
+                    // 5. Filter Tech Section
+                    $landing->filter_tech_title = $request->input('landing_filter_tech_title');
+                    $landing->filter_tech_description = $request->input('landing_filter_tech_description');
+                    $landing->filter_tech_badge_text = $request->input('landing_filter_tech_badge_text');
+
+                    if ($request->hasFile('landing_filter_tech_image_file')) {
+                        if ($landing->filter_tech_image && Storage::disk('public')->exists($landing->filter_tech_image)) {
+                            Storage::disk('public')->delete($landing->filter_tech_image);
+                        }
+                        $file = $request->file('landing_filter_tech_image_file');
+                        $filename = 'filter_' . time() . '.' . $file->getClientOriginalExtension();
+                        $landing->filter_tech_image = $file->storeAs("product/{$product->id}/landing", $filename, 'public');
+                    } elseif ($request->filled('landing_filter_tech_image')) {
+                        $landing->filter_tech_image = $request->input('landing_filter_tech_image');
+                    }
+
+                    // 6. Precision Specs Section
+                    $landing->specs_title = $request->input('landing_specs_title');
+                    $landing->specs_subtitle = $request->input('landing_specs_subtitle');
+                    $landing->specs_button_text = $request->input('landing_specs_button_text');
+                    $landing->specs_button_url = $request->input('landing_specs_button_url');
+
+                    if ($request->hasFile('landing_specs_image_file')) {
+                        if ($landing->specs_image && Storage::disk('public')->exists($landing->specs_image)) {
+                            Storage::disk('public')->delete($landing->specs_image);
+                        }
+                        $file = $request->file('landing_specs_image_file');
+                        $filename = 'specs_' . time() . '.' . $file->getClientOriginalExtension();
+                        $landing->specs_image = $file->storeAs("product/{$product->id}/landing", $filename, 'public');
+                    } elseif ($request->filled('landing_specs_image')) {
+                        $landing->specs_image = $request->input('landing_specs_image');
+                    }
+
+                    $specsGroups = $request->input('landing_specs_groups');
+                    if (is_string($specsGroups)) {
+                        $specsGroups = json_decode($specsGroups, true);
+                    }
+                    $landing->specs_groups = is_array($specsGroups) ? $specsGroups : null;
+
+                    $landing->save();
+                } else {
+                    ProductLanding::where('product_id', $product->id)->update(['status' => 0]);
+                }
+            }
+
             DB::commit();
 
-            return ApiResponse::success($product->load(['productOptions', 'productAttributes', 'images', 'description', 'freeDelivery', 'specials', 'categories', 'relatedProducts', 'boughtTogether', 'faqs', 'applications']), 'Product updated successfully');
+            return ApiResponse::success($product->load(['productOptions', 'productAttributes', 'images', 'description', 'freeDelivery', 'specials', 'categories', 'relatedProducts', 'boughtTogether', 'faqs', 'applications', 'productLanding']), 'Product updated successfully');
         } catch (\Exception $e) {
             DB::rollBack();
             return ApiResponse::error('Failed to update product', 500, [$e->getMessage()]);
@@ -954,7 +1136,7 @@ class ProductController extends Controller
             'product_ids.*' => 'integer|exists:products,id'
         ]);
 
-        $products = Product::with('images')->whereIn('id', $validated['product_ids'])->get();
+        $products = Product::with(['images', 'productLanding'])->whereIn('id', $validated['product_ids'])->get();
 
         foreach ($products as $product) {
             if ($product->main_image && Storage::disk('public')->exists($product->main_image)) {
@@ -966,6 +1148,18 @@ class ProductController extends Controller
                 if ($img->image && Storage::disk('public')->exists($img->image)) {
                     Storage::disk('public')->delete($img->image);
                 }
+            }
+
+            if ($product->productLanding) {
+                foreach (['hero_image', 'science_image', 'lifestyle_image', 'filter_tech_image', 'specs_image'] as $landingImg) {
+                    if ($product->productLanding->$landingImg && Storage::disk('public')->exists($product->productLanding->$landingImg)) {
+                        Storage::disk('public')->delete($product->productLanding->$landingImg);
+                    }
+                }
+            }
+
+            if (Storage::disk('public')->exists("product/{$product->id}")) {
+                Storage::disk('public')->deleteDirectory("product/{$product->id}");
             }
 
             $product->delete();
@@ -1181,7 +1375,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with(['images', 'productLanding'])->findOrFail($id);
 
         if ($product->main_image && Storage::disk('public')->exists($product->main_image)) {
             Storage::disk('public')->delete($product->main_image);
@@ -1192,6 +1386,18 @@ class ProductController extends Controller
             if ($img->image && Storage::disk('public')->exists($img->image)) {
                 Storage::disk('public')->delete($img->image);
             }
+        }
+
+        if ($product->productLanding) {
+            foreach (['hero_image', 'science_image', 'lifestyle_image', 'filter_tech_image', 'specs_image'] as $landingImg) {
+                if ($product->productLanding->$landingImg && Storage::disk('public')->exists($product->productLanding->$landingImg)) {
+                    Storage::disk('public')->delete($product->productLanding->$landingImg);
+                }
+            }
+        }
+
+        if (Storage::disk('public')->exists("product/{$product->id}")) {
+            Storage::disk('public')->deleteDirectory("product/{$product->id}");
         }
 
         $product->delete();

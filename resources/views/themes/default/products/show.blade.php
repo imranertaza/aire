@@ -5,13 +5,13 @@
 @push('styles')
     <style>
         :root {
-            --primary-blue: #0d6efd;
-            --primary-hover: #0b5ed7;
-            --accent-blue: #2563eb;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border-light: #e2e8f0;
-            --bg-light-alt: #f8fafc;
+            --primary-blue: var(--color-primary, #1d4ed8);
+            --primary-hover: var(--color-primary-hover, #1e40af);
+            --accent-blue: var(--color-primary-light, #2563eb);
+            --text-main: var(--color-dark, #0f172a);
+            --text-muted: var(--color-muted, #64748b);
+            --border-light: var(--color-border, #e2e8f0);
+            --bg-light-alt: var(--color-bg, #f8fafc);
         }
 
         body {
@@ -120,11 +120,81 @@
         .sticky-thumb {
             width: 60px;
             height: 60px;
-            object-fit: contain;
+            /* object-fit: contain; */
             background: #f8fafc;
             border: 1px solid var(--border-light);
             border-radius: 8px;
             padding: 4px;
+        }
+
+        .sticky-price {
+            font-size: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .sticky-buy-btn {
+            height: 44px;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .sticky-product-title {
+            max-width: 260px;
+        }
+
+        .sticky-product-header .overflow-auto {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .sticky-product-header .overflow-auto::-webkit-scrollbar {
+            display: none;
+        }
+
+        @media (max-width: 767.98px) {
+            .sticky-bar-top {
+                padding: 8px 0;
+            }
+
+            .sticky-thumb {
+                width: 44px;
+                height: 44px;
+                border-radius: 6px;
+                padding: 2px;
+            }
+
+            .sticky-product-title {
+                max-width: 140px;
+                font-size: 0.875rem !important;
+            }
+
+            .sticky-price {
+                font-size: 1.15rem;
+            }
+
+            .sticky-buy-btn {
+                height: 38px;
+                padding: 6px 14px !important;
+                font-size: 0.85rem;
+                border-radius: 6px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .sticky-product-title {
+                max-width: 100px;
+                font-size: 0.8rem !important;
+            }
+
+            .sticky-price {
+                font-size: 1rem;
+            }
+
+            .sticky-buy-btn {
+                height: 36px;
+                padding: 5px 10px !important;
+                font-size: 0.8rem;
+            }
         }
 
         .btn-scroll-top {
@@ -159,24 +229,77 @@
             font-weight: 700;
         }
 
-        /* Image Gallery Thumbnails */
-        .thumb-img {
-            opacity: 0.6;
-            transition: all 0.2s ease;
-            background-color: #f8fafc;
-            border-radius: 10px;
-            border: 1px solid var(--border-light);
-            padding: 6px;
+        /* Product Gallery Layout */
+        .product-gallery-wrapper {
+            height: 400px;
             width: 100%;
-            aspect-ratio: 1;
-            object-fit: contain;
         }
 
-        .thumb-img.active,
+        /* Image Gallery Thumbnails */
+        .product-thumb-column {
+            width: 89px;
+            max-width: 89px;
+            height: 100%;
+            max-height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            padding-right: 2px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-x pan-y;
+        }
+
+        .product-thumb-column.is-dragging {
+            cursor: grabbing !important;
+            scroll-behavior: auto !important;
+        }
+
+        .product-thumb-column.is-dragging * {
+            cursor: grabbing !important;
+            user-select: none !important;
+            pointer-events: none;
+        }
+
+        .product-thumb-column::-webkit-scrollbar {
+            display: none;
+        }
+
+        .thumb-img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            background-color: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 0;
+            opacity: 0.85;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: block;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
         .thumb-img:hover {
             opacity: 1;
-            border-color: var(--primary-blue) !important;
-            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.2);
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+        }
+
+        .thumb-img.active {
+            opacity: 1;
+            border-color: var(--color-primary, #1d4ed8) !important;
+            box-shadow: 0 0 0 2px var(--color-primary-shadow, rgba(29, 78, 216, 0.25));
         }
 
         /* Main Image Box */
@@ -185,12 +308,65 @@
             border: 1px solid var(--border-light);
             position: relative;
             border-radius: 16px;
+            height: 100%;
             max-height: 400px;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            padding: 0 !important;
+        }
+
+        .main-image-wrapper #mainProductImg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Mobile Gallery: Main Image on Top, Thumbnails at Bottom Horizontal */
+        @media (max-width: 767.98px) {
+            .product-gallery-wrapper {
+                height: auto !important;
+                flex-direction: column-reverse !important;
+                gap: 12px !important;
+            }
+
+            .main-image-wrapper {
+                height: clamp(280px, 75vw, 380px) !important;
+                max-height: none !important;
+                border-radius: 14px;
+            }
+
+            .product-thumb-column {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                padding: 4px 2px !important;
+                gap: 10px !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .thumb-img {
+                width: 72px !important;
+                height: 72px !important;
+                min-width: 72px !important;
+                border-radius: 12px !important;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .thumb-img {
+                width: 64px !important;
+                height: 64px !important;
+                min-width: 64px !important;
+            }
         }
 
         .badge-render {
@@ -208,7 +384,7 @@
         /* Feature Check Cards (2x2 Grid) */
         .feature-check-box {
             border: 1px solid var(--border-light);
-            border-radius: 10px;
+            border-radius: 6px;
             padding: 10px 12px;
             font-size: 0.73rem;
             font-weight: 700;
@@ -264,24 +440,11 @@
         }
 
         .color-swatch.active {
-            border-color: var(--primary-blue, #2563eb) !important;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+            border-color: var(--color-primary, #1d4ed8) !important;
+            box-shadow: 0 0 0 3px var(--color-primary-shadow, rgba(29, 78, 216, 0.25)) !important;
         }
 
-        /* Slidable Vertical Thumbnail Slider */
-        .product-thumb-column {
-            height: 100%;
-            max-height: 100%;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            padding-right: 2px;
-        }
-
-        .product-thumb-column::-webkit-scrollbar {
-            display: none;
-        }
+        /* Thumbnail Navigation Buttons */
 
         .thumb-nav-btn {
             width: 32px;
@@ -310,7 +473,7 @@
             color: var(--text-main);
             font-weight: 600;
             padding: 8px 22px;
-            border-radius: 8px;
+            border-radius: 6px;
             transition: all 0.2s;
         }
 
@@ -318,17 +481,17 @@
         .size-btn:hover {
             border-color: var(--primary-blue);
             color: var(--primary-blue);
-            background: #f0f6ff;
+            background: var(--color-primary-bg, #eff6ff);
         }
 
         /* Nav Pills Navigation */
         .nav-pill-custom {
-            background-color: #eef2ff;
-            color: #3b82f6;
+            background-color: var(--color-primary-bg, #eff6ff);
+            color: var(--color-primary, #1d4ed8);
             border: none;
-            font-weight: 600;
+            font-weight: 500;
             font-size: 12px;
-            padding: 8px 10px;
+            padding: 6px 8px;
             border-radius: 20px;
             transition: all 0.2s;
             text-decoration: none;
@@ -337,26 +500,141 @@
 
         .nav-pill-custom.active,
         .nav-pill-custom:hover {
-            background-color: #2563eb;
+            background-color: var(--color-primary, #1d4ed8);
             color: #ffffff;
         }
 
         /* Buy Button */
         .btn-buy-now {
-            background: #2563eb;
+            background: var(--color-primary, #1d4ed8);
             border: none;
-            font-weight: 700;
+            font-weight: 600;
             letter-spacing: 0.5px;
             padding: 16px 12px;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #ffffff;
             transition: all 0.2s;
         }
 
         .btn-buy-now:hover {
-            background: #1d4ed8;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            background: var(--color-primary-hover, #1e40af);
+            box-shadow: 0 4px 12px var(--color-primary-shadow, rgba(29, 78, 216, 0.3));
             color: #ffffff;
+        }
+
+        /* Main Product Purchase Actions Styling */
+        .product-purchase-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .product-qty-box {
+            width: 120px;
+            height: 48px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .product-qty-box .qty-btn {
+            width: 38px;
+            height: 100%;
+            border: none;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .product-qty-box .qty-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .product-qty-box .qty-input {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-weight: 700;
+            color: var(--text-main);
+            background: #ffffff;
+            padding: 0;
+        }
+
+        .btn-action-cart {
+            height: 48px;
+            padding: 0 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 140px;
+        }
+
+        .btn-action-buy {
+            height: 48px !important;
+            padding: 0 18px !important;
+            border-radius: 8px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1 1 140px;
+        }
+
+        .btn-action-icon {
+            width: 48px;
+            height: 48px;
+            padding: 0 !important;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 575.98px) {
+            .product-qty-box {
+                width: 110px;
+                height: 44px;
+            }
+
+            .btn-action-cart {
+                height: 44px;
+                flex: 1 0 calc(100% - 120px);
+                font-size: 0.9rem;
+            }
+
+            .btn-action-buy {
+                height: 44px !important;
+                flex: 1 0 calc(100% - 108px);
+                font-size: 0.9rem;
+            }
+
+            .btn-action-icon {
+                width: 44px;
+                height: 44px;
+            }
+
+            .nav-pill-custom {
+                font-size: 11px;
+                padding: 6px 8px;
+            }
         }
 
         /* Sub-Nav Bar (Tabs) */
@@ -375,6 +653,40 @@
             border-top: none;
         }
 
+        /* Product Tabs Horizontal Scroll Track (Desktop & Mobile) */
+        .product-tabs-track,
+        .bottom-tabs-bar .overflow-auto,
+        .sticky-product-header .overflow-auto {
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y pinch-zoom;
+        }
+
+        .product-tabs-track::-webkit-scrollbar,
+        .bottom-tabs-bar .overflow-auto::-webkit-scrollbar,
+        .sticky-product-header .overflow-auto::-webkit-scrollbar {
+            display: none;
+        }
+
+        .product-tabs-track.is-dragging,
+        .bottom-tabs-bar .overflow-auto.is-dragging,
+        .sticky-product-header .overflow-auto.is-dragging {
+            cursor: grabbing !important;
+            scroll-behavior: auto !important;
+        }
+
+        .product-tabs-track.is-dragging *,
+        .bottom-tabs-bar .overflow-auto.is-dragging *,
+        .sticky-product-header .overflow-auto.is-dragging * {
+            cursor: grabbing !important;
+            user-select: none !important;
+            pointer-events: none !important;
+        }
+
         .bottom-tab-link {
             color: #64748b;
             text-decoration: none;
@@ -385,6 +697,12 @@
             transition: all 0.2s;
             position: relative;
             display: inline-block;
+            flex-shrink: 0;
+            white-space: nowrap;
+            -webkit-user-drag: none;
+            user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .bottom-tab-link:hover,
@@ -599,13 +917,15 @@
             background: #ffffff;
             border: 1px solid var(--border-light);
             border-radius: 18px;
-            padding: 24px;
+            padding: 16px;
             aspect-ratio: 1 / 1;
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 14px;
             transition: all 0.2s ease;
+            overflow: hidden;
+            width: 100%;
         }
 
         .box-item-card:hover .box-item-img-box {
@@ -615,9 +935,31 @@
         }
 
         .box-item-img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .box-item-card .box-item-title,
+        .box-item-card h3 {
+            font-size: clamp(0.725rem, 0.65rem + 0.35vw, 0.9rem) !important;
+            font-weight: 700;
+            line-height: 1.25;
+            color: var(--text-main, #0f172a);
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 2.5em;
+            word-break: break-word;
+        }
+
+        .box-item-card .box-item-price {
+            font-size: clamp(0.725rem, 0.65rem + 0.25vw, 0.825rem);
+            font-weight: 700;
         }
 
         /* FAQ Accordion Styling */
@@ -721,53 +1063,127 @@
         }
 
         .product-desc-scroll {
-            height: 260px;
+            max-height: 260px;
         }
     </style>
 @endpush
 
 @section('content')
+    @php
+        $desc = $product->description;
+        $hasSpecs =
+            (bool) ($desc &&
+                ($desc->specs_badge ||
+                    $desc->specs_title ||
+                    $desc->specs_description ||
+                    $desc->specs_image ||
+                    $desc->spec1_value ||
+                    $desc->spec1_badge ||
+                    $desc->spec1_desc ||
+                    $desc->spec2_value ||
+                    $desc->spec2_badge ||
+                    $desc->spec2_desc ||
+                    $desc->spec3_value ||
+                    $desc->spec3_badge ||
+                    $desc->spec3_desc ||
+                    $desc->spec4_value ||
+                    $desc->spec4_badge ||
+                    $desc->spec4_desc));
+        $hasFeatures =
+            (bool) ($desc &&
+                ($desc->features_badge ||
+                    $desc->features_title ||
+                    $desc->features_description ||
+                    $desc->features_image ||
+                    $desc->feature1_title ||
+                    $desc->feature1_desc ||
+                    $desc->feature2_title ||
+                    $desc->feature2_desc ||
+                    $desc->feature3_title ||
+                    $desc->feature3_desc));
+        $hasTech =
+            (bool) ($desc &&
+                ($desc->technology_badge ||
+                    $desc->technology_title ||
+                    $desc->technology_description ||
+                    $desc->technology_image ||
+                    $desc->technology_card_title ||
+                    $desc->technology_card_description ||
+                    $desc->tech_feature1_title ||
+                    $desc->tech_feature1_desc ||
+                    $desc->tech_feature2_title ||
+                    $desc->tech_feature2_desc ||
+                    $desc->tech_feature3_title ||
+                    $desc->tech_feature3_desc));
+        $hasApps = (bool) ($product->applications && $product->applications->count() > 0);
+        $hasBox = (bool) (!empty($relatedProducts) && $relatedProducts->count() > 0);
+        $hasFaq = (bool) ($product->faqs && $product->faqs->count() > 0);
+    @endphp
     <!-- Sticky Header Bar (Reveals on Scroll down) -->
-    <div class="sticky-product-header" id="stickyProductHeader">
+    <div class="sticky-product-header" id="stickyProductHeader" data-lenis-prevent>
         <div class="container sticky-bar-top pb-0">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-2 gap-sm-3 min-w-0">
                     <img src="{{ !empty($product->main_image) ? getImageUrl($product->main_image) : theme_asset('img/airpro_mask_fb2.png') }}"
-                        alt="{{ $product->name ?? 'Airpro Mask FB2' }}" class="sticky-thumb">
-                    <div>
-                        <h6 class="fw-bold mb-0 text-dark fs-6">{{ $product->name ?? 'Airpro Mask FB2' }}</h6>
-                        <p class="text-muted small mb-0" style="font-size: 0.75rem;">Next-Generation Active Wearable Air
+                        alt="{{ $product->name ?? 'Airpro Mask FB2' }}" class="sticky-thumb flex-shrink-0">
+                    <div class="min-w-0">
+                        <h6 class="fw-bold mb-0 text-dark fs-6 text-truncate sticky-product-title">
+                            {{ $product->name ?? 'Airpro Mask FB2' }}</h6>
+                        <p class="text-muted small mb-0 d-none d-md-block text-truncate" style="font-size: 0.75rem;">
+                            Next-Generation Active Wearable Air
                             Purifier</p>
                     </div>
                 </div>
-                <div class="text-primary text-center">
+                <div class="text-primary text-center d-none d-lg-block">
                     <a href="#productTopSection" class="up-down-link">
                         <img src="{{ theme_asset('img/products/up.png') }}" alt="arrow-up-down">
                     </a>
                 </div>
-                <div class="d-flex align-items-center gap-3">
-                    <div class="fw-bold fs-4 text-dark me-2">${{ number_format($product->price ?? 249) }}</div>
-                    <div class="input-group border border-secondary-subtle rounded" style="width: 110px; height: 44px">
+                <div class="d-flex align-items-center gap-2 gap-sm-3 flex-shrink-0">
+                    <div class="fw-bold text-dark sticky-price me-1 me-sm-2 text-nowrap">
+                        @if ($product->special_price)
+                            <span
+                                class="text-muted text-decoration-line-through me-1 fs-6 fw-normal">${{ number_format((float) $product->price, 2) }}</span>
+                            <span>${{ number_format((float) $product->special_price, 2) }}</span>
+                        @else
+                            ${{ number_format((float) ($product->price ?? 249), 2) }}
+                        @endif
+                    </div>
+                    <div class="input-group border border-secondary-subtle rounded d-none d-md-flex sticky-qty-group"
+                        style="width: 110px; height: 44px">
                         <button class="btn btn-outline-secondary btn-sm border-0 sticky-minus-btn" type="button">-</button>
                         <input type="text"
                             class="form-control form-control-sm text-center bg-white text-dark border-0 fw-bold sticky-qty-input"
                             value="1" readonly>
                         <button class="btn btn-outline-secondary btn-sm border-0 sticky-plus-btn" type="button">+</button>
                     </div>
-                    <button class="btn btn-primary btn-buy-now px-4 py-2" style="height: 44px;"
-                        data-product-id="{{ $product->id }}">BUY NOW</button>
+                    <button class="btn btn-primary btn-buy-now sticky-buy-btn px-3 px-sm-4 py-2"
+                        data-product-id="{{ $product->id }}">Buy Now</button>
                 </div>
             </div>
         </div>
         <!-- Embedded Sticky Tabs Bar -->
-        <div class="container d-flex justify-content-between overflow-auto gap-4 text-nowrap">
+        <div class="container d-flex justify-content-between overflow-auto gap-4 text-nowrap product-tabs-track"
+            data-lenis-prevent>
             <a href="#overview" class="bottom-tab-link active">OVERVIEW</a>
-            <a href="#specs" class="bottom-tab-link">SPECIFICATIONS</a>
-            <a href="#features" class="bottom-tab-link">FEATURES</a>
-            <a href="#tech" class="bottom-tab-link">TECHNOLOGY</a>
-            <a href="#apps" class="bottom-tab-link">APPLICATIONS</a>
-            <a href="#box" class="bottom-tab-link">IN THE BOX</a>
-            <a href="#faq" class="bottom-tab-link">FAQ</a>
+            @if ($hasSpecs)
+                <a href="#specs" class="bottom-tab-link">SPECIFICATIONS</a>
+            @endif
+            @if ($hasFeatures)
+                <a href="#features" class="bottom-tab-link">FEATURES</a>
+            @endif
+            @if ($hasTech)
+                <a href="#tech" class="bottom-tab-link">TECHNOLOGY</a>
+            @endif
+            @if ($hasApps)
+                <a href="#apps" class="bottom-tab-link">APPLICATIONS</a>
+            @endif
+            @if ($hasBox)
+                <a href="#box" class="bottom-tab-link">IN THE BOX</a>
+            @endif
+            @if ($hasFaq)
+                <a href="#faq" class="bottom-tab-link">FAQ</a>
+            @endif
         </div>
     </div>
 
@@ -776,7 +1192,7 @@
         <!-- Breadcrumb -->
         <div class="cart-breadcrumb text-muted fs-13 mb-3">
             <a href="{{ route('home') }}" class="text-decoration-none text-muted">Home</a> &nbsp;&gt;&nbsp;
-            <a href="{{ route('products.index') }}" class="text-decoration-none text-muted">Products</a> &nbsp;&gt;&nbsp;
+            <a href="" class="text-decoration-none text-muted">Products</a> &nbsp;&gt;&nbsp;
             <span class="text-dark fw-bold">{{ strtoupper($product->name ?? 'AIRPRO MASK FB2') }}</span>
         </div>
 
@@ -799,31 +1215,37 @@
                             }
                         }
                     }
-                    if (empty($galleryImages)) {
-                        $galleryImages = [
-                            theme_asset('img/airpro_mask_fb2.png'),
-                            theme_asset('img/aire_mini.png'),
-                            theme_asset('img/Air-Purify.png'),
-                        ];
+                    $fallbackImages = [
+                        theme_asset('img/airpro_mask_fb2.png'),
+                        theme_asset('img/aire_mini.png'),
+                        theme_asset('img/AIRE-Pro-S1-Hero.png'),
+                        theme_asset('img/photograph.png'),
+                    ];
+
+                    $needed = 4 - count($galleryImages);
+                    for ($i = 0; $i < $needed; $i++) {
+                        $galleryImages[] = $fallbackImages[$i];
                     }
                     $primaryImage = $galleryImages[0];
                 @endphp
-                <div class="d-flex gap-3 align-items-stretch" style="height: 400px;">
-                    <div class="product-thumb-column d-flex flex-column gap-3 overflow-auto h-100" id="thumbScrollContainer"
-                        style="max-width: 89px;">
+                <div
+                    class="product-gallery-wrapper d-flex flex-column-reverse flex-md-row gap-2 gap-md-3 align-items-stretch">
+                    <div class="product-thumb-column d-flex flex-row flex-md-column gap-2 gap-md-3 overflow-auto"
+                        id="thumbScrollContainer" data-lenis-prevent>
                         @foreach ($galleryImages as $index => $imgUrl)
                             <img src="{{ $imgUrl }}" data-large="{{ $imgUrl }}"
                                 class="img-fluid cursor-pointer thumb-img {{ $index === 0 ? 'active' : '' }}"
+                                draggable="false"
                                 alt="{{ $product->name ?? 'Product Image' }} Thumbnail {{ $index + 1 }}">
                         @endforeach
                     </div>
                     <div
-                        class="flex-1 main-image-wrapper p-4 text-center position-relative overflow-hidden cursor-crosshair h-100 d-flex align-items-center justify-content-center">
+                        class="flex-1 main-image-wrapper p-0 text-center position-relative overflow-hidden cursor-crosshair d-flex align-items-center justify-content-center">
                         <div class="d-flex justify-content-between position-absolute top-0 start-0 w-100 p-3 z-1">
                             <span class="badge-render">NEW ARRIVAL</span>
                         </div>
-                        <img src="{{ $primaryImage }}" id="mainProductImg" class="img-fluid"
-                            style="max-height: 100%; object-fit: contain;" alt="{{ $product->name ?? 'Product Image' }}">
+                        <img src="{{ $primaryImage }}" id="mainProductImg" class="img-fluid w-100 h-100"
+                            style="object-fit: cover;" alt="{{ $product->name ?? 'Product Image' }}">
                         <div class="zoom-image-container d-none position-absolute top-0 start-0 w-100 h-100 bg-white"
                             id="zoomContainer"
                             style="background-repeat: no-repeat; background-size: 220% 220%; z-index: 5; pointer-events: none; opacity: 0; transition: opacity 0.2s ease;">
@@ -839,25 +1261,36 @@
 
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h1 class="fw-bold mb-0 text-dark title-2">{{ $product->name ?? 'Airpro Mask FB2' }}</h1>
-                    <h2 class="text-dark fw-bold mb-0 title-2">${{ number_format($product->price, 2) }}</h2>
+                    <div class="text-end">
+                        @if ($product->special_price)
+                            <span
+                                class="text-muted text-decoration-line-through fs-5 d-block">${{ number_format((float) $product->price, 2) }}</span>
+                            <h2 class="text-dark fw-bold mb-0 title-2">
+                                ${{ number_format((float) $product->special_price, 2) }}</h2>
+                        @else
+                            <h2 class="text-dark fw-bold mb-0 title-2">${{ number_format((float) $product->price, 2) }}
+                            </h2>
+                        @endif
+                    </div>
                 </div>
 
-                <p class="text-muted small mb-3">Next-Generation Active Wearable Air Purifier</p>
+                <p class="text-muted small mb-3">{{ $product->brand->name ?? '' }} {{ $product->model ? '|' : '' }}
+                    {{ $product->model ?? '' }} </p>
 
-                <div class="d-flex align-items-center gap-2 mb-3">
+                {{-- <div class="d-flex align-items-center gap-2 mb-3">
                     <div class="text-primary fs-6">★★★★★</div>
                     <span class="text-muted small fw-semibold">4.8 (123 Certified Reviews)</span>
-                </div>
+                </div> --}}
 
                 <!-- Vertical Scroll Wrapper -->
-                <div class="overflow-y-auto pe-2 mb-4 product-desc-scroll" data-lenis-prevent>
+                <div class="overflow-y-auto pe-2 product-desc-scroll" data-lenis-prevent>
                     <p class="text-secondary small mb-4 product-desc-text">
                         {{ $product->description->description ?? 'Engineered for precision and protection. The AIRE Airpro Mask FB2 combines industrial-grade H13 HEPA filtration with intelligent airflow sensors to deliver laboratory-clean air in a sophisticated, ergonomic form factor.' }}
                     </p>
 
                     <!-- 2x2 Feature Check Cards -->
                     @if ($product->productAttributes && $product->productAttributes->count() > 0)
-                        <div class="row g-2 mb-4">
+                        <div class="row g-2">
                             @foreach ($product->productAttributes->take(4) as $attr)
                                 @php
                                     $label = $attr->details ?? $attr->name;
@@ -981,8 +1414,8 @@
             </div>
         </div>
 
-        <div class="row mt-2">
-            <div class="col-6 text-center">
+        <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-6 text-center order-1 order-md-1 mb-2 mb-md-0 pt-4">
                 <div class="d-flex justify-content-center flex-wrap gap-2 mb-1">
                     <a href="#overview" class="nav-pill-custom active">Overview</a>
                     <a href="#specs" class="nav-pill-custom">Specifications</a>
@@ -990,64 +1423,81 @@
                     <a href="#tech" class="nav-pill-custom">Technology</a>
                     <a href="#apps" class="nav-pill-custom">Applications</a>
                     <a href="#box" class="nav-pill-custom">In The Box</a>
+                    <a href="#faq" class="nav-pill-custom">FAQ</a>
                 </div>
-                <div class="text-primary mt-2">
+                <div class="text-primary mt-2 d-none d-md-block">
                     <a href="#overview" class="up-down-link">
                         <img src="{{ theme_asset('img/products/down.png') }}" alt="arrow-up-down">
                     </a>
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-12 col-md-6 order-2 order-md-2">
                 <!-- Quantity & Buy Button -->
-                <div class="row">
-                    <div class="col-4">
-                        <div class="input-group border border-secondary-subtle rounded">
-                            <button class="btn btn-outline-secondary border-0 px-4" type="button"
-                                id="minusBtn">-</button>
-                            <input type="text"
-                                class="form-control text-center bg-white text-dark border-0 fw-bold py-3" id="qtyInput"
-                                value="1" readonly>
-                            <button class="btn btn-outline-secondary border-0 px-4" type="button"
-                                id="plusBtn">+</button>
-                        </div>
+                <div class="product-purchase-group">
+                    <div class="product-qty-box">
+                        <button class="qty-btn" type="button" id="minusBtn" aria-label="Decrease quantity">-</button>
+                        <input type="text" class="qty-input" id="qtyInput" value="1" readonly
+                            aria-label="Quantity">
+                        <button class="qty-btn" type="button" id="plusBtn" aria-label="Increase quantity">+</button>
                     </div>
                     @php
                         $inCompare = in_array($product->id, session()->get('compare', []));
                         $inWishlist = in_array($product->id, session()->get('favorites', []));
                     @endphp
-                    <div class="col-8 d-flex gap-2 flex-wrap align-items-center">
-                        <button class="btn btn-outline-primary py-3 fw-bold btn-add-to-cart-detail flex-grow-1"
-                            data-product-id="{{ $product->id }}">ADD TO CART</button>
-                        <button class="btn btn-primary py-3 fw-bold btn-buy-now flex-grow-1"
-                            data-product-id="{{ $product->id }}">BUY NOW</button>
-                        <button
-                            class="btn {{ $inCompare ? 'btn-primary text-white' : 'btn-outline-secondary' }} py-3 fw-semibold btn-add-to-compare"
-                            data-product-id="{{ $product->id }}"
-                            title="{{ $inCompare ? 'In Comparison List' : 'Add to Compare' }}" style="min-width: 48px;">
-                            <i class="bi bi-bar-chart-steps"></i>
-                        </button>
-                        <button
-                            class="btn {{ $inWishlist ? 'btn-danger text-white' : 'btn-outline-secondary' }} py-3 fw-semibold btn-toggle-favorite"
-                            data-product-id="{{ $product->id }}"
-                            title="{{ $inWishlist ? 'In Wishlist' : 'Add to Wishlist' }}" style="min-width: 48px;">
-                            <i class="bi {{ $inWishlist ? 'bi-heart-fill' : 'bi-heart' }}"></i>
-                        </button>
-                    </div>
+                    <button class="btn btn-outline-primary fw-semibold btn-add-to-cart-detail btn-action-cart"
+                        data-product-id="{{ $product->id }}">Add To Cart</button>
+                    <button class="btn btn-primary fw-semibold btn-buy-now btn-action-buy"
+                        data-product-id="{{ $product->id }}">Buy Now</button>
+                    <button
+                        class="btn {{ $inCompare ? 'btn-primary text-white' : 'btn-outline-secondary' }} fw-semibold btn-add-to-compare btn-action-icon"
+                        data-product-id="{{ $product->id }}"
+                        title="{{ $inCompare ? 'In Comparison List' : 'Add to Compare' }}">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M2 5C2 6.3 2.84 7.4 4 7.82V17.5C4 18.163 4.26339 18.7989 4.73223 19.2678C5.20107 19.7366 5.83696 20 6.5 20H10V22L14 19L10 16V18H6.5C6.22 18 6 17.78 6 17.5V7.82C7.16 7.41 8 6.31 8 5C8 3.35 6.65 2 5 2C3.35 2 2 3.35 2 5ZM5 4C5.55 4 6 4.45 6 5C6 5.55 5.55 6 5 6C4.45 6 4 5.55 4 5C4 4.45 4.45 4 5 4ZM20 16.18V6.5C20 5.83696 19.7366 5.20107 19.2678 4.73223C18.7989 4.26339 18.163 4 17.5 4H14V2L10 5L14 8V6H17.5C17.78 6 18 6.22 18 6.5V16.18C16.84 16.59 16 17.69 16 19C16 20.65 17.35 22 19 22C20.65 22 22 20.65 22 19C22 17.7 21.16 16.6 20 16.18ZM19 20C18.45 20 18 19.55 18 19C18 18.45 18.45 18 19 18C19.55 18 20 18.45 20 19C20 19.55 19.55 20 19 20Z"
+                                fill="currentColor" />
+                        </svg>
+                    </button>
+                    <button
+                        class="btn {{ $inWishlist ? 'btn-danger text-white' : 'btn-outline-secondary' }} fw-semibold btn-toggle-favorite btn-action-icon"
+                        data-product-id="{{ $product->id }}"
+                        title="{{ $inWishlist ? 'In Wishlist' : 'Add to Wishlist' }}">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M12 21L10.55 19.7C8.86667 18.1833 7.475 16.875 6.375 15.775C5.275 14.675 4.4 13.6873 3.75 12.812C3.1 11.9367 2.646 11.1327 2.388 10.4C2.13 9.66733 2.00067 8.91733 2 8.15C2 6.58333 2.525 5.275 3.575 4.225C4.625 3.175 5.93333 2.65 7.5 2.65C8.36667 2.65 9.19167 2.83333 9.975 3.2C10.7583 3.56667 11.4333 4.08333 12 4.75C12.5667 4.08333 13.2417 3.56667 14.025 3.2C14.8083 2.83333 15.6333 2.65 16.5 2.65C18.0667 2.65 19.375 3.175 20.425 4.225C21.475 5.275 22 6.58333 22 8.15C22 8.91667 21.871 9.66667 21.613 10.4C21.355 11.1333 20.9007 11.9373 20.25 12.812C19.5993 13.6867 18.7243 14.6743 17.625 15.775C16.5257 16.8757 15.134 18.184 13.45 19.7L12 21ZM12 18.3C13.6 16.8667 14.9167 15.6377 15.95 14.613C16.9833 13.5883 17.8 12.6967 18.4 11.938C19 11.1793 19.4167 10.504 19.65 9.912C19.8833 9.32 20 8.73267 20 8.15C20 7.15 19.6667 6.31667 19 5.65C18.3333 4.98333 17.5 4.65 16.5 4.65C15.7167 4.65 14.9917 4.87067 14.325 5.312C13.6583 5.75333 13.2 6.316 12.95 7H11.05C10.8 6.31667 10.3417 5.75433 9.675 5.313C9.00833 4.87167 8.28333 4.65067 7.5 4.65C6.5 4.65 5.66667 4.98333 5 5.65C4.33333 6.31667 4 7.15 4 8.15C4 8.73333 4.11667 9.321 4.35 9.913C4.58333 10.505 5 11.18 5.6 11.938C6.2 12.696 7.01667 13.5877 8.05 14.613C9.08333 15.6383 10.4 16.8673 12 18.3Z"
+                                fill="currentColor" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Sub-Nav Bar (Tabs) -->
-    <div class="container-fluid bottom-tabs-bar" id="standardTabsBar">
-        <div class="container d-flex justify-content-between overflow-auto gap-4 text-nowrap">
+    <div class="container-fluid bottom-tabs-bar" id="standardTabsBar" data-lenis-prevent>
+        <div class="container d-flex justify-content-between overflow-auto gap-4 text-nowrap product-tabs-track"
+            data-lenis-prevent>
             <a href="#overview" class="bottom-tab-link active">OVERVIEW</a>
-            <a href="#specs" class="bottom-tab-link">SPECIFICATIONS</a>
-            <a href="#features" class="bottom-tab-link">FEATURES</a>
-            <a href="#tech" class="bottom-tab-link">TECHNOLOGY</a>
-            <a href="#apps" class="bottom-tab-link">APPLICATIONS</a>
-            <a href="#box" class="bottom-tab-link">IN THE BOX</a>
-            <a href="#faq" class="bottom-tab-link">FAQ</a>
+            @if ($hasSpecs)
+                <a href="#specs" class="bottom-tab-link">SPECIFICATIONS</a>
+            @endif
+            @if ($hasFeatures)
+                <a href="#features" class="bottom-tab-link">FEATURES</a>
+            @endif
+            @if ($hasTech)
+                <a href="#tech" class="bottom-tab-link">TECHNOLOGY</a>
+            @endif
+            @if ($hasApps)
+                <a href="#apps" class="bottom-tab-link">APPLICATIONS</a>
+            @endif
+            @if ($hasBox)
+                <a href="#box" class="bottom-tab-link">IN THE BOX</a>
+            @endif
+            @if ($hasFaq)
+                <a href="#faq" class="bottom-tab-link">FAQ</a>
+            @endif
         </div>
     </div>
 
@@ -1062,11 +1512,7 @@
             'Designed for the most demanding technical environments while remaining sophisticated enough for professional urban use, providing a seamless transition between critical technical spaces and everyday clean air environments.');
         $overviewImage = $overview?->image
             ? getImageUrl($overview->image)
-            : ($desc?->description_image
-                ? getImageUrl($desc->description_image)
-                : ($product->main_image
-                    ? getImageUrl($product->main_image)
-                    : theme_asset('img/products/AIRE Airpro Mask FB2 Technical Visualization.png')));
+            : theme_asset('img/products/AIRE Airpro Mask FB2 Technical Visualization.png');
 
         // Dynamic attribute lookups
         $cadrAttr =
@@ -1099,7 +1545,7 @@
     @endphp
 
     <section id="overview" class="container py-5 my-4">
-        <div class="row align-items-center g-5">
+        <div class="row align-items-center g-md-5">
             <div class="col-lg-6">
                 <div class="text-uppercase text-muted small fw-bold mb-2"
                     style="font-size: 0.7rem; letter-spacing: 1.5px;">Overview</div>
@@ -1205,7 +1651,9 @@
 
                 <!-- Exploded Technical View Banner with Universal Parallax Background -->
                 @php
-                    $specsBgImage = $desc->specs_image ? getImageUrl($desc->specs_image) : null;
+                    $specsBgImage = $desc->specs_image
+                        ? getImageUrl($desc->specs_image)
+                        : theme_asset('img/products/SPECIFICATIONS.png');
                 @endphp
                 @if ($specsBgImage)
                     <div class="w-100 mb-5 position-relative overflow-hidden rounded-4 border bg-dark shadow-lg parallax-window"
@@ -1408,7 +1856,7 @@
             <!-- Banner with Universal Parallax Background & 3 Glassmorphism Cards Overlay -->
             @php
                 $featImg = $desc->features_image;
-                $featBgImage = $featImg ? getImageUrl($featImg) : null;
+                $featBgImage = $featImg ? getImageUrl($featImg) : theme_asset('img/products/features.png');
 
                 $hasCard1 = $desc->feature1_title || $desc->feature1_desc;
                 $hasCard2 = $desc->feature2_title || $desc->feature2_desc;
@@ -1546,7 +1994,7 @@
             <!-- Banner with Universal Parallax Background & Glassmorphism Overlay Card -->
             @php
                 $techImg = $desc->technology_image;
-                $techBgImage = $techImg ? getImageUrl($techImg) : null;
+                $techBgImage = $techImg ? getImageUrl($techImg) : theme_asset('img/airpro_mask_fb2.png');
                 $hasCard = $desc->technology_card_title || $desc->technology_card_description;
             @endphp
 
@@ -1682,7 +2130,13 @@
                                     ? 'col-lg-4'
                                     : 'col-12'));
                         $appImg = $appItem->bg_image ?: $appItem->image;
-                        $bgImage = $appImg ? getImageUrl($appImg) : null;
+                        $defaultAppImages = [
+                            theme_asset('img/products/R&D Laboratories1.png'),
+                            theme_asset('img/products/Precision Manufacturing.png'),
+                            theme_asset('img/products/Urban Mobility.png'),
+                        ];
+                        $fallbackImg = $defaultAppImages[$index % 3];
+                        $bgImage = $appImg ? getImageUrl($appImg) : $fallbackImg;
                     @endphp
                     <div class="{{ $gridCol }}">
                         <div class="app-card parallax-window"
@@ -1734,11 +2188,10 @@
                                         <img src="{{ $relProduct->main_image ? getImageUrl($relProduct->main_image) : theme_asset('img/airpro_mask_fb2.png') }}"
                                             alt="{{ $relProduct->name }}" class="img-fluid box-item-img">
                                     </div>
-                                    <h3 class="fw-bold mb-1 text-dark text-truncate" style="font-size: 0.8rem;"
-                                        title="{{ $relProduct->name }}">
+                                    <h3 class="fw-bold mb-1 text-dark box-item-title" title="{{ $relProduct->name }}">
                                         {{ strtoupper($relProduct->name) }}
                                     </h3>
-                                    <span class="text-primary small fw-bold" style="font-size: 0.75rem;">
+                                    <span class="text-primary small fw-bold box-item-price">
                                         ${{ number_format($relProduct->price, 2) }}
                                     </span>
                                 </div>
@@ -1764,7 +2217,7 @@
                 </div>
                 <div class="row">
                     <div class="col-md-3"></div>
-                    <div class="col-md-6">
+                    <div class="col-md-9">
                         <div class="accordion custom-accordion" id="faqAccordion">
                             @foreach ($product->faqs as $index => $faq)
                                 <div class="accordion-item">
@@ -1788,7 +2241,6 @@
                             @endforeach
                         </div>
                     </div>
-                    <div class="col-md-3"></div>
                 </div>
             </div>
         </section>
@@ -1814,14 +2266,51 @@
                     }
                 });
 
-                // Dynamic Thumbnail switching logic with smooth fade effect
-                $(document).on('click', '.thumb-img', function() {
+                // Dynamic Thumbnail switching function (smooth cross-fade & zoom sync)
+                function switchProductImage(imgEl) {
+                    if (!imgEl) return;
+                    const $thumb = $(imgEl);
+                    if ($thumb.hasClass('active')) return;
+
                     $('.thumb-img').removeClass('active');
-                    $(this).addClass('active');
-                    let largeImageSrc = $(this).attr('data-large');
-                    $('#mainProductImg').fadeOut(120, function() {
-                        $(this).attr('src', largeImageSrc).fadeIn(120);
+                    $thumb.addClass('active');
+
+                    const largeImageSrc = $thumb.attr('data-large') || $thumb.attr('src');
+                    if (!largeImageSrc) return;
+
+                    const $mainImg = $('#mainProductImg');
+                    $mainImg.stop(true, false).fadeTo(80, 0.25, function() {
+                        $mainImg.attr('src', largeImageSrc).fadeTo(140, 1);
                     });
+
+                    // Synchronize desktop zoom box
+                    $('#zoomContainer').css('background-image', 'url("' + largeImageSrc + '")');
+
+                    // Smooth scroll thumbnail inside column without moving the entire window
+                    const container = document.getElementById('thumbScrollContainer');
+                    if (container) {
+                        if (container.scrollHeight > container.clientHeight) {
+                            const targetTop = imgEl.offsetTop - (container.clientHeight / 2) + (imgEl
+                                .clientHeight / 2);
+                            container.scrollTo({
+                                top: Math.max(0, targetTop),
+                                behavior: 'smooth'
+                            });
+                        } else if (container.scrollWidth > container.clientWidth) {
+                            const targetLeft = imgEl.offsetLeft - (container.clientWidth / 2) + (imgEl
+                                .clientWidth / 2);
+                            container.scrollTo({
+                                left: Math.max(0, targetLeft),
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }
+
+                // Click listener for thumbnails (desktop & mobile)
+                $(document).on('click', '.thumb-img', function(e) {
+                    e.preventDefault();
+                    switchProductImage(this);
                 });
 
                 // Slidable Vertical Thumbnail Navigation (Up/Down Buttons)
@@ -1844,6 +2333,310 @@
                         });
                     }
                 });
+
+                // Draggable / Drag-to-Scroll Thumbnail Column (Mouse & Touch with momentum)
+                (function initThumbDragScroll() {
+                    const container = document.getElementById('thumbScrollContainer');
+                    if (!container) return;
+
+                    let isDown = false;
+                    let startX = 0;
+                    let startY = 0;
+                    let scrollLeft = 0;
+                    let scrollTop = 0;
+                    let hasDragged = false;
+                    let velX = 0;
+                    let velY = 0;
+                    let lastX = 0;
+                    let lastY = 0;
+                    let lastTime = 0;
+                    let momentumRaf = null;
+                    let targetThumb = null;
+
+                    // Prevent default ghost image dragging
+                    container.addEventListener('dragstart', function(e) {
+                        e.preventDefault();
+                    });
+
+                    container.addEventListener('pointerdown', function(e) {
+                        if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+                        isDown = true;
+                        hasDragged = false;
+                        startX = e.pageX;
+                        startY = e.pageY;
+                        scrollLeft = container.scrollLeft;
+                        scrollTop = container.scrollTop;
+                        lastX = e.pageX;
+                        lastY = e.pageY;
+                        lastTime = performance.now();
+                        velX = 0;
+                        velY = 0;
+                        targetThumb = e.target ? e.target.closest('.thumb-img') : null;
+
+                        if (momentumRaf) {
+                            cancelAnimationFrame(momentumRaf);
+                            momentumRaf = null;
+                        }
+                        // Note: Pointer capture is deferred until actual movement > 7px so desktop clicks dispatch cleanly to .thumb-img
+                    });
+
+                    container.addEventListener('pointermove', function(e) {
+                        if (!isDown) return;
+
+                        const x = e.pageX;
+                        const y = e.pageY;
+                        const walkX = x - startX;
+                        const walkY = y - startY;
+
+                        // Threshold to distinguish deliberate drag from a simple click
+                        if (!hasDragged && (Math.abs(walkX) > 7 || Math.abs(walkY) > 7)) {
+                            hasDragged = true;
+                            container.classList.add('is-dragging');
+                            container.style.scrollBehavior = 'auto';
+
+                            // Only capture pointer when dragging begins
+                            try {
+                                container.setPointerCapture(e.pointerId);
+                            } catch (err) {}
+                        }
+
+                        if (hasDragged) {
+                            const now = performance.now();
+                            const dt = now - lastTime;
+                            if (dt > 0) {
+                                velX = (x - lastX) / dt;
+                                velY = (y - lastY) / dt;
+                            }
+                            lastX = x;
+                            lastY = y;
+                            lastTime = now;
+
+                            container.scrollLeft = scrollLeft - walkX;
+                            container.scrollTop = scrollTop - walkY;
+                        }
+                    });
+
+                    function endDrag(e) {
+                        if (!isDown) return;
+                        isDown = false;
+
+                        if (e && e.pointerId) {
+                            try {
+                                container.releasePointerCapture(e.pointerId);
+                            } catch (err) {}
+                        }
+
+                        if (hasDragged) {
+                            // Intercept and prevent the click event triggered by this drag release
+                            const captureClick = function(clickEv) {
+                                clickEv.preventDefault();
+                                clickEv.stopPropagation();
+                                clickEv.stopImmediatePropagation();
+                                window.removeEventListener('click', captureClick, true);
+                            };
+                            window.addEventListener('click', captureClick, true);
+                            setTimeout(function() {
+                                window.removeEventListener('click', captureClick, true);
+                            }, 150);
+
+                            // Smooth momentum inertia
+                            let momentumX = velX * 16;
+                            let momentumY = velY * 16;
+                            const friction = 0.92;
+
+                            function stepMomentum() {
+                                if (Math.abs(momentumX) > 0.4 || Math.abs(momentumY) > 0.4) {
+                                    container.scrollLeft -= momentumX;
+                                    container.scrollTop -= momentumY;
+                                    momentumX *= friction;
+                                    momentumY *= friction;
+                                    momentumRaf = requestAnimationFrame(stepMomentum);
+                                } else {
+                                    container.classList.remove('is-dragging');
+                                    container.style.scrollBehavior = '';
+                                    momentumRaf = null;
+                                }
+                            }
+                            momentumRaf = requestAnimationFrame(stepMomentum);
+                        } else {
+                            container.classList.remove('is-dragging');
+                            container.style.scrollBehavior = '';
+
+                            // If released without dragging, switch image immediately on desktop/touch
+                            if (targetThumb) {
+                                switchProductImage(targetThumb);
+                            }
+                        }
+                    }
+
+                    container.addEventListener('pointerup', endDrag);
+                    container.addEventListener('pointercancel', endDrag);
+
+                    // Mouse wheel support for horizontal scroll mode on mobile view
+                    container.addEventListener('wheel', function(e) {
+                        if (container.scrollWidth > container.clientWidth && container
+                            .clientHeight >= container.scrollHeight) {
+                            const delta = e.deltaY || e.deltaX;
+                            if (delta !== 0) {
+                                container.scrollLeft += delta * 0.8;
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }
+                        }
+                    }, {
+                        passive: false
+                    });
+                })();
+
+                // Draggable / Drag-to-Scroll Product Tabs Track (Mobile & Desktop)
+                (function initTabsDragScroll() {
+                    const tracks = document.querySelectorAll('.product-tabs-track');
+                    if (!tracks.length) return;
+
+                    tracks.forEach(function(track) {
+                        let isDown = false;
+                        let startX = 0;
+                        let startY = 0;
+                        let scrollLeft = 0;
+                        let hasDragged = false;
+                        let velX = 0;
+                        let lastX = 0;
+                        let lastTime = 0;
+                        let momentumRaf = null;
+
+                        // Prevent native browser ghost dragging
+                        track.addEventListener('dragstart', function(e) {
+                            e.preventDefault();
+                        });
+
+                        track.addEventListener('pointerdown', function(e) {
+                            if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+                            // Stop propagation so parent or document listeners do not conflict
+                            e.stopPropagation();
+
+                            isDown = true;
+                            hasDragged = false;
+                            startX = e.pageX;
+                            startY = e.pageY;
+                            scrollLeft = track.scrollLeft;
+                            lastX = e.pageX;
+                            lastTime = performance.now();
+                            velX = 0;
+
+                            if (momentumRaf) {
+                                cancelAnimationFrame(momentumRaf);
+                                momentumRaf = null;
+                            }
+
+                            track.style.scrollBehavior = 'auto';
+                        });
+
+                        track.addEventListener('pointermove', function(e) {
+                            if (!isDown) return;
+
+                            const x = e.pageX;
+                            const y = e.pageY;
+                            const walkX = x - startX;
+                            const walkY = y - startY;
+
+                            // If user is scrolling vertically before dragging horizontally, release pointer
+                            if (!hasDragged && Math.abs(walkY) > 8 && Math.abs(walkY) >
+                                Math.abs(walkX)) {
+                                isDown = false;
+                                try {
+                                    track.releasePointerCapture(e.pointerId);
+                                } catch (err) {}
+                                return;
+                            }
+
+                            // Defer pointer capture until deliberate drag movement > 7px so clicks dispatch cleanly
+                            if (!hasDragged && Math.abs(walkX) > 7) {
+                                hasDragged = true;
+                                track.classList.add('is-dragging');
+                                try {
+                                    track.setPointerCapture(e.pointerId);
+                                } catch (err) {}
+                            }
+
+                            if (hasDragged) {
+                                const now = performance.now();
+                                const dt = now - lastTime;
+                                if (dt > 0) {
+                                    velX = (x - lastX) / dt;
+                                }
+                                lastX = x;
+                                lastTime = now;
+
+                                track.scrollLeft = scrollLeft - walkX;
+                            }
+                        });
+
+                        function endDrag(e) {
+                            if (!isDown) return;
+                            isDown = false;
+
+                            if (e && e.pointerId) {
+                                try {
+                                    track.releasePointerCapture(e.pointerId);
+                                } catch (err) {}
+                            }
+
+                            if (hasDragged) {
+                                // Intercept and block click on tab links so drag doesn't jump the page
+                                const captureClick = function(clickEv) {
+                                    clickEv.preventDefault();
+                                    clickEv.stopPropagation();
+                                    clickEv.stopImmediatePropagation();
+                                    window.removeEventListener('click', captureClick, true);
+                                };
+                                window.addEventListener('click', captureClick, true);
+                                setTimeout(function() {
+                                    window.removeEventListener('click', captureClick,
+                                        true);
+                                }, 150);
+
+                                // Inertia momentum deceleration
+                                let momentumX = velX * 16;
+                                const friction = 0.92;
+
+                                function stepMomentum() {
+                                    if (Math.abs(momentumX) > 0.4) {
+                                        track.scrollLeft -= momentumX;
+                                        momentumX *= friction;
+                                        momentumRaf = requestAnimationFrame(stepMomentum);
+                                    } else {
+                                        track.classList.remove('is-dragging');
+                                        track.style.scrollBehavior = '';
+                                        momentumRaf = null;
+                                    }
+                                }
+                                momentumRaf = requestAnimationFrame(stepMomentum);
+                            } else {
+                                track.classList.remove('is-dragging');
+                                track.style.scrollBehavior = '';
+                            }
+                        }
+
+                        track.addEventListener('pointerup', endDrag);
+                        track.addEventListener('pointercancel', endDrag);
+
+                        // Convert mouse wheel to horizontal scroll inside tabs track
+                        track.addEventListener('wheel', function(e) {
+                            if (track.scrollWidth > track.clientWidth) {
+                                const delta = e.deltaY || e.deltaX;
+                                if (delta !== 0) {
+                                    track.scrollLeft += delta * 0.8;
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                }
+                            }
+                        }, {
+                            passive: false
+                        });
+                    });
+                })();
 
                 // Image Hover Zoom Effect (cCart Reference Feature)
                 const $mainWrapper = $('.main-image-wrapper');
@@ -1885,42 +2678,149 @@
                 // Sticky Header & Active Nav Scroll logic
                 const stickyHeader = $('#stickyProductHeader');
                 const productTop = $('#productTopSection');
+                const $tabLinks = $('.bottom-tab-link, .nav-pill-custom');
 
-                $(window).on('scroll', function() {
-                    let scrollTop = $(this).scrollTop();
-                    let productBottom = productTop.offset().top + productTop.outerHeight() - 100;
+                // Collect unique section IDs from hash links that actually exist in the DOM
+                const targetSectionIds = [];
+                $tabLinks.each(function() {
+                    const href = $(this).attr('href');
+                    if (href && href.startsWith('#') && href.length > 1) {
+                        const id = href.substring(1);
+                        if (targetSectionIds.indexOf(id) === -1 && document.getElementById(id)) {
+                            targetSectionIds.push(id);
+                        }
+                    }
+                });
 
+                function getTargetSections() {
+                    return targetSectionIds
+                        .map(id => document.getElementById(id))
+                        .filter(el => el && el.offsetHeight > 0)
+                        .sort((a, b) => a.offsetTop - b.offsetTop);
+                }
+
+                let lastActiveId = null;
+                let isClickScrolling = false;
+                let clickScrollTimer = null;
+
+                function setActiveTab(id) {
+                    if (!id || id === lastActiveId) return;
+                    lastActiveId = id;
+
+                    $tabLinks.removeClass('active');
+                    const $matched = $tabLinks.filter(`[href="#${id}"]`);
+                    $matched.addClass('active');
+
+                    // Scroll active tab into view in mobile tabs track
+                    $matched.each(function() {
+                        const parentTrack = this.closest('.product-tabs-track');
+                        if (parentTrack && !parentTrack.classList.contains('is-dragging')) {
+                            const trackRect = parentTrack.getBoundingClientRect();
+                            const tabRect = this.getBoundingClientRect();
+                            if (tabRect.left < trackRect.left || tabRect.right > trackRect.right) {
+                                this.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'nearest',
+                                    inline: 'center'
+                                });
+                            }
+                        }
+                    });
+                }
+
+                function updateScrollSpy() {
+                    const scrollTop = $(window).scrollTop();
+                    const productBottom = productTop.offset().top + productTop.outerHeight() - 100;
+
+                    // Sticky header visibility toggle
                     if (scrollTop > productBottom) {
                         stickyHeader.addClass('is-sticky');
                     } else {
                         stickyHeader.removeClass('is-sticky');
                     }
 
-                    // Scrollspy active section tab sync
-                    const sections = $('section[id], div[id]');
-                    sections.each(function() {
-                        let top = $(this).offset().top - 120;
-                        let bottom = top + $(this).outerHeight();
-                        let id = $(this).attr('id');
+                    if (isClickScrolling) return;
 
-                        if (scrollTop >= top && scrollTop <= bottom) {
-                            $('.bottom-tab-link, .nav-pill-custom').removeClass('active');
-                            $(`.bottom-tab-link[href="#${id}"], .nav-pill-custom[href="#${id}"]`)
-                                .addClass('active');
+                    const sections = getTargetSections();
+                    if (!sections.length) return;
+
+                    const windowHeight = window.innerHeight || $(window).height();
+                    const docHeight = $(document).height();
+
+                    // If user is near the very bottom of the page, activate the last section
+                    if (scrollTop + windowHeight >= docHeight - 30) {
+                        setActiveTab(sections[sections.length - 1].id);
+                        return;
+                    }
+
+                    // Trigger when section appears 10% on the screen from the bottom (i.e. 90% from top of viewport)
+                    const triggerThreshold = windowHeight * 0.90;
+                    let activeId = null;
+
+                    for (let i = 0; i < sections.length; i++) {
+                        const sec = sections[i];
+                        const rect = sec.getBoundingClientRect();
+
+                        // Section becomes active as soon as it appears 10% on the screen from bottom
+                        if (rect.top <= triggerThreshold) {
+                            activeId = sec.id;
                         }
-                    });
-                });
+                    }
+
+                    // Default to first section when above all trigger thresholds
+                    if (!activeId && sections.length > 0) {
+                        activeId = sections[0].id;
+                    }
+
+                    if (activeId) {
+                        setActiveTab(activeId);
+                    }
+                }
+
+                $(window).on('scroll resize', updateScrollSpy);
+
+                if (window.lenisInstance && typeof window.lenisInstance.on === 'function') {
+                    window.lenisInstance.on('scroll', updateScrollSpy);
+                }
+
+                // Initial sync on page load
+                updateScrollSpy();
 
                 // Smooth Scroll to Section when clicking tabs or pills
-                $('.bottom-tab-link, .nav-pill-custom').on('click', function(e) {
+                $(document).on('click', '.bottom-tab-link, .nav-pill-custom', function(e) {
                     let targetHref = $(this).attr('href');
-                    if (targetHref.startsWith('#')) {
+                    if (targetHref && targetHref.startsWith('#')) {
                         e.preventDefault();
                         let targetSection = $(targetHref);
                         if (targetSection.length) {
-                            $('html, body').animate({
-                                scrollTop: targetSection.offset().top - 100
-                            }, 400);
+                            const targetId = targetHref.substring(1);
+                            isClickScrolling = true;
+                            clearTimeout(clickScrollTimer);
+                            clickScrollTimer = setTimeout(function() {
+                                isClickScrolling = false;
+                            }, 850);
+
+                            setActiveTab(targetId);
+
+                            if (window.lenisInstance && typeof window.lenisInstance.scrollTo ===
+                                'function') {
+                                window.lenisInstance.scrollTo(targetSection[0], {
+                                    offset: -100,
+                                    duration: 0.8
+                                });
+                            } else {
+                                $('html, body').stop().animate({
+                                    scrollTop: targetSection.offset().top - 100
+                                }, 400);
+                            }
+
+                            if (this.scrollIntoView) {
+                                this.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'nearest',
+                                    inline: 'center'
+                                });
+                            }
                         }
                     }
                 });

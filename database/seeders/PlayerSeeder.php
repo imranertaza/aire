@@ -22,7 +22,7 @@ class PlayerSeeder extends Seeder
                 'hometown'         => 'Rosario',
                 'asian_ranking'    => null,
                 'national_ranking' => null,
-                'image'            => 'https://placehold.co/200x200?text=Messi',
+                'image' => 'themes/default/assets/img/Air-Purify.png',
                 'status'           => 1,
             ],
             [
@@ -37,7 +37,7 @@ class PlayerSeeder extends Seeder
                 'hometown'         => 'Magura',
                 'asian_ranking'    => '#1',
                 'national_ranking' => '#1',
-                'image'            => 'https://placehold.co/200x200?text=Shakib',
+                'image' => 'themes/default/assets/img/Air-Purify.png',
                 'status'           => 1,
             ],
             [
@@ -52,7 +52,7 @@ class PlayerSeeder extends Seeder
                 'hometown'         => 'Hyderabad',
                 'asian_ranking'    => '#2',
                 'national_ranking' => '#1',
-                'image'            => 'https://placehold.co/200x200?text=Sindhu',
+                'image' => 'themes/default/assets/img/Air-Purify.png',
                 'status'           => 1,
             ],
         ];

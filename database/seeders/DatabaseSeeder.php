@@ -51,7 +51,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ProductsForEveryCategorySeeder::class);
         $this->call(ProductAttributesAndOptionsSeeder::class);
         $this->call(OptionSeeder::class);
-        $this->call(OptionValueSeeder::class);
         $this->call(ProductAttributeGroupSeeder::class);
         $this->call(ShippingMethodSeeder::class);
         $this->call(ShippingSettingsSeeder::class);
@@ -72,6 +71,9 @@ class DatabaseSeeder extends Seeder
         $this->call(ProductApplicationSeeder::class);
         $this->call(ProductTagSeeder::class);
         $this->call(FixProductImagesSeeder::class);
+        $this->call(FilterOptionSeeder::class);
+        $this->call(ProductFilterOptionSeeder::class);
+        $this->call(ProductLandingSeeder::class);
 
         // 5. Coupons & Offers
         $this->call(CuponSeeder::class);

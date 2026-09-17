@@ -20,16 +20,16 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 1,
                 'name' => 'Cash On Delivery',
                 'code' => 'cash_on',
-                'image' => 'https://placehold.co/200x100?text=Cash+On+Delivery',
-                'status' => 0,
+                'image' => 'payment/8PKBi3GEOyI5R92tKZYxm35U0iObzU0GLeGkmh8Z.png',
+                'status' => 1,
                 'settings' => []
             ],
             [
                 'id' => 2,
                 'name' => 'Bank Transfer',
                 'code' => 'bank_transfer',
-                'image' => 'https://placehold.co/200x100?text=Bank+Transfer',
-                'status' => 1,
+                'image' => 'payment/eigiwCWfA9GYqzg4a4ebarZJPUA057R0dWe1HyPk.png',
+                'status' => 0,
                 'settings' => [
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazingadgets@gmail.com'
                 ]
@@ -38,12 +38,12 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 3,
                 'name' => 'Paypal',
                 'code' => 'paypal',
-                'image' => 'https://placehold.co/200x100?text=Paypal',
-                'status' => 1,
+                'image' => 'payment/z0Az2U1Kg1ANhrmLeN3JMtMpxvXXjh95loNCLukh.png',
+                'status' => 0,
                 'settings' => [
                     'api_url' => 'sandbox',
-                    'api_username' => 'sb-u1koz27136347_api1.business.example.com',
                     'api_password' => 'Q6GHERFNRMSURNYD',
+                    'api_username' => 'sb-u1koz27136347_api1.business.example.com',
                     'api_signature' => 'AwIggmgx-fAD0IWRrXWdFxsw.d--AlUB67UCRrfEheVSFrGOH9DRld-V'
                 ]
             ],
@@ -51,8 +51,8 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 4,
                 'name' => 'Western Union',
                 'code' => 'western_union',
-                'image' => 'https://placehold.co/200x100?text=Western+Union',
-                'status' => 1,
+                'image' => 'payment/RL1alRaSnadrK5bW0Vc9JwdZAGbHwZolm2bFsh3Z.png',
+                'status' => 0,
                 'settings' => [
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazinggadgets@gmail.com'
                 ]
@@ -61,16 +61,17 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 5,
                 'name' => 'MoneyGram',
                 'code' => 'moneyGram',
-                'image' => 'https://placehold.co/200x100?text=MoneyGram',
-                'status' => 1,
+                'image' => 'payment/fmHggrVJrj7ePcEt0qHtToesnMKdlwdh4n9za4ym.png',
+                'status' => 0,
                 'settings' => [
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazinggadgets@gmail.com'
                 ]
             ],
-            [\n                'id' => 6,
+            [
+                'id' => 6,
                 'name' => 'Bitcoin',
                 'code' => 'bitcoin',
-                'image' => 'payment/bitcoin_1693229111_ab1db8a222a0b4082eb1.png',
+                'image' => 'payment/VKVqyOmowDrvsT87axrcDfg4euWvu5G7qTK6klC6.png',
                 'status' => 0,
                 'settings' => [
                     'instruction' => 'A set of payment instructions will be sent to you shortly. Please check your spam or junk if you do not see it in your inbox. If no instruction is receive within 24 hours, please email us at amazinggadgets@gmail.com'
@@ -80,15 +81,15 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 7,
                 'name' => 'Credit Card / Debit Card',
                 'code' => 'credit_card',
-                'image' => 'payment/cash_1759055918_f57b29fe04b4f69c505b.png',
-                'status' => 1,
+                'image' => 'payment/HaBwgUUBnLCG7D20EBv4FMTJrxk0TaOgGIxyl9h3.png',
+                'status' => 0,
                 'settings' => []
             ],
             [
                 'id' => 8,
                 'name' => 'eWallet',
                 'code' => 'u_wallet',
-                'image' => 'payment/cash_1759055992_1743dfad6cce7df3aa71.png',
+                'image' => 'payment/rDCqHIv6alkZ8J2qtBFkVZ4Rv1r5xs7A3BaWtTYU.png',
                 'status' => 0,
                 'settings' => []
             ],
@@ -96,26 +97,26 @@ class PaymentMethodSeeder extends Seeder
                 'id' => 9,
                 'name' => 'Stripe',
                 'code' => 'stripe',
-                'image' => 'payment/stripe_1711190105_76334e85265e1bfe92f5.png',
-                'status' => 1,
+                'image' => 'payment/a6ZpCqeprR8YbFmNgWcQjxwJcVoMXB8ylLJrYjRe.png',
+                'status' => 0,
                 'settings' => [
-                    'key' => '',
-                    'secret_key' => ''
+                    'key' => 'pk_test_51HiuQiDVsvPo6h6ZrkChvkyVywgbs83tPg809JsvQLqyJ3JAlXbXhTOlwZEmlzXud1paIE87z7o5erGMEUbDrevD00jOYwmg2Y',
+                    'secret_key' => 'sk_test_51HiuQiDVsvPo6h6ZmBoulU8B7qWOCl6qYC3feinEzPuj0lLICpwhE2vEHncoIA6fZaKSjXMDn09L8ueDBMzt3I6Z00SA7fC6xY'
                 ]
             ],
             [
                 'id' => 10,
                 'name' => 'Ois Bizcraft',
                 'code' => 'oisbizcraft',
-                'image' => 'payment/oisbizcraft_1733202301_f7de86d0599a71d8ccf9.jpg',
-                'status' => 1,
+                'image' => 'payment/pMsmdRdyQckepRtIfHpGUsBKGTMHHKSnFIqeOEmp.jpg',
+                'status' => 0,
                 'settings' => [
-                    'api_key' => '',
-                    'ois_bizcraft_api_url' => 'https://devapiportal.oisbizcraft.com/api/payments',
-                    'merchant_outlet_id' => '13',
-                    'terminal_id' => '001',
+                    'api_key' => 'DNNDT2QAB583ZP188BHNFMCXRB4G7SJ3',
                     'cust_code' => '001095',
-                    'exchange_rates_api' => '51f16f3fee1c4eec91235cbd887a5259'
+                    'terminal_id' => '001',
+                    'exchange_rates_api' => '51f16f3fee1c4eec91235cbd887a5259',
+                    'merchant_outlet_id' => '13',
+                    'ois_bizcraft_api_url' => 'https://devapiportal.oisbizcraft.com/api/payments'
                 ]
             ]
         ];

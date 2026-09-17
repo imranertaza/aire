@@ -89,11 +89,11 @@ class MenuItemSeeder extends Seeder
          */
         if ($footerProducts) {
             $productItems = [
-                ['name' => 'Residential', 'url' => '/product-filter?industry=residential', 'order' => 1],
-                ['name' => 'Commercial', 'url' => '/product-filter?industry=commercial', 'order' => 2],
-                ['name' => 'Healthcare', 'url' => '/product-filter?industry=healthcare', 'order' => 3],
-                ['name' => 'Infrastructure', 'url' => '/product-filter', 'order' => 4],
-                ['name' => 'Industrial', 'url' => '/product-filter', 'order' => 5],
+                ['name' => 'Residential', 'url' => '/products-filter?industry=residential', 'order' => 1],
+                ['name' => 'Commercial', 'url' => '/products-filter?industry=commercial', 'order' => 2],
+                ['name' => 'Healthcare', 'url' => '/products-filter?industry=healthcare', 'order' => 3],
+                ['name' => 'Infrastructure', 'url' => '/products-filter', 'order' => 4],
+                ['name' => 'Industrial', 'url' => '/products-filter', 'order' => 5],
                 ['name' => 'Site Map', 'url' => '/products', 'order' => 6],
             ];
 

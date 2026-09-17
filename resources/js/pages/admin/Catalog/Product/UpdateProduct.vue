@@ -34,6 +34,10 @@
                                     role="tab" aria-controls="custom-tabs-options" aria-selected="false">Options</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" id="tab-filter-options" data-toggle="pill" href="#custom-tabs-filter-options"
+                                    role="tab" aria-controls="custom-tabs-filter-options" aria-selected="false">Filter Options</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="tab-attributes" data-toggle="pill"
                                     href="#custom-tabs-attributes" role="tab" aria-controls="custom-tabs-attributes"
                                     aria-selected="false">Attributes</a>
@@ -78,6 +82,12 @@
                             <li class="nav-item">
                                 <a class="nav-link" id="tab-images" data-toggle="pill" href="#custom-tabs-images"
                                     role="tab" aria-controls="custom-tabs-images" aria-selected="false">Images</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-landing" data-toggle="pill" href="#custom-tabs-landing"
+                                    role="tab" aria-controls="custom-tabs-landing" aria-selected="false">
+                                    <i class="fas fa-rocket text-primary mr-1"></i> Landing Page
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -309,6 +319,53 @@
                                     <div v-else class="alert alert-info">No options added yet.</div>
                                 </div>
 
+                                <!-- Filter Options Tab -->
+                                <div class="tab-pane fade" id="custom-tabs-filter-options" role="tabpanel"
+                                    aria-labelledby="tab-filter-options">
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label>Add Filter Option</label>
+                                            <select class="form-control" v-model="selectedFilterOptionToAdd"
+                                                @change="addFilterOptionRow">
+                                                <option value="">-- Select Filter Option to Add --</option>
+                                                <option v-for="opt in availableFilterOptions" :key="opt.id" :value="opt">{{
+                                                    opt.name }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive" v-if="form.filter_options.length > 0">
+                                        <table class="table table-bordered">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th>Filter Option</th>
+                                                    <th>Filter Option Value</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="(fOpt, index) in form.filter_options" :key="index">
+                                                    <td>{{ fOpt.filter_option_name }}</td>
+                                                    <td>
+                                                        <select class="form-control" v-model="fOpt.filter_option_value_id"
+                                                            required>
+                                                            <option value="">-- Select Value --</option>
+                                                            <option v-for="val in fOpt.available_values"
+                                                                :key="val.id" :value="val.id">{{ val.name }}</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-sm btn-danger"
+                                                            @click="removeFilterOptionRow(index)">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div v-else class="alert alert-info">No filter options added yet.</div>
+                                </div>
+
                                 <!-- Attributes Tab -->
                                 <div class="tab-pane fade" id="custom-tabs-attributes" role="tabpanel"
                                     aria-labelledby="tab-attributes">
@@ -420,6 +477,7 @@
                                             <Vue3Dropzone v-model="descImageFile" v-model:previews="descImagePreviews"
                                                 mode="edit" :allowSelectOnPreview="true"
                                                 @previewRemoved="() => handleFileRemoved('description_image')" />
+                                            <small class="text-muted d-block mt-1">Recommended: 800 × 600px or 1200 × 800px</small>
                                         </div>
                                     </div>
                                 </div>
@@ -449,6 +507,7 @@
                                                         v-model:previews="overviewImagePreviews"
                                                         mode="edit" :allowSelectOnPreview="true"
                                                         @previewRemoved="() => handleFileRemoved('overview_image')" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 800 × 600px or 1000 × 700px (Landscape ~4:3)</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -538,6 +597,7 @@
                                                         v-model:previews="specsImagePreviews"
                                                         mode="edit" :allowSelectOnPreview="true"
                                                         @previewRemoved="() => handleFileRemoved('specs_image')" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 1200 × 600px or 1024 × 686px (Technical diagram / exploded view)</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -683,6 +743,7 @@
                                                         v-model:previews="featuresImagePreviews"
                                                         mode="edit" :allowSelectOnPreview="true"
                                                         @previewRemoved="() => handleFileRemoved('features_image')" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 1400 × 600px or 1200 × 500px (Panoramic wide banner)</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -824,6 +885,7 @@
                                                                 v-model:previews="appItem.bg_image_previews"
                                                                 mode="edit" :allowSelectOnPreview="true"
                                                                 @previewRemoved="() => { appItem.bg_image = ''; appItem.image = ''; }" />
+                                                            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Recommended: 800 × 400px or 1200 × 500px</small>
                                                         </div>
                                                     </td>
                                                     <td>
@@ -881,6 +943,7 @@
                                                         v-model:previews="technologyImagePreviews"
                                                         mode="edit" :allowSelectOnPreview="true"
                                                         @previewRemoved="() => handleFileRemoved('technology_image')" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 1400 × 700px or 1200 × 600px (Wide landscape banner)</small>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -1011,12 +1074,375 @@
                                             <label>Default Main Image</label>
                                             <Vue3Dropzone v-model="mainImageFile" v-model:previews="mainImagePreviews"
                                                 mode="edit" :allowSelectOnPreview="true" />
+                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, clean/transparent background for interactive zoom)</small>
                                         </div>
                                         <div class="col-md-8 form-group">
                                             <label>Multiple Gallery Images</label>
                                             <Vue3Dropzone v-model="galleryImageFiles" v-model:previews="galleryPreviews"
                                                 mode="edit" :multiple="true" :allowSelectOnPreview="true"
                                                 selectFileStrategy="merge" @previewRemoved="handlePreviewRemoved" />
+                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, matching main image)</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Landing Page Tab -->
+                                <div class="tab-pane fade" id="custom-tabs-landing" role="tabpanel"
+                                    aria-labelledby="tab-landing">
+                                    <!-- Enable Toggle Header -->
+                                    <div class="card mb-4 border-primary">
+                                        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                                            <div>
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" class="custom-control-input" id="toggleLanding"
+                                                        v-model="form.landing_enabled">
+                                                    <label class="custom-control-label font-weight-bold fs-5 text-dark" for="toggleLanding">
+                                                        Enable Dedicated Landing Page
+                                                    </label>
+                                                </div>
+                                                <small class="text-muted d-block mt-1">
+                                                    When enabled, a high-converting, animated showcase page is activated at
+                                                    <code>/product-landing/{{ form.slug || productId }}</code>.
+                                                    The Bottom CTA automatically synchronizes with the Hero section.
+                                                </small>
+                                            </div>
+                                            <div v-if="form.landing_enabled" class="d-flex align-items-center">
+                                                <a :href="`/product-landing/${form.slug || productId}`" target="_blank"
+                                                    class="btn btn-outline-primary btn-sm px-3 py-2 font-weight-bold">
+                                                    <i class="fas fa-external-link-alt mr-1"></i> View Live Landing Page
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div v-show="form.landing_enabled">
+                                        <!-- 1. HERO SECTION -->
+                                        <div class="card card-outline card-secondary mb-4">
+                                            <div class="card-header bg-light">
+                                                <h5 class="card-title font-weight-bold mb-0">
+                                                    <i class="fas fa-flag-checkered text-primary mr-2"></i> 1. Hero Section (Reused by Bottom CTA)
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-4 form-group">
+                                                        <label>Model Tag / Badge</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_hero_tag"
+                                                            placeholder="e.g. AIRE Pro S1" />
+                                                    </div>
+                                                    <div class="col-md-8 form-group">
+                                                        <label>Hero Title / Main Heading</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_hero_title"
+                                                            placeholder="e.g. Atmospheric Mastery." />
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Hero Subtitle / Description</label>
+                                                        <textarea class="form-control" rows="3" v-model="form.landing_hero_description"
+                                                            placeholder="Experience revolutionary synthesis technology designed to purify every molecule..."></textarea>
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Action Button Text</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_hero_button_text"
+                                                            placeholder="e.g. More Details -" />
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Action Button URL</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_hero_button_url"
+                                                            placeholder="e.g. /products/... or leave blank for default" />
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Hero & Bottom CTA Image</label>
+                                                        <Vue3Dropzone v-model="landingHeroImageFile" v-model:previews="landingHeroPreviews"
+                                                            mode="edit" :allowSelectOnPreview="true"
+                                                            @previewRemoved="() => handleFileRemoved('landing_hero_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: PNG with transparent background (1000 × 1000px)</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 2. SCIENCE OF SYNTHESIS SECTION -->
+                                        <div class="card card-outline card-secondary mb-4">
+                                            <div class="card-header bg-light">
+                                                <h5 class="card-title font-weight-bold mb-0">
+                                                    <i class="fas fa-atom text-info mr-2"></i> 2. Science of Synthesis Section
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-4 form-group">
+                                                        <label>Section Tag</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_science_tag"
+                                                            placeholder="e.g. SCIENCE OF SYNTHESIS" />
+                                                    </div>
+                                                    <div class="col-md-8 form-group">
+                                                        <label>Section Title (Line breaks supported)</label>
+                                                        <textarea rows="2" class="form-control" v-model="form.landing_science_title"
+                                                            placeholder="e.g. Extraordinary&#10;from within."></textarea>
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Section Description</label>
+                                                        <textarea class="form-control" rows="3" v-model="form.landing_science_description"
+                                                            placeholder="Every layer is engineered for peak performance..."></textarea>
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Stat 1 Value</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_science_stat1_value"
+                                                            placeholder="e.g. 99.99%" />
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Stat 1 Label</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_science_stat1_label"
+                                                            placeholder="e.g. PARTICLE REMOVAL" />
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Stat 2 Value</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_science_stat2_value"
+                                                            placeholder="e.g. UV-C" />
+                                                    </div>
+                                                    <div class="col-md-3 form-group">
+                                                        <label>Stat 2 Label</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_science_stat2_label"
+                                                            placeholder="e.g. STERILIZATION" />
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Science Card Internal Image</label>
+                                                        <Vue3Dropzone v-model="landingScienceImageFile" v-model:previews="landingSciencePreviews"
+                                                            mode="edit" :allowSelectOnPreview="true"
+                                                            @previewRemoved="() => handleFileRemoved('landing_science_image')" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Science Feature Highlights -->
+                                                <div class="mt-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <label class="font-weight-bold mb-0">Feature Highlights List</label>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" @click="addScienceFeature">
+                                                            <i class="fas fa-plus mr-1"></i> Add Highlight
+                                                        </button>
+                                                    </div>
+                                                    <div v-for="(feat, fIdx) in form.landing_science_features" :key="fIdx"
+                                                        class="border rounded p-3 mb-2 bg-light">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-md-4 form-group mb-md-0">
+                                                                <input type="text" class="form-control" v-model="feat.title"
+                                                                    placeholder="Highlight Title" />
+                                                            </div>
+                                                            <div class="col-md-7 form-group mb-md-0">
+                                                                <input type="text" class="form-control" v-model="feat.desc"
+                                                                    placeholder="Highlight Description" />
+                                                            </div>
+                                                            <div class="col-md-1 text-center">
+                                                                <button type="button" class="btn btn-sm btn-danger"
+                                                                    @click="removeScienceFeature(fIdx)">
+                                                                    <i class="fas fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 3. LIFESTYLE INTEGRATION SECTION -->
+                                        <div class="card card-outline card-secondary mb-4">
+                                            <div class="card-header bg-light">
+                                                <h5 class="card-title font-weight-bold mb-0">
+                                                    <i class="fas fa-couch text-success mr-2"></i> 3. Lifestyle Integration Section
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-4 form-group">
+                                                        <label>Section Tag</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_lifestyle_tag"
+                                                            placeholder="e.g. LIFESTYLE" />
+                                                    </div>
+                                                    <div class="col-md-8 form-group">
+                                                        <label>Section Title (Line breaks supported)</label>
+                                                        <textarea rows="2" class="form-control" v-model="form.landing_lifestyle_title"
+                                                            placeholder="e.g. Seamless&#10;Integration."></textarea>
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control" rows="3" v-model="form.landing_lifestyle_description"
+                                                            placeholder="Designed for your life, not just your air..."></textarea>
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Button Text</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_lifestyle_button_text"
+                                                            placeholder="e.g. More Details &rarr;" />
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Button URL</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_lifestyle_button_url"
+                                                            placeholder="e.g. /category/... or #" />
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Lifestyle Wide Background Image</label>
+                                                        <Vue3Dropzone v-model="landingLifestyleImageFile" v-model:previews="landingLifestylePreviews"
+                                                            mode="edit" :allowSelectOnPreview="true"
+                                                            @previewRemoved="() => handleFileRemoved('landing_lifestyle_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: Wide Banner (1920 × 900px)</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 4. MEDICAL-GRADE PRECISION FILTER SECTION -->
+                                        <div class="card card-outline card-secondary mb-4">
+                                            <div class="card-header bg-light">
+                                                <h5 class="card-title font-weight-bold mb-0">
+                                                    <i class="fas fa-shield-virus text-warning mr-2"></i> 4. Medical-Grade Precision Filter Tech Section
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Section Heading</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_filter_tech_title"
+                                                            placeholder="e.g. Medical-grade Precision." />
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Badge Overlay Text</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_filter_tech_badge_text"
+                                                            placeholder="e.g. Advanced micro-fiber weaving..." />
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Section Subtitle / Description</label>
+                                                        <textarea class="form-control" rows="2" v-model="form.landing_filter_tech_description"
+                                                            placeholder="HEPA H13 Filter Technology. From microscopic particles..."></textarea>
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Macro Filter Image</label>
+                                                        <Vue3Dropzone v-model="landingFilterImageFile" v-model:previews="landingFilterPreviews"
+                                                            mode="edit" :allowSelectOnPreview="true"
+                                                            @previewRemoved="() => handleFileRemoved('landing_filter_tech_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: 1400 × 600px</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- 5. PRECISION ENGINEERING SPECS SECTION -->
+                                        <div class="card card-outline card-secondary mb-4">
+                                            <div class="card-header bg-light">
+                                                <h5 class="card-title font-weight-bold mb-0">
+                                                    <i class="fas fa-sliders-h text-danger mr-2"></i> 5. Precision Engineering Specs Section
+                                                </h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Section Heading</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_specs_title"
+                                                            placeholder="e.g. Precision Engineering." />
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>Section Subtitle</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_specs_subtitle"
+                                                            placeholder="e.g. The definitive standard for air purification." />
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>More Details Link Text</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_specs_button_text"
+                                                            placeholder="e.g. More Details &rarr;" />
+                                                    </div>
+                                                    <div class="col-md-6 form-group">
+                                                        <label>More Details Link URL</label>
+                                                        <input type="text" class="form-control" v-model="form.landing_specs_button_url"
+                                                            placeholder="e.g. /products/... or #" />
+                                                    </div>
+                                                    <div class="col-md-12 form-group">
+                                                        <label>Default Exploded 3D Image</label>
+                                                        <Vue3Dropzone v-model="landingSpecsImageFile" v-model:previews="landingSpecsPreviews"
+                                                            mode="edit" :allowSelectOnPreview="true"
+                                                            @previewRemoved="() => handleFileRemoved('landing_specs_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: 600 × 600px square image</small>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Interactive Spec Groups Builder -->
+                                                <div class="mt-4">
+                                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                                        <h6 class="font-weight-bold mb-0">Interactive Spec Groups (Scroll Image Swapper)</h6>
+                                                        <button type="button" class="btn btn-sm btn-primary" @click="addSpecGroup">
+                                                            <i class="fas fa-plus mr-1"></i> Add Spec Group
+                                                        </button>
+                                                    </div>
+
+                                                    <div v-for="(group, gIdx) in form.landing_specs_groups" :key="gIdx"
+                                                        class="border rounded p-3 mb-4 bg-white shadow-sm">
+                                                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                                            <h6 class="font-weight-bold text-dark mb-0">
+                                                                Group #{{ gIdx + 1 }}: {{ group.title || 'Untitled Group' }}
+                                                            </h6>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                @click="removeSpecGroup(gIdx)">
+                                                                <i class="fas fa-trash-alt mr-1"></i> Remove Group
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-md-3 form-group">
+                                                                <label>Group Tag</label>
+                                                                <input type="text" class="form-control" v-model="group.tag"
+                                                                    placeholder="e.g. 01 / FILTRATION" />
+                                                            </div>
+                                                            <div class="col-md-4 form-group">
+                                                                <label>Group Title</label>
+                                                                <input type="text" class="form-control" v-model="group.title"
+                                                                    placeholder="e.g. Multi-Stage Synthesis" />
+                                                            </div>
+                                                            <div class="col-md-5 form-group">
+                                                                <label>Dynamic Scroll Image URL</label>
+                                                                <input type="text" class="form-control" v-model="group.image"
+                                                                    placeholder="URL or image path for 3D swap on scroll" />
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Spec Key-Value Table -->
+                                                        <label class="font-weight-bold mt-2">Specification Rows:</label>
+                                                        <table class="table table-sm table-bordered">
+                                                            <thead class="thead-light">
+                                                                <tr>
+                                                                    <th style="width: 45%;">Specification Label</th>
+                                                                    <th style="width: 45%;">Value</th>
+                                                                    <th style="width: 10%; text-align: center;">Action</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr v-for="(item, rIdx) in group.items" :key="rIdx">
+                                                                    <td>
+                                                                        <input type="text" class="form-control form-control-sm"
+                                                                            v-model="item.label" placeholder="e.g. CADR (Smoke)" />
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="text" class="form-control form-control-sm"
+                                                                            v-model="item.value" placeholder="e.g. 580 m³/h" />
+                                                                    </td>
+                                                                    <td class="text-center align-middle">
+                                                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                                            @click="removeSpecRow(gIdx, rIdx)">
+                                                                            <i class="fas fa-times"></i>
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                            <tfoot>
+                                                                <tr>
+                                                                    <td colspan="3" class="text-right">
+                                                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                                            @click="addSpecRow(gIdx)">
+                                                                            <i class="fas fa-plus mr-1"></i> Add Spec Row
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1057,9 +1483,11 @@ const brands = ref([]);
 const categories = ref([]);
 const attributeGroups = ref([]);
 const availableOptions = ref([]);
+const availableFilterOptions = ref([]);
 const allProducts = ref([]);
 
 const selectedOptionToAdd = ref("");
+const selectedFilterOptionToAdd = ref("");
 
 const form = ref({
     name: '',
@@ -1078,6 +1506,7 @@ const form = ref({
     sort_order: 0,
     date_available: '',
     options: [],
+    filter_options: [],
     attributes: [],
     faqs: [],
     applications: [],
@@ -1146,7 +1575,91 @@ const form = ref({
     product_free_delivery: 0,
     category_ids: [],
     related_ids: [],
-    bought_together_ids: []
+    bought_together_ids: [],
+
+    // Landing Page Fields
+    landing_enabled: false,
+    landing_hero_tag: '',
+    landing_hero_title: '',
+    landing_hero_description: '',
+    landing_hero_button_text: 'More Details -',
+    landing_hero_button_url: '',
+    landing_hero_image: '',
+
+    landing_science_tag: 'SCIENCE OF SYNTHESIS',
+    landing_science_title: 'Extraordinary\nfrom within.',
+    landing_science_description: '',
+    landing_science_stat1_value: '99.99%',
+    landing_science_stat1_label: 'PARTICLE REMOVAL',
+    landing_science_stat2_value: 'UV-C',
+    landing_science_stat2_label: 'STERILIZATION',
+    landing_science_image: '',
+    landing_science_features: [
+        { title: 'Result-Oriented Approach', desc: 'We focus on real business results, not just design. Our solutions are made to convert visitors into customers.' },
+        { title: 'Affordable & Transparent Pricing', desc: 'High-quality service at a budget-friendly price. No hidden costs, no confusion.' },
+        { title: 'Custom Solutions', desc: 'Every business is different. We design and develop according to your exact needs and goals.' }
+    ],
+
+    landing_lifestyle_tag: 'LIFESTYLE',
+    landing_lifestyle_title: 'Seamless\nIntegration.',
+    landing_lifestyle_description: 'Designed for your life, not just your air. AIRE Pro S1 harmonizes with modern architectural spaces, becoming an invisible guardian of your wellbeing.',
+    landing_lifestyle_button_text: 'More Details →',
+    landing_lifestyle_button_url: '',
+    landing_lifestyle_image: '',
+
+    landing_filter_tech_title: 'Medical-grade Precision.',
+    landing_filter_tech_description: 'HEPA H13 Filter Technology. From microscopic particles to bacteria—nothing escapes our signature filtration system.',
+    landing_filter_tech_badge_text: 'Advanced micro-fiber weaving that elevates atmospheric purity to unprecedented heights.',
+    landing_filter_tech_image: '',
+
+    landing_specs_title: 'Precision Engineering.',
+    landing_specs_subtitle: 'The definitive standard for air purification.',
+    landing_specs_button_text: 'More Details →',
+    landing_specs_button_url: '',
+    landing_specs_image: '',
+    landing_specs_groups: [
+        {
+            tag: '01 / FILTRATION',
+            title: 'Multi-Stage Synthesis',
+            image: 'https://picsum.photos/500/500?random=1',
+            items: [
+                { label: 'Primary Pre-filter', value: 'Large debris / Pets' },
+                { label: 'HEPA H13 Medical-grade', value: '99.97% of 0.3μm' },
+                { label: 'Activated Carbon', value: 'VOCs & Odors' },
+                { label: 'UV-C Sterilization', value: 'Viral Neutralization' }
+            ]
+        },
+        {
+            tag: '02 / PERFORMANCE',
+            title: 'Atmospheric Throughput',
+            image: 'https://picsum.photos/500/500?random=2',
+            items: [
+                { label: 'CADR (Smoke)', value: '580 m³/h' },
+                { label: 'Room Coverage', value: 'Up to 1200 sq. ft.' },
+                { label: 'Power Efficiency', value: '65W Max / 4W Sleep' }
+            ]
+        },
+        {
+            tag: '03 / SENSORS',
+            title: 'Cognitive Awareness',
+            image: 'https://picsum.photos/500/500?random=3',
+            items: [
+                { label: 'Laser Particle Sensor', value: 'PM2.5 / PM10' },
+                { label: 'Electrochemical Sensor', value: 'Formaldehyde (HCHO)' },
+                { label: 'Ambient Light Sensor', value: 'Auto Night-Mode' }
+            ]
+        },
+        {
+            tag: '04 / CONNECTIVITY',
+            title: 'Unified Ecosystem',
+            image: 'https://picsum.photos/500/500?random=4',
+            items: [
+                { label: 'Wireless', value: 'Wi-Fi 6 & Bluetooth 5.2' },
+                { label: 'Smart Home', value: 'HomeKit, Alexa, Google' },
+                { label: 'AIRE App', value: 'Full Remote Control' }
+            ]
+        }
+    ]
 });
 
 const mainImageFile = ref(null);
@@ -1173,15 +1686,27 @@ const featuresImagePreviews = ref([]);
 const technologyImageFile = ref(null);
 const technologyImagePreviews = ref([]);
 
+const landingHeroImageFile = ref(null);
+const landingHeroPreviews = ref([]);
+const landingScienceImageFile = ref(null);
+const landingSciencePreviews = ref([]);
+const landingLifestyleImageFile = ref(null);
+const landingLifestylePreviews = ref([]);
+const landingFilterImageFile = ref(null);
+const landingFilterPreviews = ref([]);
+const landingSpecsImageFile = ref(null);
+const landingSpecsPreviews = ref([]);
+
 const deletedFiles = ref([]);
 
 onMounted(async () => {
     try {
-        const [resBrands, resCats, resAttrGroups, resOpts, resProducts, resProd] = await Promise.all([
+        const [resBrands, resCats, resAttrGroups, resOpts, resFilterOpts, resProducts, resProd] = await Promise.all([
             axios.get('/api/brands/all'),
             axios.get('/api/product-categories/all'),
             axios.get('/api/product-attribute-groups/all'),
             axios.get('/api/options/all'),
+            axios.get('/api/filter-options/all'),
             axios.get('/api/products/all-dropdown'),
             axios.get(`/api/products/${productId}`)
         ]);
@@ -1189,6 +1714,7 @@ onMounted(async () => {
         categories.value = resCats.data.data;
         attributeGroups.value = resAttrGroups.data.data;
         availableOptions.value = resOpts.data.data;
+        availableFilterOptions.value = resFilterOpts.data.data;
         allProducts.value = resProducts.data.data;
 
         const p = resProd.data.data;
@@ -1294,17 +1820,37 @@ onMounted(async () => {
             related_ids: relatedIds,
             bought_together_ids: boughtTogetherIds,
 
-            options: (p.options || []).map(opt => {
-                const optGroup = availableOptions.value.find(o => o.id === opt.option_id);
+            options: (p.product_options || p.productOptions || p.options || []).map(opt => {
+                const optId = opt.option_id ? Number(opt.option_id) : (opt.option ? Number(opt.option.id) : null);
+                const optValId = (opt.option_value_id !== undefined && opt.option_value_id !== null && opt.option_value_id !== '')
+                    ? Number(opt.option_value_id)
+                    : (opt.option_value ? Number(opt.option_value.id) : '');
+                const optGroup = availableOptions.value.find(o => Number(o.id) === optId);
                 return {
-                    option_id: opt.option_id,
+                    option_id: optId,
                     option_name: opt.option ? opt.option.name : (optGroup ? optGroup.name : ''),
-                    option_value_id: opt.option_value_id,
+                    option_value_id: optValId,
                     quantity: opt.quantity,
                     subtract: opt.subtract,
                     price_prefix: opt.price_prefix,
                     price: opt.price,
-                    available_values: optGroup ? (optGroup.option_values || []) : []
+                    available_values: optGroup ? (optGroup.option_values || optGroup.optionValues || []) : []
+                };
+            }),
+            filter_options: (p.product_filter_options || p.productFilterOptions || p.filter_options || []).map(fOpt => {
+                const fOptId = fOpt.filter_option_id ? Number(fOpt.filter_option_id) : (fOpt.filter_option ? Number(fOpt.filter_option.id) : null);
+                const fValId = (fOpt.filter_option_value_id !== undefined && fOpt.filter_option_value_id !== null && fOpt.filter_option_value_id !== '')
+                    ? Number(fOpt.filter_option_value_id)
+                    : (fOpt.filter_option_value ? Number(fOpt.filter_option_value.id) : '');
+                const fOptGroup = availableFilterOptions.value.find(o => Number(o.id) === fOptId);
+                const availableVals = fOptGroup 
+                    ? (fOptGroup.option_values || fOptGroup.optionValues || []) 
+                    : (fOpt.filter_option?.option_values || fOpt.filter_option?.optionValues || []);
+                return {
+                    filter_option_id: fOptId,
+                    filter_option_name: fOptGroup ? fOptGroup.name : (fOpt.filter_option ? fOpt.filter_option.name : ''),
+                    filter_option_value_id: fValId,
+                    available_values: availableVals
                 };
             }),
             attributes: (p.product_attributes || p.productAttributes || p.attributes || []).map(attr => ({
@@ -1394,6 +1940,72 @@ onMounted(async () => {
             instPdfPreviews.value = [getImageCacheUrl(descInfo.instructions_pdf, 60, 60, 'webp')];
         }
 
+        // Product Landing Data
+        if (p.product_landing) {
+            const pl = p.product_landing;
+            form.value.landing_enabled = pl.status == 1;
+            form.value.landing_hero_tag = pl.hero_tag || p.model || '';
+            form.value.landing_hero_title = pl.hero_title || p.name || '';
+            form.value.landing_hero_description = pl.hero_description || (p.description ? p.description.description : '');
+            form.value.landing_hero_button_text = pl.hero_button_text || 'More Details -';
+            form.value.landing_hero_button_url = pl.hero_button_url || '';
+            form.value.landing_hero_image = pl.hero_image || '';
+
+            form.value.landing_science_tag = pl.science_tag || 'SCIENCE OF SYNTHESIS';
+            form.value.landing_science_title = pl.science_title || 'Extraordinary\nfrom within.';
+            form.value.landing_science_description = pl.science_description || '';
+            form.value.landing_science_stat1_value = pl.science_stat1_value || '99.99%';
+            form.value.landing_science_stat1_label = pl.science_stat1_label || 'PARTICLE REMOVAL';
+            form.value.landing_science_stat2_value = pl.science_stat2_value || 'UV-C';
+            form.value.landing_science_stat2_label = pl.science_stat2_label || 'STERILIZATION';
+            form.value.landing_science_image = pl.science_image || '';
+            if (pl.science_features && Array.isArray(pl.science_features)) {
+                form.value.landing_science_features = pl.science_features;
+            }
+
+            form.value.landing_lifestyle_tag = pl.lifestyle_tag || 'LIFESTYLE';
+            form.value.landing_lifestyle_title = pl.lifestyle_title || 'Seamless\nIntegration.';
+            form.value.landing_lifestyle_description = pl.lifestyle_description || '';
+            form.value.landing_lifestyle_button_text = pl.lifestyle_button_text || 'More Details →';
+            form.value.landing_lifestyle_button_url = pl.lifestyle_button_url || '';
+            form.value.landing_lifestyle_image = pl.lifestyle_image || '';
+
+            form.value.landing_filter_tech_title = pl.filter_tech_title || 'Medical-grade Precision.';
+            form.value.landing_filter_tech_description = pl.filter_tech_description || '';
+            form.value.landing_filter_tech_badge_text = pl.filter_tech_badge_text || '';
+            form.value.landing_filter_tech_image = pl.filter_tech_image || '';
+
+            form.value.landing_specs_title = pl.specs_title || 'Precision Engineering.';
+            form.value.landing_specs_subtitle = pl.specs_subtitle || '';
+            form.value.landing_specs_button_text = pl.specs_button_text || 'More Details →';
+            form.value.landing_specs_button_url = pl.specs_button_url || '';
+            form.value.landing_specs_image = pl.specs_image || '';
+            if (pl.specs_groups && Array.isArray(pl.specs_groups)) {
+                form.value.landing_specs_groups = pl.specs_groups;
+            }
+
+            if (pl.hero_image) {
+                landingHeroPreviews.value = [pl.hero_image.startsWith('http') ? pl.hero_image : getImageCacheUrl(pl.hero_image, 120, 120, 'webp')];
+            }
+            if (pl.science_image) {
+                landingSciencePreviews.value = [pl.science_image.startsWith('http') ? pl.science_image : getImageCacheUrl(pl.science_image, 120, 120, 'webp')];
+            }
+            if (pl.lifestyle_image) {
+                landingLifestylePreviews.value = [pl.lifestyle_image.startsWith('http') ? pl.lifestyle_image : getImageCacheUrl(pl.lifestyle_image, 120, 120, 'webp')];
+            }
+            if (pl.filter_tech_image) {
+                landingFilterPreviews.value = [pl.filter_tech_image.startsWith('http') ? pl.filter_tech_image : getImageCacheUrl(pl.filter_tech_image, 120, 120, 'webp')];
+            }
+            if (pl.specs_image) {
+                landingSpecsPreviews.value = [pl.specs_image.startsWith('http') ? pl.specs_image : getImageCacheUrl(pl.specs_image, 120, 120, 'webp')];
+            }
+        } else {
+            form.value.landing_enabled = false;
+            form.value.landing_hero_tag = p.model || 'AIRE Pro S1';
+            form.value.landing_hero_title = p.name || 'Atmospheric Mastery.';
+            form.value.landing_hero_description = p.description ? p.description.description : '';
+        }
+
     } catch (error) {
         toast.error("Failed to load product details.");
         console.error(error);
@@ -1442,20 +2054,24 @@ const handlePreviewRemoved = (preview) => {
 
 const handleFileRemoved = (fieldName) => {
     deletedFiles.value.push(fieldName);
+    if (form.value && form.value[fieldName] !== undefined) {
+        form.value[fieldName] = '';
+    }
 };
 
 const addOptionRow = () => {
     if (!selectedOptionToAdd.value) return;
 
+    const opt = selectedOptionToAdd.value;
     form.value.options.push({
-        option_id: selectedOptionToAdd.value.id,
-        option_name: selectedOptionToAdd.value.name,
+        option_id: Number(opt.id),
+        option_name: opt.name,
         option_value_id: '',
         quantity: 0,
         subtract: 1,
         price_prefix: '+',
         price: 0,
-        available_values: selectedOptionToAdd.value.option_values || []
+        available_values: opt.option_values || opt.optionValues || []
     });
 
     selectedOptionToAdd.value = "";
@@ -1463,6 +2079,24 @@ const addOptionRow = () => {
 
 const removeOptionRow = (index) => {
     form.value.options.splice(index, 1);
+};
+
+const addFilterOptionRow = () => {
+    if (!selectedFilterOptionToAdd.value) return;
+
+    const opt = selectedFilterOptionToAdd.value;
+    form.value.filter_options.push({
+        filter_option_id: Number(opt.id),
+        filter_option_name: opt.name,
+        filter_option_value_id: '',
+        available_values: opt.option_values || opt.optionValues || []
+    });
+
+    selectedFilterOptionToAdd.value = "";
+};
+
+const removeFilterOptionRow = (index) => {
+    form.value.filter_options.splice(index, 1);
 };
 
 const addAttributeRow = () => {
@@ -1511,6 +2145,42 @@ const removeFaq = (index) => {
     form.value.faqs.splice(index, 1);
 };
 
+// Landing Page Helpers
+const addScienceFeature = () => {
+    if (!form.value.landing_science_features) form.value.landing_science_features = [];
+    form.value.landing_science_features.push({ title: '', desc: '' });
+};
+
+const removeScienceFeature = (index) => {
+    form.value.landing_science_features.splice(index, 1);
+};
+
+const addSpecGroup = () => {
+    if (!form.value.landing_specs_groups) form.value.landing_specs_groups = [];
+    const num = String(form.value.landing_specs_groups.length + 1).padStart(2, '0');
+    form.value.landing_specs_groups.push({
+        tag: `${num} / SPEC`,
+        title: 'New Specification Group',
+        image: 'https://picsum.photos/500/500',
+        items: [{ label: '', value: '' }]
+    });
+};
+
+const removeSpecGroup = (index) => {
+    form.value.landing_specs_groups.splice(index, 1);
+};
+
+const addSpecRow = (groupIndex) => {
+    if (!form.value.landing_specs_groups[groupIndex].items) {
+        form.value.landing_specs_groups[groupIndex].items = [];
+    }
+    form.value.landing_specs_groups[groupIndex].items.push({ label: '', value: '' });
+};
+
+const removeSpecRow = (groupIndex, rowIndex) => {
+    form.value.landing_specs_groups[groupIndex].items.splice(rowIndex, 1);
+};
+
 const submitForm = async () => {
     if (!form.value.name) {
         toast.error("Please enter a product name.");
@@ -1541,7 +2211,9 @@ const submitForm = async () => {
 
     const formData = new FormData();
     Object.keys(form.value).forEach(key => {
-        if (['options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids'].includes(key)) {
+        if (key.startsWith('landing_')) {
+            // Handled separately below
+        } else if (['options', 'filter_options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids'].includes(key)) {
             formData.append(key, JSON.stringify(form.value[key]));
         } else if (['faqs', 'applications'].includes(key)) {
             // Handled separately below
@@ -1551,6 +2223,52 @@ const submitForm = async () => {
             }
         }
     });
+
+    // Landing Page Form Submission
+    formData.append('landing_enabled', form.value.landing_enabled ? 1 : 0);
+    if (form.value.landing_enabled) {
+        formData.append('landing_hero_tag', form.value.landing_hero_tag || '');
+        formData.append('landing_hero_title', form.value.landing_hero_title || '');
+        formData.append('landing_hero_description', form.value.landing_hero_description || '');
+        formData.append('landing_hero_button_text', form.value.landing_hero_button_text || '');
+        formData.append('landing_hero_button_url', form.value.landing_hero_button_url || '');
+        if (form.value.landing_hero_image) formData.append('landing_hero_image', form.value.landing_hero_image);
+
+        formData.append('landing_science_tag', form.value.landing_science_tag || '');
+        formData.append('landing_science_title', form.value.landing_science_title || '');
+        formData.append('landing_science_description', form.value.landing_science_description || '');
+        formData.append('landing_science_stat1_value', form.value.landing_science_stat1_value || '');
+        formData.append('landing_science_stat1_label', form.value.landing_science_stat1_label || '');
+        formData.append('landing_science_stat2_value', form.value.landing_science_stat2_value || '');
+        formData.append('landing_science_stat2_label', form.value.landing_science_stat2_label || '');
+        if (form.value.landing_science_image) formData.append('landing_science_image', form.value.landing_science_image);
+        formData.append('landing_science_features', JSON.stringify(form.value.landing_science_features || []));
+
+        formData.append('landing_lifestyle_tag', form.value.landing_lifestyle_tag || '');
+        formData.append('landing_lifestyle_title', form.value.landing_lifestyle_title || '');
+        formData.append('landing_lifestyle_description', form.value.landing_lifestyle_description || '');
+        formData.append('landing_lifestyle_button_text', form.value.landing_lifestyle_button_text || '');
+        formData.append('landing_lifestyle_button_url', form.value.landing_lifestyle_button_url || '');
+        if (form.value.landing_lifestyle_image) formData.append('landing_lifestyle_image', form.value.landing_lifestyle_image);
+
+        formData.append('landing_filter_tech_title', form.value.landing_filter_tech_title || '');
+        formData.append('landing_filter_tech_description', form.value.landing_filter_tech_description || '');
+        formData.append('landing_filter_tech_badge_text', form.value.landing_filter_tech_badge_text || '');
+        if (form.value.landing_filter_tech_image) formData.append('landing_filter_tech_image', form.value.landing_filter_tech_image);
+
+        formData.append('landing_specs_title', form.value.landing_specs_title || '');
+        formData.append('landing_specs_subtitle', form.value.landing_specs_subtitle || '');
+        formData.append('landing_specs_button_text', form.value.landing_specs_button_text || '');
+        formData.append('landing_specs_button_url', form.value.landing_specs_button_url || '');
+        if (form.value.landing_specs_image) formData.append('landing_specs_image', form.value.landing_specs_image);
+        formData.append('landing_specs_groups', JSON.stringify(form.value.landing_specs_groups || []));
+
+        if (landingHeroImageFile.value && landingHeroImageFile.value[0]) formData.append('landing_hero_image_file', landingHeroImageFile.value[0].file);
+        if (landingScienceImageFile.value && landingScienceImageFile.value[0]) formData.append('landing_science_image_file', landingScienceImageFile.value[0].file);
+        if (landingLifestyleImageFile.value && landingLifestyleImageFile.value[0]) formData.append('landing_lifestyle_image_file', landingLifestyleImageFile.value[0].file);
+        if (landingFilterImageFile.value && landingFilterImageFile.value[0]) formData.append('landing_filter_tech_image_file', landingFilterImageFile.value[0].file);
+        if (landingSpecsImageFile.value && landingSpecsImageFile.value[0]) formData.append('landing_specs_image_file', landingSpecsImageFile.value[0].file);
+    }
 
     if (form.value.applications && form.value.applications.length > 0) {
         form.value.applications.forEach((appItem, index) => {

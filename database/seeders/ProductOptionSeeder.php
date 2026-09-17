@@ -17,6 +17,10 @@ class ProductOptionSeeder extends Seeder
     {
         $this->command->info('Starting ProductOptionSeeder...');
 
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        ProductOption::truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         // Get first few existing records
         $productIds = Product::pluck('id')->take(10)->toArray();
         $optionIds  = Option::pluck('id')->take(10)->toArray();

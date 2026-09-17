@@ -32,7 +32,6 @@
                                         <th>Email</th>
                                         <th>Phone</th>
                                         <th>Balance</th>
-                                        <th>Point</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -44,15 +43,8 @@
                                         <td class="align-middle">{{ customer.email }}</td>
                                         <td class="align-middle">{{ customer.phone }}</td>
                                         <td class="align-middle">{{ customer.balance ?? '0.00' }}</td>
-                                        <td class="align-middle">{{ customer.point ?? 0 }}</td>
                                         <td class="align-middle">
                                             <div class="d-flex flex-wrap" style="gap:4px">
-
-                                                <router-link
-                                                    :to="{ name: 'CustomerPointHistory', params: { id: customer.id } }"
-                                                    class="btn btn-xs btn-success text-nowrap">
-                                                    <i class="fas fa-book"></i> Point
-                                                </router-link>
 
                                                 <router-link
                                                     :to="{ name: 'CustomerLedger', params: { id: customer.id } }"

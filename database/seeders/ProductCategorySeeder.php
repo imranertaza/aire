@@ -26,7 +26,7 @@ class ProductCategorySeeder extends Seeder
                 'slug'          => 'products',
                 'description'   => 'Explore high-performance air purification systems, smart sensors, protective masks, accessories, and replacement parts.',
                 'icon_class'    => 'bi bi-box-seam',
-                'image'         => 'categories/products.jpg',
+                'image' => 'themes/default/assets/img/Air-Purify.png',
                 'sort_order'    => 1,
                 'subcategories' => [
                     [
@@ -101,7 +101,7 @@ class ProductCategorySeeder extends Seeder
                 'slug'          => 'solutions',
                 'description'   => 'Custom engineered air solutions tailored for health, energy efficiency, infection control, compliance, and smart building environments.',
                 'icon_class'    => 'bi bi-lightbulb',
-                'image'         => 'categories/solutions.jpg',
+                'image' => 'themes/default/assets/img/Air-Purify.png',
                 'sort_order'    => 2,
                 'subcategories' => [
                     [
@@ -181,7 +181,7 @@ class ProductCategorySeeder extends Seeder
                 'slug'          => 'industries',
                 'description'   => 'Specialized air quality engineering for residential, commercial, healthcare, and industrial sectors.',
                 'icon_class'    => 'bi bi-buildings',
-                'image'         => 'categories/industries.jpg',
+                'image' => 'themes/default/assets/img/Air-Purify.png',
                 'sort_order'    => 3,
                 'subcategories' => [
                     [
@@ -263,7 +263,7 @@ class ProductCategorySeeder extends Seeder
                 'slug'          => 'technologies',
                 'description'   => 'Advanced technologies for cleaner, smarter, healthier spaces — engineered for maximum efficiency, precision filtration, and continuous air quality intelligence.',
                 'icon_class'    => 'bi bi-cpu',
-                'image'         => 'categories/technologies.jpg',
+                'image' => 'themes/default/assets/img/Air-Purify.png',
                 'sort_order'    => 4,
                 'subcategories' => [
                     [
@@ -347,7 +347,7 @@ class ProductCategorySeeder extends Seeder
                 'slug'          => 'monitoring',
                 'description'   => 'Enterprise air quality intelligence platform — IoT sensing devices, live dashboards, predictive analytics, and automated compliance reporting.',
                 'icon_class'    => 'bi bi-display',
-                'image'         => 'categories/monitoring.jpg',
+                'image' => 'themes/default/assets/img/Air-Purify.png',
                 'sort_order'    => 5,
                 'subcategories' => [
                     [
@@ -433,6 +433,7 @@ class ProductCategorySeeder extends Seeder
                 'status'        => 1,
                 'header_menu'   => 1,
                 'side_menu'     => 1,
+                'show_features_on_category_page' => 1,
             ]);
 
             $createdCategoryIds[] = $parent->id;
@@ -451,6 +452,7 @@ class ProductCategorySeeder extends Seeder
                         'status'        => 1,
                         'header_menu'   => 1,
                         'side_menu'     => 1,
+                        'show_features_on_category_page' => 1,
                     ]);
 
                     $createdCategoryIds[] = $child->id;
@@ -469,6 +471,7 @@ class ProductCategorySeeder extends Seeder
                                 'status'        => 1,
                                 'header_menu'   => 1,
                                 'side_menu'     => 1,
+                                'show_features_on_category_page' => 1,
                             ]);
                             $createdCategoryIds[] = $subChild->id;
                         }

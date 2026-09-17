@@ -179,6 +179,44 @@ class AdvancedProductController extends Controller
     }
 
     /**
+     * Apply filter options to multiple selected products.
+     */
+    public function bulkUpdateFilterOptions(Request $request)
+    {
+        $request->validate([
+            'product_ids'   => 'required|array',
+            'product_ids.*' => 'integer|exists:products,id',
+            'filter_options' => 'required|array',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            foreach ($request->product_ids as $pid) {
+                // Delete old filter options
+                \App\Models\ProductFilterOption::where('product_id', $pid)->delete();
+
+                // Insert new filter options
+                $filterOptionData = [];
+                foreach ($request->filter_options as $opt) {
+                    $filterOptionData[] = [
+                        'product_id'             => $pid,
+                        'filter_option_id'       => $opt['filter_option_id'],
+                        'filter_option_value_id' => $opt['filter_option_value_id'],
+                    ];
+                }
+                \App\Models\ProductFilterOption::insert($filterOptionData);
+            }
+
+            DB::commit();
+            return ApiResponse::success(null, 'Bulk filter options updated successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return ApiResponse::error('Failed to update bulk filter options', 500, [$e->getMessage()]);
+        }
+    }
+
+    /**
      * Apply attributes to multiple selected products.
      */
     public function bulkUpdateAttributes(Request $request)

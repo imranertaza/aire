@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Section extends Model
 {
@@ -12,6 +13,22 @@ class Section extends Model
     protected $casts = [
         'data' => 'array',
     ];
+
+    /**
+     * Booted lifecycle hooks for automatic cache busting.
+     */
+    protected static function booted()
+    {
+        static::saved(function ($section) {
+            Cache::forget("section_{$section->name}");
+            Cache::forget('all_sections');
+        });
+
+        static::deleted(function ($section) {
+            Cache::forget("section_{$section->name}");
+            Cache::forget('all_sections');
+        });
+    }
 
     /**
      * Helper to get a value by key.

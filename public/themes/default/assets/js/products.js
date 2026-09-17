@@ -52,7 +52,7 @@ $(document).ready(function () {
 
     // 5. Intersection Observer for Scrollspy
     const sections = document.querySelectorAll('.content-section');
-    const menuItems = document.querySelectorAll('.sidebar-menu .menu-item');
+    const menuItems = document.querySelectorAll('.sidebar-menu .menu-item, .mobile-cat-pill');
 
     if (sections.length && menuItems.length) {
         const observerOptions = {
@@ -66,9 +66,12 @@ $(document).ready(function () {
                 if (entry.isIntersecting) {
                     menuItems.forEach(item => item.classList.remove('active'));
                     const id = entry.target.getAttribute('id');
-                    const activeLinks = document.querySelectorAll(`.sidebar-menu .menu-item[href="#${id}"]`);
+                    const activeLinks = document.querySelectorAll(`.sidebar-menu .menu-item[href="#${id}"], .mobile-cat-pill[href="#${id}"]`);
                     activeLinks.forEach(link => {
                         link.classList.add('active');
+                        if (link.classList.contains('mobile-cat-pill')) {
+                            link.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                        }
                     });
                 }
             });

@@ -79,6 +79,40 @@
         <!-- Center Content Column -->
         <section class="col-lg-9 col-xl-6 center-feed px-lg-4">
 
+            <!-- Mobile Horizontal Solutions Scroll Bar (Visible on mobile/tablet) -->
+            <div class="d-lg-none mobile-category-scroll-wrapper" data-lenis-prevent>
+                <div class="mobile-category-scroll-track" data-lenis-prevent>
+                    <a href="#residential" class="mobile-cat-pill active">
+                        <span class="mobile-cat-pill__icon"><i class="bi bi-house"></i></span>
+                        <span>Residential</span>
+                    </a>
+                    <a href="#commercial" class="mobile-cat-pill">
+                        <span class="mobile-cat-pill__icon"><i class="bi bi-building"></i></span>
+                        <span>Commercial</span>
+                    </a>
+                    <a href="#healthcare" class="mobile-cat-pill">
+                        <span class="mobile-cat-pill__icon"><i class="bi bi-heart-pulse"></i></span>
+                        <span>Healthcare</span>
+                    </a>
+                    <a href="#education" class="mobile-cat-pill">
+                        <span class="mobile-cat-pill__icon"><i class="bi bi-mortarboard"></i></span>
+                        <span>Education</span>
+                    </a>
+                    <a href="#transportation" class="mobile-cat-pill">
+                        <span class="mobile-cat-pill__icon"><i class="bi bi-train-front"></i></span>
+                        <span>Transportation</span>
+                    </a>
+                    <a href="#industrial" class="mobile-cat-pill">
+                        <span class="mobile-cat-pill__icon"><i class="bi bi-cone-striped"></i></span>
+                        <span>Industrial</span>
+                    </a>
+                    <a href="#infrastructure" class="mobile-cat-pill">
+                        <span class="mobile-cat-pill__icon"><i class="bi bi-shield-check"></i></span>
+                        <span>Infrastructure</span>
+                    </a>
+                </div>
+            </div>
+
             <!-- 1. Residential Solutions -->
             <div id="residential" class="content-section mb-5 pb-4">
                 <h2 class="section-title title-1">Residential Solutions</h2>

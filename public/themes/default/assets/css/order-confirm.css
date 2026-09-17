@@ -3,7 +3,7 @@
    ========================================================================== */
 
 :root {
-    --confirm-primary: #2563eb;
+    --confirm-primary: var(--color-primary, #1d4ed8);
     --confirm-success: #00b843;
     --confirm-dark: #0F172A;
     --confirm-muted: #64748b;
@@ -132,7 +132,7 @@
 .confirm-hero-icon-outer {
     width: 72px;
     height: 72px;
-    background-color: #dbeafe;
+    background-color: var(--color-primary-icon, #dbeafe);
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
@@ -143,7 +143,7 @@
 .confirm-hero-icon-inner {
     width: 38px;
     height: 38px;
-    background-color: #2563eb;
+    background-color: var(--color-primary, #1d4ed8);
     color: #ffffff;
     border-radius: 50%;
     display: flex;
@@ -231,7 +231,7 @@
     left: 12%;
     width: 25%;
     height: 2px;
-    background: #2563eb;
+    background: var(--color-primary, #1d4ed8);
     z-index: 2;
 }
 
@@ -261,15 +261,15 @@
 }
 
 .confirm-timeline-step.completed .confirm-timeline-icon {
-    background: #2563eb;
+    background: var(--color-primary, #1d4ed8);
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px var(--color-primary-shadow, rgba(29, 78, 216, 0.3));
 }
 
 .confirm-timeline-step.active .confirm-timeline-icon {
     background: #ffffff;
-    border: 2px solid #2563eb;
-    color: #2563eb;
+    border: 2px solid var(--color-primary, #1d4ed8);
+    color: var(--color-primary, #1d4ed8);
 }
 
 .confirm-timeline-label {
@@ -422,27 +422,27 @@
 }
 
 .btn-contact-support {
-    background-color: #2563eb;
-    border: 1px solid #2563eb;
+    background-color: var(--color-primary, #1d4ed8);
+    border: 1px solid var(--color-primary, #1d4ed8);
     color: #ffffff;
 }
 
 .btn-contact-support:hover {
-    background-color: #1d4ed8;
-    border-color: #1d4ed8;
+    background-color: var(--color-primary-hover, #1e40af);
+    border-color: var(--color-primary-hover, #1e40af);
     color: #ffffff;
 }
 
 .btn-email-us {
     background-color: #ffffff;
-    border: 1px solid #2563eb;
-    color: #2563eb;
+    border: 1px solid var(--color-primary, #1d4ed8);
+    color: var(--color-primary, #1d4ed8);
 }
 
 .btn-email-us:hover {
-    background-color: #f0f6ff;
-    color: #1d4ed8;
-    border-color: #1d4ed8;
+    background-color: var(--color-primary-bg, #eff6ff);
+    color: var(--color-primary-hover, #1e40af);
+    border-color: var(--color-primary-hover, #1e40af);
 }
 
 /* Estimated Delivery Box (Right Column) */
@@ -464,7 +464,7 @@
     left: 0;
     bottom: 0;
     width: 4px;
-    background-color: #2563eb;
+    background-color: var(--color-primary, #1d4ed8);
 }
 
 .confirm-delivery-header {

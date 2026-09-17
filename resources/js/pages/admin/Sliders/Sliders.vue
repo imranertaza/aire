@@ -4,9 +4,14 @@
       <div class="mr-2">
         <select v-model="selectedKey" @change="onFilterChange" class="custom-select" style="min-width: 220px;">
           <option value="all">All Placements / Sections</option>
+          <option value="banner_section">Homepage Hero Slider</option>
           <option value="category_sidebar">Category Sidebar Ads</option>
-          <option value="banner_section">Homepage Main Banners</option>
           <option value="featured_ad">Featured Ads</option>
+          <option value="about_us">About Us Ads</option>
+          <option value="products">Products Ads</option>
+          <option value="filter">Filter Products Ads</option>
+          <option value="compare">Compare Page Ads</option>
+          <option value="favorite">Wishlist / Favorite Page Ads</option>
         </select>
       </div>
 
@@ -53,7 +58,7 @@
                     <small class="text-muted d-block">{{ truncateText(notice.description, 45) }}</small>
                   </td>
                   <td class="align-middle">
-                    <span class="badge badge-secondary" v-if="notice.subtitle">{{ notice.subtitle }}</span>
+                    <span class="badge badge-secondary text-wrap" v-if="notice.subtitle">{{ notice.subtitle }}</span>
                     <span class="text-muted" v-else>-</span>
                   </td>
                   <td class="align-middle">
@@ -132,12 +137,22 @@ const parseKeys = (key) => {
 
 const getPlacementLabel = (key) => {
   switch (key) {
+    case 'banner_section':
+      return 'Homepage Hero Slider';
     case 'category_sidebar':
       return 'Category Sidebar Ad';
-    case 'banner_section':
-      return 'Homepage Banner';
     case 'featured_ad':
       return 'Featured Ad';
+    case 'about_us':
+      return 'About Us Ad';
+    case 'products':
+      return 'Products Ad';
+    case 'filter':
+      return 'Filter Products Ad';
+    case 'compare':
+      return 'Compare Ad';
+    case 'favorite':
+      return 'Favorite Ad';
     default:
       return key || 'General';
   }

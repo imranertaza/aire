@@ -14,11 +14,11 @@ use Intervention\Image\Facades\Image;
 class ProductCategoryController extends Controller
 {
     /**
-     * Retrieve a paginated list of product categories with optional search.
+     * Retrieve a paginated list of product categories with optional search and 3-level category filtering.
      */
     public function index(Request $request)
     {
-        $query = ProductCategory::with('parent')->orderBy('sort_order', 'asc')->latest();
+        $query = ProductCategory::with(['parent.parent'])->orderBy('sort_order', 'asc')->latest();
 
         if ($request->filled('search')) {
             $search = $request->input('search');
@@ -28,10 +28,51 @@ class ProductCategoryController extends Controller
             });
         }
 
+        // 3-Level Category Filtering: Level 3 (Sub-Sub) > Level 2 (Sub) > Level 1 (Parent)
+        if ($request->filled('level3_id')) {
+            $ids = $this->getCategoryAndDescendantIds((int) $request->input('level3_id'));
+            $query->whereIn('id', $ids);
+        } elseif ($request->filled('level2_id')) {
+            $ids = $this->getCategoryAndDescendantIds((int) $request->input('level2_id'));
+            $query->whereIn('id', $ids);
+        } elseif ($request->filled('level1_id')) {
+            $ids = $this->getCategoryAndDescendantIds((int) $request->input('level1_id'));
+            $query->whereIn('id', $ids);
+        } elseif ($request->filled('category_id')) {
+            $ids = $this->getCategoryAndDescendantIds((int) $request->input('category_id'));
+            $query->whereIn('id', $ids);
+        } elseif ($request->filled('parent_id')) {
+            $parentId = $request->input('parent_id');
+            if ($parentId === 'null' || $parentId === '0') {
+                $query->whereNull('parent_id');
+            } else {
+                $query->where('parent_id', $parentId);
+            }
+        }
+
         $perPage = (int) $request->input('per_page', 10);
         $categories = $query->paginate($perPage);
 
         return ApiResponse::success($categories, 'Categories retrieved successfully');
+    }
+
+    /**
+     * Helper to get a category ID and all its descendant IDs recursively.
+     */
+    private function getCategoryAndDescendantIds($categoryId, $allCategories = null)
+    {
+        if ($allCategories === null) {
+            $allCategories = ProductCategory::select('id', 'parent_id')->get();
+        }
+
+        $ids = [(int) $categoryId];
+        $children = $allCategories->where('parent_id', (int) $categoryId);
+
+        foreach ($children as $child) {
+            $ids = array_merge($ids, $this->getCategoryAndDescendantIds($child->id, $allCategories));
+        }
+
+        return array_values(array_unique($ids));
     }
 
     /**
@@ -175,10 +216,12 @@ class ProductCategoryController extends Controller
             'bg_color'         => 'nullable|string|max:50',
             'header_menu'      => 'nullable|in:0,1,true,false',
             'side_menu'        => 'nullable|in:0,1,true,false',
+            'show_in_filter'   => 'nullable|in:0,1,true,false',
             'sort_order'       => 'nullable|integer|min:0',
             'status'           => 'required|in:0,1,true,false',
             'parent_id'        => 'nullable|exists:product_categories,id',
             'features'         => 'nullable',
+            'show_features_on_category_page' => 'nullable|in:0,1,true,false',
         ]);
 
         if ($request->has('features')) {
@@ -198,6 +241,8 @@ class ProductCategoryController extends Controller
         $validated['status'] = filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         $validated['header_menu'] = filter_var($validated['header_menu'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         $validated['side_menu'] = filter_var($validated['side_menu'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+        $validated['show_in_filter'] = filter_var($validated['show_in_filter'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+        $validated['show_features_on_category_page'] = filter_var($validated['show_features_on_category_page'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
 
         if (!isset($validated['sort_order'])) {
             $validated['sort_order'] = 0;
@@ -243,10 +288,12 @@ class ProductCategoryController extends Controller
             'bg_color'         => 'nullable|string|max:50',
             'header_menu'      => 'nullable|in:0,1,true,false',
             'side_menu'        => 'nullable|in:0,1,true,false',
+            'show_in_filter'   => 'nullable|in:0,1,true,false',
             'sort_order'       => 'nullable|integer|min:0',
             'status'           => 'required|in:0,1,true,false',
             'parent_id'        => 'nullable|exists:product_categories,id',
             'features'         => 'nullable',
+            'show_features_on_category_page' => 'nullable|in:0,1,true,false',
         ]);
 
         if ($request->has('features')) {
@@ -274,6 +321,8 @@ class ProductCategoryController extends Controller
         $validated['status'] = filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         $validated['header_menu'] = filter_var($validated['header_menu'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         $validated['side_menu'] = filter_var($validated['side_menu'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+        $validated['show_in_filter'] = filter_var($validated['show_in_filter'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+        $validated['show_features_on_category_page'] = filter_var($validated['show_features_on_category_page'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
 
         // Prevent setting itself as parent
         if (isset($validated['parent_id']) && $validated['parent_id'] == $category->id) {
@@ -290,7 +339,7 @@ class ProductCategoryController extends Controller
             $path = $file->storeAs("product-categories/{$category->id}", $filename, 'public');
 
             $fullPath = Storage::disk('public')->path($path);
-            Image::make($fullPath)->fit(250, 150)->save();
+            // Image::make($fullPath)->fit(250, 150)->save();
 
             $validated['image'] = $path;
         }
@@ -315,6 +364,21 @@ class ProductCategoryController extends Controller
         return ApiResponse::success([
             'status' => $category->status,
         ], $category->status == 1 ? 'Category active' : 'Category inactive');
+    }
+
+    /**
+     * Toggle the show_in_filter status.
+     */
+    public function toggleShowInFilter($id)
+    {
+        $category = ProductCategory::findOrFail($id);
+        $category->show_in_filter = $category->show_in_filter == 1 ? 0 : 1;
+        $category->updatedBy = Auth::id();
+        $category->save();
+
+        return ApiResponse::success([
+            'show_in_filter' => $category->show_in_filter,
+        ], $category->show_in_filter == 1 ? 'Show in filter enabled' : 'Show in filter disabled');
     }
 
     /**

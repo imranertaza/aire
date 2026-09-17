@@ -1,16 +1,24 @@
 <template>
     <DashboardHeader title="Advanced Products Editor">
         <div class="d-flex align-items-center flex-wrap gap-2">
-            <button @click="openBulkStatusModal" class="btn btn-sm btn-warning" :disabled="selectedProductIds.length === 0">
+            <button @click="openBulkStatusModal" class="btn btn-sm btn-warning"
+                :disabled="selectedProductIds.length === 0">
                 <i class="fas fa-toggle-on mr-1"></i> Bulk Status
             </button>
-            <button @click="openBulkCategoriesModal" class="btn btn-sm btn-info" :disabled="selectedProductIds.length === 0">
+            <button @click="openBulkCategoriesModal" class="btn btn-sm btn-info"
+                :disabled="selectedProductIds.length === 0">
                 <i class="fas fa-tags mr-1"></i> Bulk Categories
             </button>
-            <button @click="openBulkOptionsModal" class="btn btn-sm btn-success" :disabled="selectedProductIds.length === 0">
+            <button @click="openBulkOptionsModal" class="btn btn-sm btn-success"
+                :disabled="selectedProductIds.length === 0">
                 <i class="fas fa-cog mr-1"></i> Bulk Options
             </button>
-            <button @click="openBulkAttributesModal" class="btn btn-sm btn-primary" :disabled="selectedProductIds.length === 0">
+            <button @click="openBulkFilterOptionsModal" class="btn btn-sm btn-success"
+                :disabled="selectedProductIds.length === 0">
+                <i class="fas fa-filter mr-1"></i> Bulk Filter Options
+            </button>
+            <button @click="openBulkAttributesModal" class="btn btn-sm btn-primary"
+                :disabled="selectedProductIds.length === 0">
                 <i class="fas fa-list-alt mr-1"></i> Bulk Attributes
             </button>
             <router-link :to="{ name: 'Products' }" class="btn btn-sm btn-secondary">
@@ -22,7 +30,8 @@
     <section class="content">
         <div class="card shadow-sm border-0">
             <!-- Card Header / Search -->
-            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between flex-wrap" style="gap:10px;">
+            <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between flex-wrap"
+                style="gap:10px;">
                 <div style="min-width:260px; max-width:380px; flex:1;">
                     <div class="input-group input-group-sm">
                         <div class="input-group-prepend">
@@ -30,12 +39,14 @@
                                 <i class="fas fa-search text-muted"></i>
                             </span>
                         </div>
-                        <input type="text" class="form-control border-left-0" placeholder="Search by name or model..." v-model="searchQuery" @input="debouncedSearch" />
+                        <input type="text" class="form-control border-left-0" placeholder="Search by name or model..."
+                            v-model="searchQuery" @input="debouncedSearch" />
                     </div>
                 </div>
                 <div class="d-flex align-items-center" style="gap:10px;">
                     <span class="small text-muted"><i class="fas fa-info-circle mr-1"></i>Click any cell to edit</span>
-                    <span v-if="selectedProductIds.length > 0" class="badge badge-pill badge-primary px-3 py-2" style="font-size:13px;">
+                    <span v-if="selectedProductIds.length > 0" class="badge badge-pill badge-primary px-3 py-2"
+                        style="font-size:13px;">
                         <i class="fas fa-check-square mr-1"></i>{{ selectedProductIds.length }} selected
                     </span>
                 </div>
@@ -46,47 +57,43 @@
                 <table class="table table-hover table-sm mb-0 advanced-table">
                     <thead>
                         <tr>
-                            <th class="text-center" >
+                            <th class="text-center">
                                 <input type="checkbox" @change="toggleSelectAll" :checked="isAllSelected" />
                             </th>
-                            <th >#</th>
-                            <th >Img</th>
-                            <th >Name</th>
-                            <th >Model</th>
-                            <th >Price</th>
-                            <th >Qty</th>
-                            <th >Status</th>
-                            <th >Featured</th>
-                            <th class="text-center" >Categories</th>
-                            <th class="text-center" >Options</th>
-                            <th class="text-center" >Attrs</th>
-                            <th class="text-center" >SEO</th>
-                            <th class="text-center action-col" >Save</th>
+                            <th>#</th>
+                            <th>Img</th>
+                            <th>Name</th>
+                            <th>Model</th>
+                            <th>Price</th>
+                            <th>Qty</th>
+                            <th>Status</th>
+                            <th>Featured</th>
+                            <th class="text-center">Categories</th>
+                            <th class="text-center">Options</th>
+                            <th class="text-center">Filter Options</th>
+                            <th class="text-center">Attrs</th>
+                            <th class="text-center">SEO</th>
+                            <th class="text-center action-col">Save</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="product in products" :key="product.id" :class="{ 'row-editing': isRowEditing(product.id) }">
+                        <tr v-for="product in products" :key="product.id"
+                            :class="{ 'row-editing': isRowEditing(product.id) }">
                             <td class="text-center align-middle">
                                 <input type="checkbox" :value="product.id" v-model="selectedProductIds" />
                             </td>
                             <td class="align-middle text-muted small">{{ product.id }}</td>
                             <td class="align-middle">
                                 <img :src="product.main_image ? getImageCacheUrl(product.main_image, 80, 80, 'webp') : '/images/no-image.jpg'"
-                                     class="product-thumb" />
+                                    class="product-thumb" />
                             </td>
 
                             <!-- Name — click to edit -->
                             <td class="align-middle editable-cell" @click="startEdit(product.id, 'name')">
                                 <template v-if="isEditing(product.id, 'name')">
-                                    <input
-                                        type="text"
-                                        class="form-control form-control-sm cell-input"
-                                        v-model="product.name"
-                                        @blur="stopEdit"
-                                        @keyup.enter="stopEdit"
-                                        @keyup.escape="stopEdit"
-                                        v-focus
-                                    />
+                                    <input type="text" class="form-control form-control-sm cell-input"
+                                        v-model="product.name" @blur="stopEdit" @keyup.enter="stopEdit"
+                                        @keyup.escape="stopEdit" v-focus />
                                 </template>
                                 <template v-else>
                                     <span class="cell-value">{{ product.name || '—' }}</span>
@@ -97,15 +104,9 @@
                             <!-- Model — click to edit -->
                             <td class="align-middle editable-cell" @click="startEdit(product.id, 'model')">
                                 <template v-if="isEditing(product.id, 'model')">
-                                    <input
-                                        type="text"
-                                        class="form-control form-control-sm cell-input"
-                                        v-model="product.model"
-                                        @blur="stopEdit"
-                                        @keyup.enter="stopEdit"
-                                        @keyup.escape="stopEdit"
-                                        v-focus
-                                    />
+                                    <input type="text" class="form-control form-control-sm cell-input"
+                                        v-model="product.model" @blur="stopEdit" @keyup.enter="stopEdit"
+                                        @keyup.escape="stopEdit" v-focus />
                                 </template>
                                 <template v-else>
                                     <span class="cell-value code-value">{{ product.model || '—' }}</span>
@@ -116,15 +117,10 @@
                             <!-- Price — click to edit -->
                             <td class="align-middle editable-cell" @click="startEdit(product.id, 'price')">
                                 <template v-if="isEditing(product.id, 'price')">
-                                    <input min="0" type="number"
-                                        step="0.01"
+                                    <input min="0" type="number" step="0.01"
                                         class="form-control form-control-sm cell-input text-right"
-                                        v-model="product.price"
-                                        @blur="stopEdit"
-                                        @keyup.enter="stopEdit"
-                                        @keyup.escape="stopEdit"
-                                        v-focus
-                                    />
+                                        v-model="product.price" @blur="stopEdit" @keyup.enter="stopEdit"
+                                        @keyup.escape="stopEdit" v-focus />
                                 </template>
                                 <template v-else>
                                     <span class="cell-value">{{ formatPrice(product.price) }}</span>
@@ -133,16 +129,13 @@
                             </td>
 
                             <!-- Quantity — click to edit -->
-                            <td class="align-middle editable-cell text-center" @click="startEdit(product.id, 'quantity')">
+                            <td class="align-middle editable-cell text-center"
+                                @click="startEdit(product.id, 'quantity')">
                                 <template v-if="isEditing(product.id, 'quantity')">
                                     <input min="0" type="number"
                                         class="form-control form-control-sm cell-input text-center"
-                                        v-model="product.quantity"
-                                        @blur="stopEdit"
-                                        @keyup.enter="stopEdit"
-                                        @keyup.escape="stopEdit"
-                                        v-focus
-                                    />
+                                        v-model="product.quantity" @blur="stopEdit" @keyup.enter="stopEdit"
+                                        @keyup.escape="stopEdit" v-focus />
                                 </template>
                                 <template v-else>
                                     <span class="cell-value">{{ product.quantity }}</span>
@@ -182,23 +175,33 @@
                                 </button>
                             </td>
 
+                            <!-- Filter Options -->
+                            <td class="align-middle text-center">
+                                <button class="btn btn-xs btn-outline-success" @click="openFilterOptionsModal(product)">
+                                    <i class="fas fa-filter mr-1"></i>{{ product.product_filter_options?.length || 0 }}
+                                </button>
+                            </td>
+
                             <!-- Attributes -->
                             <td class="align-middle text-center">
-                                <button class="btn btn-xs btn-outline-primary text-nowrap" @click="openAttributesModal(product)">
+                                <button class="btn btn-xs btn-outline-primary text-nowrap"
+                                    @click="openAttributesModal(product)">
                                     <i class="fas fa-list mr-1"></i>{{ product.product_attributes?.length || 0 }}
                                 </button>
                             </td>
 
                             <!-- SEO -->
                             <td class="align-middle text-center">
-                                <button class="btn btn-xs btn-outline-secondary" @click="openSeoModal(product)" title="Edit SEO">
+                                <button class="btn btn-xs btn-outline-secondary" @click="openSeoModal(product)"
+                                    title="Edit SEO">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </td>
 
                             <!-- Save -->
                             <td class="align-middle text-center action-col">
-                                <button class="btn btn-xs btn-primary" @click="saveProductRow(product)" title="Save row">
+                                <button class="btn btn-xs btn-primary" @click="saveProductRow(product)"
+                                    title="Save row">
                                     <i class="fas fa-save"></i>
                                 </button>
                             </td>
@@ -225,25 +228,21 @@
     <div class="ap-modal-backdrop" v-if="showCategoriesModal" @click.self="showCategoriesModal = false">
         <div class="ap-modal">
             <div class="ap-modal-header">
-                <h6><i class="fas fa-tags text-info mr-2"></i>{{ isBulkAction ? 'Bulk Edit Categories' : 'Edit Categories' }}</h6>
+                <h6><i class="fas fa-tags text-info mr-2"></i>{{ isBulkAction ? 'Bulk Edit Categories' : 'Edit Categories'
+                    }}</h6>
                 <button class="ap-close" @click="showCategoriesModal = false">&times;</button>
             </div>
             <div class="ap-modal-body">
                 <p class="text-muted small mb-2">
                     Select one or more categories. Hierarchy is shown as <strong>Parent &gt; Child</strong>.
                 </p>
-                <Multiselect
-                    v-model="bulkForm.category_ids"
-                    :options="categoriesOptions"
-                    mode="tags"
-                    placeholder="Search and select categories..."
-                    searchable
-                    class="multiselect-custom"
-                />
+                <Multiselect v-model="bulkForm.category_ids" :options="categoriesOptions" mode="tags"
+                    placeholder="Search and select categories..." searchable class="multiselect-custom" />
             </div>
             <div class="ap-modal-footer">
                 <button class="btn btn-sm btn-secondary" @click="showCategoriesModal = false">Cancel</button>
-                <button class="btn btn-sm btn-info" @click="submitBulkCategories" :disabled="bulkForm.category_ids.length === 0">
+                <button class="btn btn-sm btn-info" @click="submitBulkCategories"
+                    :disabled="bulkForm.category_ids.length === 0">
                     <i class="fas fa-check mr-1"></i>Apply Categories
                 </button>
             </div>
@@ -286,7 +285,9 @@
     <div class="ap-modal-backdrop" v-if="showOptionsModal" @click.self="showOptionsModal = false">
         <div class="ap-modal ap-modal-lg">
             <div class="ap-modal-header">
-                <h6><i class="fas fa-cog text-success mr-2"></i>{{ isBulkAction ? 'Bulk Edit Options' : 'Edit Options' }}</h6>
+                <h6><i class="fas fa-cog text-success mr-2"></i>{{ isBulkAction ? 'Bulk Edit Options' : 'Edit Options'
+                }}
+                </h6>
                 <button class="ap-close" @click="showOptionsModal = false">&times;</button>
             </div>
             <div class="ap-modal-body">
@@ -316,23 +317,28 @@
                                 <td>
                                     <select class="form-control form-control-sm" v-model="prodOpt.option_value_id">
                                         <option value="">-- Select --</option>
-                                        <option v-for="val in prodOpt.available_values" :key="val.id" :value="val.id">{{ val.name }}</option>
+                                        <option v-for="val in prodOpt.available_values" :key="val.id" :value="val.id">{{
+                                            val.name }}</option>
                                     </select>
                                 </td>
-                                <td><input min="0" type="number" class="form-control form-control-sm" v-model="prodOpt.quantity" style="width:70px;" /></td>
+                                <td><input min="0" type="number" class="form-control form-control-sm"
+                                        v-model="prodOpt.quantity" style="width:70px;" /></td>
                                 <td>
-                                    <select class="form-control form-control-sm" v-model="prodOpt.subtract" style="width:70px;">
+                                    <select class="form-control form-control-sm" v-model="prodOpt.subtract"
+                                        style="width:70px;">
                                         <option :value="1">Yes</option>
                                         <option :value="0">No</option>
                                     </select>
                                 </td>
                                 <td>
-                                    <select class="form-control form-control-sm" v-model="prodOpt.price_prefix" style="width:60px;">
+                                    <select class="form-control form-control-sm" v-model="prodOpt.price_prefix"
+                                        style="width:60px;">
                                         <option value="+">+</option>
                                         <option value="-">-</option>
                                     </select>
                                 </td>
-                                <td><input min="0" type="number" step="0.01" class="form-control form-control-sm" v-model="prodOpt.price" style="width:80px;" /></td>
+                                <td><input min="0" type="number" step="0.01" class="form-control form-control-sm"
+                                        v-model="prodOpt.price" style="width:80px;" /></td>
                                 <td class="text-center">
                                     <button type="button" class="btn btn-xs btn-danger" @click="removeOptionRow(index)">
                                         <i class="fas fa-trash"></i>
@@ -348,8 +354,69 @@
             </div>
             <div class="ap-modal-footer">
                 <button class="btn btn-sm btn-secondary" @click="showOptionsModal = false">Cancel</button>
-                <button class="btn btn-sm btn-success" @click="submitBulkOptions" :disabled="bulkForm.options.length === 0">
+                <button class="btn btn-sm btn-success" @click="submitBulkOptions"
+                    :disabled="bulkForm.options.length === 0">
                     <i class="fas fa-check mr-1"></i>Apply Options
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Filter Options Modal -->
+    <div class="ap-modal-backdrop" v-if="showFilterOptionsModal" @click.self="showFilterOptionsModal = false">
+        <div class="ap-modal ap-modal-lg">
+            <div class="ap-modal-header">
+                <h6><i class="fas fa-filter text-success mr-2"></i>{{ isBulkAction ? 'Bulk Edit Filter Options' :
+                    'Edit Filter Options' }}</h6>
+                <button class="ap-close" @click="showFilterOptionsModal = false">&times;</button>
+            </div>
+            <div class="ap-modal-body">
+                <div class="form-group mb-3">
+                    <label class="form-label small font-weight-bold">Add Filter Option</label>
+                    <select class="form-control form-control-sm" v-model="selectedFilterOptionToAdd"
+                        @change="addFilterOptionRow">
+                        <option value="">-- Select Filter Option to Add --</option>
+                        <option v-for="opt in availableFilterOptions" :key="opt.id" :value="opt">{{ opt.name }}</option>
+                    </select>
+                </div>
+                <div class="table-responsive" v-if="bulkForm.filter_options.length > 0">
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Filter Option</th>
+                                <th>Value</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(fOpt, index) in bulkForm.filter_options" :key="index">
+                                <td class="align-middle small">{{ fOpt.filter_option_name }}</td>
+                                <td>
+                                    <select class="form-control form-control-sm" v-model="fOpt.filter_option_value_id">
+                                        <option value="">-- Select --</option>
+                                        <option v-for="val in fOpt.available_values" :key="val.id" :value="val.id">{{
+                                            val.name }}</option>
+                                    </select>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-xs btn-danger"
+                                        @click="removeFilterOptionRow(index)">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div v-else class="alert alert-light border text-muted small mb-0">
+                    <i class="fas fa-info-circle mr-1"></i>No filter options added yet. Select a filter option above.
+                </div>
+            </div>
+            <div class="ap-modal-footer">
+                <button class="btn btn-sm btn-secondary" @click="showFilterOptionsModal = false">Cancel</button>
+                <button class="btn btn-sm btn-success" @click="submitBulkFilterOptions"
+                    :disabled="bulkForm.filter_options.length === 0">
+                    <i class="fas fa-check mr-1"></i>Apply Filter Options
                 </button>
             </div>
         </div>
@@ -379,14 +446,18 @@
                                 <td>
                                     <select class="form-control form-control-sm" v-model="attr.attribute_group_id">
                                         <option value="">-- Group --</option>
-                                        <option v-for="g in attributeGroups" :key="g.id" :value="g.id">{{ g.name }}</option>
+                                        <option v-for="g in attributeGroups" :key="g.id" :value="g.id">{{ g.name }}
+                                        </option>
                                     </select>
                                 </td>
                                 <td><input type="text" class="form-control form-control-sm" v-model="attr.name" /></td>
-                                <td><textarea class="form-control form-control-sm" v-model="attr.details" rows="1"></textarea></td>
-                                <td><input min="0" type="number" class="form-control form-control-sm text-center" v-model="attr.sort_order" /></td>
+                                <td><textarea class="form-control form-control-sm" v-model="attr.details"
+                                        rows="1"></textarea></td>
+                                <td><input min="0" type="number" class="form-control form-control-sm text-center"
+                                        v-model="attr.sort_order" /></td>
                                 <td class="text-center align-middle">
-                                    <button type="button" class="btn btn-xs btn-danger" @click="removeAttributeRow(index)">
+                                    <button type="button" class="btn btn-xs btn-danger"
+                                        @click="removeAttributeRow(index)">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -407,7 +478,8 @@
             </div>
             <div class="ap-modal-footer">
                 <button class="btn btn-sm btn-secondary" @click="showAttributesModal = false">Cancel</button>
-                <button class="btn btn-sm btn-primary" @click="submitBulkAttributes" :disabled="bulkForm.attributes.length === 0">
+                <button class="btn btn-sm btn-primary" @click="submitBulkAttributes"
+                    :disabled="bulkForm.attributes.length === 0">
                     <i class="fas fa-check mr-1"></i>Apply Attributes
                 </button>
             </div>
@@ -424,15 +496,18 @@
             <div class="ap-modal-body">
                 <div class="form-group mb-3">
                     <label class="form-label small font-weight-bold">Meta Title</label>
-                    <input type="text" class="form-control form-control-sm" v-model="seoForm.meta_title" placeholder="Meta title" />
+                    <input type="text" class="form-control form-control-sm" v-model="seoForm.meta_title"
+                        placeholder="Meta title" />
                 </div>
                 <div class="form-group mb-3">
                     <label class="form-label small font-weight-bold">Meta Description</label>
-                    <textarea class="form-control form-control-sm" v-model="seoForm.meta_description" rows="3" placeholder="Meta description"></textarea>
+                    <textarea class="form-control form-control-sm" v-model="seoForm.meta_description" rows="3"
+                        placeholder="Meta description"></textarea>
                 </div>
                 <div class="form-group mb-0">
                     <label class="form-label small font-weight-bold">Meta Keywords</label>
-                    <input type="text" class="form-control form-control-sm" v-model="seoForm.meta_keyword" placeholder="keyword1, keyword2, ..." />
+                    <input type="text" class="form-control form-control-sm" v-model="seoForm.meta_keyword"
+                        placeholder="keyword1, keyword2, ..." />
                 </div>
             </div>
             <div class="ap-modal-footer">
@@ -463,7 +538,9 @@ const products = ref([]);
 const categories = ref([]);
 const attributeGroups = ref([]);
 const availableOptions = ref([]);
+const availableFilterOptions = ref([]);
 const selectedOptionToAdd = ref("");
+const selectedFilterOptionToAdd = ref("");
 
 const searchQuery = ref("");
 const selectedProductIds = ref([]);
@@ -476,6 +553,7 @@ const editingCell = ref(null); // { productId, field }
 const showCategoriesModal = ref(false);
 const showStatusModal = ref(false);
 const showOptionsModal = ref(false);
+const showFilterOptionsModal = ref(false);
 const showAttributesModal = ref(false);
 const showSeoModal = ref(false);
 
@@ -489,6 +567,7 @@ const bulkForm = ref({
     statusField: 'status',
     statusValue: 1,
     options: [],
+    filter_options: [],
     attributes: []
 });
 
@@ -574,14 +653,16 @@ const loadProducts = async (page = 1) => {
 
 const loadDependencies = async () => {
     try {
-        const [resCats, resGroups, resOpts] = await Promise.all([
+        const [resCats, resGroups, resOpts, resFilterOpts] = await Promise.all([
             axios.get('/api/product-categories/all'),
             axios.get('/api/product-attribute-groups/all'),
-            axios.get('/api/options/all')
+            axios.get('/api/options/all'),
+            axios.get('/api/filter-options/all')
         ]);
         categories.value = resCats.data.data;
         attributeGroups.value = resGroups.data.data;
         availableOptions.value = resOpts.data.data;
+        availableFilterOptions.value = resFilterOpts.data.data;
     } catch (error) {
         console.error("Dependency loading failed", error);
     }
@@ -656,6 +737,13 @@ const openBulkOptionsModal = () => {
     showOptionsModal.value = true;
 };
 
+const openBulkFilterOptionsModal = () => {
+    isBulkAction.value = true;
+    bulkForm.value.filter_options = [];
+    selectedFilterOptionToAdd.value = "";
+    showFilterOptionsModal.value = true;
+};
+
 const openBulkAttributesModal = () => {
     isBulkAction.value = true;
     bulkForm.value.attributes = [];
@@ -689,6 +777,26 @@ const openOptionsModal = (product) => {
     showOptionsModal.value = true;
 };
 
+const openFilterOptionsModal = (product) => {
+    isBulkAction.value = false;
+    currentEditProductId.value = product.id;
+    bulkForm.value.filter_options = product.product_filter_options ? product.product_filter_options.map(opt => {
+        const fOptId = opt.filter_option_id ? Number(opt.filter_option_id) : (opt.filter_option ? Number(opt.filter_option.id) : null);
+        const fValId = (opt.filter_option_value_id !== undefined && opt.filter_option_value_id !== null && opt.filter_option_value_id !== '')
+            ? Number(opt.filter_option_value_id)
+            : (opt.filter_option_value ? Number(opt.filter_option_value.id) : '');
+        const parentOpt = availableFilterOptions.value.find(o => Number(o.id) === fOptId);
+        return {
+            filter_option_id: fOptId,
+            filter_option_name: parentOpt ? parentOpt.name : (opt.filter_option ? opt.filter_option.name : ''),
+            filter_option_value_id: fValId,
+            available_values: parentOpt ? (parentOpt.option_values || parentOpt.optionValues || []) : []
+        };
+    }) : [];
+    selectedFilterOptionToAdd.value = "";
+    showFilterOptionsModal.value = true;
+};
+
 const openAttributesModal = (product) => {
     isBulkAction.value = false;
     currentEditProductId.value = product.id;
@@ -714,20 +822,35 @@ const openSeoModal = (product) => {
 // ---- Options/Attributes row management ----
 const addOptionRow = () => {
     if (!selectedOptionToAdd.value) return;
+    const opt = selectedOptionToAdd.value;
     bulkForm.value.options.push({
-        option_id: selectedOptionToAdd.value.id,
-        option_name: selectedOptionToAdd.value.name,
+        option_id: Number(opt.id),
+        option_name: opt.name,
         option_value_id: '',
         quantity: 0,
         subtract: 1,
         price_prefix: '+',
         price: 0,
-        available_values: selectedOptionToAdd.value.option_values || []
+        available_values: opt.option_values || opt.optionValues || []
     });
     selectedOptionToAdd.value = "";
 };
 
 const removeOptionRow = (index) => bulkForm.value.options.splice(index, 1);
+
+const addFilterOptionRow = () => {
+    if (!selectedFilterOptionToAdd.value) return;
+    const opt = selectedFilterOptionToAdd.value;
+    bulkForm.value.filter_options.push({
+        filter_option_id: Number(opt.id),
+        filter_option_name: opt.name,
+        filter_option_value_id: '',
+        available_values: opt.option_values || opt.optionValues || []
+    });
+    selectedFilterOptionToAdd.value = "";
+};
+
+const removeFilterOptionRow = (index) => bulkForm.value.filter_options.splice(index, 1);
 
 const addAttributeRow = () => {
     bulkForm.value.attributes.push({ attribute_group_id: '', name: '', details: '', sort_order: 0 });
@@ -784,6 +907,22 @@ const submitBulkOptions = async () => {
     }
 };
 
+const submitBulkFilterOptions = async () => {
+    try {
+        const productIds = isBulkAction.value ? selectedProductIds.value : [currentEditProductId.value];
+        await axios.post('/api/advanced-products/bulk/filter-options', {
+            product_ids: productIds,
+            filter_options: bulkForm.value.filter_options
+        });
+        toast.success(isBulkAction.value ? "Bulk filter options applied!" : "Filter options updated!");
+        showFilterOptionsModal.value = false;
+        if (isBulkAction.value) selectedProductIds.value = [];
+        loadProducts(pagination.value.current_page);
+    } catch {
+        toast.error("Failed to apply filter options.");
+    }
+};
+
 const submitBulkAttributes = async () => {
     try {
         const productIds = isBulkAction.value ? selectedProductIds.value : [currentEditProductId.value];
@@ -826,20 +965,25 @@ const submitSeoForm = async () => {
     border-bottom: none;
     padding: 10px 8px;
 }
+
 .advanced-table tbody tr {
     transition: background 0.1s;
 }
+
 .advanced-table tbody tr.row-editing {
     background: #fffbe6 !important;
 }
+
 .advanced-table tbody tr:hover {
     background: #f0f6ff;
 }
+
 .advanced-table tbody td {
     vertical-align: middle;
     font-size: 13px;
     padding: 6px 8px;
 }
+
 .product-thumb {
     width: 46px;
     height: 46px;
@@ -853,19 +997,23 @@ const submitSeoForm = async () => {
     cursor: pointer;
     position: relative;
 }
+
 .editable-cell:hover {
     background: #e8f4fd !important;
 }
+
 .cell-value {
     display: inline-block;
     max-width: 100%;
     word-break: break-word;
 }
+
 .code-value {
     font-family: monospace;
     font-size: 12px;
     color: #6c757d;
 }
+
 .cell-edit-icon {
     font-size: 9px;
     color: #adb5bd;
@@ -873,9 +1021,11 @@ const submitSeoForm = async () => {
     opacity: 0;
     transition: opacity 0.15s;
 }
+
 .editable-cell:hover .cell-edit-icon {
     opacity: 1;
 }
+
 .cell-input {
     min-width: 80px;
 }
@@ -906,6 +1056,7 @@ const submitSeoForm = async () => {
     padding: 20px;
     min-height: 60vh !important;
 }
+
 .ap-modal {
     background: #fff;
     border-radius: 10px;
@@ -915,10 +1066,14 @@ const submitSeoForm = async () => {
     min-height: 60vh !important;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     overflow: hidden;
 }
-.ap-modal-lg { max-width: 820px; }
+
+.ap-modal-lg {
+    max-width: 820px;
+}
+
 .ap-modal-header {
     display: flex;
     align-items: center;
@@ -927,12 +1082,14 @@ const submitSeoForm = async () => {
     border-bottom: 1px solid #dee2e6;
     background: #f8f9fa;
 }
+
 .ap-modal-header h6 {
     margin: 0;
     font-weight: 700;
     font-size: 14px;
     color: #343a40;
 }
+
 .ap-close {
     background: none;
     border: none;
@@ -942,12 +1099,17 @@ const submitSeoForm = async () => {
     cursor: pointer;
     padding: 0 4px;
 }
-.ap-close:hover { color: #343a40; }
+
+.ap-close:hover {
+    color: #343a40;
+}
+
 .ap-modal-body {
     padding: 18px;
     overflow-y: auto;
     flex: 1;
 }
+
 .ap-modal-footer {
     padding: 12px 18px;
     border-top: 1px solid #dee2e6;
@@ -962,7 +1124,7 @@ const submitSeoForm = async () => {
     position: sticky;
     right: 0;
     background: #fff;
-    box-shadow: -2px 0 4px rgba(0,0,0,0.05);
+    box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
 }
 
 /* ---- Utility ---- */
@@ -987,12 +1149,15 @@ const submitSeoForm = async () => {
     --ms-py: 6px;
     --ms-px: 10px;
 }
+
 .multiselect-custom .multiselect-tags-search {
     background-color: transparent !important;
 }
+
 .multiselect-custom .multiselect-option.is-selected {
     background: #2980b9;
 }
+
 .multiselect-custom .multiselect-tag {
     font-size: 12px;
     padding: 2px 8px;

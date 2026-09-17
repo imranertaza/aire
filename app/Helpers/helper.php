@@ -7,58 +7,62 @@ use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('getImageUrl')) {
     /**
-     * Generate a secure and reliable URL for an image stored in public storage.
+     * Retrieve public URL for an image, with optional on-demand resizing,
+     * smart cropping (fit), WebP conversion, and caching.
      *
-     * - Returns a fallback default image if path is empty or invalid.
-     * - Returns the original URL if it's already absolute (http/https).
-     * - Checks file existence in public disk and returns correct storage link.
-     *
-     * @param string|null $path The relative path from storage or absolute URL
-     * @return string The full accessible image URL
+     * @param string|null $path    Original image path or URL
+     * @param int|null    $width   Optional width
+     * @param int|null    $height  Optional height
+     * @param array       $options Options: ['fit' => bool, 'format' => 'webp', 'quality' => 85, 'optimize' => bool]
+     * @return string
      */
-    function getImageUrl(?string $path): string
+    function getImageUrl(?string $path, ?int $width = null, ?int $height = null, array $options = []): string
     {
-        // Fallback if no path provided
+        // 1. Empty fallback
         if (empty($path)) {
-            return asset('themes/default/assets/img/airpro_mask_fb2.png');
+            return \App\Services\ImageService::getFallbackUrl();
         }
 
-        // If already an absolute URL
-        if (preg_match('/^https?:\/\//i', $path)) {
-            if (str_contains($path, 'placehold.co') || str_contains($path, 'placeholder')) {
-                return asset('themes/default/assets/img/airpro_mask_fb2.png');
+        // 2. If dimensions or optimization requested, delegate to ImageService
+        if ($width !== null || $height !== null || !empty($options['optimize'])) {
+            if (!empty($options['fit']) && $width && $height) {
+                return \App\Services\ImageService::fit($path, $width, $height, $options);
             }
-            return $path;
+
+            if (!empty($options['optimize']) && !$width && !$height) {
+                return \App\Services\ImageService::optimize($path, $options);
+            }
+
+            if ($width !== null) {
+                return \App\Services\ImageService::resize($path, $width, $height, $options);
+            }
         }
 
-        // Normalize path
+        // 3. Direct fast bypass check for remote URLs and SVGs
+        if (\App\Services\ImageService::shouldBypass($path)) {
+            return \App\Services\ImageService::getBypassUrl($path);
+        }
+
+        // 4. Default resolution (100% backward-compatible with existing calls)
         $normalized = ltrim($path, '/');
 
-        // Check if file exists directly in public folder (e.g. themes/default/assets/img/...)
         if (file_exists(public_path($normalized))) {
             return asset($normalized);
         }
 
-        // Check if file exists in public storage
-        if (Storage::disk('public')->exists($normalized)) {
-            // return asset("public/storage/{$normalized}");
-            return asset("storage/{$normalized}");
-        }
-
-        // Check if path starts with storage/
         if (str_starts_with($normalized, 'storage/')) {
             $sub = substr($normalized, 8);
-            if (Storage::disk('public')->exists($sub) || file_exists(public_path($normalized))) {
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($sub) || file_exists(public_path($normalized))) {
                 return asset($normalized);
             }
         }
 
-        // Fallback to real theme product asset
-        if (file_exists(public_path('themes/default/assets/img/airpro_mask_fb2.png'))) {
-            return asset('themes/default/assets/img/airpro_mask_fb2.png');
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($normalized) || file_exists(public_path('storage/' . $normalized))) {
+            return asset("storage/{$normalized}");
         }
 
-        return asset('assets/images/default.svg');
+        // Fallback
+        return \App\Services\ImageService::getFallbackUrl();
     }
 }
 
@@ -122,12 +126,27 @@ if (! function_exists('getImagePath')) {
     function getImagePath(?string $path): string
     {
         if (empty($path)) {
-            return '/assets/images/default.svg'; // fallback image
+            return '/themes/default/assets/img/airpro_mask_fb2.png';
         }
 
-        return (str_starts_with($path, 'http://') || str_starts_with($path, 'https://'))
-            ? $path
-            : '/storage/' . ltrim($path, '/');
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $normalized = ltrim($path, '/');
+
+        if (
+            str_starts_with($normalized, 'themes/') ||
+            str_starts_with($normalized, 'assets/') ||
+            str_starts_with($normalized, 'images/') ||
+            str_starts_with($normalized, 'packages/') ||
+            str_starts_with($normalized, 'build/') ||
+            str_starts_with($normalized, 'storage/')
+        ) {
+            return '/' . $normalized;
+        }
+
+        return '/storage/' . $normalized;
     }
 }
 
@@ -147,7 +166,7 @@ if (! function_exists('getImageCacheUrl')) {
     function getImageCacheUrl(?string $filePath, int $width = 200, int $height = 200, string $format = 'webp'): string
     {
 
-        $baseUrl      = env('APP_URL'); // comes from APP_URL in .env
+        $baseUrl      = config('app.url') ?: env('APP_URL');
         $relativePath = getImagePath($filePath);
         // If already absolute URL, return as-is
         if (str_starts_with($relativePath, 'http://') || str_starts_with($relativePath, 'https://')) {
@@ -175,4 +194,67 @@ function getLimitedText(?string $text, $char = 100): string
     }
 
     return $truncated . '...';
+}
+
+
+if (! function_exists('isModuleEnabled')) {
+    /**
+     * Check if a system module is enabled by its key.
+     *
+     * @param string $moduleKey
+     * @return bool
+     */
+    function isModuleEnabled(string $moduleKey): bool
+    {
+        static $enabledModules = null;
+        if ($enabledModules === null) {
+            try {
+                $enabledModules = \Illuminate\Support\Facades\Cache::remember('system_enabled_modules', 60, function () {
+                    return \App\Models\Module::where('status', 1)->pluck('module_key')->toArray();
+                });
+            } catch (\Throwable $e) {
+                return false;
+            }
+        }
+        return in_array($moduleKey, $enabledModules, true);
+    }
+}
+
+if (! function_exists('is_module_enabled')) {
+    function is_module_enabled(string $moduleKey): bool
+    {
+        return isModuleEnabled($moduleKey);
+    }
+}
+
+
+if (! function_exists('getSection')) {
+    /**
+     * Retrieve a dynamic CMS section from database by name with caching.
+     *
+     * @param string $name
+     * @param array|null $default
+     * @return array|null
+     */
+    function getSection(string $name, ?array $default = null): ?array
+    {
+        try {
+            return \Illuminate\Support\Facades\Cache::remember("section_{$name}", 86400, function () use ($name, $default) {
+                $section = \App\Models\Section::where('name', $name)->first();
+                if (!$section) {
+                    return $default;
+                }
+                return is_array($section->data) ? $section->data : json_decode($section->data, true);
+            }) ?? $default;
+        } catch (\Throwable $e) {
+            return $default;
+        }
+    }
+}
+
+if (! function_exists('get_section')) {
+    function get_section(string $name, ?array $default = null): ?array
+    {
+        return getSection($name, $default);
+    }
 }

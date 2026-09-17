@@ -38,13 +38,26 @@ app.use(Vue3Toastify, {
     position: "top-right",
     theme: "light",
 });
-const token = localStorage.getItem("token");
+const isHttpOnly = import.meta.env.VITE_IS_HTTPONLY === 'true';
 
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
 
+const initialToken = localStorage.getItem("token");
+if (!isHttpOnly && initialToken) {
+    axios.defaults.headers.common["Authorization"] = `Bearer ${initialToken}`;
+}
+
 axios.interceptors.request.use((config) => {
     const loadingStore = useLoadingStore();
+
+    // Dynamically ensure Authorization header is up to date
+    if (!isHttpOnly) {
+        const token = localStorage.getItem("token");
+        if (token) {
+            config.headers["Authorization"] = `Bearer ${token}`;
+        }
+    }
 
     // Normalize method to lowercase
     const method = config.method?.toLowerCase();
@@ -88,12 +101,22 @@ axios.interceptors.response.use(
         if (["post", "put", "patch", "delete", "get"].includes(method)) {
             loadingStore.stop();
         }
+
+        // Handle 401 Unauthorized (invalid/expired token or session)
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("isAuthenticated");
+            localStorage.removeItem("role");
+            delete axios.defaults.headers.common["Authorization"];
+
+            const currentPath = window.location.pathname;
+            if (currentPath.startsWith("/admin") && currentPath !== "/admin/login") {
+                router.push({ name: "AdminLogin" });
+            }
+        }
+
         return Promise.reject(error);
     }
 );
-const isHttpOnly = import.meta.env.VITE_IS_HTTPONLY === 'true';
 
-if (!isHttpOnly && token) {
-    axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-}
 app.mount("#app");

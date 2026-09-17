@@ -107,6 +107,10 @@ Route::middleware('auth:user')->prefix('pages')->controller(PageController::clas
 /* Frontend Sections & Sliders */
 Route::prefix('sections')->middleware(['auth:user', 'permission:manage-frontend'])->controller(SectionController::class)->group(function () {
     Route::get('/', 'index');
+    Route::get('home-sections', 'homeSections')->name('sections.home-sections');
+    Route::get('by-name/{name}', 'getByName')->name('sections.by-name');
+    Route::post('by-name/{name}', 'updateByName')->name('sections.update-by-name');
+    Route::put('by-name/{name}', 'updateByName');
     Route::get('{id}', 'show')->name('sections.show');
     Route::put('{id}', 'update')->name('sections.update');
 });
@@ -363,6 +367,7 @@ Route::prefix('product-categories')->middleware(['auth:user'])->controller(Produ
     Route::get('{id}', 'show')->name('product-categories.show')->middleware('permission:view-product-categories');
     Route::put('{id}', 'update')->name('product-categories.update')->middleware('permission:edit-product-categories');
     Route::patch('{id}/toggle-status', 'toggleStatus')->name('product-categories.toggle')->middleware('permission:edit-product-categories');
+    Route::patch('{id}/toggle-show-in-filter', 'toggleShowInFilter')->name('product-categories.toggle-show-in-filter')->middleware('permission:edit-product-categories');
     Route::delete('{id}', 'destroy')->name('product-categories.destroy')->middleware('permission:delete-product-categories');
 });
 
@@ -388,6 +393,18 @@ Route::prefix('options')->middleware(['auth:user'])->controller(\App\Http\Contro
     Route::delete('{id}', 'destroy')->name('options.destroy')->middleware('permission:delete-options');
 });
 
+/* Filter Options */
+Route::prefix('filter-options')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\FilterOptionController::class)->group(function () {
+    Route::get('/', 'index')->name('filter-options.index')->middleware('permission:view-options');
+    Route::get('all', 'allOptions')->name('filter-options.all')->middleware('permission:view-options');
+    Route::post('/', 'store')->name('filter-options.store')->middleware('permission:create-options');
+    Route::get('{id}', 'show')->name('filter-options.show')->middleware('permission:view-options');
+    Route::put('{id}', 'update')->name('filter-options.update')->middleware('permission:edit-options');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('filter-options.toggle')->middleware('permission:edit-options');
+    Route::patch('{id}/toggle-show-in-filter', 'toggleShowInFilter')->name('filter-options.toggle-show-in-filter')->middleware('permission:edit-options');
+    Route::delete('{id}', 'destroy')->name('filter-options.destroy')->middleware('permission:delete-options');
+});
+
 /* Products */
 Route::prefix('products')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductController::class)->group(function () {
     Route::get('all-dropdown', 'dropdownList')->name('products.dropdown');
@@ -409,6 +426,7 @@ Route::prefix('advanced-products')->middleware(['auth:user', 'permission:edit-pr
     Route::post('update-description', 'updateDescription')->name('advanced-products.update-description');
     Route::post('update-field', 'updateField')->name('advanced-products.update-field');
     Route::post('bulk/options', 'bulkUpdateOptions')->name('advanced-products.bulk.options');
+    Route::post('bulk/filter-options', 'bulkUpdateFilterOptions')->name('advanced-products.bulk.filter-options');
     Route::post('bulk/attributes', 'bulkUpdateAttributes')->name('advanced-products.bulk.attributes');
     Route::post('bulk/categories', 'bulkUpdateCategories')->name('advanced-products.bulk.categories');
     Route::post('bulk/status', 'bulkUpdateStatus')->name('advanced-products.bulk.status');
@@ -483,3 +501,6 @@ Route::middleware(['auth:user'])->get('templates', function () {
 
     return response()->json($files);
 });
+
+Route::match(['get', 'post'], 'filter-wizard/query', [\App\Http\Controllers\ProductController::class, 'filterStepApi']);
+

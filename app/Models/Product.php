@@ -76,6 +76,23 @@ class Product extends Model
         return $this->hasOne(ProductFreeDelivery::class);
     }
 
+    public function special()
+    {
+        $today = now()->toDateString();
+        return $this->hasOne(ProductSpecial::class)
+            ->where(function ($q) use ($today) {
+                $q->whereNull('start_date')
+                    ->orWhere('start_date', '<=', $today)
+                    ->orWhere('start_date', '0000-00-00');
+            })
+            ->where(function ($q) use ($today) {
+                $q->whereNull('end_date')
+                    ->orWhere('end_date', '>=', $today)
+                    ->orWhere('end_date', '0000-00-00');
+            })
+            ->orderBy('special_price', 'asc');
+    }
+
     public function specials()
     {
         return $this->hasMany(ProductSpecial::class);
@@ -98,7 +115,12 @@ class Product extends Model
 
     public function productOptions()
     {
-        return $this->hasMany(ProductOption::class);
+        return $this->hasMany(ProductOption::class, 'product_id');
+    }
+
+    public function productFilterOptions()
+    {
+        return $this->hasMany(ProductFilterOption::class, 'product_id');
     }
 
     public function productAttributes()
@@ -119,6 +141,11 @@ class Product extends Model
     public function images()
     {
         return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+    }
+
+    public function productLanding()
+    {
+        return $this->hasOne(ProductLanding::class, 'product_id');
     }
 
     // ========================================
@@ -171,5 +198,24 @@ class Product extends Model
         return $this->main_image
             ? asset('storage/' . $this->main_image)
             : asset('images/no-image.jpg');
+    }
+
+    public function getSpecialPriceAttribute(): ?float
+    {
+        $special = $this->relationLoaded('special') ? $this->special : $this->special()->first();
+
+        if ($special && is_numeric($special->special_price)) {
+            $sp = (float) $special->special_price;
+            if ($sp > 0 && $sp < (float) $this->price) {
+                return $sp;
+            }
+        }
+
+        return null;
+    }
+
+    public function getFinalPriceAttribute(): float
+    {
+        return $this->special_price !== null ? (float) $this->special_price : (float) $this->price;
     }
 }

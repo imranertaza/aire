@@ -56,11 +56,12 @@ class CustomerDashboardController extends Controller
     public function orderInvoice(int $id)
     {
         $customerId = Auth::guard('customer')->id();
-        $order = \App\Models\Order::where('id', $id)
+        $order = \App\Models\Order::with('orderStatus')
+            ->where('id', $id)
             ->where('customer_id', $customerId)
             ->firstOrFail();
 
-        $orderItems = \App\Models\OrderItem::with('product')
+        $orderItems = \App\Models\OrderItem::with(['product.images', 'options'])
             ->where('order_id', $order->id)
             ->get();
 

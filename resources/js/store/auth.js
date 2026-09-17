@@ -10,8 +10,8 @@ import { defineStore } from "pinia";
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     isHttponly: import.meta.env.VITE_IS_HTTPONLY === 'true', // Config flag
-    token: null,           // Sanctum API token
-    role: null,            // Current user role (e.g., 'admin', 'editor')
+    token: localStorage.getItem("token") || null,           // Sanctum API token
+    role: localStorage.getItem("role") || null,            // Current user role (e.g., 'admin', 'editor')
     permissions: [],       // Array of permission strings
     modules: [],           // Array of enabled module keys
   }),
@@ -22,8 +22,23 @@ export const useAuthStore = defineStore('auth', {
     async fetchRoleAndPermissions() {
       const res = await axios.get('/api/admin/me');
       this.role = res.data.role;
-      this.permissions = res.data.permissions;
+      this.permissions = res.data.permissions || [];
       this.modules = res.data.modules || [];
+    },
+    /**
+     * Clear all auth state and local storage when unauthenticated or on logout.
+     */
+    resetAuth() {
+      this.token = null;
+      this.role = null;
+      this.permissions = [];
+      this.modules = [];
+
+      localStorage.removeItem('token');
+      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem('role');
+
+      delete axios.defaults.headers.common['Authorization'];
     },
     /**
      * Check if current user has a specific permission.

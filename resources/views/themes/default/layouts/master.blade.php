@@ -46,11 +46,14 @@
 
     @include('themes.default.layouts.footer')
 
+    @include('themes.default.partials.auth-modal')
+
     <!-- Core Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
     <!-- Theme Custom JS -->
     <script src="{{ theme_asset('js/main.js') }}" defer></script>
     <script src="{{ theme_asset('js/ui.js') }}" defer></script>

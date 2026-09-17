@@ -67,6 +67,14 @@ class ProductCategory extends Model
     }
 
     /**
+     * Scope for show in filter
+     */
+    public function scopeShowInFilter($query)
+    {
+        return $query->where('show_in_filter', 1);
+    }
+
+    /**
      * Get all children recursively (nested categories)
      */
     public function childrenRecursive()

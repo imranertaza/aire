@@ -137,6 +137,8 @@ class SliderController extends Controller
             $slide->update(['image' => $path]);
         }
 
+        Slider::clearCache();
+
         return ApiResponse::success($slide, 'Slide created successfully');
     }
 
@@ -205,6 +207,8 @@ class SliderController extends Controller
 
         $slider->update($data);
 
+        Slider::clearCache();
+
         return ApiResponse::success($slider, 'Slide updated successfully');
     }
 
@@ -221,6 +225,8 @@ class SliderController extends Controller
         $slider = Slider::findOrFail($id);
         $slider->enabled = $slider->enabled ? 0 : 1;
         $slider->save();
+
+        Slider::clearCache();
 
         return ApiResponse::success([
             'id'      => $slider->id,
@@ -244,6 +250,8 @@ class SliderController extends Controller
         }
 
         $slider->delete();
+
+        Slider::clearCache();
 
         return ApiResponse::success(null, 'Slide deleted successfully');
     }

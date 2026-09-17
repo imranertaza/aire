@@ -66,10 +66,17 @@ class SettingsController extends Controller
             'smtp_crypto'         => 'sometimes|in:ssl,tls,""',
 
             // Social Links
-            'fb_url'              => 'sometimes|url|max:255',
-            'twitter_url'         => 'sometimes|url|max:255',
-            'linkedin_url'        => 'sometimes|url|max:255',
-            'instagram_url'       => 'sometimes|url|max:255',
+            'fb_url'              => 'sometimes|nullable|string|max:255',
+            'twitter_url'         => 'sometimes|nullable|string|max:255',
+            'linkedin_url'        => 'sometimes|nullable|string|max:255',
+            'instagram_url'       => 'sometimes|nullable|string|max:255',
+
+            // Mobile App Store Links & Images
+            'google_play_url'         => 'sometimes|nullable|string|max:255',
+            'app_store_url'           => 'sometimes|nullable|string|max:255',
+            'google_play_image'       => 'sometimes|image|mimes:png,jpg,jpeg,svg,webp|max:4096',
+            'app_store_image'         => 'sometimes|image|mimes:png,jpg,jpeg,svg,webp|max:4096',
+            'show_app_download_links' => 'sometimes|in:0,1',
 
             // SEO & Meta
             'meta_title'          => 'sometimes|string|max:155',
@@ -95,6 +102,9 @@ class SettingsController extends Controller
             'brand_name'          => 'sometimes|string|max:255',
             'footer_description'  => 'sometimes|string|max:1000',
 
+            // Storefront Appearance
+            'show_category_features_globally' => 'sometimes|in:0,1',
+
             // reCAPTCHA (these will update .env)
             'use_recaptcha'       => 'sometimes|in:0,1',
             'nocaptcha_sitekey'   => 'sometimes|string|max:255',
@@ -108,6 +118,8 @@ class SettingsController extends Controller
             'remove_breadcrumb' => 'breadcrumb',
             'remove_og_image' => 'og_image',
             'remove_twitter_image' => 'twitter_image',
+            'remove_google_play_image' => 'google_play_image',
+            'remove_app_store_image' => 'app_store_image',
         ]; // Build rules dynamically
         $rules = [];
         foreach ($removableImages as $removeKey => $fieldName) {
@@ -137,7 +149,15 @@ class SettingsController extends Controller
                 continue;
             }
 
-            $setting = Setting::firstOrCreate(['label' => $label]);
+            $setting = Setting::firstOrCreate(
+                ['label' => $label],
+                [
+                    'title'     => ucwords(str_replace('_', ' ', $label)),
+                    'value'     => '',
+                    'createdBy' => Auth::id() ?? 1,
+                    'updatedBy' => Auth::id() ?? 1,
+                ]
+            );
 
             if ($request->hasFile($label)) {
                 $file = $request->file($label);

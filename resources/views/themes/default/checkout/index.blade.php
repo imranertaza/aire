@@ -125,72 +125,74 @@
                         </div>
 
                         <!-- Promo code section -->
-                        <div class="border-top pt-4" id="promoBanner">
-                            @if (session()->has('applied_coupon'))
-                                {{-- Applied coupon banner --}}
-                                <div class="d-flex align-items-center justify-content-between gap-2 rounded-3 px-3 py-2"
-                                    id="appliedCouponBanner"
-                                    style="background: var(--color-primary-bg); border: 1.5px solid var(--color-primary-light);">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-tag-fill fs-15" style="color: var(--color-primary);"></i>
-                                        <div>
-                                            <span class="fw-bold fs-14"
-                                                style="color: var(--color-primary);">{{ strtoupper(session('applied_coupon')->code) }}</span>
-                                            <p class="mb-0 fs-12 text-muted">Coupon applied — saving
-                                                ${{ number_format($discount, 2) }}</p>
+                        @if (isModuleEnabled('coupon'))
+                            <div class="border-top pt-4" id="promoBanner">
+                                @if (session()->has('applied_coupon'))
+                                    {{-- Applied coupon banner --}}
+                                    <div class="d-flex align-items-center justify-content-between gap-2 rounded-3 px-3 py-2"
+                                        id="appliedCouponBanner"
+                                        style="background: var(--color-primary-bg); border: 1.5px solid var(--color-primary-light);">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-tag-fill fs-15" style="color: var(--color-primary);"></i>
+                                            <div>
+                                                <span class="fw-bold fs-14"
+                                                    style="color: var(--color-primary);">{{ strtoupper(session('applied_coupon')->code) }}</span>
+                                                <p class="mb-0 fs-12 text-muted">Coupon applied — saving
+                                                    ${{ number_format($discount, 2) }}</p>
+                                            </div>
+                                        </div>
+                                        <button type="button" id="btnRemoveCoupon"
+                                            class="btn btn-link p-0 fs-13 fw-semibold text-decoration-none"
+                                            style="color: var(--color-primary-hover);">
+                                            <i class="bi bi-x-circle me-1"></i>Remove
+                                        </button>
+                                    </div>
+                                @else
+                                    {{-- Promo code input form --}}
+                                    <div id="promoInputWrapper">
+                                        <a class="text-decoration-none fw-semibold fs-14 text-dark d-flex justify-content-between align-items-center"
+                                            data-bs-toggle="collapse" href="#promoCodeCollapse" role="button"
+                                            aria-expanded="false" aria-controls="promoCodeCollapse">
+                                            Do you have a promo code?
+                                            <i class="bi bi-chevron-down text-muted"></i>
+                                        </a>
+                                        <div class="collapse mt-3" id="promoCodeCollapse">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control fs-14 shadow-none"
+                                                    id="promoCodeInput" placeholder="Enter code">
+                                                <button class="btn btn-dark fw-semibold fs-14 px-3" type="button"
+                                                    id="btnApplyPromo">Apply</button>
+                                            </div>
+                                            <div id="promoFeedback" class="mt-2 fs-13 fw-semibold"></div>
                                         </div>
                                     </div>
-                                    <button type="button" id="btnRemoveCoupon"
-                                        class="btn btn-link p-0 fs-13 fw-semibold text-decoration-none"
-                                        style="color: var(--color-primary-hover);">
-                                        <i class="bi bi-x-circle me-1"></i>Remove
-                                    </button>
-                                </div>
-                            @else
-                                {{-- Promo code input form --}}
-                                <div id="promoInputWrapper">
-                                    <a class="text-decoration-none fw-semibold fs-14 text-dark d-flex justify-content-between align-items-center"
-                                        data-bs-toggle="collapse" href="#promoCodeCollapse" role="button"
-                                        aria-expanded="false" aria-controls="promoCodeCollapse">
-                                        Do you have a promo code?
-                                        <i class="bi bi-chevron-down text-muted"></i>
-                                    </a>
-                                    <div class="collapse mt-3" id="promoCodeCollapse">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control fs-14 shadow-none"
-                                                id="promoCodeInput" placeholder="Enter code">
-                                            <button class="btn btn-dark fw-semibold fs-14 px-3" type="button"
-                                                id="btnApplyPromo">Apply</button>
-                                        </div>
-                                        <div id="promoFeedback" class="mt-2 fs-13 fw-semibold"></div>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
+                                @endif
+                            </div>
+                        @endif
 
                     </div>
                 </div>
 
                 <!-- MAIN COLUMN: Forms -->
-                <div class="col-lg-6 px-lg-4 center-feed">
+                <div class="col-lg-9 px-lg-4 center-feed">
 
                     <!-- Checkout Progress Stepper -->
                     <div class="checkout-stepper d-flex align-items-center justify-content-between my-3 mb-5">
                         <!-- Step 1: Cart -->
                         <div class="text-center position-relative">
                             <div class="rounded-circle text-white d-flex align-items-center justify-content-center mx-auto mb-2 fw-bold"
-                                style="width: 38px; height: 38px; background-color: #2563eb;">1</div>
+                                style="width: 38px; height: 38px; background-color: var(--color-primary, #1d4ed8);">1</div>
                             <span class="fs-13 fw-semibold text-dark">Cart</span>
                         </div>
 
                         <!-- Connecting Line 1-2 -->
-                        <div class="flex-grow-1 mx-3" style="height: 2px; background-color: #2563eb; margin-top: -5%;">
+                        <div class="flex-grow-1 mx-3" style="height: 2px; background-color: var(--color-primary, #1d4ed8); margin-top: -5%;">
                         </div>
 
                         <!-- Step 2: Checkout -->
                         <div class="text-center position-relative">
                             <div class="rounded-circle text-white d-flex align-items-center justify-content-center mx-auto mb-2 fw-bold"
-                                style="width: 38px; height: 38px; background-color: #2563eb;">2</div>
+                                style="width: 38px; height: 38px; background-color: var(--color-primary, #1d4ed8);">2</div>
                             <span class="fs-13 fw-semibold text-dark">Checkout</span>
                         </div>
 
@@ -596,13 +598,13 @@
                 </div>
 
                 <!-- RIGHT COLUMN: Guarantees & Support Sidebar -->
-                <div class="col-lg-3 border-left1px ps-lg-4">
+                {{-- <div class="col-lg-3 border-left1px ps-lg-4">
                     <div class="right-sidebar sticky-lg-top" style="top: 100px;">
 
                         <!-- Trust Feature 1: Secure Checkout -->
                         <div class="d-flex align-items-start gap-3 mb-4">
                             <div class="rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0"
-                                style="width: 44px; height: 44px; background-color: #eff6ff; color: #2563eb;">
+                                style="width: 44px; height: 44px; background-color: var(--color-primary-bg, #eff6ff); color: var(--color-primary, #1d4ed8);">
                                 <i class="bi bi-shield-check fs-5"></i>
                             </div>
                             <div>
@@ -614,7 +616,7 @@
                         <!-- Trust Feature 2: 30-Day Returns -->
                         <div class="d-flex align-items-start gap-3 mb-4">
                             <div class="rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0"
-                                style="width: 44px; height: 44px; background-color: #eff6ff; color: #2563eb;">
+                                style="width: 44px; height: 44px; background-color: var(--color-primary-bg, #eff6ff); color: var(--color-primary, #1d4ed8);">
                                 <i class="bi bi-arrow-counterclockwise fs-5"></i>
                             </div>
                             <div>
@@ -627,7 +629,7 @@
                         <!-- Trust Feature 3: 1 Year Warranty -->
                         <div class="d-flex align-items-start gap-3 mb-4">
                             <div class="rounded-3 p-2 d-flex align-items-center justify-content-center flex-shrink-0"
-                                style="width: 44px; height: 44px; background-color: #eff6ff; color: #2563eb;">
+                                style="width: 44px; height: 44px; background-color: var(--color-primary-bg, #eff6ff); color: var(--color-primary, #1d4ed8);">
                                 <i class="bi bi-award fs-5"></i>
                             </div>
                             <div>
@@ -658,7 +660,7 @@
                         </div>
 
                     </div>
-                </div>
+                </div> --}}
 
             </div>
         </div>

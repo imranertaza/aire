@@ -52,6 +52,12 @@
                                         <i class="fas" :class="category?.side_menu == 1 ? 'fa-check text-success' : 'fa-times text-danger'"></i>
                                     </span>
                                 </li>
+                                <li class="list-group-item">
+                                    <b>Show in Filter</b>
+                                    <span class="float-right">
+                                        <i class="fas" :class="category?.show_in_filter == 1 ? 'fa-check text-success' : 'fa-times text-danger'"></i>
+                                    </span>
+                                </li>
                             </ul>
                         </div>
                     </div>

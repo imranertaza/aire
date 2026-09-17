@@ -94,7 +94,7 @@
     padding: 30px;
     padding-bottom: 120px;
     /* box-shadow: 0 10px 40px var(--color-dark-shadow-sm); */
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* ── Content Sections ────────────────────────────────────── */
@@ -156,7 +156,7 @@
 }
 
 .cart-count-badge {
-    background-color: #2563eb !important;
+    background-color: var(--color-primary, #2563eb) !important;
 }
 
 .favorite-count-badge,

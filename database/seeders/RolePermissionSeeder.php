@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -19,404 +18,321 @@ class RolePermissionSeeder extends Seeder
         // 🧩 Define roles
         $roles = ['super-admin', 'admin', 'editor', 'viewer'];
 
-        // 🧩 Define permissions (expanded)
+        // 🧩 Comprehensive permissions list
         $permissions = [
-            // Dashboard
+            // 1. Dashboard
             'view-dashboard',
 
-            // User management
+            // 2. User Management
             'view-users',
             'create-users',
             'update-users',
             'delete-users',
             'update-user-role',
+            'update-permissions',
 
-            // Posts CRUD
-            'view-posts',
-            'create-posts',
-            'edit-posts',
-            'delete-posts',
-            'publish-posts',
+            // 3. Orders & Commerce
+            'view-orders',
+            'edit-orders',
+            'delete-orders',
 
-            // Pages CRUD
+            // 4. Customers
+            'view-customers',
+            'create-customers',
+            'edit-customers',
+            'delete-customers',
+
+            // 5. Coupons
+            'view-coupons',
+            'create-coupons',
+            'edit-coupons',
+            'delete-coupons',
+
+            // 6. Offers
+            'view-offers',
+            'create-offers',
+            'edit-offers',
+            'delete-offers',
+
+            // 7. Products
+            'view-products',
+            'create-products',
+            'edit-products',
+            'delete-products',
+
+            // 8. Product Categories
+            'view-product-categories',
+            'create-product-categories',
+            'edit-product-categories',
+            'delete-product-categories',
+
+            // 9. Brands
+            'view-brands',
+            'create-brands',
+            'edit-brands',
+            'delete-brands',
+
+            // 10. Attribute Groups
+            'view-attribute-groups',
+            'create-attribute-groups',
+            'edit-attribute-groups',
+            'delete-attribute-groups',
+
+            // 11. Options / Variants
+            'view-options',
+            'create-options',
+            'edit-options',
+            'delete-options',
+
+            // 12. Color Families
+            'view-color-families',
+            'create-color-families',
+            'edit-color-families',
+            'delete-color-families',
+
+            // 13. Reviews
+            'view-reviews',
+            'create-reviews',
+            'edit-reviews',
+            'delete-reviews',
+
+            // 14. Pages CRUD
             'view-pages',
             'create-pages',
             'edit-pages',
             'delete-pages',
             'publish-pages',
 
-            // Categories CRUD
+            // 15. Blog / Posts CRUD
+            'view-posts',
+            'create-posts',
+            'edit-posts',
+            'delete-posts',
+            'publish-posts',
+
+            // 16. Post Categories CRUD
             'view-categories',
             'create-categories',
             'edit-categories',
             'delete-categories',
 
-            // ✅ News Categories CRUD
-            'view-news-categories',
-            'create-news-categories',
-            'edit-news-categories',
-            'delete-news-categories',
+            // 17. Newsletters & Emails
+            'view-newsletters',
+            'send-emails',
+            'delete-newsletters',
 
+            // 18. Storefront & Theme Builder
+            'theme-builder',
+            'manage-frontend',
 
-            // ✅ Blog Categories CRUD
-            'view-blog-categories',
-            'create-blog-categories',
-            'edit-blog-categories',
-            'delete-blog-categories',
+            // 19. Sliders & Ads
+            'view-sliders',
+            'create-sliders',
+            'edit-sliders',
+            'delete-sliders',
 
-            // ✅ Galleries CRUD
-            'view-galleries',
-            'create-galleries',
-            'edit-galleries',
-            'delete-galleries',
-            'publish-galleries',
+            // 20. Homepage Sections
+            'view-sections',
+            'create-sections',
+            'edit-sections',
+            'delete-sections',
 
-            // ✅ Events CRUD
-            'view-events',
-            'create-events',
-            'edit-events',
-            'delete-events',
-
-            // ✅ Event Categories CRUD
-            'view-events-categories',
-            'create-events-categories',
-            'edit-events-categories',
-            'delete-events-categories',
-
-            // ✅ Notices CRUD
-            'view-notices',
-            'create-notices',
-            'edit-notices',
-            'delete-notices',
-
-            // ✅ Players CRUD
-            // View-players
-            'view-players',
-            // Create-players
-            'create-players',
-            // Edit-players
-            'edit-players',
-            // Delete-players
-            'delete-players',
-
-            // ✅ Results CRUD
-            'view-results',
-            'create-results',
-            'edit-results',
-            'delete-results',
-
-            // ✅ Brands CRUD
-            'view-brands',
-            'create-brands',
-            'edit-brands',
-            'delete-brands',
-
-            // ✅ Product Categories CRUD
-            'view-product-categories',
-            'create-product-categories',
-            'edit-product-categories',
-            'delete-product-categories',
-
-            // ✅ Product Attribute Groups CRUD
-            'view-attribute-groups',
-            'create-attribute-groups',
-            'edit-attribute-groups',
-            'delete-attribute-groups',
-
-            // ✅ Options CRUD
-            'view-options',
-            'create-options',
-            'edit-options',
-            'delete-options',
-
-            // ✅ Products CRUD
-            'view-products',
-            'create-products',
-            'edit-products',
-            'delete-products',
-
-            // ✅ Coupons CRUD
-            'view-coupons',
-            'create-coupons',
-            'edit-coupons',
-            'delete-coupons',
-
-            // ✅ Customers CRUD
-            'view-customers',
-            'create-customers',
-            'edit-customers',
-            'delete-customers',
-
-            // ✅ Orders CRUD
-            'view-orders',
-            'edit-orders',
-            'delete-orders',
-
-            // ✅ Offers CRUD
-            'view-offers',
-            'create-offers',
-            'edit-offers',
-            'delete-offers',
-
-            // ✅ Reviews CRUD
-            'view-reviews',
-            'edit-reviews',
-            'delete-reviews',
-
-            // ✅ Shipping Methods
+            // 21. Shipping Methods
             'view-shipping-methods',
             'create-shipping-methods',
             'edit-shipping-methods',
             'delete-shipping-methods',
 
-            // Geo Zones
+            // 22. Geo Zones
             'view-geo-zones',
             'create-geo-zones',
             'edit-geo-zones',
             'delete-geo-zones',
 
-            // ✅ Payment Methods
+            // 23. Payment Methods
             'view-payment-methods',
+            'create-payment-methods',
             'edit-payment-methods',
+            'delete-payment-methods',
 
-            // Modules
+            // 24. System Settings & Menus
+            'view-settings',
+            'update-settings',
+            'manage-menus',
+
+            // 25. Modules
             'view-modules',
             'edit-modules',
 
-            // ✅ Custom Modules
-            'view-newsletters',
-            'send-emails',
-            'view-fund-requests',
-            'view-color-families',
-
-
-            // ✅ News
-            'view-news',
-            'create-news',
-            'edit-news',
-            'delete-news',
-            'publish-news',
-
-            // ✅ Blog
+            // 26. Additional legacy / pluggable items
             'view-blog',
             'create-blog',
             'edit-blog',
             'delete-blog',
             'publish-blog',
-
-            // Settings
-            'view-settings',
-            'update-settings',
-
-            // Section
-            'manage-frontend',
+            'view-blog-categories',
+            'create-blog-categories',
+            'edit-blog-categories',
+            'delete-blog-categories',
+            'view-news',
+            'create-news',
+            'edit-news',
+            'delete-news',
+            'publish-news',
+            'view-news-categories',
+            'create-news-categories',
+            'edit-news-categories',
+            'delete-news-categories',
+            'view-galleries',
+            'create-galleries',
+            'edit-galleries',
+            'delete-galleries',
+            'publish-galleries',
+            'view-events',
+            'create-events',
+            'edit-events',
+            'delete-events',
+            'view-events-categories',
+            'create-events-categories',
+            'edit-events-categories',
+            'delete-events-categories',
+            'view-notices',
+            'create-notices',
+            'edit-notices',
+            'delete-notices',
+            'view-players',
+            'create-players',
+            'edit-players',
+            'delete-players',
+            'view-results',
+            'create-results',
+            'edit-results',
+            'delete-results',
             'manage-committee-members',
-
-            'manage-menus',
-
-            // Permissions management
-            'update-permissions',
+            'view-fund-requests',
         ];
 
-        // ✅ Create permissions
+        // ✅ Create all permissions in database
         foreach ($permissions as $perm) {
             Permission::firstOrCreate(['name' => $perm, 'guard_name' => $guard]);
         }
 
-        // ✅ Create roles and assign permissions
+        // ✅ Assign permissions to roles
         foreach ($roles as $roleName) {
             $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => $guard]);
 
             switch ($roleName) {
                 case 'super-admin':
-                    // Full access
+                    // Full access to every permission
                     $role->syncPermissions(Permission::where('guard_name', $guard)->pluck('name'));
                     break;
 
                 case 'admin':
+                    // Full management rights
                     $role->syncPermissions([
                         'view-dashboard',
 
-                        // User management
+                        // Users
                         'view-users',
                         'create-users',
                         'update-users',
                         'delete-users',
                         'update-user-role',
 
-                        // Posts
-                        'view-posts',
-                        'create-posts',
-                        'edit-posts',
-                        'delete-posts',
-                        'publish-posts',
+                        // Commerce
+                        'view-orders',
+                        'edit-orders',
+                        'delete-orders',
+                        'view-customers',
+                        'create-customers',
+                        'edit-customers',
+                        'delete-customers',
+                        'view-coupons',
+                        'create-coupons',
+                        'edit-coupons',
+                        'delete-coupons',
+                        'view-offers',
+                        'create-offers',
+                        'edit-offers',
+                        'delete-offers',
+                        'view-shipping-methods',
+                        'create-shipping-methods',
+                        'edit-shipping-methods',
+                        'delete-shipping-methods',
+                        'view-payment-methods',
+                        'create-payment-methods',
+                        'edit-payment-methods',
 
-                        // Pages
+                        // Catalog
+                        'view-products',
+                        'create-products',
+                        'edit-products',
+                        'delete-products',
+                        'view-product-categories',
+                        'create-product-categories',
+                        'edit-product-categories',
+                        'delete-product-categories',
+                        'view-brands',
+                        'create-brands',
+                        'edit-brands',
+                        'delete-brands',
+                        'view-attribute-groups',
+                        'create-attribute-groups',
+                        'edit-attribute-groups',
+                        'delete-attribute-groups',
+                        'view-options',
+                        'create-options',
+                        'edit-options',
+                        'delete-options',
+                        'view-color-families',
+                        'create-color-families',
+                        'edit-color-families',
+                        'delete-color-families',
+                        'view-reviews',
+                        'create-reviews',
+                        'edit-reviews',
+                        'delete-reviews',
+
+                        // Content
                         'view-pages',
                         'create-pages',
                         'edit-pages',
                         'delete-pages',
                         'publish-pages',
-
-                        // Post Categories
+                        'view-posts',
+                        'create-posts',
+                        'edit-posts',
+                        'delete-posts',
+                        'publish-posts',
                         'view-categories',
                         'create-categories',
                         'edit-categories',
                         'delete-categories',
+                        'view-newsletters',
+                        'send-emails',
 
-                        // ✅ News Categories CRUD
-                        'view-news-categories',
-                        'create-news-categories',
-                        'edit-news-categories',
-                        'delete-news-categories',
+                        // Storefront & Design
+                        'theme-builder',
+                        'manage-frontend',
+                        'view-sliders',
+                        'create-sliders',
+                        'edit-sliders',
+                        'delete-sliders',
+                        'view-sections',
+                        'create-sections',
+                        'edit-sections',
+                        'delete-sections',
 
-                        // ✅ News Categories CRUD
-                        'view-blog-categories',
-                        'create-blog-categories',
-                        'edit-blog-categories',
-                        'delete-blog-categories',
-
-                        // ✅ Results CRUD
-                        'view-results',
-                        'create-results',
-                        'edit-results',
-                        'delete-results',
-
-                        // ✅ Brands CRUD
-                        'view-brands',
-                        'create-brands',
-                        'edit-brands',
-                        'delete-brands',
-
-                        // ✅ Product Categories CRUD
-                        'view-product-categories',
-                        'create-product-categories',
-                        'edit-product-categories',
-                        'delete-product-categories',
-
-                        // ✅ Product Attribute Groups CRUD
-                        'view-attribute-groups',
-                        'create-attribute-groups',
-                        'edit-attribute-groups',
-                        'delete-attribute-groups',
-
-                        // ✅ Options CRUD
-                        'view-options',
-                        'create-options',
-                        'edit-options',
-                        'delete-options',
-
-                        // ✅ Products CRUD
-                        'view-products',
-                        'create-products',
-                        'edit-products',
-                        'delete-products',
-
-                        // ✅ Coupons CRUD
-                        'view-coupons',
-                        'create-coupons',
-                        'edit-coupons',
-                        'delete-coupons',
-
-                        // ✅ Customers CRUD
-                        'view-customers',
-                        'create-customers',
-                        'edit-customers',
-                        'delete-customers',
-
-                        // ✅ Orders CRUD
-                        'view-orders',
-                        'edit-orders',
-                        'delete-orders',
-
-                        // ✅ Offers CRUD
-                        'view-offers',
-                        'create-offers',
-                        'edit-offers',
-                        'delete-offers',
-
-                        // ✅ Reviews CRUD
-                        'view-reviews',
-                        'edit-reviews',
-                        'delete-reviews',
-
-                        // ✅ Shipping Methods
-                        'view-shipping-methods',
-                        'create-shipping-methods',
-                        'edit-shipping-methods',
-                        'delete-shipping-methods',
-
-                        // Geo Zones
+                        // System Settings
+                        'view-settings',
+                        'update-settings',
+                        'manage-menus',
                         'view-geo-zones',
                         'create-geo-zones',
                         'edit-geo-zones',
                         'delete-geo-zones',
-
-                        // ✅ Payment Methods
-                        'view-payment-methods',
-                        'edit-payment-methods',
-                        
-                        // ✅ Custom Modules
-                        'view-newsletters',
-                        'send-emails',
-                        'view-fund-requests',
-                        'view-color-families',
-
-                        // ✅ Galleries CRUD
-                        'view-galleries',
-                        'create-galleries',
-                        'edit-galleries',
-                        'delete-galleries',
-                        'publish-galleries',
-
-                        // ✅ Events CRUD
-                        'view-events',
-                        'create-events',
-                        'edit-events',
-                        'delete-events',
-
-                        // ✅ Event Categories CRUD
-                        'view-events-categories',
-                        'create-events-categories',
-                        'edit-events-categories',
-                        'delete-events-categories',
-
-                        // ✅ Notices CRUD
-                        'view-notices',
-                        'create-notices',
-                        'edit-notices',
-                        'delete-notices',
-
-                        // ✅ News
-                        'view-news',
-                        'create-news',
-                        'edit-news',
-                        'delete-news',
-                        'publish-news',
-
-                        // ✅ News
-                        'view-blog',
-                        'create-blog',
-                        'edit-blog',
-                        'delete-blog',
-                        'publish-blog',
-
-
-                        'manage-frontend',
-                        'manage-committee-members',
-
-                        // Players CRUD
-                        'view-players',
-                        'create-players',
-                        'edit-players',
-                        'delete-players',
-
-                        // Settings
-                        'view-settings',
-                        'update-settings',
-                        'update-permissions',
-                        'manage-menus',
-
+                        'view-modules',
+                        'edit-modules',
                     ]);
                     break;
 
@@ -424,193 +340,89 @@ class RolePermissionSeeder extends Seeder
                     $role->syncPermissions([
                         'view-dashboard',
 
-                        // Posts
-                        'view-posts',
-                        'create-posts',
-                        'edit-posts',
-                        'publish-posts',
+                        // Commerce
+                        'view-orders',
+                        'edit-orders',
+                        'view-customers',
+                        'create-customers',
+                        'edit-customers',
+                        'view-coupons',
+                        'create-coupons',
+                        'edit-coupons',
+                        'view-offers',
+                        'create-offers',
+                        'edit-offers',
+                        'view-shipping-methods',
+                        'view-payment-methods',
 
-                        // Pages
+                        // Catalog
+                        'view-products',
+                        'create-products',
+                        'edit-products',
+                        'view-product-categories',
+                        'create-product-categories',
+                        'edit-product-categories',
+                        'view-brands',
+                        'create-brands',
+                        'edit-brands',
+                        'view-attribute-groups',
+                        'create-attribute-groups',
+                        'edit-attribute-groups',
+                        'view-options',
+                        'create-options',
+                        'edit-options',
+                        'view-color-families',
+                        'create-color-families',
+                        'edit-color-families',
+                        'view-reviews',
+                        'edit-reviews',
+
+                        // Content
                         'view-pages',
                         'create-pages',
                         'edit-pages',
                         'publish-pages',
-
-                        // Categories
+                        'view-posts',
+                        'create-posts',
+                        'edit-posts',
+                        'publish-posts',
                         'view-categories',
                         'create-categories',
                         'edit-categories',
-
-                        // ✅ News Categories (editor can manage but not delete)
-                        'view-news-categories',
-                        'create-news-categories',
-                        'edit-news-categories',
-
-                        // ✅ News Categories (editor can manage but not delete)
-                        'view-blog-categories',
-                        'create-blog-categories',
-                        'edit-blog-categories',
-
-                        // ✅ Galleries (editor can manage but not delete)
-                        'view-galleries',
-                        'create-galleries',
-                        'edit-galleries',
-                        'publish-galleries',
-
-                        // ✅ Events CRUD
-                        'view-events',
-                        'create-events',
-                        'edit-events',
-
-                        // ✅ Event Categories CRUD
-                        'view-events-categories',
-                        'create-events-categories',
-                        'edit-events-categories',
-
-                        // ✅ Notices CRUD
-                        'view-notices',
-                        'create-notices',
-                        'edit-notices',
-
-                        // ✅ News
-                        'view-news',
-                        'create-news',
-                        'edit-news',
-                        'delete-news',
-
-                        // ✅ News
-                        'view-blog',
-                        'create-blog',
-                        'edit-blog',
-                        'delete-blog',
-
-                        // ✅ Results CRUD
-                        'view-results',
-                        'create-results',
-                        'edit-results',
-
-                        // ✅ Brands CRUD
-                        'view-brands',
-                        'create-brands',
-                        'edit-brands',
-
-                        // ✅ Product Categories CRUD
-                        'view-product-categories',
-                        'create-product-categories',
-                        'edit-product-categories',
-
-                        // ✅ Product Attribute Groups CRUD
-                        'view-attribute-groups',
-                        'create-attribute-groups',
-                        'edit-attribute-groups',
-
-                        // ✅ Options CRUD
-                        'view-options',
-                        'create-options',
-                        'edit-options',
-
-                        // ✅ Products CRUD
-                        'view-products',
-                        'create-products',
-                        'edit-products',
-
-                        // ✅ Coupons CRUD
-                        'view-coupons',
-                        'create-coupons',
-                        'edit-coupons',
-
-                        // ✅ Customers CRUD
-                        'view-customers',
-                        'create-customers',
-                        'edit-customers',
-
-                        // ✅ Orders CRUD
-                        'view-orders',
-                        'edit-orders',
-
-                        // ✅ Offers CRUD
-                        'view-offers',
-                        'create-offers',
-                        'edit-offers',
-
-                        // ✅ Reviews CRUD
-                        'view-reviews',
-                        'edit-reviews',
-
-                        // ✅ Shipping Methods
-                        'view-shipping-methods',
-                        'edit-shipping-methods',
-
-                        // ✅ Payment Methods
-                        'view-payment-methods',
-                        'edit-payment-methods',
-
-                        // ✅ Modules
-                        'view-modules',
-                        'edit-modules',
-
-                        // ✅ Custom Modules
                         'view-newsletters',
                         'send-emails',
-                        'view-fund-requests',
-                        'view-color-families',
+
+                        // Storefront & Design
+                        'view-sliders',
+                        'create-sliders',
+                        'edit-sliders',
+                        'view-sections',
+                        'create-sections',
+                        'edit-sections',
                     ]);
                     break;
 
                 case 'viewer':
                     $role->syncPermissions([
                         'view-dashboard',
-
-                        'view-users',
-                        'view-posts',
-                        'view-pages',
-                        'view-categories',
-                        'view-settings',
-
-                        'view-product-categories',
-                        'view-attribute-groups',
-                        'view-options',
-                        'view-products',
+                        'view-orders',
+                        'view-customers',
                         'view-coupons',
                         'view-offers',
-                        'view-reviews',
-                        'view-customers',
-                        'view-orders',
-                        'view-shipping-methods',
-
-                        'view-news-categories',
-                        'view-blog-categories',
-
-                        'view-galleries',
-
-                        // ✅ Events
-                        'view-events',
-                        'view-events-categories',
-
-                        // ✅ Notices CRUD
-                        'view-notices',
-
-                        // ✅ News
-                        'view-news',
-                        // ✅ Blog
-                        'view-blog',
-
-                        // ✅ Results CRUD
-                        'view-results',
-
-                        // ✅ Brands CRUD
-                        'view-brands',
-
-                        // ✅ Product Categories CRUD
+                        'view-products',
                         'view-product-categories',
-
-                        // ✅ Product Attribute Groups CRUD
+                        'view-brands',
                         'view-attribute-groups',
-
-                        // ✅ Custom Modules
-                        'view-newsletters',
-                        'view-fund-requests',
+                        'view-options',
                         'view-color-families',
+                        'view-reviews',
+                        'view-pages',
+                        'view-posts',
+                        'view-categories',
+                        'view-newsletters',
+                        'view-sliders',
+                        'view-sections',
+                        'view-settings',
                     ]);
                     break;
             }

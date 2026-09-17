@@ -83,9 +83,18 @@
                                         <label>Upload Slide Image</label>
                                         <Vue3Dropzone v-model="fileUpload" v-model:previews="previews" mode="edit"
                                             :allowSelectOnPreview="true" :maxFiles="1" />
-                                        <small class="text-muted d-block mt-1">
-                                            Recommended: <strong>400 × 260px</strong> or <strong>600 × 400px</strong>
-                                        </small>
+                                        
+                                        <div class="mt-2 p-2 bg-light border rounded small">
+                                            <div class="font-weight-bold text-dark mb-1">
+                                                <i class="fas fa-info-circle text-primary mr-1"></i> Recommended Dimensions by Placement:
+                                            </div>
+                                            <div :class="form.keys?.includes('banner_section') ? 'text-primary font-weight-bold' : 'text-muted'" class="mb-1">
+                                                • <strong>Homepage Hero Slider:</strong> 1400 × 520px or 1920 × 600px (Wide panoramic banner)
+                                            </div>
+                                            <div :class="form.keys?.some(k => k !== 'banner_section') ? 'text-dark' : 'text-muted'">
+                                                • <strong>Sidebar & Card Ads:</strong> 600 × 400px or 400 × 260px (Landscape ~4:3)
+                                            </div>
+                                        </div>
 
                                         <div v-if="previews && previews.length && previews[0]" class="mt-2 text-center">
                                             <img :src="previews[0]" alt="Preview" class="img-thumbnail"
@@ -130,6 +139,7 @@ const fileUpload = ref(null);
 const previews = ref([]);
 
 const placementOptions = [
+    { value: 'banner_section', label: 'Homepage Hero Slider' },
     { value: 'category_sidebar', label: 'Category Sidebar Ads' },
     { value: 'featured_ad', label: 'Featured Ad Card' },
     { value: 'about_us', label: 'About Us Ads' },

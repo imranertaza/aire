@@ -115,8 +115,8 @@
                         $firstTopNews = $topNews->first();
                     @endphp
                     <div class="top-news-card highlight card-smooth">
-                        <img src="{{ getImageCacheUrl($firstTopNews->f_image, 548, 340, 'webp') }}" alt=""
-                            class="card-img-top" alt="news image">
+                        <img src="{{ getImageCacheUrl($firstTopNews->f_image, 548, 340, 'webp') }}"
+                            class="card-img-top" alt="news image" loading="lazy" decoding="async">
                         <a href="{{ route('news-and-updates-details', $firstTopNews->slug) }}" class="">
                             <div class="card-body">
                                 <h5 class="title-four mb-2 p-0">
@@ -137,8 +137,8 @@
                             @endif
                             <div class="">
                                 <div class="top-news-card hover-fill-horizontal">
-                                    <img src="{{ getImageCacheUrl($news->f_image, 262, 145) }}" class="card-img-top"
-                                        alt="news image">
+                                    <img src="{{ getImageCacheUrl($news->f_image, 262, 145, 'webp') }}" class="card-img-top"
+                                        alt="news image" loading="lazy" decoding="async">
                                     <a href="{{ route('news-and-updates-details', $news->slug) }}" class="">
                                         <div class="card-body">
                                             <h5 class="title-four p-0">
@@ -173,8 +173,8 @@
                                 <div class="swiper-slide">
                                     <a href="{{ route('news-and-updates-details', $news->slug) }}">
                                         <div class="gaming-news-card card-smooth hover-fill-horizontal fill-white-muted">
-                                            <img src="{{ getImageCacheUrl($news->f_image, 362, 320) }}"
-                                                class="card-img-top" alt="news image">
+                                            <img src="{{ getImageCacheUrl($news->f_image, 362, 320, 'webp') }}"
+                                                class="card-img-top" alt="news image" loading="lazy" decoding="async">
                                             <div class="card-body">
                                                 <h5 class="title-four min-h-38">
                                                     {{ truncateText($news->news_title, 45) }}
@@ -237,8 +237,8 @@
                             <div class="swiper-slide">
                                 <a href="{{ route('event-details', $item->slug) }}">
                                     <div class="gaming-news-card running-event-card card-smooth ">
-                                        <img src="{{ getImageCacheUrl($item->featured_image, 262, 230) }}"
-                                            class="card-img-top" alt="news image">
+                                        <img src="{{ getImageCacheUrl($item->featured_image, 262, 230, 'webp') }}"
+                                            class="card-img-top" alt="news image" loading="lazy" decoding="async">
                                         <div class="card-body">
                                             <h5 class="title-four min-h-38">
                                                 {{ truncateText($item->title, 40) }}
@@ -298,8 +298,8 @@
                                     <div class="upcoming-event-card card-smooth">
                                         <a href="{{ route('event-details', $item->slug) }}"
                                             aria-label="Upcoming Event 1">
-                                            <img src="{{ getImageCacheUrl($item->featured_image, 252, 515) }}"
-                                                class="card-img-top img-thumbnail" alt="{{ $item->title }}">
+                                            <img src="{{ getImageCacheUrl($item->featured_image, 252, 515, 'webp') }}"
+                                                class="card-img-top img-thumbnail" alt="{{ $item->title }}" loading="lazy" decoding="async">
                                         </a>
                                     </div>
                                 </div>
@@ -350,8 +350,8 @@
                 <div class="row row-cols-md-2 align-items-center">
                     <div class="text-center mb-md-0 mb-4">
                         <img class="img-fluid rounded-2"
-                            src="{{ getImageCacheUrl($about_mission_vision->data['image'], 476, 375) }}"
-                            alt="Mission and Vision">
+                            src="{{ getImageCacheUrl($about_mission_vision->data['image'], 476, 375, 'webp') }}"
+                            alt="Mission and Vision" loading="lazy" decoding="async">
                     </div>
                     <div class="">
                         <h3 class="title-two mb-3">{{ $about_mission_vision->data['title'] }}</h3>
@@ -379,8 +379,8 @@
                         @forelse ($blogs as $blog)
                             <div class="swiper-slide">
                                 <div class="gaming-news-card latest-blog-card card-smooth">
-                                    <img src="{{ getImageCacheUrl($blog->f_image, 357, 225) }}" class="card-img-top"
-                                        alt="news image">
+                                    <img src="{{ getImageCacheUrl($blog->f_image, 357, 225, 'webp') }}" class="card-img-top"
+                                        alt="news image" loading="lazy" decoding="async">
                                     <div class="card-body">
                                         <p class="content-text d-flex align-items-center"><svg width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none"
@@ -436,7 +436,14 @@
         ↑
     </button>
     @push('styles')
+        <link rel="stylesheet" href="{{ theme_asset('css/home.css') }}">
         <style>
+            /* Override font to Inter for best-selling section */
+            .home-best-selling-section,
+            .home-best-selling-section * {
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            }
+
             .blog-title {
                 height: 42.2px;
                 overflow: hidden;

@@ -28,6 +28,25 @@ class CheckoutController extends Controller
         }
         $cart = session()->get('cart', []);
 
+        // Refresh cart items with latest prices/specials
+        $cartUpdated = false;
+        foreach ($cart as $key => &$item) {
+            $product = Product::with('special')->find($item['id']);
+            if ($product) {
+                $effectivePrice = $product->final_price;
+                if (!isset($item['price']) || (float)$item['price'] != $effectivePrice) {
+                    $item['price'] = $effectivePrice;
+                    $item['original_price'] = (float) $product->price;
+                    $item['special_price'] = $product->special_price;
+                    $cartUpdated = true;
+                }
+            }
+        }
+        unset($item);
+        if ($cartUpdated) {
+            session()->put('cart', $cart);
+        }
+
         $zoneRateService = app(\App\Services\Shipping\ZoneRateShippingService::class);
         $zoneService     = app(\App\Services\Shipping\ZoneShippingService::class);
         $flatService     = app(\App\Services\Shipping\FlatShippingService::class);
@@ -111,6 +130,19 @@ class CheckoutController extends Controller
         if (empty($cart)) {
             return redirect()->route('cart')->withErrors(['cart' => 'Your cart is empty.']);
         }
+
+        // Re-verify cart items with current prices/specials
+        foreach ($cart as $key => &$item) {
+            $product = Product::with('special')->find($item['id']);
+            if ($product) {
+                $effectivePrice = $product->final_price;
+                $item['price'] = $effectivePrice;
+                $item['original_price'] = (float) $product->price;
+                $item['special_price'] = $product->special_price;
+            }
+        }
+        unset($item);
+        session()->put('cart', $cart);
 
         // Account creation if requested and user is guest
         if ($request->filled('new_acc_create') && !Auth::guard('customer')->check()) {

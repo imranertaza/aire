@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* ============================================================
    AIRE INDUSTRIES — DESIGN TOKENS (CSS CUSTOM PROPERTIES)
@@ -6,8 +6,8 @@
    ============================================================ */
 :root {
     /* ── Brand / Primary ─────────────────────────────────── */
-    --color-primary: #1d4ed8;
-    --color-primary-hover: #1e40af;
+    --color-primary: #0095DA;
+    --color-primary-hover: #0876a8;
     --color-primary-light: #2563eb;
     --color-primary-bg: #eff6ff;
     /* active bg */
@@ -65,9 +65,12 @@
     --color-primary-shadow-md: rgba(29, 78, 216, 0.30);
     --color-primary-glow: rgba(37, 99, 235, 0.40);
 
-    /* ── Legacy aliases (kept for backwards compat) ─────── */
+    /* ── Legacy & cross-stylesheet aliases ────────────────── */
     --primary-color: var(--color-primary);
     --primary-hover: var(--color-primary-hover);
+    --primary-blue: var(--color-primary);
+    --primary-hover-blue: var(--color-primary-hover);
+    --accent-blue: var(--color-primary-light);
     --bg-color: var(--color-bg);
     --text-dark: var(--color-dark);
     --text-muted: var(--color-muted);
@@ -84,8 +87,10 @@
 }
 
 /* ── Smooth Scroll ───────────────────────────────────────── */
-html {
-    scroll-behavior: smooth !important;
+html,
+html.lenis,
+html.lenis-smooth {
+    scroll-behavior: auto !important;
 }
 
 /* Lenis Smooth Scroll */
@@ -259,7 +264,11 @@ small,
 }
 
 .offcanvas {
-    z-index: 9999;
+    z-index: 1045;
+}
+
+.offcanvas-backdrop {
+    z-index: 1040;
 }
 
 @media (max-width: 1199.98px) {
@@ -341,10 +350,50 @@ small,
 }
 
 .cart-count-badge {
-    background-color: #2563eb !important;
+    background-color: var(--color-primary-light, #2563eb) !important;
 }
 
 .favorite-count-badge,
 .compare-count-badge {
     background-color: #ef4444 !important;
+}
+
+/* ── Bootstrap Primary Overrides (Using Brand Tokens) ────── */
+.btn-primary {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: #ffffff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--color-primary-hover) !important;
+    border-color: var(--color-primary-hover) !important;
+    color: #ffffff !important;
+}
+
+.btn-outline-primary {
+    color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus,
+.btn-outline-primary:active {
+    background-color: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: #ffffff !important;
+}
+
+.text-primary {
+    color: var(--color-primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--color-primary) !important;
+}
+
+.border-primary {
+    border-color: var(--color-primary) !important;
 }

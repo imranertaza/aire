@@ -378,10 +378,10 @@ $(document).ready(function () {
         }
     });
 
-    // Restart Protocol Button Click
-    $(document).on('click', '#btnRestartProtocol', function () {
-        currentStep = 1;
-        renderWizard();
+    // Restart Protocol Button Click (Reload site)
+    $(document).on('click', '#btnRestartProtocol', function (e) {
+        e.preventDefault();
+        window.location.reload();
     });
 
     // Sidebar Step Item Click (Allow Jumping Back to Completed Steps)
@@ -411,6 +411,21 @@ $(document).ready(function () {
 
         const stackedWrapper = document.getElementById('whyChooseStackedWrapper') || document.getElementById('whyChooseWrapper');
         if (stackedWrapper && window.innerWidth >= 992) {
+            ScrollTrigger.getAll().forEach(st => {
+                if (st.vars && st.vars.trigger === stackedWrapper || st.trigger === stackedWrapper) {
+                    st.kill(true);
+                }
+            });
+
+            const pinSpacer = stackedWrapper.closest('.pin-spacer');
+            if (pinSpacer && pinSpacer.parentElement) {
+                pinSpacer.parentElement.insertBefore(stackedWrapper, pinSpacer);
+                pinSpacer.remove();
+            }
+
+            gsap.set(stackedWrapper, { clearProps: "all" });
+            gsap.set("#whyChooseStackedWrapper .stacked-card, #whyChooseWrapper .stacked-card", { clearProps: "transform" });
+
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: stackedWrapper,
@@ -418,13 +433,14 @@ $(document).ready(function () {
                     end: "+=1200",
                     scrub: 1,
                     pin: true,
-                    anticipatePin: 1
+                    anticipatePin: 1,
+                    invalidateOnRefresh: true
                 }
             });
 
-            tl.to("#whyChooseStackedWrapper .card-layer-2", { y: "0%", ease: "power1.out", duration: 1 })
-                .to("#whyChooseStackedWrapper .card-layer-3", { y: "0%", ease: "power1.out", duration: 1 })
-                .to("#whyChooseStackedWrapper .card-layer-4", { y: "0%", ease: "power1.out", duration: 1 });
+            tl.fromTo("#whyChooseStackedWrapper .card-layer-2", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 })
+              .fromTo("#whyChooseStackedWrapper .card-layer-3", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 })
+              .fromTo("#whyChooseStackedWrapper .card-layer-4", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 });
         }
     }
 
@@ -446,62 +462,115 @@ $(document).ready(function () {
     }
 
     // Living Hero Product Flight Animation on Scroll
-    const livingHeroSection = document.querySelector('#living-hero-section');
-    const animatedProductImg = document.querySelector('#living-hero-animated-product');
-    const productTargetBox = document.querySelector('#living-hero-product-target');
-    const livingHeroImgBox = document.querySelector('#living-hero-img-box');
+    function initLivingHeroScrollTrigger() {
+        const livingHeroSection = document.querySelector('#living-hero-section');
+        const animatedProductImg = document.querySelector('#living-hero-animated-product');
+        const productTargetBox = document.querySelector('#living-hero-product-target');
+        const livingHeroImgBox = document.querySelector('#living-hero-img-box');
 
-    if (livingHeroSection && animatedProductImg && productTargetBox && livingHeroImgBox) {
-        if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-            gsap.registerPlugin(ScrollTrigger);
+        if (!livingHeroSection || !animatedProductImg || !productTargetBox || !livingHeroImgBox) return;
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-            function setupProductFlight() {
-                const startCenter = livingHeroImgBox.getBoundingClientRect().top + (livingHeroImgBox.getBoundingClientRect().height / 2);
-                const targetCenter = productTargetBox.getBoundingClientRect().top + (productTargetBox.getBoundingClientRect().height / 2);
-                const yDistance = targetCenter - startCenter;
+        gsap.registerPlugin(ScrollTrigger);
 
-                gsap.to(animatedProductImg, {
-                    y: yDistance,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: livingHeroSection,
-                        start: "top 35%",
-                        end: "bottom 85%",
-                        scrub: 0.5,
-                        invalidateOnRefresh: true
-                    }
-                });
+        // 1. Clean up previous triggers on living hero section to avoid duplicates
+        ScrollTrigger.getAll().forEach(st => {
+            if (st.vars && (st.vars.trigger === livingHeroSection || st.vars.trigger === livingHeroImgBox || st.trigger === livingHeroSection || st.trigger === livingHeroImgBox)) {
+                st.kill(true);
             }
+        });
 
-            setupProductFlight();
-            window.addEventListener('resize', setupProductFlight);
+        // 2. Clear stale transforms & reset base centering
+        gsap.set(animatedProductImg, { clearProps: "transform" });
+        gsap.set(animatedProductImg, {
+            xPercent: -50,
+            yPercent: -50,
+            x: 0,
+            y: 0
+        });
+
+        // Start scroll animation only when the image is centered on the screen
+        gsap.fromTo(animatedProductImg,
+            {
+                y: 0
+            },
+            {
+                y: () => {
+                    const startCenter = livingHeroImgBox.offsetTop + (livingHeroImgBox.offsetHeight / 2);
+                    const targetCenter = productTargetBox.offsetTop + (productTargetBox.offsetHeight / 2);
+                    return targetCenter - startCenter;
+                },
+                ease: "none",
+                scrollTrigger: {
+                    trigger: livingHeroImgBox,
+                    start: "center center",
+                    endTrigger: productTargetBox,
+                    end: "center center",
+                    scrub: 0.6,
+                    invalidateOnRefresh: true
+                }
+            }
+        );
+
+        // Refresh trigger coordinates when images finish loading
+        const bgImg = livingHeroImgBox.querySelector('.living-hero__bg-img');
+        if (bgImg && !bgImg.complete) {
+            bgImg.addEventListener('load', function() {
+                ScrollTrigger.refresh();
+            }, { once: true });
+        }
+        if (!animatedProductImg.complete) {
+            animatedProductImg.addEventListener('load', function() {
+                ScrollTrigger.refresh();
+            }, { once: true });
         }
     }
+
+    // Expose globally for AJAX / page re-renders
+    window.initLivingHeroScrollTrigger = initLivingHeroScrollTrigger;
+    initLivingHeroScrollTrigger();
 
     // Initial Render
     renderWizard();
 });
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    const testimonialsSwiper = new Swiper('.testimonials-slider', {
+function initTestimonialsSwiper() {
+    const sliderContainer = document.querySelector('.testimonials-slider');
+    if (!sliderContainer || typeof Swiper === 'undefined') return;
+
+    if (sliderContainer.swiper) {
+        sliderContainer.swiper.update();
+        return;
+    }
+
+    const slideCount = sliderContainer.querySelectorAll('.swiper-slide').length;
+    if (slideCount === 0) return;
+
+    new Swiper(sliderContainer, {
         slidesPerView: 1,
         spaceBetween: 24,
-        loop: true,
-        autoplay: {
+        loop: slideCount > 2,
+        autoplay: slideCount > 1 ? {
             delay: 5000,
             disableOnInteraction: false,
-        },
+            pauseOnMouseEnter: true,
+        } : false,
         pagination: {
-            el: '.swiper-pagination',
+            el: sliderContainer.querySelector('.swiper-pagination') || '.swiper-pagination',
             clickable: true,
         },
         breakpoints: {
             // When window width is >= 768px
             768: {
-                slidesPerView: 2,
+                slidesPerView: slideCount >= 2 ? 2 : 1,
                 spaceBetween: 30,
             }
         }
     });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initTestimonialsSwiper();
 });
+window.initTestimonialsSwiper = initTestimonialsSwiper;

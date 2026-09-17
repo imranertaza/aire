@@ -26,12 +26,25 @@ class CustomerAuthController extends Controller
      */
     public function postSignin(Request $request)
     {
-        $credentials = $request->validate([
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'email' => 'required|email|max:96',
             'password' => 'required|string',
         ]);
 
-        if (Auth::guard('customer')->attempt($credentials)) {
+        if ($validator->fails()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $credentials = $validator->validated();
+
+        if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember', false))) {
             $request->session()->regenerate();
             
             $customer = Auth::guard('customer')->user();
@@ -40,7 +53,27 @@ class CustomerAuthController extends Controller
             session()->put('customer_email', $customer->email);
             session()->put('customer_pic', $customer->pic);
 
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Logged in successfully!',
+                    'redirect' => $request->input('redirect') ?: url()->previous() ?: route('home'),
+                    'user' => [
+                        'name' => session()->get('customer_name'),
+                        'email' => session()->get('customer_email'),
+                    ],
+                ]);
+            }
+
             return redirect()->route('home')->with('success', 'Logged in successfully!');
+        }
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Invalid email or password.',
+                'errors' => ['email' => ['Invalid email or password.']],
+            ], 422);
         }
 
         return back()->withErrors(['email' => 'Invalid email or password.'])->withInput();
@@ -59,11 +92,24 @@ class CustomerAuthController extends Controller
      */
     public function postSignup(Request $request)
     {
-        $validated = $request->validate([
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
             'name' => 'required|string|max:64',
             'email' => 'required|email|max:96|unique:customers,email',
             'password' => 'required|string|min:6',
         ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $validated = $validator->validated();
 
         $parts = explode(' ', trim($validated['name']), 2);
         $firstname = $parts[0];
@@ -87,6 +133,18 @@ class CustomerAuthController extends Controller
         session()->put('customer_name', $customer->firstname . ' ' . $customer->lastname);
         session()->put('customer_email', $customer->email);
         session()->put('customer_pic', $customer->pic);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Registered and logged in successfully!',
+                'redirect' => $request->input('redirect') ?: url()->previous() ?: route('home'),
+                'user' => [
+                    'name' => session()->get('customer_name'),
+                    'email' => session()->get('customer_email'),
+                ],
+            ]);
+        }
 
         return redirect()->route('home')->with('success', 'Registered and logged in successfully!');
     }

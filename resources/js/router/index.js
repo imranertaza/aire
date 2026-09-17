@@ -547,9 +547,25 @@ const routes = [{
                 },
             },
             {
+                path: "home-sections",
+                name: "HomeSections",
+                component: () => import('@/pages/admin/Section/HomeSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
                 path: "manage-sections",
                 name: "Section",
                 component: () => import('@/pages/admin/Section/Section.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "client-testimonials",
+                name: "TestimonialsSection",
+                component: () => import('@/pages/admin/Section/TestimonialsSection.vue'),
                 meta: {
                     permission: "manage-frontend"
                 },
@@ -700,15 +716,6 @@ const routes = [{
                 },
             },
             {
-                path: "customer-point/:id",
-                name: "CustomerPointHistory",
-                component: () => import('@/pages/admin/Catalog/Customer/CustomerPointHistory.vue'),
-                props: true,
-                meta: {
-                    permission: "view-customers"
-                },
-            },
-            {
                 path: "manage-orders",
                 name: "Orders",
                 component: () => import('@/pages/admin/Catalog/Order/Orders.vue'),
@@ -746,7 +753,7 @@ const routes = [{
                 path: 'newsletters',
                 name: 'NewsletterList',
                 component: () => import('@/pages/admin/Newsletter/NewsletterList.vue'),
-                meta: { title: 'Newsletters' }
+                meta: { permission: 'view-newsletters', title: 'Newsletters' }
             },
             {
                 path: 'email-send',
@@ -905,6 +912,14 @@ const routes = [{
                 },
             },
             {
+                path: "manage-filter-options",
+                name: "FilterOptions",
+                component: () => import('@/pages/admin/Catalog/FilterOption/FilterOptions.vue'),
+                meta: {
+                    permission: "view-options"
+                },
+            },
+            {
                 path: "products",
                 name: "Products",
                 component: () => import('@/pages/admin/Catalog/Product/Products.vue'),
@@ -988,22 +1003,27 @@ router.beforeEach(async (to, from, next) => {
         return next(loginRoute);
     }
 
-    // 3. Permission check
-    const requiredPermission = to.meta.permission;
-    if (requiredPermission) {
+    // 3. Hydrate role and permissions on load/reload if authenticated
+    if (hasAuth && authStore.permissions.length === 0) {
         try {
             await authStore.fetchRoleAndPermissions();
         } catch (err) {
-            const loginRoute = role ? `/${role}/login` : "/login";
+            authStore.resetAuth();
+            const loginRoute = to.meta.role ? `/${to.meta.role}/login` : "/admin/login";
             return next(loginRoute);
         }
     }
 
-    if (requiredPermission && !authStore.hasPermission(requiredPermission)) {
-        return next({
-            name: "Unauthorized"
-        });
+    // 4. Permission check
+    const requiredPermission = to.meta.permission;
+    if (requiredPermission) {
+        if (!authStore.hasPermission(requiredPermission)) {
+            return next({
+                name: "Unauthorized"
+            });
+        }
     }
+
     next();
 });
 export default router;

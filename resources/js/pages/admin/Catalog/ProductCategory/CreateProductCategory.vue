@@ -62,9 +62,15 @@
                                             <h3 class="card-title font-weight-bold">
                                                 <i class="fas fa-layer-group mr-2 text-primary"></i> Category Features (Highlight Badges)
                                             </h3>
-                                            <button type="button" class="btn btn-sm btn-outline-primary ml-auto" @click="addFeature">
+                                            <div class="d-flex align-items-center ml-auto" style="gap: 15px;">
+                                                <div class="custom-control custom-switch mt-1">
+                                                    <input type="checkbox" class="custom-control-input" id="showFeaturesOnCategoryPage" v-model="form.show_features_on_category_page" :true-value="1" :false-value="0">
+                                                    <label class="custom-control-label" for="showFeaturesOnCategoryPage">Show on Category Page</label>
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-outline-primary" @click="addFeature">
                                                 <i class="fas fa-plus mr-1"></i> Add Feature
                                             </button>
+                                        </div>
                                         </div>
                                         <div class="card-body">
                                             <p class="text-muted small mb-3">
@@ -161,7 +167,7 @@
                                     <div class="mb-3">
                                         <label class="form-label">Category Image</label>
                                         <Vue3Dropzone v-model="fileUpload" :allowSelectOnPreview="true" />
-                                        <small class="text-muted">Recommended: 1140 × 586px</small>
+                                        <small class="text-muted">Recommended: 600 × 400px or 800 × 500px (Landscape ~16:9)</small>
                                     </div>
 
                                     <!-- Alt Name -->
@@ -219,6 +225,14 @@
                                     <div class="form-group">
                                         <label>Side Menu</label>
                                         <select v-model="form.side_menu" class="custom-select">
+                                            <option value="1">Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Show in Filter</label>
+                                        <select v-model="form.show_in_filter" class="custom-select">
                                             <option value="1">Yes</option>
                                             <option value="0">No</option>
                                         </select>
@@ -287,10 +301,12 @@ const form = reactive({
     sort_order: 0,
     header_menu: 0,
     side_menu: 0,
+    show_in_filter: 0,
     status: 1,
     featured_top_product_id: null,
     featured_middle_product_id: null,
     featured_bottom_product_id: null,
+    show_features_on_category_page: 1,
     features: [],
 });
 

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Option;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\OptionValue;
 use Illuminate\Database\Seeder;
 
 class OptionSeeder extends Seeder
@@ -13,27 +13,48 @@ class OptionSeeder extends Seeder
      */
     public function run(): void
     {
-        $options = [
-            [
-                'name'       => 'Color',
-                'type'       => 'radio',
-                'status'     => 1,
-                'sort_order' => 1,
-                'createdBy'  => 1,
-                'updatedBy'  => 1,
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Option::truncate();
+        OptionValue::truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        $optionsData = [
+            'Color' => [
+                'type' => 'radio',
+                'values' => ['Red', 'Blue', 'Black', 'White', 'Green']
             ],
-            [
-                'name'       => 'Size',
-                'type'       => 'radio',
-                'status'     => 1,
-                'sort_order' => 2,
-                'createdBy'  => 1,
-                'updatedBy'  => 1,
+            'Size' => [
+                'type' => 'radio',
+                'values' => ['Small', 'Medium', 'Large', 'XL']
+            ],
+            'Material' => [
+                'type' => 'radio',
+                'values' => ['Cotton', 'Leather']
             ],
         ];
 
-        foreach ($options as $option) {
-            Option::create($option);
+        $sortOrder = 1;
+        foreach ($optionsData as $optName => $optData) {
+            $option = Option::create([
+                'name'       => $optName,
+                'type'       => $optData['type'],
+                'sort_order' => $sortOrder++,
+                'status'     => 1,
+                'createdBy'  => 1,
+                'updatedBy'  => 1,
+            ]);
+
+            foreach ($optData['values'] as $vIdx => $valName) {
+                OptionValue::create([
+                    'option_id'  => $option->id,
+                    'name'       => $valName,
+                    'image'      => null,
+                    'sort_order' => $vIdx + 1,
+                    'status'     => 1,
+                    'createdBy'  => 1,
+                    'updatedBy'  => 1,
+                ]);
+            }
         }
     }
 }

@@ -30,7 +30,7 @@
                             <div class="text-box">
                                 <h2 class="mb-0">{{ $cat->category_name }}</h2>
                                 <small
-                                    class="d-block mt-1">{{ \Illuminate\Support\Str::limit($cat->description ?? 'Explore solutions', 50) }}</small>
+                                    class="d-block mt-1">{{ \Illuminate\Support\Str::limit($cat->description ?? 'VIEW PRODUCT', 50) }}</small>
                             </div>
                             <i class="bi bi-chevron-right ms-auto chevron"></i>
                         </a>
@@ -64,9 +64,9 @@
                                         <div class="card-content">
                                             <h3 class="card-title mb-4 fs-24">{{ $sub->category_name }}</h3>
                                             <p class="card-spec-list">{{ getLimitedText($sub->description) }}</p>
-                                            <a href="{{ route('category.show', $sub->slug ?? $sub->id) }}"
+                                            <a href="{{ route('category.detail', ['slug' => $category->slug]) }}"
                                                 class="card-link fs-12 mt-auto">
-                                                EXPLORE SOLUTIONS <i class="bi bi-arrow-right"></i>
+                                                VIEW PRODUCT <i class="bi bi-arrow-right"></i>
                                             </a>
                                         </div>
                                     </div>
@@ -80,7 +80,7 @@
                             <h4 class="fw-bold mb-2">Browse All Products in {{ $category->category_name }}</h4>
                             <p class="text-muted small mb-4">View technical specifications, products, and available models
                                 for {{ $category->category_name }}.</p>
-                            <a href="{{ route('products.filter', $category->id) }}"
+                            <a href="{{ route('products.filter', $category->slug) }}"
                                 class="btn btn-primary rounded-pill px-4 fw-bold">
                                 View Products <i class="bi bi-arrow-right ms-1"></i>
                             </a>
@@ -108,7 +108,7 @@
                                     <h3 class="mb-2">The Future of Pure Living</h3>
                                     <p class="text-muted mb-2 lh-base">Experience the pinnacle of air technology seamlessly
                                         integrated into your architectural vision.</p>
-                                    <a href="{{ route('categories') }}"
+                                    <a href="{{ route('products.filter', $category->slug) }}"
                                         class="btn btn-primary w-100 fw-bold shadow-sm featured-btn">VIEW PRODUCTS</a>
                                 </div>
                             </div>

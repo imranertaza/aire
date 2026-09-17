@@ -262,7 +262,7 @@
         color: var(--text-main);
         font-weight: 600;
         padding: 8px 22px;
-        border-radius: 8px;
+        border-radius: 6px;
         transition: all 0.2s;
     }
 
@@ -297,10 +297,10 @@
     .btn-buy-now {
         background: #2563eb;
         border: none;
-        font-weight: 700;
+        font-weight: 600;
         letter-spacing: 0.5px;
         padding: 16px 12px;
-        border-radius: 8px;
+        border-radius: 6px;
         color: #ffffff;
         transition: all 0.2s;
     }

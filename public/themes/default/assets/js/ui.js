@@ -26,7 +26,7 @@ $(document).ready(function () {
         if ($('.search-floating-card').length === 0) {
             var cardHtml = `
                 <div class="search-floating-card" data-lenis-prevent>
-                    <form class="search-floating-bar" action="/product-filter" method="GET">
+                    <form class="search-floating-bar" action="/products-filter" method="GET">
                         <input type="search" name="search" class="search-floating-input" placeholder="Search products, models, categories..." autocomplete="off" autofocus>
                         <button type="submit" class="search-floating-btn" aria-label="Search">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -195,7 +195,7 @@ $(document).ready(function () {
 
                 // Footer link to full filtered catalog
                 html += `
-                    <a href="/product-filter?search=${encodeURIComponent(query)}" class="search-floating-footer">
+                    <a href="/products-filter?search=${encodeURIComponent(query)}" class="search-floating-footer">
                         See all results for "${escapeHtml(query)}" &rarr;
                     </a>
                 `;

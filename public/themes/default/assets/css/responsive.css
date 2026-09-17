@@ -412,6 +412,104 @@
     }
 }
 
+/* =============================================================
+   MOBILE FLOATING BOTTOM DOCK / ACTION BAR
+   ============================================================= */
+.mobile-bottom-dock {
+    position: fixed;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 28px);
+    max-width: 380px;
+    z-index: 1040;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.mobile-dock-inner {
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 6px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.mobile-dock-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: #64748b;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    min-width: 58px;
+    position: relative;
+}
+
+.mobile-dock-item:hover,
+.mobile-dock-item:focus {
+    color: var(--color-primary, #0066cc);
+}
+
+.mobile-dock-item.active {
+    color: var(--color-primary, #0066cc);
+    background: rgba(0, 102, 204, 0.08);
+}
+
+.mobile-dock-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: inherit;
+}
+
+.mobile-dock-icon svg {
+    transition: transform 0.2s ease;
+}
+
+.mobile-dock-item:active .mobile-dock-icon svg {
+    transform: scale(0.88);
+}
+
+.mobile-dock-label {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.2px;
+    color: inherit;
+}
+
+.mobile-dock-icon .header-count-badge {
+    position: absolute;
+    top: -6px;
+    right: -10px;
+    min-width: 17px;
+    height: 17px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 50%;
+    background-color: var(--color-primary, #0066cc);
+    color: #fff;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0, 102, 204, 0.35);
+}
+
+
 /* ----------------------------------------------------------------
    PRINT SAFETY — hide decorative/nav elements
    ---------------------------------------------------------------- */
@@ -422,7 +520,8 @@
     .offcanvas,
     .sidebar-menu,
     .sticky-sidebar,
-    .featured-card {
+    .featured-card,
+    .mobile-bottom-dock {
         display: none !important;
     }
 

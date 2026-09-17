@@ -25,6 +25,46 @@ class SectionController extends Controller
      */
     public function index()
     {
+        if (!Section::where('name', 'home_best_selling')->exists()) {
+            $defaultProductIds = \App\Models\Product::where('status', 1)->take(4)->pluck('id')->toArray();
+            Section::create([
+                'name' => 'home_best_selling',
+                'data' => [
+                    'badge' => 'Product',
+                    'title' => 'Best Selling Product',
+                    'subtitle' => 'Discover the top‑selling models trusted by thousands of families for cleaner, healthier air.',
+                    'product_ids' => $defaultProductIds,
+                ],
+            ]);
+        }
+        if (!Section::where('name', 'home_new_arrival')->exists()) {
+            $defaultNewArrivalIds = \App\Models\Product::where('status', 1)->latest('id')->take(3)->pluck('id')->toArray();
+            Section::create([
+                'name' => 'home_new_arrival',
+                'data' => [
+                    'badge' => 'New arrival',
+                    'title' => 'Freshly Launched Models',
+                    'subtitle' => 'Explore the latest purifiers designed with advanced technology for modern living.',
+                    'product_ids' => $defaultNewArrivalIds,
+                ],
+            ]);
+        }
+        if (!Section::where('name', 'home_customer_favorites')->exists()) {
+            $defaultFavoriteIds = \App\Models\Product::where('status', 1)->skip(3)->take(3)->pluck('id')->toArray();
+            if (empty($defaultFavoriteIds)) {
+                $defaultFavoriteIds = \App\Models\Product::where('status', 1)->take(2)->pluck('id')->toArray();
+            }
+            Section::create([
+                'name' => 'home_customer_favorites',
+                'data' => [
+                    'badge' => 'Customers Favorites',
+                    'title' => 'Loved by Our Community',
+                    'subtitle' => 'Discover the purifiers most chosen by families who value clean, healthy air.',
+                    'product_ids' => $defaultFavoriteIds,
+                ],
+            ]);
+        }
+
         $sections = Section::paginate(15);
 
         return ApiResponse::success($sections, 'Sections retrieved successfully');
@@ -37,7 +77,96 @@ class SectionController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws ModelNotFoundException
      */
-    public function show($id)
+        /**
+     * Retrieve all sections configured on the storefront homepage, sorted in display sequence.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function homeSections(Request $request)
+    {
+        $homeSectionKeys = [
+            'home_benefits',
+            'home_best_selling',
+            'home_lifestyle',
+            'home_new_arrival',
+            'why_choose_aire',
+            'home_customer_favorites',
+            'home_video',
+            'home_living_hero',
+            'home_faq',
+        ];
+
+        // Ensure default records exist for essential sections if missing
+        if (!Section::where('name', 'home_best_selling')->exists()) {
+            $defaultProductIds = \App\Models\Product::where('status', 1)->take(4)->pluck('id')->toArray();
+            Section::create([
+                'name' => 'home_best_selling',
+                'data' => [
+                    'badge' => 'Product',
+                    'title' => 'Best Selling Product',
+                    'subtitle' => 'Discover the top‑selling models trusted by thousands of families for cleaner, healthier air.',
+                    'product_ids' => $defaultProductIds,
+                ],
+            ]);
+        }
+        if (!Section::where('name', 'home_new_arrival')->exists()) {
+            $defaultNewArrivalIds = \App\Models\Product::where('status', 1)->latest('id')->take(3)->pluck('id')->toArray();
+            Section::create([
+                'name' => 'home_new_arrival',
+                'data' => [
+                    'badge' => 'New arrival',
+                    'title' => 'Freshly Launched Models',
+                    'subtitle' => 'Explore the latest purifiers designed with advanced technology for modern living.',
+                    'product_ids' => $defaultNewArrivalIds,
+                ],
+            ]);
+        }
+        if (!Section::where('name', 'home_customer_favorites')->exists()) {
+            $defaultFavoriteIds = \App\Models\Product::where('status', 1)->skip(3)->take(3)->pluck('id')->toArray();
+            if (empty($defaultFavoriteIds)) {
+                $defaultFavoriteIds = \App\Models\Product::where('status', 1)->take(2)->pluck('id')->toArray();
+            }
+            Section::create([
+                'name' => 'home_customer_favorites',
+                'data' => [
+                    'badge' => 'Customers Favorites',
+                    'title' => 'Loved by Our Community',
+                    'subtitle' => 'Discover the purifiers most chosen by families who value clean, healthy air.',
+                    'product_ids' => $defaultFavoriteIds,
+                ],
+            ]);
+        }
+        if (!Section::where('name', 'home_living_hero')->exists()) {
+            $defaultLivingHeroProduct = \App\Models\Product::where('status', 1)->latest('id')->first();
+            Section::create([
+                'name' => 'home_living_hero',
+                'data' => [
+                    'enabled' => 1,
+                    'badge' => 'INNOVATION',
+                    'title' => 'The Future of Pure Living',
+                    'subtitle' => 'Engineered for complete atmospheric transformation. Seamlessly integrates into modern living spaces with intelligent active air purification.',
+                    'description' => 'Engineered for complete atmospheric transformation. Seamlessly integrates into modern living spaces with intelligent active air purification.',
+                    'image' => 'themes/default/assets/img/background-without-product.png',
+                    'product_id' => $defaultLivingHeroProduct ? $defaultLivingHeroProduct->id : null,
+                    'button_text' => 'Buy Now',
+                ],
+            ]);
+        }
+
+        $sections = Section::whereIn('name', $homeSectionKeys)->get();
+
+        $ordered = collect($homeSectionKeys)
+            ->map(function ($key) use ($sections) {
+                return $sections->firstWhere('name', $key);
+            })
+            ->filter()
+            ->values();
+
+        return ApiResponse::success($ordered, 'Home sections retrieved successfully');
+    }
+
+public function show($id)
     {
         $section = Section::findOrFail($id);
         return ApiResponse::success($section, 'Section data retrieved successfully');
@@ -59,7 +188,8 @@ class SectionController extends Controller
 
         $request->validate([
             'data'  => 'required|json',
-            'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,svg,webp|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,svg,webp|max:10240',
+            'video_file' => 'nullable|file|mimes:mp4,webm,ogg,mov|max:102400',
         ]);
 
         if ($request->remove_image == 1) {
@@ -84,6 +214,47 @@ class SectionController extends Controller
             $data['image'] = $request->file('image')
                 ->storeAs("sections/{$section->id}/images", $filename, 'public');
         }
+        if ($request->hasFile('video_file')) {
+            $oldVideo = $data['video_file'] ?? $section->data['video_file'] ?? null;
+            if ($oldVideo && Storage::disk('public')->exists($oldVideo)) {
+                Storage::disk('public')->delete($oldVideo);
+            }
+
+            $filename = uniqid('video_') . '.' . $request->file('video_file')->getClientOriginalExtension();
+            $data['video_file'] = $request->file('video_file')
+                ->storeAs("sections/{$section->id}/video", $filename, 'public');
+        }
+
+        if ($request->remove_video == 1) {
+            $oldVideo = $data['video_file'] ?? $section->data['video_file'] ?? null;
+            if ($oldVideo && Storage::disk('public')->exists($oldVideo)) {
+                Storage::disk('public')->delete($oldVideo);
+            }
+            $data['video_file'] = null;
+        }
+
+
+        // Handle item-level images & avatars (e.g. item_image_0, item_avatar_0, etc.)
+        if (isset($data['items']) && is_array($data['items'])) {
+            foreach ($data['items'] as $index => &$item) {
+                $imageKey = "item_image_{$index}";
+                if ($request->hasFile($imageKey)) {
+                    $file = $request->file($imageKey);
+                    $filename = uniqid('lifestyle_') . '.' . $file->getClientOriginalExtension();
+                    $storedPath = $file->storeAs("sections/{$section->id}/lifestyle", $filename, 'public');
+                    $item['image'] = $storedPath;
+                }
+
+                $avatarKey = "item_avatar_{$index}";
+                if ($request->hasFile($avatarKey)) {
+                    $file = $request->file($avatarKey);
+                    $filename = uniqid('avatar_') . '.' . $file->getClientOriginalExtension();
+                    $storedPath = $file->storeAs("sections/{$section->id}/testimonials", $filename, 'public');
+                    $item['avatar'] = $storedPath;
+                }
+            }
+            unset($item);
+        }
 
         $section->data = $data;
         $section->updatedBy = Auth::id();
@@ -92,6 +263,96 @@ class SectionController extends Controller
         return ApiResponse::success($section, 'Section updated successfully');
     }
 
+
+    /**
+     * Retrieve or create a single section by unique name.
+     *
+     * @param string $name
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getByName($name)
+    {
+        $section = Section::firstOrCreate(['name' => $name]);
+
+        if (empty($section->data) && $name === 'client_testimonials') {
+            $section->data = [
+                'title' => 'Purity in Practice',
+                'subtitle' => 'CLIENT TESTIMONIALS',
+                'items' => [
+                    [
+                        'name' => 'Sarah Jenkins',
+                        'role' => 'INTERIOR ARCHITECT',
+                        'avatar' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80',
+                        'rating' => 5,
+                        'quote' => "The AIRE Pro S1 is not just an air purifier; it's a piece of architectural art that has transformed our living environment.",
+                    ],
+                    [
+                        'name' => 'Marcus Chen',
+                        'role' => 'SENIOR FACILITY MANAGER',
+                        'avatar' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=120&q=80',
+                        'rating' => 5,
+                        'quote' => 'Unmatched technical precision. The IAQ data reporting is exactly what our facility management team needed for ESG compliance.',
+                    ],
+                    [
+                        'name' => 'Dr. Elena Rostova',
+                        'role' => 'CLINICAL ALLERGIST',
+                        'avatar' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=120&q=80',
+                        'rating' => 5,
+                        'quote' => 'The multi-stage filtration system drastically reduced particulate matter in our high-traffic clinic rooms. Absolutely vital for our patients.',
+                    ],
+                    [
+                        'name' => 'David Sterling',
+                        'role' => 'SUSTAINABILITY DIRECTOR',
+                        'avatar' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80',
+                        'rating' => 5,
+                        'quote' => 'Combining whisper-quiet acoustics with verifiable CADR performance has made AIRE our go-to partner for premium commercial builds.',
+                    ],
+                ]
+            ];
+            $section->save();
+        }
+
+        if (empty($section->data) && ($name === 'home_best_selling' || $name === 'best_selling')) {
+            $defaultProductIds = \App\Models\Product::where('status', 1)->take(4)->pluck('id')->toArray();
+            $section->data = [
+                'badge' => 'Product',
+                'title' => 'Best Selling Product',
+                'subtitle' => 'Discover the top‑selling models trusted by thousands of families for cleaner, healthier air.',
+                'product_ids' => $defaultProductIds,
+            ];
+            $section->save();
+        }
+
+        if (empty($section->data) && ($name === 'home_living_hero' || $name === 'living_hero')) {
+            $defaultLivingHeroProduct = \App\Models\Product::where('status', 1)->latest('id')->first();
+            $section->data = [
+                'enabled' => 1,
+                'badge' => 'INNOVATION',
+                'title' => 'The Future of Pure Living',
+                'subtitle' => 'Engineered for complete atmospheric transformation. Seamlessly integrates into modern living spaces with intelligent active air purification.',
+                'description' => 'Engineered for complete atmospheric transformation. Seamlessly integrates into modern living spaces with intelligent active air purification.',
+                'image' => 'themes/default/assets/img/background-without-product.png',
+                'product_id' => $defaultLivingHeroProduct ? $defaultLivingHeroProduct->id : null,
+                'button_text' => 'Buy Now',
+            ];
+            $section->save();
+        }
+
+        return ApiResponse::success($section, 'Section data retrieved successfully');
+    }
+
+    /**
+     * Update a section by its unique name.
+     *
+     * @param Request $request
+     * @param string $name
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateByName(Request $request, $name)
+    {
+        $section = Section::firstOrCreate(['name' => $name]);
+        return $this->update($request, $section->id);
+    }
 
     /**
      * Update a single key-value pair within a section's data.

@@ -160,18 +160,144 @@ $(document).ready(function () {
             ]
         }
     ];
-
     // State Tracking
     let currentStep = 1;
     const userSelections = {};
+    let availableOptionsMap = null;
+    let isFetchingProgress = false;
+
+    // Helper: check if a step is multi-select checkbox
+    function isStepCheckbox(stepNum) {
+        const step = STEPS_DATA.find(s => s.stepNum === stepNum);
+        return step && (step.type === 'checkbox' || step.stepType === 'checkbox');
+    }
+
+    // Helper: check if a specific option value is selected in a step
+    function isStepOptionSelected(stepNum, val) {
+        const selections = userSelections[stepNum];
+        if (!selections || !Array.isArray(selections)) return false;
+        return selections.some(item => String(item.val) === String(val));
+    }
+
+    // Helper: get array of active selected values (excluding 'any') for a step
+    function getStepSelectedValues(stepNum) {
+        const selections = userSelections[stepNum];
+        if (!selections || !Array.isArray(selections)) return [];
+        return selections
+            .map(item => item.val)
+            .filter(v => v && v !== 'any' && v !== 'all');
+    }
+
+    // Helper: determine if an option has matching products in current selection
+    function isOptionAvailable(stepId, optVal) {
+        if (!availableOptionsMap || !optVal || optVal === 'any' || optVal === 'all') return true;
+
+        const cleanStepKey = String(stepId).toLowerCase().replace(/[\s\(\)²\-]/g, '_').replace(/_+/g, '_').trim();
+        const cleanOptVal = String(optVal).toLowerCase().replace(/[\s\-]/g, '_').trim();
+
+        let allowedList = null;
+        for (let k in availableOptionsMap) {
+            const cleanK = k.toLowerCase().replace(/[\s\(\)²\-]/g, '_').replace(/_+/g, '_').trim();
+            if (cleanK === cleanStepKey || cleanK.includes(cleanStepKey) || cleanStepKey.includes(cleanK)) {
+                allowedList = availableOptionsMap[k];
+                break;
+            }
+        }
+
+        if (!allowedList || !Array.isArray(allowedList) || allowedList.length === 0) return true;
+
+        return allowedList.some(item => {
+            const cleanItem = String(item).toLowerCase().replace(/[\s\-]/g, '_').trim();
+            return cleanItem === cleanOptVal || cleanItem.includes(cleanOptVal) || cleanOptVal.includes(cleanItem);
+        });
+    }
+
+    // Build payload using all user selections up to the specified step
+    function buildFilterPayload(stepLimit = 9) {
+        const selectedSlugs = [];
+        for (let k = 1; k <= stepLimit; k++) {
+            const vals = getStepSelectedValues(k);
+            vals.forEach(v => selectedSlugs.push(v));
+        }
+
+        const getSingleVal = (stepNum) => {
+            if (stepLimit < stepNum) return '';
+            const vals = getStepSelectedValues(stepNum);
+            return vals.length > 0 ? vals[0] : '';
+        };
+
+        const getArrayVals = (stepNum) => {
+            if (stepLimit < stepNum) return [];
+            return getStepSelectedValues(stepNum);
+        };
+
+        return {
+            _token: window.CSRF_TOKEN || '',
+            category: getSingleVal(1),
+            industry: getSingleVal(1),
+            building_type: getSingleVal(2),
+            room_type: getSingleVal(3),
+            area_range: getSingleVal(4),
+            occupancy: getSingleVal(5),
+            health_concern: getArrayVals(6),
+            problem: getArrayVals(7),
+            solution_needed: getArrayVals(8),
+            budget: getSingleVal(9),
+            category_slugs: selectedSlugs,
+            page: 1
+        };
+    }
+
+    // Backend query on step progression to fetch matching count & next step candidate options
+    function fetchStepProgress(stepLimit, onComplete) {
+        if (!window.FILTER_QUERY_URL) {
+            if (typeof onComplete === 'function') onComplete();
+            return;
+        }
+
+        const payload = buildFilterPayload(stepLimit);
+        isFetchingProgress = true;
+
+        const $btnNext = $('#btnNextStep');
+        if ($btnNext.length && typeof onComplete === 'function') {
+            $btnNext.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> SYNTHESIZING...');
+        }
+
+        $.ajax({
+            url: window.FILTER_QUERY_URL,
+            type: 'POST',
+            data: payload,
+            success: function (res) {
+                if (res && res.status) {
+                    if (res.available_options) {
+                        availableOptionsMap = res.available_options;
+                    }
+                    if (res.count !== undefined) {
+                        $('#liveMatchCountTag').text(res.count + ' Products Match');
+                        $('.protocol-analysis-pct').text(res.count + ' MATCHES');
+                    }
+                    window.LATEST_STEP_RESULT = res;
+                }
+            },
+            complete: function () {
+                isFetchingProgress = false;
+                if ($btnNext.length) {
+                    $btnNext.prop('disabled', false);
+                }
+                if (typeof onComplete === 'function') {
+                    onComplete();
+                }
+            }
+        });
+    }
 
     // Initialize Selections with default first choices
     STEPS_DATA.forEach(step => {
-        userSelections[step.stepNum] = {
+        userSelections[step.stepNum] = [{
             label: step.options[0].label,
             icon: step.options[0].icon,
             val: step.options[0].val
-        };
+        }];
     });
 
     // Render Full Wizard UI
@@ -190,7 +316,7 @@ $(document).ready(function () {
             const isActive = step.stepNum === currentStep;
             const isCompleted = step.stepNum < currentStep;
             const formattedNum = String(step.stepNum).padStart(2, '0');
-            const selection = userSelections[step.stepNum];
+            const selections = userSelections[step.stepNum] || [];
 
             let stateClass = '';
             if (isActive) stateClass = 'active';
@@ -198,11 +324,27 @@ $(document).ready(function () {
 
             let contentHtml = '';
             if (isCompleted || isActive) {
-                contentHtml = `
-                    <span class="step-summary-pill">
-                        <i class="bi ${selection.icon}"></i> ${selection.label}
-                    </span>
-                `;
+                if (selections.length === 0 || (selections.length === 1 && selections[0].val === 'any')) {
+                    const defaultIcon = (selections[0] && selections[0].icon) || 'bi-grid';
+                    contentHtml = `
+                        <span class="step-summary-pill">
+                            <i class="bi ${defaultIcon}"></i> Any
+                        </span>
+                    `;
+                } else if (selections.length === 1) {
+                    contentHtml = `
+                        <span class="step-summary-pill">
+                            <i class="bi ${selections[0].icon}"></i> ${selections[0].label}
+                        </span>
+                    `;
+                } else {
+                    const labelStr = selections.map(s => s.label).join(', ');
+                    contentHtml = `
+                        <span class="step-summary-pill" title="${labelStr}">
+                            <i class="bi ${selections[0].icon}"></i> ${labelStr}
+                        </span>
+                    `;
+                }
             } else {
                 contentHtml = `<div class="step-name">—</div>`;
             }
@@ -220,102 +362,145 @@ $(document).ready(function () {
         });
     }
 
-    // 3. Render Center Panel Active & Inactive Step Sections
+    // 3. Render Center Panel Active & Inactive Step Sections with Progressive Narrowing
     function renderCenterWizard() {
         const $centerContainer = $('#wizardStepsContainer');
         $centerContainer.empty();
 
         // Check if all steps completed
-        if (currentStep > 9) {
+        if (currentStep > STEPS_DATA.length) {
             renderProtocolCompleteSummary($centerContainer);
             return;
         }
 
         const activeData = STEPS_DATA.find(s => s.stepNum === currentStep);
         const formattedActiveNum = String(activeData.stepNum).padStart(2, '0');
+        const isCheckbox = isStepCheckbox(currentStep);
+
+        // Verify currently selected options are available; if not, fallback to 'any'
+        if (userSelections[currentStep] && Array.isArray(userSelections[currentStep])) {
+            userSelections[currentStep] = userSelections[currentStep].filter(item => {
+                if (item.val === 'any' || item.val === 'all') return true;
+                return isOptionAvailable(activeData.stepId, item.val);
+            });
+
+            if (userSelections[currentStep].length === 0) {
+                const anyOpt = activeData.options.find(o => o.val === 'any') || activeData.options[0];
+                userSelections[currentStep] = [{ label: anyOpt.label, icon: anyOpt.icon, val: anyOpt.val }];
+                renderSidebarTracker();
+            }
+        }
 
         // Active Step Section
         let activeSectionHtml = `
             <div class="step-section step-animate-slide-up">
-                <div class="step-title-row">
-                    <span class="step-title-num">${formattedActiveNum}</span>
-                    <h2 class="step-title-text">${activeData.stepTitle}</h2>
+                <div class="step-title-row d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="step-title-num">${formattedActiveNum}</span>
+                        <h2 class="step-title-text mb-0">${activeData.stepTitle}</h2>
+                    </div>
+                    ${isCheckbox ? '<span class="badge bg-light text-primary border rounded-pill px-3 py-1.5 fs-11 fw-semibold"><i class="bi bi-check2-all me-1"></i> Multi-select enabled</span>' : ''}
                 </div>
                 <div class="option-grid-3col">
         `;
 
-        activeData.options.forEach((opt, idx) => {
-            const isSelected = userSelections[currentStep] ? (userSelections[currentStep].val === opt.val) : false;
+        activeData.options.forEach((opt) => {
+            const isAvail = isOptionAvailable(activeData.stepId, opt.val);
+            const isSelected = isStepOptionSelected(currentStep, opt.val);
             const selectedClass = isSelected ? 'selected' : '';
-            const checkedAttr = isSelected ? 'checked' : '';
+            const disabledClass = isAvail ? '' : 'disabled';
+            const disabledAttr = isAvail ? '' : 'disabled';
+            const checkedAttr = (isSelected && isAvail) ? 'checked' : '';
+            const inputType = isCheckbox ? 'checkbox' : 'radio';
+            const inputName = isCheckbox ? `step_${currentStep}[]` : `step_${currentStep}`;
 
             activeSectionHtml += `
-                <label class="option-card-step ${selectedClass}" data-step="${currentStep}" data-val="${opt.val}" data-label="${opt.label}" data-icon="${opt.icon}">
-                    <input type="radio" name="step_${currentStep}" value="${opt.val}" ${checkedAttr}>
+                <div class="option-card-step ${selectedClass} ${disabledClass}" data-step="${currentStep}" data-val="${opt.val}" data-label="${opt.label}" data-icon="${opt.icon}" data-type="${inputType}" role="button" tabindex="0" ${!isAvail ? 'title="No matching products for current selection"' : ''}>
+                    <input type="${inputType}" name="${inputName}" value="${opt.val}" ${checkedAttr} ${disabledAttr} tabindex="-1">
                     <i class="bi ${opt.icon} option-card-step-icon"></i>
                     <span class="option-card-step-label">${opt.label}</span>
-                </label>
+                </div>
             `;
         });
 
         activeSectionHtml += `
                 </div>
-                <div class="option-grid-3col g-3 mt-4 mb-5">
+                <div class="protocol-action-buttons d-flex align-items-center gap-2 gap-sm-3 mt-4 mb-4 mb-lg-5">
                     ${currentStep > 1 ? `
-                    <div class="col">
-                        <button type="button" class="btn-protocol-prev-step w-100" id="btnPrevStep">
-                            <i class="bi bi-arrow-left"></i> PREVIOUS
-                        </button>
-                    </div>
+                    <button type="button" class="btn-protocol-prev-step flex-fill" id="btnPrevStep">
+                        <i class="bi bi-arrow-left"></i> PREVIOUS
+                    </button>
                     ` : ''}
-                    <div class="col ${currentStep === 1 ? 'offset-col' : ''}"> <!-- Or use w-100 if single -->
-                        <button type="button" class="btn-protocol-next-step w-100" id="btnNextStep">
-                            ${currentStep === 9 ? 'FINALIZE' : 'NEXT'} <i class="bi bi-arrow-right"></i>
-                        </button>
-                    </div>
+                    <button type="button" class="btn-protocol-next-step ${currentStep === 1 ? 'w-100' : 'flex-fill'}" id="btnNextStep">
+                        ${currentStep === 9 ? 'FINALIZE' : 'NEXT'} <i class="bi bi-arrow-right"></i>
+                    </button>
                 </div>
             </div>
         `;
 
-        // Render Inactive Step Section below if step < 9
+        // Render Inactive Step Section below if there is a next step
         let inactiveSectionHtml = '';
-        if (currentStep < 9) {
+        if (currentStep < STEPS_DATA.length) {
             const nextData = STEPS_DATA.find(s => s.stepNum === currentStep + 1);
-            const formattedNextNum = String(nextData.stepNum).padStart(2, '0');
+            if (nextData) {
+                const formattedNextNum = String(nextData.stepNum).padStart(2, '0');
 
-            inactiveSectionHtml = `
+                inactiveSectionHtml = `
                 <div class="step-section opacity-60">
                     <div class="step-title-row">
                         <span class="step-title-num text-muted" style="color: #cbd5e1 !important;">${formattedNextNum}</span>
-                        <h2 class="step-title-text text-muted" style="color: #94a3b8 !important;">${nextData.stepTitle}</h2>
+                        <h2 class="step-title-text text-muted mb-0" style="color: #94a3b8 !important;">${nextData.stepTitle}</h2>
                     </div>
                     <div class="option-grid-3col">
-            `;
+                `;
 
-            nextData.options.forEach(opt => {
-                inactiveSectionHtml += `
-                    <div class="option-card-step disabled">
+                nextData.options.forEach(opt => {
+                    const isNextAvail = isOptionAvailable(nextData.stepId, opt.val);
+                    const optDisabledClass = isNextAvail ? '' : 'opacity-25';
+                    inactiveSectionHtml += `
+                    <div class="option-card-step disabled ${optDisabledClass}">
                         <i class="bi ${opt.icon} option-card-step-icon"></i>
                         <span class="option-card-step-label">${opt.label}</span>
                     </div>
                 `;
-            });
+                });
 
-            inactiveSectionHtml += `
+                inactiveSectionHtml += `
                     </div>
                 </div>
             `;
+            }
         }
-
         $centerContainer.append(activeSectionHtml + inactiveSectionHtml);
     }
 
     // 4. Handle Protocol Complete (Directly fetch and display matched products)
     function renderProtocolCompleteSummary($container) {
-        $container.empty();
+        $container.html(`
+            <div class="protocol-complete-header mb-4 p-4 rounded-4 bg-light border border-light-subtle text-center">
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-2" style="width: 44px; height: 44px;">
+                    <i class="bi bi-shield-check fs-4"></i>
+                </div>
+                <h2 class="title-2 fs-22 fw-bold text-dark mb-1">Precision Protocol Synthesis Complete</h2>
+                <p class="fs-13 text-muted mb-0">System has analyzed your requirements and synthesized the highest-rated matching configuration below.</p>
+            </div>
+            <div id="protocolLoadingSpinner" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Analyzing & loading specifications...</span>
+                </div>
+                <p class="fs-13 text-muted mt-2 fw-semibold">Synthesizing matched solutions...</p>
+            </div>
+        `);
 
-        // Trigger filter API query only once all steps are completed
-        triggerLiveProductCountQuery(1, true);
+        if (window.LATEST_STEP_RESULT && window.LATEST_STEP_RESULT.products) {
+            $('#protocolLoadingSpinner').remove();
+            $('#liveMatchCountTag').text((window.LATEST_STEP_RESULT.count || 0) + ' Products Match');
+            renderRelatedProducts(window.LATEST_STEP_RESULT, {
+                total: window.LATEST_STEP_RESULT.total || window.LATEST_STEP_RESULT.count || 0
+            });
+        } else {
+            triggerLiveProductCountQuery(1, true);
+        }
     }
 
     // 5. Update Progress Bars & Counters
@@ -325,6 +510,8 @@ $(document).ready(function () {
             $('.protocol-analysis-pct').text('100%');
             $('.step-header-tag').text('PROTOCOL COMPLETE');
             $('.step-header-count').text('STEP 9 / 9');
+            if ($('#mobileStepBadge').length) $('#mobileStepBadge').text('STEP 9 / 9');
+            if ($('#mobileStepName').length) $('#mobileStepName').text('PROTOCOL COMPLETE');
             return;
         }
 
@@ -332,59 +519,136 @@ $(document).ready(function () {
         const pctStr = activeData.progressPct + '%';
 
         $('.step-progress-track-fill, .protocol-progress-fill').css('width', pctStr);
-        $('.protocol-analysis-pct').text(pctStr);
         $('.step-header-tag').text(activeData.stepTag);
         $('.step-header-count').text(activeData.stepCount);
+        if ($('#mobileStepBadge').length) $('#mobileStepBadge').text(activeData.stepCount);
+        if ($('#mobileStepName').length) $('#mobileStepName').text(activeData.stepTitle);
     }
 
     // 6. jQuery Event Listeners (Delegated)
-    $(document).on('click', '.option-card-step:not(.disabled)', function () {
-        const stepNum = $(this).data('step');
-        const val = $(this).data('val');
-        const label = $(this).data('label');
-        const icon = $(this).data('icon');
+    $(document).on('click', '.option-card-step:not(.disabled)', function (e) {
+        e.preventDefault();
+        const $card = $(this);
+        const stepNum = parseInt($card.data('step'), 10);
+        const val = String($card.data('val'));
+        const label = $card.data('label');
+        const icon = $card.data('icon');
+        const activeData = STEPS_DATA.find(s => s.stepNum === stepNum);
+        const isCheckbox = isStepCheckbox(stepNum);
 
-        $(this).addClass('selected').siblings().removeClass('selected');
-        $(this).find('input[type="radio"]').prop('checked', true);
+        if (!Array.isArray(userSelections[stepNum])) {
+            userSelections[stepNum] = userSelections[stepNum] ? [userSelections[stepNum]] : [];
+        }
 
-        // Update Selection State
-        userSelections[stepNum] = { label, icon, val };
+        if (isCheckbox) {
+            if (val === 'any' || val === 'all') {
+                // Clicking "Any": clear other selections and only select "Any"
+                userSelections[stepNum] = [{ label, icon, val }];
+                $card.addClass('selected').siblings().removeClass('selected');
+                $card.find('input').prop('checked', true);
+                $card.siblings().find('input').prop('checked', false);
+            } else {
+                // Remove "Any" if it was selected
+                userSelections[stepNum] = userSelections[stepNum].filter(item => item.val !== 'any' && item.val !== 'all');
+                $card.parent().find('[data-val="any"], [data-val="all"]').removeClass('selected').find('input').prop('checked', false);
 
-        // Update Sidebar Immediately (No API call on each step click)
+                const existingIndex = userSelections[stepNum].findIndex(item => String(item.val).toLowerCase() === val.toLowerCase());
+                if (existingIndex > -1) {
+                    // Already selected -> Deselect
+                    userSelections[stepNum].splice(existingIndex, 1);
+                    $card.removeClass('selected');
+                    $card.find('input').prop('checked', false);
+                } else {
+                    // Not selected -> Select
+                    userSelections[stepNum].push({ label, icon, val });
+                    $card.addClass('selected');
+                    $card.find('input').prop('checked', true);
+                }
+
+                // If nothing left selected, auto-select "Any"
+                if (userSelections[stepNum].length === 0) {
+                    const anyOpt = activeData.options.find(o => o.val === 'any') || activeData.options[0];
+                    userSelections[stepNum] = [{ label: anyOpt.label, icon: anyOpt.icon, val: anyOpt.val }];
+                    $card.parent().find('[data-val="' + anyOpt.val + '"]').addClass('selected').find('input').prop('checked', true);
+                }
+            }
+        } else {
+            // Radio: single selection
+            userSelections[stepNum] = [{ label, icon, val }];
+            $card.addClass('selected').siblings().removeClass('selected');
+            $card.find('input').prop('checked', true);
+            $card.siblings().find('input').prop('checked', false);
+        }
+
+        // Update Sidebar Tracker
         renderSidebarTracker();
+
+        // Background query to update match counts & pre-calculate available next options
+        fetchStepProgress(stepNum);
     });
 
     function smoothScrollToWizard() {
         const $panel = $('.protocol-center-panel');
         if ($panel.length) {
-            const panelTop = $panel.offset().top - 100;
+            const offset = $(window).width() < 992 ? 70 : 100;
+            const panelTop = $panel.offset().top - offset;
             const scrollPos = $(window).scrollTop();
-            if (scrollPos > panelTop + 150 || scrollPos < panelTop - 250) {
+            if (scrollPos > panelTop + 100 || scrollPos < panelTop - 200) {
                 window.scrollTo({ top: panelTop, behavior: 'smooth' });
             }
         }
     }
 
-    // Next Step Button Click
+    // Mobile Stepper Drawer Toggle
+    $(document).on('click', '#mobileStepperToggle', function () {
+        const $content = $('#protocolStepperContent');
+        const $chevron = $(this).find('.mobile-stepper-chevron');
+        const isOpen = $content.hasClass('is-open');
+        if (isOpen) {
+            $content.removeClass('is-open');
+            $chevron.css('transform', 'rotate(0deg)');
+            $(this).attr('aria-expanded', 'false');
+        } else {
+            $content.addClass('is-open');
+            $chevron.css('transform', 'rotate(180deg)');
+            $(this).attr('aria-expanded', 'true');
+        }
+    });
+
+    // Next Step Button Click: Query backend, narrow next step options, and advance
     $(document).on('click', '#btnNextStep', function () {
-        currentStep++;
-        renderWizard();
-        smoothScrollToWizard();
+        if (isFetchingProgress) return;
+
+        if (currentStep < STEPS_DATA.length) {
+            fetchStepProgress(currentStep, function () {
+                currentStep++;
+                renderWizard();
+                smoothScrollToWizard();
+            });
+        } else {
+            fetchStepProgress(STEPS_DATA.length, function () {
+                currentStep++;
+                renderWizard();
+                smoothScrollToWizard();
+            });
+        }
     });
 
     // Previous Step Button Click
     $(document).on('click', '#btnPrevStep', function () {
         if (currentStep > 1) {
             currentStep--;
-            renderWizard();
-            smoothScrollToWizard();
+            fetchStepProgress(currentStep - 1, function () {
+                renderWizard();
+                smoothScrollToWizard();
+            });
         }
     });
 
-    // Restart Protocol Button Click
-    $(document).on('click', '#btnRestartProtocol', function () {
-        currentStep = 1;
-        renderWizard();
+    // Restart Protocol Button Click (Reload site)
+    $(document).on('click', '#btnRestartProtocol', function (e) {
+        e.preventDefault();
+        window.location.reload();
     });
 
     // Sidebar Step Item Click (Allow Jumping Back to Completed Steps)
@@ -392,7 +656,16 @@ $(document).ready(function () {
         const stepNum = parseInt($(this).data('step'), 10);
         if (stepNum && stepNum < currentStep) {
             currentStep = stepNum;
-            renderWizard();
+            // On mobile (< 992px), auto-collapse the stepper after selecting a step
+            if ($(window).width() < 992) {
+                $('#protocolStepperContent').removeClass('is-open');
+                $('.mobile-stepper-chevron').css('transform', 'rotate(0deg)');
+                $('#mobileStepperToggle').attr('aria-expanded', 'false');
+            }
+            fetchStepProgress(currentStep - 1, function () {
+                renderWizard();
+                smoothScrollToWizard();
+            });
         }
     });
     // Filter Group Accordion Toggle Handler
@@ -408,12 +681,34 @@ $(document).ready(function () {
             $currentGroup.removeClass('collapsed');
         }
     });
+
     // GSAP ScrollTrigger Pinned Deck Animation (Bottom to Top Reveal) for #whyChooseStackedWrapper
-    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+    function initWhyChooseScrollTrigger() {
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
         gsap.registerPlugin(ScrollTrigger);
 
         const stackedWrapper = document.getElementById('whyChooseStackedWrapper') || document.getElementById('whyChooseWrapper');
-        if (stackedWrapper && window.innerWidth >= 992) {
+        if (!stackedWrapper) return;
+
+        // 1. Clean up previous triggers on the same element to avoid ghost pinning or duplicate triggers
+        ScrollTrigger.getAll().forEach(st => {
+            if (st.vars && st.vars.trigger === stackedWrapper || st.trigger === stackedWrapper) {
+                st.kill(true);
+            }
+        });
+
+        // 2. Unwind any stale/cached .pin-spacer wrappers from browser history (bfcache)
+        const pinSpacer = stackedWrapper.closest('.pin-spacer');
+        if (pinSpacer && pinSpacer.parentElement) {
+            pinSpacer.parentElement.insertBefore(stackedWrapper, pinSpacer);
+            pinSpacer.remove();
+        }
+
+        // 3. Clear any leftover inline transforms
+        gsap.set(stackedWrapper, { clearProps: "all" });
+        gsap.set("#whyChooseStackedWrapper .stacked-card, #whyChooseWrapper .stacked-card", { clearProps: "transform" });
+
+        if (window.innerWidth >= 992) {
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: stackedWrapper,
@@ -421,14 +716,42 @@ $(document).ready(function () {
                     end: "+=1200",
                     scrub: 1,
                     pin: true,
-                    anticipatePin: 1
+                    anticipatePin: 1,
+                    invalidateOnRefresh: true,
+                    refreshPriority: 1
                 }
             });
 
-            tl.to("#whyChooseStackedWrapper .card-layer-2", { y: "0%", ease: "power1.out", duration: 1 })
-                .to("#whyChooseStackedWrapper .card-layer-3", { y: "0%", ease: "power1.out", duration: 1 })
-                .to("#whyChooseStackedWrapper .card-layer-4", { y: "0%", ease: "power1.out", duration: 1 });
+            tl.fromTo("#whyChooseStackedWrapper .card-layer-2, #whyChooseWrapper .card-layer-2", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 })
+                .fromTo("#whyChooseStackedWrapper .card-layer-3, #whyChooseWrapper .card-layer-3", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 })
+                .fromTo("#whyChooseStackedWrapper .card-layer-4, #whyChooseWrapper .card-layer-4", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 });
         }
+    }
+
+    // Expose globally for AJAX / SPA navigation
+    window.initWhyChooseScrollTrigger = initWhyChooseScrollTrigger;
+    initWhyChooseScrollTrigger();
+
+    // Refresh ScrollTrigger when window finishes loading all assets/images & fonts
+    function safeRefreshScrollTriggers() {
+        if (typeof ScrollTrigger !== 'undefined') {
+            ScrollTrigger.sort();
+            ScrollTrigger.refresh(true);
+        }
+    }
+
+    if (document.readyState === 'complete') {
+        setTimeout(safeRefreshScrollTriggers, 100);
+    } else {
+        window.addEventListener('load', function () {
+            setTimeout(safeRefreshScrollTriggers, 100);
+        });
+    }
+
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () {
+            setTimeout(safeRefreshScrollTriggers, 50);
+        });
     }
 
     // Initialize Right Sidebar Featured Swiper Slider
@@ -453,37 +776,58 @@ $(document).ready(function () {
     }
 
     // Living Hero Product Flight Animation on Scroll
-    const livingHeroSection = document.querySelector('#living-hero-section');
-    const animatedProductImg = document.querySelector('#living-hero-animated-product');
-    const productTargetBox = document.querySelector('#living-hero-product-target');
-    const livingHeroImgBox = document.querySelector('#living-hero-img-box');
+    function initLivingHeroScrollTrigger() {
+        const livingHeroSection = document.querySelector('#living-hero-section');
+        const animatedProductImg = document.querySelector('#living-hero-animated-product');
+        const productTargetBox = document.querySelector('#living-hero-product-target');
+        const livingHeroImgBox = document.querySelector('#living-hero-img-box');
 
-    if (livingHeroSection && animatedProductImg && productTargetBox && livingHeroImgBox) {
-        if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-            gsap.registerPlugin(ScrollTrigger);
+        if (!livingHeroSection || !animatedProductImg || !productTargetBox || !livingHeroImgBox) return;
+        if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-            function setupProductFlight() {
-                const startCenter = livingHeroImgBox.getBoundingClientRect().top + (livingHeroImgBox.getBoundingClientRect().height / 2);
-                const targetCenter = productTargetBox.getBoundingClientRect().top + (productTargetBox.getBoundingClientRect().height / 2);
-                const yDistance = targetCenter - startCenter;
+        gsap.registerPlugin(ScrollTrigger);
 
-                gsap.to(animatedProductImg, {
-                    y: yDistance,
-                    ease: "none",
-                    scrollTrigger: {
-                        trigger: livingHeroSection,
-                        start: "top 35%",
-                        end: "bottom 85%",
-                        scrub: 0.5,
-                        invalidateOnRefresh: true
-                    }
-                });
+        // 1. Clean up previous triggers on living hero section to avoid duplicates
+        ScrollTrigger.getAll().forEach(st => {
+            if (st.vars && st.vars.trigger === livingHeroSection || st.trigger === livingHeroSection) {
+                st.kill(true);
             }
+        });
 
-            setupProductFlight();
-            window.addEventListener('resize', setupProductFlight);
-        }
+        // 2. Clear stale transforms & reset base centering
+        gsap.set(animatedProductImg, { clearProps: "transform" });
+        gsap.set(animatedProductImg, {
+            xPercent: -50,
+            yPercent: -50,
+            x: 0,
+            y: 0
+        });
+
+        gsap.fromTo(animatedProductImg,
+            {
+                y: 0
+            },
+            {
+                y: () => {
+                    const startCenter = livingHeroImgBox.offsetTop + (livingHeroImgBox.offsetHeight / 2);
+                    const targetCenter = productTargetBox.offsetTop + (productTargetBox.offsetHeight / 2);
+                    return targetCenter - startCenter;
+                },
+                ease: "none",
+                scrollTrigger: {
+                    trigger: livingHeroSection,
+                    start: "top top",
+                    end: "bottom 85%",
+                    scrub: 0.6,
+                    invalidateOnRefresh: true
+                }
+            }
+        );
     }
+
+    // Expose globally for AJAX / page re-renders
+    window.initLivingHeroScrollTrigger = initLivingHeroScrollTrigger;
+    initLivingHeroScrollTrigger();
 
 
     // Render Other Matched Products Dynamically inside #other-matched-products
@@ -494,13 +838,37 @@ $(document).ready(function () {
         hasMore: (window.INITIAL_PAGINATION && window.INITIAL_PAGINATION.hasMore) || false
     };
 
-    function generateProductCardHtml(p) {
+    function generateProductCardHtml(p, colClass = 'col-md-6 col-sm-6') {
+        // We simulate the blade template here.
+        // Assume empty/false for active states initially since AJAX payload doesn't include session states.
+        const inCart = false;
+        const inCompare = false;
+        const isFav = false;
+
+        const categoryBgColor = p.category_bg_color || '#6c757d';
+        const categoryName = p.category || '';
+        const subtitle = (p.subtitle || p.category || 'ENTERPRISE FILTRATION').toUpperCase();
+
+        let badgeHtml = '';
+        if (categoryName || (p.quantity <= 5 && p.quantity > 0)) {
+            badgeHtml = `<div class="product-card__badge-wrapper">`;
+            if (categoryName) {
+                badgeHtml += `<span class="product-card__badge-pill" style="background-color: ${categoryBgColor} !important; color: #ffffff !important;">${categoryName}</span>`;
+            }
+            if (p.quantity <= 5 && p.quantity > 0) {
+                badgeHtml += `<span class="product-card__badge-pill product-card__badge-pill--low-stock">Low Stock</span>`;
+            }
+            badgeHtml += `</div>`;
+        }
+
         return `
-            <div class="col-md-6 mb-3 product-card-col">
-                <div class="product-card position-relative shadow-sm h-100 d-flex flex-column justify-content-between">
+            <div class="${colClass} mb-3 product-card-col">
+                <div class="product-card position-relative h-100">
+                    ${badgeHtml}
                     <div class="product-card__labels position-absolute d-flex flex-column gap-2">
-                        <a href="javascript:void(0);" class="btn-add-to-cart"
-                            data-product-id="${p.id}" title="Add to cart">
+                        <a href="javascript:void(0);" class="btn-add-to-cart ${inCart ? 'active' : ''}"
+                            data-product-id="${p.id}" data-bs-toggle="tooltip" data-bs-placement="left"
+                            title="${inCart ? 'In Cart' : 'Add to Cart'}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -508,176 +876,188 @@ $(document).ready(function () {
                                     fill="#0066CC" />
                             </svg>
                         </a>
-                        <a href="javascript:void(0);" class="btn-add-to-favorite"
-                            data-product-id="${p.id}" title="Add to wishlist">
+                        <a href="javascript:void(0);" class="btn-add-to-compare ${inCompare ? 'active' : ''}"
+                            data-product-id="${p.id}" data-bs-toggle="tooltip" data-bs-placement="left"
+                            title="${inCompare ? 'In Compare' : 'Compare this solution'}">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
-                                    d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z"
+                                    d="M2 5C2 6.3 2.84 7.4 4 7.82V17.5C4 18.163 4.26339 18.7989 4.73223 19.2678C5.20107 19.7366 5.83696 20 6.5 20H10V22L14 19L10 16V18H6.5C6.22 18 6 17.78 6 17.5V7.82C7.16 7.41 8 6.31 8 5C8 3.35 6.65 2 5 2C3.35 2 2 3.35 2 5ZM5 4C5.55 4 6 4.45 6 5C6 5.55 5.55 6 5 6C4.45 6 4 5.55 4 5C4 4.45 4.45 4 5 4ZM20 16.18V6.5C20 5.83696 19.7366 5.20107 19.2678 4.73223C18.7989 4.26339 18.163 4 17.5 4H14V2L10 5L14 8V6H17.5C17.78 6 18 6.22 18 6.5V16.18C16.84 16.59 16 17.69 16 19C16 20.65 17.35 22 19 22C20.65 22 22 20.65 22 19C22 17.7 21.16 16.6 20 16.18ZM19 20C18.45 20 18 19.55 18 19C18 18.45 18.45 18 19 18C19.55 18 20 18.45 20 19C20 19.55 19.55 20 19 20Z"
                                     fill="#0066CC" />
+                            </svg>
+                        </a>
+                        <a href="javascript:void(0);" class="btn-toggle-favorite ${isFav ? 'active' : ''}"
+                            data-product-id="${p.id}" data-bs-toggle="tooltip" data-bs-placement="left"
+                            title="${isFav ? 'Remove from favorites' : 'Add to favorite'}">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="${isFav ? '#dc3545' : 'none'}"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M12 20.9999L10.55 19.6999C8.86667 18.1832 7.475 16.8749 6.375 15.7749C5.275 14.6749 4.4 13.6872 3.75 12.8119C3.1 11.9366 2.646 11.1326 2.388 10.3999C2.13 9.66724 2.00067 8.91724 2 8.1499C2 6.58324 2.525 5.2749 3.575 4.2249C4.625 3.1749 5.93333 2.6499 7.5 2.6499C8.36667 2.6499 9.19167 2.83324 9.975 3.1999C10.7583 3.56657 11.4333 4.08324 12 4.7499C12.5667 4.08324 13.2417 3.56657 14.025 3.1999C14.8083 2.83324 15.6333 2.6499 16.5 2.6499C18.0667 2.6499 19.375 3.1749 20.425 4.2249C21.475 5.2749 22 6.58324 22 8.1499C22 8.91657 21.871 9.66657 21.613 10.3999C21.355 11.1332 20.9007 11.9372 20.25 12.8119C19.5993 13.6866 18.7243 14.6742 17.625 15.7749C16.5257 16.8756 15.134 18.1839 13.45 19.6999L12 20.9999ZM12 18.2999C13.6 16.8666 14.9167 15.6376 15.95 14.6129C16.9833 13.5882 17.8 12.6966 18.4 11.9379C19 11.1792 19.4167 10.5039 19.65 9.9119C19.8833 9.3199 20 8.73257 20 8.1499C20 7.1499 19.6667 6.31657 19 5.6499C18.3333 4.98324 17.5 4.6499 16.5 4.6499C15.7167 4.6499 14.9917 4.87057 14.325 5.3119C13.6583 5.75324 13.2 6.3159 12.95 6.9999H11.05C10.8 6.31657 10.3417 5.75424 9.675 5.3129C9.00833 4.87157 8.28333 4.65057 7.5 4.6499C6.5 4.6499 5.66667 4.98324 5 5.6499C4.33333 6.31657 4 7.1499 4 8.1499C4 8.73324 4.11667 9.3209 4.35 9.9129C4.58333 10.5049 5 11.1799 5.6 11.9379C6.2 12.6959 7.01667 13.5876 8.05 14.6129C9.08333 15.6382 10.4 16.8672 12 18.2999Z"
+                                    fill="${isFav ? '#dc3545' : '#0066CC'}" />
                             </svg>
                         </a>
                     </div>
                     <div class="product-card__image-wrapper">
                         <a href="${p.url}">
-                            <img src="${p.main_image}" alt="${p.name}" class="product-card__image">
+                            <img src="${p.main_image}" alt="${p.name}" class="product-card__image" loading="lazy">
                         </a>
                     </div>
                     <h3 class="product-card__title">
-                        <a href="${p.url}" class="text-decoration-none text-dark">
+                        <a href="${p.url}">
                             ${p.name}
                         </a>
                     </h3>
                     <div class="product-card__category">
-                        ${p.category}
+                        ${subtitle}
                     </div>
                     <div class="product-card__actions">
-                        <a href="javascript:void(0);" class="product-card__btn-buy btn-buy-now"
-                            data-product-id="${p.id}">Buy</a>
+                        <a href="javascript:void(0);" class="product-card__btn-buy btn-buy-now" data-product-id="${p.id}">Buy</a>
                         <a href="${p.url}" class="product-card__btn-learn">Learn more</a>
-                        <a href="javascript:void(0);" class="product-card__btn-compare btn-add-to-compare"
-                            data-product-id="${p.id}" title="Add to Compare"
-                            style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:6px;border:1px solid #cbd5e1;background:#fff;color:#475569;transition:all .2s;"
-                            onmouseover="this.style.background='#0066cc';this.style.color='#fff';this.style.borderColor='#0066cc'"
-                            onmouseout="this.style.background='#fff';this.style.color='#475569';this.style.borderColor='#cbd5e1'">
-                            <i class="bi bi-bar-chart-steps" style="font-size:0.85rem;"></i>
-                        </a>
                     </div>
                 </div>
             </div>
         `;
     }
 
-    // Render Matched Products List
-    function renderRelatedProducts(products, meta, isAppend = false) {
+    function generateBestMatchHeroHtml(p) {
+        const inCart = false;
+        const inCompare = false;
+        const isFav = false;
+        const categoryBgColor = p.category_bg_color || '#0066cc';
+        const categoryName = p.category || 'Air Solution';
+        const subtitle = (p.subtitle || 'OPTIMAL ARCHITECTURAL MATCH').toUpperCase();
+
+        return `
+            <div class="best-matched-product-card mb-4 p-4 bg-white border rounded-4 shadow-sm position-relative">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2 border-bottom">
+                    <span class="badge bg-primary text-white text-uppercase px-3 py-2 fw-bold" style="font-size: 11px; letter-spacing: 0.08em;">
+                        <i class="bi bi-patch-check-fill me-1"></i> #1 Best Matched Solution
+                    </span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fs-12 fw-semibold" id="btnRestartProtocol">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reconfigure Protocol
+                    </button>
+                </div>
+
+                <div class="row align-items-center g-4">
+                    <div class="col-md-5 text-center">
+                        <div class="best-match-img-box p-3 bg-light rounded-3 d-flex align-items-center justify-content-center" style="min-height: 220px;">
+                            <a href="${p.url}">
+                                <img src="${p.main_image}" alt="${p.name}" class="img-fluid" style="max-height: 220px; object-fit: contain;">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <span class="badge rounded-pill mb-2 px-2.5 py-1 text-white fs-11" style="background-color: ${categoryBgColor};">
+                            ${categoryName}
+                        </span>
+                        <h2 class="title-2 fs-22 fw-bold text-dark mb-1">
+                            <a href="${p.url}" class="text-decoration-none text-dark hover-primary">${p.name}</a>
+                            ${p.model ? `<span class="text-muted fw-normal fs-15 ms-1">(${p.model})</span>` : ''}
+                        </h2>
+                        <div class="text-uppercase text-muted fs-11 fw-bold tracking-wider mb-2">${subtitle}</div>
+
+                        ${p.description ? `<p class="fs-13 text-muted mb-3 line-clamp-2">${p.description}</p>` : ''}
+
+                        <div class="d-flex flex-wrap gap-2 mb-3">
+                            <span class="badge bg-light text-dark border px-2.5 py-1.5 fs-12 fw-medium">
+                                <i class="bi bi-wind text-primary me-1"></i> CADR: <strong>${p.cadr || 'High Performance'}</strong>
+                            </span>
+                            <span class="badge bg-light text-dark border px-2.5 py-1.5 fs-12 fw-medium">
+                                <i class="bi bi-shield-check text-success me-1"></i> Filtration: <strong>${p.filter_grade || 'HEPA H13'}</strong>
+                            </span>
+                        </div>
+
+                        <div class="d-flex flex-wrap align-items-center justify-content-between pt-3 border-top gap-3">
+                            <div class="price-wrap">
+                                <span class="fs-11 text-muted text-uppercase d-block fw-semibold">Configured Price</span>
+                                <span class="fs-22 fw-bold text-dark">$${p.price}</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="${p.url}" class="btn btn-outline-dark btn-sm rounded-pill px-3 py-2 fw-semibold">
+                                    Full Specs <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                                <a href="javascript:void(0);" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold btn-buy-now" data-product-id="${p.id}">
+                                    Buy Now
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Render Matched Products List (products[0] as #1 Best Match + products[1..n] in grid below)
+    function renderRelatedProducts(data, meta) {
         const $section = $('#other-matched-products, #Related-products');
         if (!$section.length) return;
 
-        // Update infinite scroll pagination meta
-        if (meta) {
-            infiniteScroll.currentPage = meta.current_page || 1;
-            infiniteScroll.lastPage = meta.last_page || 1;
-            infiniteScroll.hasMore = infiniteScroll.currentPage < infiniteScroll.lastPage;
+        // Extract products array from API response
+        let products = [];
+        if (data && Array.isArray(data.products)) {
+            products = data.products;
+        } else if (Array.isArray(data)) {
+            products = data;
+        } else if (data && data.best_product) {
+            products = [data.best_product, ...(data.other_products || data.related_products || [])];
         }
 
-        if (!isAppend) {
-            if (!products || products.length === 0) {
-                $section.html(`
-                    <div class="p-4 bg-light rounded-4 border text-center my-4">
-                        <i class="bi bi-search fs-3 text-muted mb-2 d-block"></i>
-                        <h4 class="fs-16 fw-bold text-dark mb-1">No Other Matches</h4>
-                        <p class="fs-13 text-muted mb-0">Adjust your protocol options or explore our complete catalog.</p>
+        if (!products || products.length === 0) {
+            $section.html(`
+                <div class="p-4 bg-light rounded-4 border text-center my-4">
+                    <i class="bi bi-search fs-3 text-muted mb-2 d-block"></i>
+                    <h4 class="fs-16 fw-bold text-dark mb-1">No Exact Matches Found</h4>
+                    <p class="fs-13 text-muted mb-3">No specific product matches all combined criteria simultaneously.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" id="btnRestartProtocol">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Reconfigure Protocol
+                        </button>
+                        <a href="${window.CATALOG_URL || '/categories'}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-semibold">
+                            Browse Catalog
+                        </a>
                     </div>
-                `);
-                return;
-            }
+                </div>
+            `);
+            return;
+        }
 
-            let cardsHtml = '';
-            products.forEach(p => {
-                cardsHtml += generateProductCardHtml(p);
-            });
+        // 1. First index [0] is ALWAYS the #1 Best Match product
+        const bestMatch = products[0];
 
-            let productsHtml = `
-                <div class="other-matched-products-wrapper my-5 pt-3 border-top">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h3 class="title-2 fs-20 fw-bold text-dark mb-0">Recommended Configurations</h3>
-                        </div>
+        // 2. All remaining indices [1..n] are rendered directly below in the grid
+        const otherProducts = products.slice(1);
+
+        let bestMatchHtml = generateBestMatchHeroHtml(bestMatch);
+        let otherCardsHtml = '';
+        otherProducts.forEach(p => {
+            otherCardsHtml += generateProductCardHtml(p, 'col-md-6 col-sm-6');
+        });
+
+        let otherSectionHtml = '';
+        if (otherProducts.length > 0) {
+            otherSectionHtml = `
+                <div class="other-matched-products-wrapper mt-4 pt-4 border-top">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="title-2 fs-18 fw-bold text-dark mb-0">
+                            <i class="bi bi-grid-3x3-gap text-primary me-2"></i> Other Matching Products (${otherProducts.length})
+                        </h3>
+                        <a href="${window.CATALOG_URL || '/products-filter'}" class="btn btn-sm btn-link text-decoration-none fw-semibold fs-13 text-primary p-0">
+                            View All in Catalog <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
 
-                    <div class="row g-4" id="matchedProductsGrid">
-                        ${cardsHtml}
-                    </div>
-
-                    <div id="infiniteScrollLoader" class="text-center py-4 w-100 ${infiniteScroll.hasMore ? '' : 'd-none'}">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <span class="ms-2 fs-13 text-muted fw-semibold">Loading more configurations...</span>
+                    <div class="row g-3" id="matchedProductsGrid">
+                        ${otherCardsHtml}
                     </div>
                 </div>
             `;
-
-            $section.html(productsHtml);
         } else {
-            // Append mode
-            let newCardsHtml = '';
-            products.forEach(p => {
-                newCardsHtml += generateProductCardHtml(p);
-            });
-            $('#matchedProductsGrid').append(newCardsHtml);
-
-            if (infiniteScroll.hasMore) {
-                $('#infiniteScrollLoader').removeClass('d-none');
-            } else {
-                $('#infiniteScrollLoader').addClass('d-none');
-            }
+            otherSectionHtml = `
+                <div class="row g-3 d-none" id="matchedProductsGrid"></div>
+            `;
         }
-    }
 
-    // Infinite Scroll On-Scroll Event Listener
-    let scrollThrottle = null;
-    $(window).on('scroll resize', function () {
-        if (scrollThrottle) return;
-        scrollThrottle = setTimeout(function () {
-            scrollThrottle = null;
-
-            if (!infiniteScroll.hasMore || infiniteScroll.isLoading) return;
-
-            const $loader = $('#infiniteScrollLoader');
-            if (!$loader.length || $loader.hasClass('d-none')) return;
-
-            const loaderOffset = $loader.offset().top;
-            const scrollBottom = $(window).scrollTop() + $(window).height();
-
-            if (scrollBottom >= loaderOffset - 400) {
-                loadNextInfinitePage();
-            }
-        }, 100);
-    });
-
-    function loadNextInfinitePage() {
-        if (!infiniteScroll.hasMore || infiniteScroll.isLoading) return;
-        if (!window.FILTER_QUERY_URL) return;
-
-        infiniteScroll.isLoading = true;
-        $('#infiniteScrollLoader').removeClass('d-none');
-
-        const nextPage = infiniteScroll.currentPage + 1;
-        const selectedSlugs = [];
-        Object.keys(userSelections).forEach(function (stepKey) {
-            if (userSelections[stepKey] && userSelections[stepKey].val) {
-                selectedSlugs.push(userSelections[stepKey].val);
-            }
-        });
-
-        $.ajax({
-            url: window.FILTER_QUERY_URL,
-            type: 'POST',
-            data: {
-                _token: window.CSRF_TOKEN || '',
-                category_slugs: selectedSlugs,
-                page: nextPage
-            },
-            success: function (res) {
-                infiniteScroll.isLoading = false;
-                if (res && res.status && res.products && res.products.length > 0) {
-                    renderRelatedProducts(res.products, {
-                        current_page: res.current_page,
-                        last_page: res.last_page,
-                        total: res.total,
-                        per_page: res.per_page
-                    }, true);
-                } else {
-                    infiniteScroll.hasMore = false;
-                    $('#infiniteScrollLoader').addClass('d-none');
-                }
-            },
-            error: function () {
-                infiniteScroll.isLoading = false;
-                $('#infiniteScrollLoader').addClass('d-none');
-            }
-        });
+        $section.html(bestMatchHtml + otherSectionHtml);
     }
 
     // Live AJAX Product Matching Query
@@ -687,39 +1067,49 @@ $(document).ready(function () {
 
         clearTimeout(queryTimeout);
         queryTimeout = setTimeout(function () {
-            const selectedSlugs = [];
-            Object.keys(userSelections).forEach(function (stepKey) {
-                if (userSelections[stepKey] && userSelections[stepKey].val) {
-                    selectedSlugs.push(userSelections[stepKey].val);
-                }
-            });
+            const payload = buildFilterPayload(9);
+            payload.page = page;
 
             $.ajax({
                 url: window.FILTER_QUERY_URL,
                 type: 'POST',
-                data: {
-                    _token: window.CSRF_TOKEN || '',
-                    category_slugs: selectedSlugs,
-                    page: page
-                },
+                data: payload,
                 success: function (res) {
+                    $('#protocolLoadingSpinner').remove();
                     if (res && res.status) {
                         $('#liveMatchCountTag').text(res.count + ' Products Match');
 
-                        // Reset & Render matched products with infinite scroll pagination meta
-                        renderRelatedProducts(res.products || [], {
-                            current_page: res.current_page || 1,
-                            last_page: res.last_page || 1,
-                            total: res.total || res.count || 0,
-                            per_page: res.per_page || 2
-                        }, false);
+                        // Render best match + other searched products
+                        renderRelatedProducts(res, {
+                            total: res.total || res.count || 0
+                        });
 
                         if (shouldScroll && $('#other-matched-products').length) {
                             $('html, body').animate({
                                 scrollTop: $('#other-matched-products').offset().top - 80
                             }, 500);
                         }
+                    } else {
+                        renderRelatedProducts([], {});
                     }
+                },
+                error: function (xhr, status, error) {
+                    $('#protocolLoadingSpinner').remove();
+                    $('#other-matched-products').html(`
+                        <div class="p-4 bg-light rounded-4 border text-center my-4">
+                            <i class="bi bi-exclamation-triangle text-warning fs-3 mb-2 d-block"></i>
+                            <h4 class="fs-16 fw-bold text-dark mb-1">Notice</h4>
+                            <p class="fs-13 text-muted mb-3">Unable to synthesize specifications at this moment.</p>
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold" id="btnRestartProtocol">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reconfigure Protocol
+                                </button>
+                                <a href="${window.CATALOG_URL || '/categories'}" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-semibold">
+                                    Browse Catalog
+                                </a>
+                            </div>
+                        </div>
+                    `);
                 }
             });
         }, 150);
@@ -727,17 +1117,39 @@ $(document).ready(function () {
 
     $(document).on('click', '#btnViewProductsFinal, #btnViewProductsResult', function (e) {
         e.preventDefault();
-        const selectedSlugs = [];
-        Object.keys(userSelections).forEach(function (stepKey) {
-            if (userSelections[stepKey] && userSelections[stepKey].val) {
-                selectedSlugs.push(userSelections[stepKey].val);
+        const cleanParams = new URLSearchParams();
+
+        const singleParamMap = {
+            1: 'category',
+            2: 'building_type',
+            3: 'room_type',
+            4: 'area_range',
+            5: 'occupancy',
+            9: 'budget'
+        };
+
+        const arrayParamMap = {
+            6: 'health_concern',
+            7: 'problem',
+            8: 'solution_needed'
+        };
+
+        Object.keys(singleParamMap).forEach(stepNum => {
+            const vals = getStepSelectedValues(parseInt(stepNum, 10));
+            if (vals.length > 0) {
+                cleanParams.set(singleParamMap[stepNum], vals[0]);
             }
         });
 
-        let targetUrl = window.CATALOG_URL || '/categories';
-        if (selectedSlugs.length > 0) {
-            targetUrl = '/category/' + encodeURIComponent(selectedSlugs[0]);
-        }
+        Object.keys(arrayParamMap).forEach(stepNum => {
+            const vals = getStepSelectedValues(parseInt(stepNum, 10));
+            vals.forEach(v => {
+                cleanParams.append(arrayParamMap[stepNum] + '[]', v);
+            });
+        });
+
+        const baseUrl = window.CATALOG_URL || '/products-filter';
+        const targetUrl = cleanParams.toString() ? (baseUrl + '?' + cleanParams.toString()) : baseUrl;
         window.location.href = targetUrl;
     });
 
@@ -746,25 +1158,42 @@ $(document).ready(function () {
 });
 
 
-document.addEventListener('DOMContentLoaded', () => {
-    const testimonialsSwiper = new Swiper('.testimonials-slider', {
+function initTestimonialsSwiper() {
+    const sliderContainer = document.querySelector('.testimonials-slider');
+    if (!sliderContainer || typeof Swiper === 'undefined') return;
+
+    if (sliderContainer.swiper) {
+        sliderContainer.swiper.update();
+        return;
+    }
+
+    const slideCount = sliderContainer.querySelectorAll('.swiper-slide').length;
+    if (slideCount === 0) return;
+
+    new Swiper(sliderContainer, {
         slidesPerView: 1,
         spaceBetween: 24,
-        loop: true,
-        autoplay: {
+        loop: slideCount > 2,
+        autoplay: slideCount > 1 ? {
             delay: 5000,
             disableOnInteraction: false,
-        },
+            pauseOnMouseEnter: true,
+        } : false,
         pagination: {
-            el: '.swiper-pagination',
+            el: sliderContainer.querySelector('.swiper-pagination') || '.swiper-pagination',
             clickable: true,
         },
         breakpoints: {
             // When window width is >= 768px
             768: {
-                slidesPerView: 2,
+                slidesPerView: slideCount >= 2 ? 2 : 1,
                 spaceBetween: 30,
             }
         }
     });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initTestimonialsSwiper();
 });
+window.initTestimonialsSwiper = initTestimonialsSwiper;

@@ -148,6 +148,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const stackedWrapper = document.getElementById('whyChooseWrapper') || document.getElementById('whyChooseStackedWrapper');
         if (stackedWrapper && window.innerWidth >= 992) {
+            ScrollTrigger.getAll().forEach(st => {
+                if (st.vars && st.vars.trigger === stackedWrapper || st.trigger === stackedWrapper) {
+                    st.kill(true);
+                }
+            });
+
+            const pinSpacer = stackedWrapper.closest('.pin-spacer');
+            if (pinSpacer && pinSpacer.parentElement) {
+                pinSpacer.parentElement.insertBefore(stackedWrapper, pinSpacer);
+                pinSpacer.remove();
+            }
+
+            gsap.set(stackedWrapper, { clearProps: "all" });
+            gsap.set("#whyChooseWrapper .stacked-card, #whyChooseStackedWrapper .stacked-card", { clearProps: "transform" });
+
             const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: stackedWrapper,
@@ -155,13 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     end: "+=1200",
                     scrub: 1,
                     pin: true,
-                    anticipatePin: 1
+                    anticipatePin: 1,
+                    invalidateOnRefresh: true
                 }
             });
 
-            tl.to("#whyChooseWrapper .card-layer-2", { y: "0%", ease: "power1.out", duration: 1 })
-              .to("#whyChooseWrapper .card-layer-3", { y: "0%", ease: "power1.out", duration: 1 })
-              .to("#whyChooseWrapper .card-layer-4", { y: "0%", ease: "power1.out", duration: 1 });
+            tl.fromTo("#whyChooseWrapper .card-layer-2, #whyChooseStackedWrapper .card-layer-2", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 })
+              .fromTo("#whyChooseWrapper .card-layer-3, #whyChooseStackedWrapper .card-layer-3", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 })
+              .fromTo("#whyChooseWrapper .card-layer-4, #whyChooseStackedWrapper .card-layer-4", { y: "140%" }, { y: "0%", ease: "power1.out", duration: 1 });
         }
     }
 });
