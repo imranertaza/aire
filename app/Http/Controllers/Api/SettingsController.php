@@ -104,6 +104,7 @@ class SettingsController extends Controller
 
             // Storefront Appearance
             'show_category_features_globally' => 'sometimes|in:0,1',
+            'popular_searches'                => 'sometimes|nullable|string|max:1000',
 
             // reCAPTCHA (these will update .env)
             'use_recaptcha'       => 'sometimes|in:0,1',

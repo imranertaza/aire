@@ -26,29 +26,12 @@
                                     aria-controls="custom-tabs-data" aria-selected="false">Data</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" id="tab-images" data-toggle="pill" href="#custom-tabs-images"
+                                    role="tab" aria-controls="custom-tabs-images" aria-selected="false">Images</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="tab-links" data-toggle="pill" href="#custom-tabs-links"
                                     role="tab" aria-controls="custom-tabs-links" aria-selected="false">Links</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="tab-options" data-toggle="pill" href="#custom-tabs-options"
-                                    role="tab" aria-controls="custom-tabs-options" aria-selected="false">Options</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="tab-filter-options" data-toggle="pill" href="#custom-tabs-filter-options"
-                                    role="tab" aria-controls="custom-tabs-filter-options" aria-selected="false">Filter Options</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="tab-attributes" data-toggle="pill"
-                                    href="#custom-tabs-attributes" role="tab" aria-controls="custom-tabs-attributes"
-                                    aria-selected="false">Attributes</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="tab-specials" data-toggle="pill" href="#custom-tabs-specials"
-                                    role="tab" aria-controls="custom-tabs-specials" aria-selected="false">Specials</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="tab-others" data-toggle="pill" href="#custom-tabs-others"
-                                    role="tab" aria-controls="custom-tabs-others" aria-selected="false">Others</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" id="tab-overview" data-toggle="pill" href="#custom-tabs-overview"
@@ -71,12 +54,29 @@
                                     role="tab" aria-controls="custom-tabs-applications" aria-selected="false">Applications</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-faqs" data-toggle="pill" href="#custom-tabs-faqs"
-                                    role="tab" aria-controls="custom-tabs-faqs" aria-selected="false">FAQs</a>
+                                <a class="nav-link" id="tab-filter-options" data-toggle="pill" href="#custom-tabs-filter-options"
+                                    role="tab" aria-controls="custom-tabs-filter-options" aria-selected="false">Filter Options</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" id="tab-images" data-toggle="pill" href="#custom-tabs-images"
-                                    role="tab" aria-controls="custom-tabs-images" aria-selected="false">Images</a>
+                                <a class="nav-link" id="tab-options" data-toggle="pill" href="#custom-tabs-options"
+                                    role="tab" aria-controls="custom-tabs-options" aria-selected="false">Options</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-attributes" data-toggle="pill"
+                                    href="#custom-tabs-attributes" role="tab" aria-controls="custom-tabs-attributes"
+                                    aria-selected="false">Attributes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-specials" data-toggle="pill" href="#custom-tabs-specials"
+                                    role="tab" aria-controls="custom-tabs-specials" aria-selected="false">Specials</a>
+                            </li>
+                            <!-- <li class="nav-item">
+                                <a class="nav-link" id="tab-others" data-toggle="pill" href="#custom-tabs-others"
+                                    role="tab" aria-controls="custom-tabs-others" aria-selected="false">Others</a>
+                            </li> -->
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-faqs" data-toggle="pill" href="#custom-tabs-faqs"
+                                    role="tab" aria-controls="custom-tabs-faqs" aria-selected="false">FAQs</a>
                             </li>
                         </ul>
                     </div>

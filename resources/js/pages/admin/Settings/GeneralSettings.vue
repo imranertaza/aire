@@ -136,6 +136,16 @@
                                 </div>
                                 <small class="text-muted d-block mt-1">If disabled, category features will be hidden across the entire storefront, overriding individual category settings.</small>
                             </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label font-weight-bold">Popular Searches (Search Modal)</label>
+                                <textarea v-model="form.popular_searches" class="form-control" rows="3"
+                                    placeholder="e.g. Air Purifier, ERV, Cleanroom, Hospital HVAC, PM2.5 Removal, Model BAP-500"></textarea>
+                                <small class="text-muted d-block mt-1">
+                                    Enter comma-separated keywords or phrases to show as clickable suggestion chips in the search popup modal.
+                                    <br>
+                                    <em>Note: Leave this blank to automatically auto-generate popular searches from your active product categories, filter options, and products.</em>
+                                </small>
+                            </div>
                         </div>
                     </div>
 
@@ -429,6 +439,7 @@ const form = ref({
     brand_name: '',
     footer_description: '',
     show_category_features_globally: 1,
+    popular_searches: '',
     mail_protocol: '',
     mail_address: '',
     send_from: '',

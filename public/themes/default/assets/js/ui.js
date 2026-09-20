@@ -15,46 +15,51 @@ $(document).ready(function () {
         $(this).closest('form').css('transform', 'scale(1)');
     });
 
-    // 3. Floating Live Dynamic Search
+    // 3. AIRE Smart Search & Discovery Modal
     let searchDebounceTimer = null;
+    let examplePromptIndex = 0;
+    const examplePrompts = [
+        "clean air for classroom",
+        "reduce virus in hospital OT",
+        "PM2.5 removal for living room",
+        "quiet ERV for bedroom",
+        "cleanroom HVAC system",
+        "high efficiency air purifier for clinic"
+    ];
 
-    function ensureSearchElements() {
-        if ($('.search-backdrop').length === 0) {
-            $('body').append('<div class="search-backdrop"></div>');
-        }
-
-        if ($('.search-floating-card').length === 0) {
-            var cardHtml = `
-                <div class="search-floating-card" data-lenis-prevent>
-                    <form class="search-floating-bar" action="/products-filter" method="GET">
-                        <input type="search" name="search" class="search-floating-input" placeholder="Search products, models, categories..." autocomplete="off" autofocus>
-                        <button type="submit" class="search-floating-btn" aria-label="Search">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                                <path d="M18.031 16.617L22.314 20.899L20.899 22.314L16.617 18.031C15.0237 19.3082 13.042 20.0029 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20.0029 13.042 19.3082 15.0237 18.031 16.617ZM16.025 15.875C17.2938 14.5697 18.0025 12.8204 18 11C18 7.133 14.867 4 11 4C7.133 4 4 7.133 4 11C4 14.867 7.133 18 11 18C12.8204 18.0025 14.5697 17.2938 15.875 16.025L16.025 15.875Z" fill="currentColor"/>
-                            </svg>
-                        </button>
-                    </form>
-                    <div class="search-floating-results" data-lenis-prevent></div>
-                </div>`;
-            $('body').append(cardHtml);
-        }
-    }
-
-    function openSearch() {
-        ensureSearchElements();
-
-        const $backdrop = $('.search-backdrop');
-        const $card = $('.search-floating-card');
-        const $input = $('.search-floating-input');
+    function openSearch(initialQuery = '') {
+        const $backdrop = $('#aireSearchBackdrop');
+        const $modal = $('#aireSearchModal');
+        const $input = $('#aireSearchInput');
+        const $guidance = $('#aireSearchGuidance');
+        const $results = $('#aireSearchResults');
+        const $clear = $('#aireSearchClear');
 
         $backdrop.addClass('show');
-        $card.addClass('show');
+        $modal.addClass('show');
+        $('body').addClass('search-modal-open');
 
-        // Immediate + staggered autofocus so browser never drops focus
+        if (initialQuery) {
+            $input.val(initialQuery);
+            $clear.removeClass('d-none');
+            $guidance.hide();
+            $results.show().html('<div class="aire-results-loading"><i class="spinner-border spinner-border-sm text-primary me-2"></i>Searching clean air systems...</div>');
+            fetchLiveSearchResults(initialQuery);
+        } else {
+            $guidance.show();
+            $results.empty().hide();
+            if ($input.val().trim().length === 0) {
+                $clear.addClass('d-none');
+            }
+        }
+
+        // Staggered focus so browser never loses focus
         const focusInput = function () {
-            if ($input.length && $card.hasClass('show')) {
+            if ($input.length && $modal.hasClass('show')) {
                 $input[0].focus({ preventScroll: true });
-                $input.select();
+                if (initialQuery) {
+                    $input.select();
+                }
             }
         };
 
@@ -66,34 +71,40 @@ $(document).ready(function () {
     }
 
     function closeSearch() {
-        $('.search-floating-card').removeClass('show has-results');
-        $('.search-backdrop').removeClass('show');
-        $('.search-floating-results').empty().hide();
-        $('.search-floating-input').val('').blur();
+        $('#aireSearchModal').removeClass('show');
+        $('#aireSearchBackdrop').removeClass('show');
+        $('body').removeClass('search-modal-open');
+        $('#aireSearchInput').blur();
     }
 
-    // Toggle button click
+    // Toggle button click (Desktop + Mobile dock)
     $(document).on('click', '[data-search-toggle]', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        if ($('.search-floating-card').hasClass('show')) {
+        if ($('#aireSearchModal').hasClass('show')) {
             closeSearch();
         } else {
             openSearch();
         }
     });
 
-    // Close on backdrop click
-    $(document).on('click', '.search-backdrop', function (e) {
+    // Close button click
+    $(document).on('click', '#aireSearchCloseBtn', function (e) {
+        e.preventDefault();
+        closeSearch();
+    });
+
+    // Backdrop click
+    $(document).on('click', '#aireSearchBackdrop', function (e) {
         e.preventDefault();
         closeSearch();
     });
 
     // Global keyboard handling
     $(document).on('keydown', function (e) {
-        const isSearchOpen = $('.search-floating-card').hasClass('show');
+        const isSearchOpen = $('#aireSearchModal').hasClass('show');
         const activeTagName = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
-        const isTypingInOtherInput = ['input', 'textarea', 'select'].includes(activeTagName) && !$(document.activeElement).hasClass('search-floating-input');
+        const isTypingInOtherInput = ['input', 'textarea', 'select'].includes(activeTagName) && !$(document.activeElement).hasClass('aire-search-input');
 
         // Escape closes search
         if (e.key === 'Escape' && isSearchOpen) {
@@ -110,38 +121,74 @@ $(document).ready(function () {
             }
         }
 
-        // If search is open but input somehow lost focus, redirect alphanumeric key to search input
-        if (isSearchOpen && !$(document.activeElement).hasClass('search-floating-input') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        // If search is open but input lost focus, redirect alphanumeric key to search input
+        if (isSearchOpen && !$(document.activeElement).hasClass('aire-search-input') && !e.ctrlKey && !e.metaKey && !e.altKey) {
             if (e.key.length === 1 || e.key === 'Backspace') {
-                const $input = $('.search-floating-input');
+                const $input = $('#aireSearchInput');
                 $input.focus();
             }
         }
     });
 
+    // Search Input Clear Button
+    $(document).on('click', '#aireSearchClear', function () {
+        const $input = $('#aireSearchInput');
+        $input.val('').focus();
+        $(this).addClass('d-none');
+        $('#aireSearchResults').empty().hide();
+        $('#aireSearchGuidance').show();
+    });
+
     // Live Dynamic Search Input Handler
-    $(document).on('input', '.search-floating-input', function () {
+    $(document).on('input', '#aireSearchInput', function () {
         const query = $(this).val().trim();
-        const $card = $('.search-floating-card');
-        const $results = $('.search-floating-results');
+        const $clear = $('#aireSearchClear');
+        const $guidance = $('#aireSearchGuidance');
+        const $results = $('#aireSearchResults');
 
         clearTimeout(searchDebounceTimer);
 
+        if (query.length > 0) {
+            $clear.removeClass('d-none');
+        } else {
+            $clear.addClass('d-none');
+        }
+
         if (query.length < 2) {
-            $card.removeClass('has-results');
             $results.empty().hide();
+            $guidance.show();
             return;
         }
 
-        $card.addClass('has-results');
-        $results.show().html('<div class="search-floating-loading"><i class="spinner-border spinner-border-sm text-primary me-2"></i>Searching clean air systems...</div>');
+        $guidance.hide();
+        $results.show().html('<div class="aire-results-loading"><i class="spinner-border spinner-border-sm text-primary me-2"></i>Searching clean air systems...</div>');
 
         searchDebounceTimer = setTimeout(function () {
-            fetchLiveSearchResults(query, $card, $results);
+            fetchLiveSearchResults(query);
         }, 180);
     });
 
-    function fetchLiveSearchResults(query, $card, $results) {
+    // Popular Search Chips Click
+    $(document).on('click', '.aire-search-chip', function (e) {
+        e.preventDefault();
+        const keyword = $(this).data('keyword');
+        if (keyword) {
+            $('#aireSearchInput').val(keyword).trigger('input');
+        }
+    });
+
+
+    // "Try an example" button click
+    $(document).on('click', '#aireBtnTryExample', function (e) {
+        e.preventDefault();
+        const prompt = examplePrompts[examplePromptIndex % examplePrompts.length];
+        examplePromptIndex++;
+        $('#aireSearchInput').val(prompt).trigger('input');
+    });
+
+    function fetchLiveSearchResults(query) {
+        const $results = $('#aireSearchResults');
+
         $.ajax({
             url: '/products-dropdown',
             method: 'GET',
@@ -150,12 +197,14 @@ $(document).ready(function () {
             success: function (res) {
                 const products = res.products || res.data || [];
                 const categories = res.categories || [];
+                const matchingTags = res.matching_tags || [];
 
-                if (products.length === 0 && categories.length === 0) {
+                if (products.length === 0 && categories.length === 0 && matchingTags.length === 0) {
                     $results.html(`
-                        <div class="search-floating-empty">
-                            <i class="bi bi-wind fs-3 d-block text-muted mb-2"></i>
-                            No products found matching "<strong>${escapeHtml(query)}</strong>"
+                        <div class="aire-results-empty">
+                            <i class="bi bi-wind fs-2 d-block text-muted mb-2"></i>
+                            No products or solutions found matching "<strong>${escapeHtml(query)}</strong>".
+                            <div class="mt-2 text-muted fs-12">Try searching by model (e.g. BAP-500), application (e.g. Hospital), or requirement (e.g. PM2.5).</div>
                         </div>
                     `);
                     return;
@@ -165,37 +214,49 @@ $(document).ready(function () {
 
                 // Matching Categories Section
                 if (categories.length > 0) {
-                    html += `<div class="search-floating-section-title">Matching Categories</div>`;
-                    html += `<div class="search-floating-categories">`;
+                    html += `<div class="aire-results-section-title">Matching Categories & Solutions</div>`;
+                    html += `<div class="aire-results-pills-row">`;
                     categories.forEach(function (cat) {
-                        html += `<a href="${cat.url}" class="search-floating-cat-pill">${escapeHtml(cat.name)}</a>`;
+                        html += `<a href="${cat.url}" class="aire-results-pill"><i class="bi bi-folder2-open"></i> ${escapeHtml(cat.name)}</a>`;
+                    });
+                    html += `</div>`;
+                }
+
+                // Matching Requirement / Application Filter Tags
+                if (matchingTags.length > 0) {
+                    html += `<div class="aire-results-section-title">Matching Requirements & Applications</div>`;
+                    html += `<div class="aire-results-pills-row">`;
+                    matchingTags.forEach(function (tag) {
+                        html += `<a href="${tag.url}" class="aire-results-pill"><i class="bi bi-tag-fill"></i> ${escapeHtml(tag.name)} <span class="text-muted fs-10">(${escapeHtml(tag.group)})</span></a>`;
                     });
                     html += `</div>`;
                 }
 
                 // Matching Products Section
                 if (products.length > 0) {
-                    html += `<div class="search-floating-section-title">Products</div>`;
+                    html += `<div class="aire-results-section-title">Products</div>`;
+                    html += `<div class="aire-results-products-grid">`;
                     products.forEach(function (p) {
                         html += `
-                            <a href="${p.url}" class="search-floating-item">
-                                <img src="${p.image}" alt="${escapeHtml(p.name)}" class="search-floating-item-img">
-                                <div class="search-floating-item-info">
-                                    <div class="search-floating-item-title">${escapeHtml(p.name)}</div>
-                                    <div class="search-floating-item-meta">
-                                        <span class="search-floating-item-cat" style="background-color: ${p.category_bg || '#0066cc'};">${escapeHtml(p.category)}</span>
-                                        ${p.model ? `<span>• ${escapeHtml(p.model)}</span>` : ''}
+                            <a href="${p.url}" class="aire-result-product-card">
+                                <img src="${p.image}" alt="${escapeHtml(p.name)}" class="aire-result-product-img" onerror="this.onerror=null;this.src='/themes/default/assets/img/Air-Purify.png';">
+                                <div class="aire-result-product-info">
+                                    <div class="aire-result-product-title">${escapeHtml(p.name)}</div>
+                                    <div class="aire-result-product-meta">
+                                        <span class="aire-result-product-badge" style="background-color: ${p.category_bg || '#0066cc'};">${escapeHtml(p.category)}</span>
+                                        ${p.model ? `<span>• Model: <strong>${escapeHtml(p.model)}</strong></span>` : ''}
                                     </div>
                                 </div>
-                                <div class="search-floating-item-price">$${p.price}</div>
+                                <div class="aire-result-product-price">$${p.price}</div>
                             </a>
                         `;
                     });
+                    html += `</div>`;
                 }
 
                 // Footer link to full filtered catalog
                 html += `
-                    <a href="/products-filter?search=${encodeURIComponent(query)}" class="search-floating-footer">
+                    <a href="/products-filter?search=${encodeURIComponent(query)}" class="aire-results-footer">
                         See all results for "${escapeHtml(query)}" &rarr;
                     </a>
                 `;
@@ -203,7 +264,7 @@ $(document).ready(function () {
                 $results.html(html);
             },
             error: function () {
-                $results.html('<div class="search-floating-empty text-danger">Search service unavailable. Please try again.</div>');
+                $results.html('<div class="aire-results-empty text-danger">Search service temporarily unavailable. Please try again.</div>');
             }
         });
     }

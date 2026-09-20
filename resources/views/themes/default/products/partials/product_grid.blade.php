@@ -10,7 +10,8 @@
                 class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill mt-1">{{ $products->total() }}
                 solutions found</span>
         </div>
-        <a href="{{ route('products.filter') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3 clear-search-btn">
+        <a href="{{ route('products.filter') }}"
+            class="d-flex btn btn-sm btn-outline-dark rounded-pill px-3 clear-search-btn">
             <i class="bi bi-x-circle me-1"></i> Clear
         </a>
     </div>

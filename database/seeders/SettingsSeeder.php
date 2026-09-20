@@ -79,6 +79,9 @@ class SettingsSeeder extends Seeder
             ['label' => 'google_play_image', 'title' => 'Google Play Badge Image', 'value' => '', 'createdBy' => $userId, 'updatedBy' => $userId],
             ['label' => 'app_store_image', 'title' => 'App Store Badge Image', 'value' => '', 'createdBy' => $userId, 'updatedBy' => $userId],
             ['label' => 'show_app_download_links', 'title' => 'Show App Download Links', 'value' => '1', 'createdBy' => $userId, 'updatedBy' => $userId],
+
+            // Search & Discovery
+            ['label' => 'popular_searches', 'title' => 'Popular Searches', 'value' => '', 'createdBy' => $userId, 'updatedBy' => $userId],
         ];
 
         foreach ($settings as $setting) {

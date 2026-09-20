@@ -46,11 +46,11 @@
                                         <td class="align-middle">
                                             <div class="d-flex flex-wrap" style="gap:4px">
 
-                                                <router-link
+                                                <!-- <router-link
                                                     :to="{ name: 'CustomerLedger', params: { id: customer.id } }"
                                                     class="btn btn-xs btn-info text-nowrap">
                                                     <i class="fas fa-book"></i> Ledger
-                                                </router-link>
+                                                </router-link> -->
 
                                                 <router-link v-if="authStore.hasPermission('edit-customers')"
                                                     :to="{ name: 'UpdateCustomer', params: { id: customer.id } }"

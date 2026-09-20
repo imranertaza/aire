@@ -11,8 +11,14 @@ class Setting extends Model
 
     protected static function booted()
     {
-        static::saved(fn() => Cache::forget('settings'));
-        static::deleted(fn() => Cache::forget('settings'));
+        static::saved(function () {
+            Cache::forget('settings');
+            Cache::forget('aire_popular_searches_list');
+        });
+        static::deleted(function () {
+            Cache::forget('settings');
+            Cache::forget('aire_popular_searches_list');
+        });
     }
 
     public static function allCached()

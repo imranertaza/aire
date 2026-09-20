@@ -217,7 +217,7 @@
                                         <input min="0" v-model="form.sort_order" type="number" class="form-control" />
                                     </div>
 
-                                    <div class="form-group">
+                                    <!-- <div class="form-group">
                                         <label>Header Menu</label>
                                         <select v-model="form.header_menu" class="custom-select">
                                             <option value="1">Yes</option>
@@ -231,7 +231,7 @@
                                             <option value="1">Yes</option>
                                             <option value="0">No</option>
                                         </select>
-                                    </div>
+                                    </div> -->
 
                                     <div class="form-group">
                                         <label>Show in Filter</label>

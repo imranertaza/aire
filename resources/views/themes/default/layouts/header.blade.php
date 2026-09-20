@@ -226,22 +226,6 @@
     </div>
 </header>
 
-<!-- Search Bar Overlay -->
-<div class="header-search-overlay d-none">
-    <form class="header-search-bar d-flex align-items-center w-100" action="{{ route('products.filter') }}"
-        method="GET">
-        <input type="search" name="search" class="header-search-input" placeholder="Search products..."
-            autocomplete="off">
-        <button type="submit" class="header-search-btn" aria-label="Search">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                    d="M18.031 16.617L22.314 20.899L20.899 22.314L16.617 18.031C15.0237 19.3082 13.042 20.0029 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20.0029 13.042 19.3082 15.0237 18.031 16.617ZM16.025 15.875C17.2938 14.5697 18.0025 12.8204 18 11C18 7.133 14.867 4 11 4C7.133 4 4 7.133 4 11C4 14.867 7.133 18 11 18C12.8204 18.0025 14.5697 17.2938 15.875 16.025L16.025 15.875Z"
-                    fill="currentColor" />
-            </svg>
-        </button>
-    </form>
-</div>
-
 <!-- Mobile Offcanvas Menu -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" role="dialog"
     aria-labelledby="mobileMenuLabel" aria-modal="true">

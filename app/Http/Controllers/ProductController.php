@@ -275,12 +275,15 @@ class ProductController extends Controller
     /**
      * Retrieve list of products and categories for live dropdown search.
      */
+    /**
+     * Retrieve list of products and categories for live dropdown search.
+     */
     public function dropdownList(Request $request)
     {
         $search = trim($request->query('search', ''));
         $categoryId = $request->query('category_id');
 
-        $query = Product::where('status', 1)->with(['categories', 'description', 'brand']);
+        $query = Product::where('status', 1)->with(['categories', 'description', 'brand', 'productFilterOptions.filterOptionValue', 'applications']);
 
         if ($categoryId) {
             $query->whereHas('categories', function ($q) use ($categoryId) {
@@ -289,7 +292,9 @@ class ProductController extends Controller
         }
 
         if (!empty($search)) {
-            $query->where(function ($q) use ($search) {
+            $keywords = array_filter(explode(' ', $search), fn($k) => mb_strlen(trim($k)) >= 3);
+
+            $query->where(function ($q) use ($search, $keywords) {
                 $q->where('name', 'LIKE', "%{$search}%")
                     ->orWhere('model', 'LIKE', "%{$search}%")
                     ->orWhere('product_code', 'LIKE', "%{$search}%")
@@ -298,8 +303,27 @@ class ProductController extends Controller
                     })
                     ->orWhereHas('description', function ($dq) use ($search) {
                         $dq->where('tag', 'LIKE', "%{$search}%")
-                            ->orWhere('meta_title', 'LIKE', "%{$search}%");
+                            ->orWhere('meta_title', 'LIKE', "%{$search}%")
+                            ->orWhere('meta_description', 'LIKE', "%{$search}%");
+                    })
+                    ->orWhereHas('productFilterOptions.filterOptionValue', function ($foq) use ($search) {
+                        $foq->where('name', 'LIKE', "%{$search}%");
+                    })
+                    ->orWhereHas('applications', function ($aq) use ($search) {
+                        $aq->where('title', 'LIKE', "%{$search}%")
+                            ->orWhere('description', 'LIKE', "%{$search}%");
                     });
+
+                if (!empty($keywords) && count($keywords) > 1) {
+                    foreach ($keywords as $kw) {
+                        $kw = trim($kw);
+                        if (in_array(strtolower($kw), ['for', 'the', 'and', 'with', 'air', 'all'])) continue;
+                        $q->orWhere('name', 'LIKE', "%{$kw}%")
+                            ->orWhere('model', 'LIKE', "%{$kw}%")
+                            ->orWhereHas('productFilterOptions.filterOptionValue', fn($foq) => $foq->where('name', 'LIKE', "%{$kw}%"))
+                            ->orWhereHas('applications', fn($aq) => $aq->where('title', 'LIKE', "%{$kw}%"));
+                    }
+                }
             });
         }
 
@@ -338,12 +362,30 @@ class ProductController extends Controller
                 });
         }
 
+        // Search matching requirement / application filter tags
+        $matchingTags = [];
+        if (!empty($search)) {
+            $matchingTags = \App\Models\FilterOptionValue::with('filterOption:id,name')
+                ->where('name', 'LIKE', "%{$search}%")
+                ->take(4)
+                ->get()
+                ->map(function ($fov) {
+                    return [
+                        'id'    => $fov->id,
+                        'name'  => $fov->name,
+                        'group' => $fov->filterOption?->name ?? 'Filter',
+                        'url'   => route('products.filter') . '?search=' . urlencode($fov->name),
+                    ];
+                });
+        }
+
         return response()->json([
-            'status'     => true,
-            'data'       => $products,
-            'products'   => $products,
-            'categories' => $categories,
-            'total'      => $products->count(),
+            'status'        => true,
+            'data'          => $products,
+            'products'      => $products,
+            'categories'    => $categories,
+            'matching_tags' => $matchingTags,
+            'total'         => $products->count(),
         ]);
     }
 
@@ -651,7 +693,8 @@ class ProductController extends Controller
             },
             'search' => function ($q) use ($search) {
                 if (!empty($search)) {
-                    $q->where(function ($sq) use ($search) {
+                    $keywords = array_filter(explode(' ', $search), fn($k) => mb_strlen(trim($k)) >= 3);
+                    $q->where(function ($sq) use ($search, $keywords) {
                         $sq->where('name', 'like', "%{$search}%")
                             ->orWhere('model', 'like', "%{$search}%")
                             ->orWhere('product_code', 'like', "%{$search}%")
@@ -660,7 +703,25 @@ class ProductController extends Controller
                                 $dq->where('tag', 'like', "%{$search}%")
                                     ->orWhere('meta_title', 'like', "%{$search}%")
                                     ->orWhere('description', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('productFilterOptions.filterOptionValue', function ($foq) use ($search) {
+                                $foq->where('name', 'like', "%{$search}%");
+                            })
+                            ->orWhereHas('applications', function ($aq) use ($search) {
+                                $aq->where('title', 'like', "%{$search}%")
+                                    ->orWhere('description', 'like', "%{$search}%");
                             });
+
+                        if (!empty($keywords) && count($keywords) > 1) {
+                            foreach ($keywords as $kw) {
+                                $kw = trim($kw);
+                                if (in_array(strtolower($kw), ['for', 'the', 'and', 'with', 'air', 'all'])) continue;
+                                $sq->orWhere('name', 'like', "%{$kw}%")
+                                    ->orWhere('model', 'like', "%{$kw}%")
+                                    ->orWhereHas('productFilterOptions.filterOptionValue', fn($foq) => $foq->where('name', 'like', "%{$kw}%"))
+                                    ->orWhereHas('applications', fn($aq) => $aq->where('title', 'like', "%{$kw}%"));
+                            }
+                        }
                     });
                 }
             },
