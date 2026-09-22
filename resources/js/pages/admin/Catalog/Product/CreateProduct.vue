@@ -82,7 +82,7 @@
                     </div>
 
                     <div class="card-body">
-                        <form @submit.prevent="submitForm" id="productForm">
+                        <form @submit.prevent="submitForm" id="productForm" novalidate>
                             <div class="tab-content" id="product-tabs-content">
 
                                 <!-- General Tab -->
@@ -100,7 +100,8 @@
                                         </div>
                                         <div class="col-md-12 form-group">
                                             <label>Description</label>
-                                            <RichTextEditor v-model="form.description" />
+                                            <!-- <RichTextEditor v-model="form.description" /> -->
+                                             <textarea class="form-control" v-model="form.description" ></textarea>
                                         </div>
                                         <div class="col-md-12 form-group">
                                             <label>Tags</label>
@@ -180,6 +181,24 @@
                                                 <option :value="1">Active</option>
                                                 <option :value="0">Inactive</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Images Tab (Tab 3 in sequence) -->
+                                <div class="tab-pane fade" id="custom-tabs-images" role="tabpanel"
+                                    aria-labelledby="tab-images">
+                                    <div class="row">
+                                        <div class="col-md-4 form-group">
+                                            <label>Default Main Image <span class="text-danger">*</span></label>
+                                            <Vue3Dropzone v-model="mainImageFile" :allowSelectOnPreview="true" />
+                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, clean/transparent background for interactive zoom)</small>
+                                        </div>
+                                        <div class="col-md-8 form-group">
+                                            <label>Multiple Gallery Images</label>
+                                            <Vue3Dropzone v-model="galleryImageFiles" :multiple="true"
+                                                :allowSelectOnPreview="true" selectFileStrategy="merge" />
+                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, matching main image)</small>
                                         </div>
                                     </div>
                                 </div>
@@ -1015,24 +1034,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Images Tab -->
-                                <div class="tab-pane fade" id="custom-tabs-images" role="tabpanel"
-                                    aria-labelledby="tab-images">
-                                    <div class="row">
-                                        <div class="col-md-4 form-group">
-                                            <label>Default Main Image</label>
-                                            <Vue3Dropzone v-model="mainImageFile" :allowSelectOnPreview="true" />
-                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, clean/transparent background for interactive zoom)</small>
-                                        </div>
-                                        <div class="col-md-8 form-group">
-                                            <label>Multiple Gallery Images</label>
-                                            <Vue3Dropzone v-model="galleryImageFiles" :multiple="true"
-                                                :allowSelectOnPreview="true" selectFileStrategy="merge" />
-                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, matching main image)</small>
-                                        </div>
-                                    </div>
-                                </div>
-
                             </div>
                         </form>
                     </div>
@@ -1321,15 +1322,84 @@ const removeFaq = (index) => {
     form.value.faqs.splice(index, 1);
 };
 
+// Programmatic tab switcher to show tab with validation error
+const switchToTab = (tabId) => {
+    const tabEl = document.getElementById(tabId);
+    if (tabEl) {
+        if (window.$ && typeof window.$(tabEl).tab === 'function') {
+            window.$(tabEl).tab('show');
+        } else {
+            tabEl.click();
+        }
+        tabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+};
+
 const submitForm = async () => {
-    if (!form.value.name || !form.value.model || form.value.price === '' || form.value.quantity === '') {
-        toast.error("Please fill in all required fields.");
+    // 1. General Tab Validation
+    if (!form.value.name || !form.value.name.trim()) {
+        switchToTab('tab-general');
+        toast.error("Please enter a Product Name in the General tab.");
         return;
     }
 
-    if (form.value.category_ids.length === 0) {
-        toast.error("Please select at least one category.");
+    if (!form.value.slug || !form.value.slug.trim()) {
+        switchToTab('tab-general');
+        toast.error("Please enter a Product Slug in the General tab.");
         return;
+    }
+
+    // 2. Data Tab Validation
+    if (!form.value.model || !form.value.model.trim()) {
+        switchToTab('tab-data');
+        toast.error("Please enter a Product Model in the Data tab.");
+        return;
+    }
+
+    if (form.value.price === '' || form.value.price === null || Number(form.value.price) < 0) {
+        switchToTab('tab-data');
+        toast.error("Please enter a valid Price in the Data tab.");
+        return;
+    }
+
+    if (form.value.quantity === '' || form.value.quantity === null || Number(form.value.quantity) < 0) {
+        switchToTab('tab-data');
+        toast.error("Please enter a valid Quantity in the Data tab.");
+        return;
+    }
+
+    // 3. Images Tab Validation (Default Main Image is mandatory)
+    if (!mainImageFile.value?.[0]?.file) {
+        switchToTab('tab-images');
+        toast.error("Please upload the Default Main Image in the Images tab.");
+        return;
+    }
+
+    // 4. Links Tab Validation (At least one Category is mandatory)
+    if (!form.value.category_ids || form.value.category_ids.length === 0) {
+        switchToTab('tab-links');
+        toast.error("Please select at least one Category in the Links tab.");
+        return;
+    }
+
+    // 5. Options Validation (if rows were added)
+    if (form.value.options && form.value.options.length > 0) {
+        const invalidOpt = form.value.options.find(opt => !opt.option_value_id || opt.quantity === '' || opt.quantity === null);
+        if (invalidOpt) {
+            switchToTab('tab-options');
+            toast.error("Please select an Option Value and enter Quantity for all added options.");
+            return;
+        }
+    }
+
+    // 6. FAQs Validation (if rows were added)
+    if (form.value.faqs && form.value.faqs.length > 0) {
+        const invalidFaq = form.value.faqs.find(faq => !faq.question?.trim() || !faq.answer?.trim());
+        if (invalidFaq) {
+            switchToTab('tab-faqs');
+            toast.error("Please fill in both Question and Answer for all added FAQs.");
+            return;
+        }
     }
 
     loading.value = true;

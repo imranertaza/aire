@@ -20,6 +20,15 @@ function initLifestyleParallax() {
 
         gsap.registerPlugin(ScrollTrigger);
 
+        // Clean up previous triggers on rows to prevent duplicates on back navigation
+        rows.forEach(function (row) {
+            ScrollTrigger.getAll().forEach(function (st) {
+                if ((st.vars && st.vars.trigger === row) || st.trigger === row) {
+                    st.kill(true);
+                }
+            });
+        });
+
         rows.forEach(function (row, idx) {
             const imgBox = row.querySelector('.home-lifestyle__img-box');
             const img = row.querySelector('.home-lifestyle__img');
@@ -27,13 +36,13 @@ function initLifestyleParallax() {
 
             if (imgBox && img) {
                 // Initial scale so vertical movement never exposes empty edges
-                gsap.set(img, { scale: 1.15, transformOrigin: 'center center' });
+                gsap.set(img, { scale: 1.18, transformOrigin: 'center center' });
 
                 // Smooth vertical scroll parallax scrub
                 gsap.fromTo(img,
-                    { yPercent: -8 },
+                    { yPercent: -6 },
                     {
-                        yPercent: 8,
+                        yPercent: 6,
                         ease: 'none',
                         scrollTrigger: {
                             trigger: row,
@@ -136,6 +145,7 @@ function initLifestyleParallax() {
 
     checkAndInit();
 }
+window.initLifestyleParallax = initLifestyleParallax;
 
 /**
  * Benefits Banner Parallax Effect
@@ -147,6 +157,13 @@ function initBenefitsParallax() {
 
     if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         gsap.registerPlugin(ScrollTrigger);
+
+        // Clean up previous trigger on banner if any
+        ScrollTrigger.getAll().forEach(function (st) {
+            if ((st.vars && st.vars.trigger === banner) || st.trigger === banner) {
+                st.kill(true);
+            }
+        });
 
         gsap.fromTo(bannerBg,
             { yPercent: -12 },
@@ -163,3 +180,4 @@ function initBenefitsParallax() {
         );
     }
 }
+window.initBenefitsParallax = initBenefitsParallax;

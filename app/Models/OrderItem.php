@@ -33,4 +33,28 @@ class OrderItem extends Model
     {
         return $this->hasMany(OrderOption::class, 'order_item_id');
     }
+
+    /**
+     * Accessor for item total.
+     */
+    public function getTotalAttribute(): float
+    {
+        return (float) ($this->final_price ?? ($this->total_price ?? ($this->price * $this->quantity)));
+    }
+
+    /**
+     * Accessor for product name fallback.
+     */
+    public function getNameAttribute($value): ?string
+    {
+        return $value ?: ($this->product->name ?? null);
+    }
+
+    /**
+     * Accessor for product model fallback.
+     */
+    public function getModelAttribute($value): ?string
+    {
+        return $value ?: ($this->product->model ?? 'Standard');
+    }
 }

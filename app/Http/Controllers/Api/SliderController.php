@@ -98,7 +98,7 @@ class SliderController extends Controller
             'link'        => 'nullable|string|max:255',
             'button_text' => 'nullable|string|max:100',
             'order'       => 'nullable|integer|min:0',
-            'enabled'     => 'nullable|in:0,1',
+            'enabled'     => 'required|in:0,1',
             'image'       => 'required|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
         ]);
 
@@ -152,7 +152,7 @@ class SliderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $slider = Slider::findOrFail($id);
+        $isImageRequired = empty($slider->image) || $request->remove_image == 1;
 
         $data = $request->validate([
             'key'         => 'nullable',
@@ -164,7 +164,7 @@ class SliderController extends Controller
             'button_text' => 'nullable|string|max:100',
             'order'       => 'nullable|integer|min:0',
             'enabled'     => 'required|in:0,1',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
+            'image'       => $isImageRequired ? 'required|image|mimes:jpg,jpeg,png,gif,webp|max:4096' : 'nullable|image|mimes:jpg,jpeg,png,gif,webp|max:4096',
         ]);
 
         // Process multiselect keys

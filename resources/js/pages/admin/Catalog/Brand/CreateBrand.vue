@@ -15,7 +15,7 @@
                                 <div class="col-md-8">
                                     <!-- Name -->
                                     <div class="form-group">
-                                        <label>Brand Name</label>
+                                        <label>Brand Name <span class="text-danger">*</span></label>
                                         <input v-model="form.name" type="text" class="form-control" required />
                                     </div>
                                     
@@ -36,7 +36,7 @@
                                 <div class="col-md-4">
                                     <!-- File Upload -->
                                     <div class="form-group">
-                                        <label>Upload Image</label>
+                                        <label>Upload Image <span class="text-danger">*</span></label>
                                         <Vue3Dropzone v-model="fileUpload" :allowSelectOnPreview="true" />
                                         <small class="text-muted d-block mt-1">Recommended: 300 × 300px or 400 × 200px (Transparent PNG)</small>
                                         <small class="text-muted d-block">Maximum File Size: 4MB (Image only)</small>
@@ -44,8 +44,8 @@
 
                                     <!-- Status -->
                                     <div class="form-group">
-                                        <label>Status</label>
-                                        <select v-model="form.status" class="custom-select">
+                                        <label>Status <span class="text-danger">*</span></label>
+                                        <select v-model="form.status" class="custom-select" required>
                                             <option value="1">Active</option>
                                             <option value="0">Inactive</option>
                                         </select>
@@ -87,6 +87,11 @@ const form = reactive({
 });
 
 const submitBrand = async () => {
+    if (!fileUpload.value || !fileUpload.value[0]) {
+        toast.error('Brand image is required.');
+        return;
+    }
+
     const payload = new FormData();
 
     for (const key in form) {

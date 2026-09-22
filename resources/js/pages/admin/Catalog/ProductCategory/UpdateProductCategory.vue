@@ -15,7 +15,12 @@
                                 <div class="col-md-8">
                                     <div class="form-group">
                                         <label>Category Name <span class="text-danger">*</span></label>
-                                        <input v-model="form.category_name" type="text" class="form-control" required />
+                                        <input v-model="form.category_name" @input="form.slug = form.slug ? form.slug : generateSlug(form.category_name)" type="text" class="form-control" required />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Slug <span class="text-danger">*</span></label>
+                                        <input v-model="form.slug" type="text" class="form-control" placeholder="auto-generated-from-name" required />
                                     </div>
 
                                     <div class="form-group">
@@ -53,7 +58,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Description</label>
+                                        <label>Description <span class="text-danger">*</span></label>
                                         <textarea v-model="form.description" class="form-control" rows="3"></textarea>
                                     </div>
 
@@ -166,14 +171,14 @@
                                 <div class="col-md-4">
                                     <!-- File Upload -->
                                     <div class="form-group">
-                                        <label>Upload Image</label>
+                                        <label>Upload Image <span class="text-danger">*</span></label>
                                         <Vue3Dropzone v-model="fileUpload" v-model:previews="previews" mode="edit"
                                             :allowSelectOnPreview="true" />
                                         <small class="text-muted">Recommended: 600 × 400px or 800 × 500px (Landscape ~16:9)</small>
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Icon Type</label>
+                                        <label>Icon Type <span class="text-danger">*</span></label>
                                         <div>
                                             <div class="custom-control custom-radio custom-control-inline">
                                                 <input type="radio" id="iconTypeClass" class="custom-control-input"
@@ -189,13 +194,13 @@
                                     </div>
 
                                     <div class="form-group" v-if="form.icon_type === 'class'">
-                                        <label>Icon Class</label>
+                                        <label>Icon Class <span class="text-danger">*</span></label>
                                         <IconPicker v-model="form.icon_class" />
                                         <small class="text-muted">FontAwesome or Bootstrap icon class</small>
                                     </div>
 
                                     <div class="form-group" v-if="form.icon_type === 'model'">
-                                        <label>Select Custom Icon</label>
+                                        <label>Select Custom Icon <span class="text-danger">*</span></label>
                                         <div class="d-flex flex-wrap border p-2 rounded"
                                             style="max-height: 200px; overflow-y: auto;">
                                             <div v-for="iconItem in icons" :key="iconItem.id"
@@ -243,8 +248,8 @@
 
                                     <!-- Status -->
                                     <div class="form-group">
-                                        <label>Status</label>
-                                        <select v-model="form.status" class="custom-select">
+                                        <label>Status <span class="text-danger">*</span></label>
+                                        <select v-model="form.status" class="custom-select" required>
                                             <option :value="1">Active</option>
                                             <option :value="0">Inactive</option>
                                         </select>
@@ -281,7 +286,7 @@ import axios from 'axios';
 import { reactive, ref, onMounted, computed } from 'vue';
 import { useToast } from '@/composables/useToast';
 import { useRoute, useRouter } from 'vue-router';
-import { getImageUrl, getImageCacheUrl } from '@/layouts/helpers/helpers';
+import { getImageUrl, getImageCacheUrl, generateSlug } from '@/layouts/helpers/helpers';
 
 const toast = useToast();
 const route = useRoute();
@@ -296,6 +301,7 @@ const productsList = ref([]);
 
 const form = reactive({
     category_name: '',
+    slug: '',
     alt_name: '',
     bg_color: '#00c853',
     parent_id: null,
@@ -360,6 +366,7 @@ onMounted(async () => {
         productsList.value = prods;
 
         form.category_name = data.category_name;
+        form.slug = data.slug || generateSlug(data.category_name || '');
         form.alt_name = data.alt_name;
         form.bg_color = data.bg_color || '#00c853';
         form.parent_id = data.parent_id;

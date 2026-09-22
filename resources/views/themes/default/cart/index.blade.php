@@ -39,11 +39,14 @@
                             <span class="text-secondary">Discount</span>
                             <span class="fw-bold text-danger cart-discount-val">-${{ number_format($discount, 2) }}</span>
                         </div>
+                        @php
+                            $isCartFree = collect($cart)->contains(fn($i) => !empty($i['free_delivery']));
+                        @endphp
                         <div class="d-flex justify-content-between align-items-center mb-3 fs-14">
                             <span class="text-secondary">Shipping <i
                                     class="bi bi-info-circle text-muted ms-1 cursor-pointer"
                                     title="Free shipping on qualifying orders"></i></span>
-                            <span class="fw-bold text-dark">Free</span>
+                            <span class="fw-bold {{ $isCartFree ? 'text-success' : 'text-dark' }}">{{ $isCartFree ? 'Free Delivery' : 'Free' }}</span>
                         </div>
 
                         @if (isModuleEnabled('coupon'))
@@ -157,12 +160,29 @@
                                             title="{{ $item['model'] }}">
                                             {{ getLimitedText($item['model'], 40) }}
                                         </p>
-                                        <div class="cart-product-price">
+                                        @if (!empty($item['options']) && count($item['options']) > 0)
+                                            <div class="cart-product-options d-flex flex-wrap gap-1 mb-1">
+                                                @foreach ($item['options'] as $opt)
+                                                    <span class="badge bg-light text-secondary border px-2 py-1 fw-normal d-inline-flex align-items-center gap-1" style="font-size: 0.72rem;">
+                                                        <strong>{{ $opt['name'] }}:</strong> {{ $opt['value'] }}
+                                                        @if (!empty($opt['price']) && (float) $opt['price'] > 0)
+                                                            <span class="text-primary fw-semibold">({{ ($opt['price_prefix'] ?? '+') . '$' . number_format($opt['price'], 2) }})</span>
+                                                        @endif
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                        <div class="cart-product-price d-flex align-items-center flex-wrap gap-1">
                                             @if (isset($item['original_price']) && $item['original_price'] > $item['price'])
                                                 <span
                                                     class="text-muted text-decoration-line-through me-1 small">${{ number_format($item['original_price'], 2) }}</span>
                                             @endif
-                                            ${{ number_format($item['price'], 2) }}
+                                            <span>${{ number_format($item['price'], 2) }}</span>
+                                            @if (!empty($item['free_delivery']))
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0 ms-1 fw-semibold" style="font-size: 0.72rem;">
+                                                    <i class="bi bi-truck"></i> Free Delivery
+                                                </span>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

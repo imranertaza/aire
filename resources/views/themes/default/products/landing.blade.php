@@ -114,7 +114,8 @@
                         <div class="sub-header-subtitle">
                             {{ getLimitedText($landingHeroDesc, 100) }}
                         </div>
-                        <a href="{{ $landingHeroBtnUrl }}" class="sub-header-details-btn">More Details</a>
+                        <a href="{{ route('products.detail', $product->slug ?: $product->id) }}"
+                            class="sub-header-details-btn">More Details</a>
                     </div>
                 </div>
             </div>
@@ -122,7 +123,8 @@
             <div class="d-flex align-items-center gap-4">
                 <div class="fw-bold fs-5">
                     @if ($product?->special_price)
-                        <span class="text-muted text-decoration-line-through me-1 fs-6 fw-normal">${{ number_format((float) $product->price, 2) }}</span>
+                        <span
+                            class="text-muted text-decoration-line-through me-1 fs-6 fw-normal">${{ number_format((float) $product->price, 2) }}</span>
                         <span>${{ number_format((float) $product->special_price, 2) }}</span>
                     @else
                         ${{ $product?->price ? number_format((float) $product->price, 2) : '249.00' }}

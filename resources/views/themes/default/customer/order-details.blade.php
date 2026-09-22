@@ -47,10 +47,10 @@
                                             <tr>
                                                 <td>
                                                     <div class="d-flex align-items-center gap-3">
-                                                        <img src="{{ getImageUrl($item->product->main_image ?? $item->product->image ?? '') }}" alt="{{ $item->name }}" class="rounded-3 border p-1" style="width: 54px; height: 54px; object-fit: cover;">
+                                                        <img src="{{ getImageUrl($item->product->main_image ?? $item->product->image ?? '') }}" alt="{{ $item->product->name ?? ($item->name ?? 'Product') }}" class="rounded-3 border p-1" style="width: 54px; height: 54px; object-fit: cover;">
                                                         <div>
-                                                            <h6 class="fw-bold mb-0 fs-14 text-dark">{{ $item->name }}</h6>
-                                                            <span class="text-muted fs-12">Model: {{ $item->model ?? 'Standard' }}</span>
+                                                            <h6 class="fw-bold mb-0 fs-14 text-dark">{{ $item->product->name ?? ($item->name ?? 'Product') }}</h6>
+                                                            <span class="text-muted fs-12">Model: {{ $item->product->model ?? ($item->model ?? 'Standard') }}</span>
                                                             @if($item->options && $item->options->count() > 0)
                                                                 <div class="mt-1">
                                                                     @foreach($item->options as $opt)
@@ -65,7 +65,7 @@
                                                 </td>
                                                 <td class="fw-medium">${{ number_format($item->price, 2) }}</td>
                                                 <td class="fw-bold">{{ $item->quantity }}</td>
-                                                <td class="fw-bold text-end">${{ number_format($item->total, 2) }}</td>
+                                                <td class="fw-bold text-end">${{ number_format($item->final_price ?? ($item->total_price ?? ($item->price * $item->quantity)), 2) }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>

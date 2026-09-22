@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class StorefrontController extends Controller
 {
@@ -20,8 +21,13 @@ class StorefrontController extends Controller
      */
     public function index()
     {
-        $topFeaturedProduct = Product::where('status', 1)->where('featured', 1)->with(['categories', 'images', 'special'])->latest()->first();
-        $bottomFeaturedProduct = Product::where('status', 1)->with(['categories', 'images', 'special'])->latest()->first();
+        $topFeaturedProduct = Cache::remember('home_top_featured_product', 3600, function () {
+            return Product::where('status', 1)->where('featured', 1)->with(['categories', 'images', 'special'])->latest()->first();
+        });
+
+        $bottomFeaturedProduct = Cache::remember('home_bottom_featured_product', 3600, function () {
+            return Product::where('status', 1)->with(['categories', 'images', 'special'])->latest()->first();
+        });
 
         $products = Product::with('special')->latest()->paginate(50)->withQueryString();
         $heroSlides = \App\Models\Slider::getByPlacement('banner_section');
@@ -31,16 +37,18 @@ class StorefrontController extends Controller
 
     public function categories(Request $request)
     {
-        $categories = \App\Models\ProductCategory::active()
-            ->whereNull('parent_id')
-            ->with([
-                'icon',
-                'children' => function ($q) {
-                    $q->active();
-                },
-                'featuredTopProducts.images',
-                'featuredBottomProducts.images'
-            ])->get();
+        $categories = Cache::remember('catalog_parent_categories_tree', 3600, function () {
+            return \App\Models\ProductCategory::active()
+                ->whereNull('parent_id')
+                ->with([
+                    'icon',
+                    'children' => function ($q) {
+                        $q->active();
+                    },
+                    'featuredTopProducts.images',
+                    'featuredBottomProducts.images'
+                ])->get();
+        });
 
         return \theme_view('products.category.index', compact('categories'));
     }

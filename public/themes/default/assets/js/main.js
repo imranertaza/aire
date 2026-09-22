@@ -148,13 +148,17 @@ function getSelectedOptions() {
         const optionId = el.getAttribute('data-option-id');
         const optionName = el.getAttribute('data-option-name') || 'Color';
         const valueId = el.getAttribute('data-value-id');
-        const valueName = el.getAttribute('title') || el.getAttribute('data-color') || '';
+        const valueName = el.getAttribute('data-color') || (el.getAttribute('title') || '').split('(')[0].trim();
+        const price = parseFloat(el.getAttribute('data-price')) || 0;
+        const pricePrefix = el.getAttribute('data-price-prefix') || '+';
         if (optionId && valueId) {
             options[valueId] = {
                 option_id: optionId,
                 value_id: valueId,
                 name: optionName,
-                value: valueName
+                value: valueName,
+                price: price,
+                price_prefix: pricePrefix
             };
         }
     });
@@ -164,12 +168,16 @@ function getSelectedOptions() {
         const optionName = el.getAttribute('data-option-name') || 'Option';
         const valueId = el.getAttribute('data-value-id');
         const valueName = el.textContent.replace(/\(.*?\)/g, '').trim();
+        const price = parseFloat(el.getAttribute('data-price')) || 0;
+        const pricePrefix = el.getAttribute('data-price-prefix') || '+';
         if (optionId && valueId) {
             options[valueId] = {
                 option_id: optionId,
                 value_id: valueId,
                 name: optionName,
-                value: valueName
+                value: valueName,
+                price: price,
+                price_prefix: pricePrefix
             };
         }
     });
@@ -324,6 +332,13 @@ $(document).ready(function () {
                         window.showCartToast('Product added to cart.', false);
                     }
                     btn.prop('disabled', false).removeClass('pe-none');
+                } else if (response.has_options && response.redirect) {
+                    // Redirect to detail page if product has mandatory options
+                    window.location.href = response.redirect;
+                    return;
+                } else {
+                    btn.prop('disabled', false).removeClass('pe-none').html(originalContent);
+                    alert(response.message || 'Could not update cart.');
                 }
             },
             error: function () {
@@ -432,14 +447,20 @@ $(document).ready(function () {
                     if (response.is_favorite) {
                         btn.addClass('active btn-danger text-white').removeClass('btn-outline-secondary');
                         if (icon.length) icon.removeClass('bi-heart').addClass('bi-heart-fill');
+                        btn.find('svg').attr('fill', '#dc3545');
+                        btn.find('svg path').attr('fill', '#dc3545');
                     } else {
                         btn.removeClass('active btn-danger text-white').addClass('btn-outline-secondary');
                         if (icon.length) icon.removeClass('bi-heart-fill').addClass('bi-heart');
+                        btn.find('svg').attr('fill', 'none');
+                        btn.find('svg path').attr('fill', '#0066CC');
                     }
 
                     const favCount = response.favorites_count !== undefined ? response.favorites_count : response.count;
                     window.updateHeaderBadges('favorite', favCount);
                     window.showFavoriteToast(response.message);
+                } else {
+                    alert(response.message || 'Could not update favorites.');
                 }
             },
             error: function () {
@@ -717,65 +738,124 @@ $(document).ready(function () {
                 window.addEventListener('pointercancel', onPointerUp, { passive: true });
             });
 
-        // Convert vertical wheel to horizontal scroll inside horizontal scroll tracks
-        $(document).on('wheel', '.mobile-category-scroll-track, .bottom-tabs-bar .overflow-auto', function (e) {
-            var delta = e.originalEvent.deltaY || e.originalEvent.deltaX;
-            if (delta !== 0 && this.scrollWidth > this.clientWidth) {
-                this.scrollLeft += delta * 0.9;
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        });
+            // Convert vertical wheel to horizontal scroll inside horizontal scroll tracks
+            $(document).on('wheel', '.mobile-category-scroll-track, .bottom-tabs-bar .overflow-auto', function (e) {
+                var delta = e.originalEvent.deltaY || e.originalEvent.deltaX;
+                if (delta !== 0 && this.scrollWidth > this.clientWidth) {
+                    this.scrollLeft += delta * 0.9;
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
 
-        $(document).on('click', 'a[href^="#"]', function (e) {
-            var target = $(this).attr('href');
-            if (target && target.length > 1 && $(target).length) {
-                e.preventDefault();
-                window.lenisInstance.scrollTo(target, { offset: -80, duration: 1.2 });
-            }
-        });
+            $(document).on('click', 'a[href^="#"]', function (e) {
+                // Ignore Bootstrap toggles (collapse, tab, modal, dropdown)
+                if ($(this).is('[data-bs-toggle], [data-toggle], [role="tab"], .dropdown-toggle, .btn-close')) {
+                    return;
+                }
+
+                var target = $(this).attr('href');
+                if (target && target.length > 1 && $(target).length) {
+                    e.preventDefault();
+                    if (window.lenisInstance && typeof window.lenisInstance.scrollTo === 'function') {
+                        window.lenisInstance.scrollTo(target, { offset: -80, duration: 1.2 });
+                    } else {
+                        var $target = $(target);
+                        if ($target.length) {
+                            $('html, body').stop().animate({ scrollTop: $target.offset().top - 80 }, 600);
+                        }
+                    }
+                }
+            });
+        }
     }
-}
 
     if (typeof Lenis === 'undefined') {
-    loadScript('https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js', initLenisScroll);
-} else {
-    initLenisScroll();
-}
+        loadScript('https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js', initLenisScroll);
+    } else {
+        initLenisScroll();
+    }
 
-// Global GSAP ScrollTrigger Lifecycle & Navigation Cleanup
-if (typeof window !== 'undefined') {
-    // Kill all ScrollTriggers before the browser caches this page (bfcache)
-    // This prevents stale .pin-spacer DOM nodes from being captured in the snapshot
-    window.addEventListener('pagehide', function () {
-        if (typeof ScrollTrigger !== 'undefined') {
-            ScrollTrigger.getAll().forEach(st => st.kill(true));
-        }
-    });
+    // Global GSAP ScrollTrigger Lifecycle & Back/Forward Cache (bfcache) Recovery
+    (function () {
+        if (typeof window === 'undefined') return;
 
-    // When the page is restored from the back-forward cache (event.persisted === true),
-    // the DOM still has GSAP's stale pin-spacer divs baked in.
-    // The only reliable fix is a hard reload so the page re-renders from scratch.
-    window.addEventListener('pageshow', function (e) {
-        if (e.persisted) {
-            // Page came from bfcache — reload to get fresh DOM without GSAP artifacts
-            window.location.reload();
-            return;
+        // Prevent browser's premature scroll jump before Lenis & GSAP coordinates are ready
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
         }
-        // Normal page show (not from cache): just refresh trigger positions
-        if (typeof ScrollTrigger !== 'undefined') {
-            ScrollTrigger.clearScrollMemory('manual');
-            setTimeout(function () {
+
+        // Persist scroll position per URL path to accurately restore on Back navigation
+        window.addEventListener('beforeunload', function () {
+            try {
+                sessionStorage.setItem('aire_scroll_pos_' + window.location.pathname, window.scrollY);
+            } catch (err) { }
+        });
+
+        function recoverScrollAndTriggers(isBackForward) {
+            // 1. Synchronize Lenis smooth scroll engine with DOM height
+            if (window.lenisInstance) {
+                window.lenisInstance.resize();
+            }
+
+            // 2. Restore exact scroll coordinate if returning via back/forward cache or history
+            if (isBackForward) {
+                try {
+                    var savedPos = sessionStorage.getItem('aire_scroll_pos_' + window.location.pathname);
+                    if (savedPos !== null) {
+                        var targetY = parseFloat(savedPos) || 0;
+                        if (window.lenisInstance) {
+                            window.lenisInstance.scrollTo(targetY, { immediate: true });
+                        } else {
+                            window.scrollTo(0, targetY);
+                        }
+                    }
+                } catch (err) { }
+            }
+
+            // 3. Re-initialize dynamic components & recalculate all ScrollTrigger boundaries
+            if (typeof ScrollTrigger !== 'undefined') {
                 if (typeof window.initWhyChooseScrollTrigger === 'function') {
                     window.initWhyChooseScrollTrigger();
                 }
                 if (typeof window.initLivingHeroScrollTrigger === 'function') {
                     window.initLivingHeroScrollTrigger();
                 }
+                if (typeof window.initLifestyleParallax === 'function') {
+                    window.initLifestyleParallax();
+                }
+                if (typeof window.initBenefitsParallax === 'function') {
+                    window.initBenefitsParallax();
+                }
+
+                ScrollTrigger.clearScrollMemory();
+                ScrollTrigger.sort();
                 ScrollTrigger.refresh(true);
-            }, 50);
+            }
         }
-    });
+
+        // Modern bfcache & page restore listener
+        window.addEventListener('pageshow', function (e) {
+            var isBackNav = e.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2);
+
+            // Immediate recovery pass
+            recoverScrollAndTriggers(isBackNav);
+
+            // Deferred second pass after custom fonts & dynamic images paint
+            requestAnimationFrame(function () {
+                setTimeout(function () {
+                    recoverScrollAndTriggers(false);
+                }, 120);
+            });
+        });
+
+        // History popstate listener
+        window.addEventListener('popstate', function () {
+            requestAnimationFrame(function () {
+                recoverScrollAndTriggers(true);
+            });
+        });
+    })();
 
     // ── Mobile Offcanvas Active Menu Indicator Auto-sync ──────────
     function syncMobileMenuActiveItem() {
@@ -810,5 +890,4 @@ if (typeof window !== 'undefined') {
     $(document).on('show.bs.offcanvas', function () {
         syncMobileMenuActiveItem();
     });
-}
-}) ();
+})();

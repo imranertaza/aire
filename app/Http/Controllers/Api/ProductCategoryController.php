@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Intervention\Image\Facades\Image;
 
 class ProductCategoryController extends Controller
@@ -205,6 +206,7 @@ class ProductCategoryController extends Controller
     {
         $validated = $request->validate([
             'category_name'    => 'required|string|max:155',
+            'slug'             => 'nullable|string|max:255',
             'description'      => 'nullable|string',
             'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:255',
@@ -232,6 +234,9 @@ class ProductCategoryController extends Controller
             $validated['features'] = is_array($features) ? array_values($features) : null;
         }
 
+        $validated['slug'] = !empty($validated['slug'])
+            ? Str::slug($validated['slug'])
+            : Str::slug($validated['category_name']);
         $validated['alt_name'] = $request->input('alt_name') ?: $request->input('category_name');
         $validated['bg_color'] = $request->input('bg_color') ?: '#00c853';
         $validated['createdBy'] = Auth::id();
@@ -242,7 +247,7 @@ class ProductCategoryController extends Controller
         $validated['header_menu'] = filter_var($validated['header_menu'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         $validated['side_menu'] = filter_var($validated['side_menu'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
         $validated['show_in_filter'] = filter_var($validated['show_in_filter'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
-        $validated['show_features_on_category_page'] = filter_var($validated['show_features_on_category_page'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+        $validated['show_features_on_category_page'] = filter_var($validated['show_features_on_category_page'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
 
         if (!isset($validated['sort_order'])) {
             $validated['sort_order'] = 0;
@@ -277,6 +282,7 @@ class ProductCategoryController extends Controller
 
         $validated = $request->validate([
             'category_name'    => 'required|string|max:155',
+            'slug'             => 'nullable|string|max:255',
             'description'      => 'nullable|string',
             'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:255',
@@ -311,6 +317,11 @@ class ProductCategoryController extends Controller
             $validated['image'] = null;
         }
 
+        if ($request->has('slug')) {
+            $validated['slug'] = !empty($validated['slug'])
+                ? Str::slug($validated['slug'])
+                : Str::slug($validated['category_name']);
+        }
         $validated['alt_name'] = $request->input('alt_name') ?: $request->input('category_name');
         if ($request->has('bg_color')) {
             $validated['bg_color'] = $request->input('bg_color') ?: '#00c853';

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class ProductCategory extends Model
 {
@@ -17,13 +18,37 @@ class ProductCategory extends Model
 
     protected static function booted()
     {
+        static::saving(function ($category) {
+            if (empty($category->slug) && !empty($category->category_name)) {
+                $category->slug = Str::slug($category->category_name);
+            }
+        });
+
         static::saved(function ($category) {
             Cache::forget('all_categories');
+            Cache::forget('catalog_parent_categories_tree');
         });
 
         static::deleted(function ($category) {
             Cache::forget('all_categories');
+            Cache::forget('catalog_parent_categories_tree');
         });
+    }
+
+    /**
+     * Get category slug, with auto-fallback to category_name or ID if empty.
+     */
+    public function getSlugAttribute($value): string
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+
+        if (!empty($this->category_name)) {
+            return Str::slug($this->category_name);
+        }
+
+        return (string) ($this->id ?? '');
     }
 
     /**

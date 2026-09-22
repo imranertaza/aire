@@ -35,6 +35,34 @@ class Product extends Model
                 $product->slug = $slug;
             }
         });
+
+        static::saved(function ($product) {
+            \Illuminate\Support\Facades\Cache::forget("product_detail_{$product->slug}");
+            \Illuminate\Support\Facades\Cache::forget("product_detail_{$product->id}");
+            \Illuminate\Support\Facades\Cache::forget("product_landing_{$product->slug}");
+            \Illuminate\Support\Facades\Cache::forget("product_landing_{$product->id}");
+            \Illuminate\Support\Facades\Cache::forget("product_related_{$product->id}");
+            \Illuminate\Support\Facades\Cache::forget('home_best_selling_products');
+            \Illuminate\Support\Facades\Cache::forget('home_new_arrival_products');
+            \Illuminate\Support\Facades\Cache::forget('home_customer_fav_products');
+            \Illuminate\Support\Facades\Cache::forget('home_top_featured_product');
+            \Illuminate\Support\Facades\Cache::forget('home_bottom_featured_product');
+            \Illuminate\Support\Facades\Cache::forget('home_living_hero_product');
+        });
+
+        static::deleted(function ($product) {
+            \Illuminate\Support\Facades\Cache::forget("product_detail_{$product->slug}");
+            \Illuminate\Support\Facades\Cache::forget("product_detail_{$product->id}");
+            \Illuminate\Support\Facades\Cache::forget("product_landing_{$product->slug}");
+            \Illuminate\Support\Facades\Cache::forget("product_landing_{$product->id}");
+            \Illuminate\Support\Facades\Cache::forget("product_related_{$product->id}");
+            \Illuminate\Support\Facades\Cache::forget('home_best_selling_products');
+            \Illuminate\Support\Facades\Cache::forget('home_new_arrival_products');
+            \Illuminate\Support\Facades\Cache::forget('home_customer_fav_products');
+            \Illuminate\Support\Facades\Cache::forget('home_top_featured_product');
+            \Illuminate\Support\Facades\Cache::forget('home_bottom_featured_product');
+            \Illuminate\Support\Facades\Cache::forget('home_living_hero_product');
+        });
     }
 
     public function getRouteKeyName()
@@ -217,5 +245,12 @@ class Product extends Model
     public function getFinalPriceAttribute(): float
     {
         return $this->special_price !== null ? (float) $this->special_price : (float) $this->price;
+    }
+
+    public function getIsFreeDeliveryAttribute(): bool
+    {
+        return $this->relationLoaded('freeDelivery')
+            ? $this->freeDelivery !== null
+            : $this->freeDelivery()->exists();
     }
 }

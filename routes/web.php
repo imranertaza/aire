@@ -216,6 +216,9 @@ Route::controller(FrontendController::class)->group(function () {
     Route::get('executive-committee/{slug}', 'committeeMembersDetails')->name('committee-members-details');
     Route::post('contact-us', 'contactSubmit')->name('contact.submit');
 
+    // Dynamic XML Sitemap for Search Engines (Google, Bing)
+    Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+
     /* Static pages */
     Route::prefix('pages')->name('page.')->group(function () {
         Route::get('/', 'pages')->name('index');

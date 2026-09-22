@@ -13,30 +13,30 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>First Name</label>
+                                        <label>First Name <span class="text-danger">*</span></label>
                                         <input v-model="basicForm.firstname" type="text" class="form-control" placeholder="First Name" required />
                                     </div>
                                     <div class="form-group">
-                                        <label>Last Name</label>
+                                        <label>Last Name <span class="text-danger">*</span></label>
                                         <input v-model="basicForm.lastname" type="text" class="form-control" placeholder="Last Name" required />
                                     </div>
                                     <div class="form-group">
-                                        <label>Email Address</label>
+                                        <label>Email Address <span class="text-danger">*</span></label>
                                         <input v-model="basicForm.email" type="email" class="form-control" placeholder="Email Address" required />
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Phone Number</label>
+                                        <label>Phone Number <span class="text-danger">*</span></label>
                                         <input v-model="basicForm.phone" type="text" class="form-control" placeholder="Phone Number" required />
                                     </div>
                                     <div class="form-group">
                                         <label>Password <small class="text-muted">(leave blank to keep current)</small></label>
-                                        <input v-model="basicForm.password" type="password" class="form-control" placeholder="Password" />
+                                        <input v-model="basicForm.password" type="password" class="form-control" placeholder="Password" minlength="6" />
                                     </div>
                                     <div class="form-group" v-if="basicForm.password">
-                                        <label>Confirm Password</label>
-                                        <input v-model="basicForm.con_password" type="password" class="form-control" placeholder="Confirm Password" required />
+                                        <label>Confirm Password <span class="text-danger">*</span></label>
+                                        <input v-model="basicForm.con_password" type="password" class="form-control" placeholder="Confirm Password" minlength="6" required />
                                     </div>
                                 </div>
                             </div>
@@ -105,6 +105,10 @@ onMounted(() => {
 });
 
 const submitBasic = async () => {
+    if (basicForm.password && basicForm.password !== basicForm.con_password) {
+        toast.error('Password and Confirm Password do not match.');
+        return;
+    }
     saving.value = true;
     try {
         await axios.put(`/api/customers/${route.params.id}`, basicForm);

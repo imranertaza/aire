@@ -62,7 +62,7 @@ class BrandController extends Controller
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'alt_name'   => 'nullable|string|max:255',
-            'image'      => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+            'image'      => 'required|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'status'     => 'required|in:0,1',
             'sort_order' => 'nullable|integer',
         ]);
@@ -98,11 +98,12 @@ class BrandController extends Controller
      */
     public function update(Request $request, Brand $brand)
     {
+        $isImageRequired = empty($brand->image) || $request->remove_image == 1;
 
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
             'alt_name'   => 'nullable|string|max:255',
-            'image'      => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
+            'image'      => $isImageRequired ? 'required|image|mimes:jpg,jpeg,png,webp,gif|max:4096' : 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:4096',
             'status'     => 'required|in:0,1',
             'sort_order' => 'nullable|integer',
         ]);

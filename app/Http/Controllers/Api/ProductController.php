@@ -100,7 +100,7 @@ class ProductController extends Controller
             'sort_order'          => 'nullable|integer|min:0',
 
             // Image
-            'main_image'          => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'main_image'          => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
 
             // Arrays for relations
             'options'             => 'nullable|array',
@@ -121,9 +121,9 @@ class ProductController extends Controller
             'special_start_date'  => 'nullable|date',
             'special_end_date'    => 'nullable|date',
             'product_free_delivery' => 'nullable|in:0,1,true,false',
-            'documentation_pdf'   => 'nullable|file|mimes:pdf|max:5120',
-            'safety_pdf'          => 'nullable|file|mimes:pdf|max:5120',
-            'instructions_pdf'    => 'nullable|file|mimes:pdf|max:5120',
+            // 'documentation_pdf'   => 'nullable|file|mimes:pdf|max:5120',
+            // 'safety_pdf'          => 'nullable|file|mimes:pdf|max:5120',
+            // 'instructions_pdf'    => 'nullable|file|mimes:pdf|max:5120',
             'description_image'   => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'category_ids'        => 'nullable|array',
             'related_ids'         => 'nullable|array',
@@ -184,7 +184,6 @@ class ProductController extends Controller
                 'specs_badge'          => $request->input('specs_badge'),
                 'specs_title'          => $request->input('specs_title'),
                 'specs_description'    => $request->input('specs_description'),
-                'specs_image'          => $request->input('specs_image'),
                 'spec1_icon'           => $request->input('spec1_icon'),
                 'spec1_badge'          => $request->input('spec1_badge'),
                 'spec1_value'          => $request->input('spec1_value'),
@@ -210,7 +209,6 @@ class ProductController extends Controller
                 'features_badge'       => $request->input('features_badge'),
                 'features_title'       => $request->input('features_title'),
                 'features_description' => $request->input('features_description'),
-                'features_image'       => $request->input('features_image'),
                 'feature1_icon'        => $request->input('feature1_icon'),
                 'feature1_title'       => $request->input('feature1_title'),
                 'feature1_desc'        => $request->input('feature1_desc'),
@@ -229,7 +227,6 @@ class ProductController extends Controller
                 'technology_badge'            => $request->input('technology_badge'),
                 'technology_title'            => $request->input('technology_title'),
                 'technology_description'      => $request->input('technology_description'),
-                'technology_image'            => $request->input('technology_image'),
                 'technology_card_title'       => $request->input('technology_card_title'),
                 'technology_card_description' => $request->input('technology_card_description'),
                 'tech_feature1_title'         => $request->input('tech_feature1_title'),
@@ -264,16 +261,22 @@ class ProductController extends Controller
                 $file = $request->file('specs_image');
                 $filename = 'specs_bg_' . time() . '.' . $file->getClientOriginalExtension();
                 $descData['specs_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            } elseif ($request->filled('specs_image') && is_string($request->input('specs_image'))) {
+                $descData['specs_image'] = $request->input('specs_image');
             }
             if ($request->hasFile('features_image')) {
                 $file = $request->file('features_image');
                 $filename = 'feat_bg_' . time() . '.' . $file->getClientOriginalExtension();
                 $descData['features_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            } elseif ($request->filled('features_image') && is_string($request->input('features_image'))) {
+                $descData['features_image'] = $request->input('features_image');
             }
             if ($request->hasFile('technology_image')) {
                 $file = $request->file('technology_image');
                 $filename = 'tech_' . time() . '.' . $file->getClientOriginalExtension();
                 $descData['technology_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            } elseif ($request->filled('technology_image') && is_string($request->input('technology_image'))) {
+                $descData['technology_image'] = $request->input('technology_image');
             }
 
             $product->description()->create($descData);
@@ -494,6 +497,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // dd($request->all());
         $product = Product::findOrFail($id);
 
         foreach (['category_ids', 'related_ids', 'bought_together_ids', 'options', 'filter_options', 'attributes', 'deleted_images', 'deleted_files'] as $field) {
@@ -536,7 +540,7 @@ class ProductController extends Controller
             'meta_title'          => 'nullable|string|max:255',
             'meta_description'    => 'nullable|string|max:255',
             'meta_keyword'        => 'nullable|string|max:255',
-            'video'               => 'nullable|string|max:255',
+            // 'video'               => 'nullable|string|max:255',
             'special_price'       => 'nullable|numeric|min:0',
             'special_start_date'  => 'nullable|date',
             'special_end_date'    => 'nullable|date',
@@ -609,7 +613,6 @@ class ProductController extends Controller
                 'specs_badge'          => $request->input('specs_badge'),
                 'specs_title'          => $request->input('specs_title'),
                 'specs_description'    => $request->input('specs_description'),
-                'specs_image'          => $request->input('specs_image'),
                 'spec1_icon'           => $request->input('spec1_icon'),
                 'spec1_badge'          => $request->input('spec1_badge'),
                 'spec1_value'          => $request->input('spec1_value'),
@@ -635,7 +638,6 @@ class ProductController extends Controller
                 'features_badge'       => $request->input('features_badge'),
                 'features_title'       => $request->input('features_title'),
                 'features_description' => $request->input('features_description'),
-                'features_image'       => $request->input('features_image'),
                 'feature1_icon'        => $request->input('feature1_icon'),
                 'feature1_title'       => $request->input('feature1_title'),
                 'feature1_desc'        => $request->input('feature1_desc'),
@@ -654,7 +656,6 @@ class ProductController extends Controller
                 'technology_badge'            => $request->input('technology_badge'),
                 'technology_title'            => $request->input('technology_title'),
                 'technology_description'      => $request->input('technology_description'),
-                'technology_image'            => $request->input('technology_image'),
                 'technology_card_title'       => $request->input('technology_card_title'),
                 'technology_card_description' => $request->input('technology_card_description'),
                 'tech_feature1_title'         => $request->input('tech_feature1_title'),
@@ -717,7 +718,10 @@ class ProductController extends Controller
                 $file = $request->file('specs_image');
                 $filename = 'specs_bg_' . time() . '.' . $file->getClientOriginalExtension();
                 $descData['specs_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            } elseif ($request->filled('specs_image') && is_string($request->input('specs_image'))) {
+                $descData['specs_image'] = $request->input('specs_image');
             }
+
             if ($request->hasFile('features_image')) {
                 if ($productDesc->features_image && Storage::disk('public')->exists($productDesc->features_image)) {
                     Storage::disk('public')->delete($productDesc->features_image);
@@ -725,7 +729,10 @@ class ProductController extends Controller
                 $file = $request->file('features_image');
                 $filename = 'feat_bg_' . time() . '.' . $file->getClientOriginalExtension();
                 $descData['features_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            } elseif ($request->filled('features_image') && is_string($request->input('features_image'))) {
+                $descData['features_image'] = $request->input('features_image');
             }
+
             if ($request->hasFile('technology_image')) {
                 if ($productDesc->technology_image && Storage::disk('public')->exists($productDesc->technology_image)) {
                     Storage::disk('public')->delete($productDesc->technology_image);
@@ -733,6 +740,8 @@ class ProductController extends Controller
                 $file = $request->file('technology_image');
                 $filename = 'tech_' . time() . '.' . $file->getClientOriginalExtension();
                 $descData['technology_image'] = $file->storeAs("product/{$product->id}", $filename, 'public');
+            } elseif ($request->filled('technology_image') && is_string($request->input('technology_image'))) {
+                $descData['technology_image'] = $request->input('technology_image');
             }
 
             $product->description()->updateOrCreate([], $descData);

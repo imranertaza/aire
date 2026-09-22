@@ -24,6 +24,7 @@ return [
     */
     'format' => env('IMAGE_CACHE_FORMAT', 'webp'),
     'quality' => (int) env('IMAGE_CACHE_QUALITY', 85),
+    'auto_optimize' => env('IMAGE_CACHE_AUTO_OPTIMIZE', true),
 
     /*
     |--------------------------------------------------------------------------

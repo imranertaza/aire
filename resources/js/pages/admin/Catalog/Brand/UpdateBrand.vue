@@ -16,7 +16,7 @@
                                 <div class="col-md-8">
                                     <!-- Name -->
                                     <div class="form-group">
-                                        <label>Brand Name</label>
+                                        <label>Brand Name <span class="text-danger">*</span></label>
                                         <input v-model="form.name" type="text" class="form-control" required />
                                     </div>
                                     
@@ -37,7 +37,7 @@
                                 <div class="col-md-4">
                                     <!-- File Upload -->
                                     <div class="form-group">
-                                        <label>Upload Image</label>
+                                        <label>Upload Image <span class="text-danger">*</span></label>
                                         <Vue3Dropzone v-model="fileUpload" v-model:previews="previews" mode="edit"
                                             :allowSelectOnPreview="true" />
                                         <small class="text-muted d-block mt-1">Recommended: 300 × 300px or 400 × 200px (Transparent PNG)</small>
@@ -54,8 +54,8 @@
 
                                     <!-- Status -->
                                     <div class="form-group">
-                                        <label>Status</label>
-                                        <select v-model="form.status" class="custom-select">
+                                        <label>Status <span class="text-danger">*</span></label>
+                                        <select v-model="form.status" class="custom-select" required>
                                             <option value="1">Active</option>
                                             <option value="0">Inactive</option>
                                         </select>
@@ -118,6 +118,14 @@ const fetchBrand = async () => {
 
 // Update brand
 const updateBrand = async () => {
+    const hasExistingImage = previews.value && previews.value.length > 0 && previews.value[0];
+    const hasNewUpload = fileUpload.value && fileUpload.value.length > 0 && fileUpload.value[0];
+
+    if (!hasExistingImage && !hasNewUpload) {
+        toast.error('Brand image is required.');
+        return;
+    }
+
     const payload = new FormData();
     if (!previews.value[0]) {
         payload.append('remove_image', 1);

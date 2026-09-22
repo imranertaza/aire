@@ -1,14 +1,25 @@
 @extends('themes.default.layouts.master')
 
-@section('body_class', 'product-filter-page')
+@section('title', !empty($currentCategory->meta_title) ? $currentCategory->meta_title : ($currentCategory ?
+    $currentCategory->category_name . ' | Aire' : 'Aire | Products'))
+@section('meta_description', !empty($currentCategory->meta_description) ? $currentCategory->meta_description :
+    $currentCategory->description ?? 'Aire Industries delivers cutting-edge indoor air quality solutions.')
+    @if (!empty($currentCategory->meta_keyword))
+        @section('meta_keywords', $currentCategory->meta_keyword)
+    @endif
+    @if (!empty($currentCategory->image))
+        @section('og_image', getImagePath($currentCategory->image))
+    @endif
 
-@push('styles')
-    <!-- Google Fonts Playfair Display -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
-        rel="stylesheet">
-    <!-- BEM Product Filter Page CSS -->
-    <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
-@endpush
+    @section('body_class', 'product-filter-page')
+
+    @push('styles')
+        <!-- Google Fonts Playfair Display -->
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+            rel="stylesheet">
+        <!-- BEM Product Filter Page CSS -->
+        <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
+    @endpush
 
 @section('content')
     <!-- Main Container: 3 Column Layout like index.html -->
@@ -479,20 +490,9 @@
                     applyLiveFilters(window.location.href);
                 });
 
-                // 5. Handle page show (back-forward cache navigation) & window load
-                window.addEventListener('pageshow', function(e) {
-                    // If page was restored from bfcache (browser back button),
-                    // main.js handles a full reload — skip re-init here to avoid
-                    // double pin-spacer wrapping on the stale DOM.
-                    if (e.persisted) return;
-
+                // 5. Handle page show & live filter restore
+                window.addEventListener('pageshow', function() {
                     if (typeof ScrollTrigger !== 'undefined') {
-                        if (typeof window.initWhyChooseScrollTrigger === 'function') {
-                            window.initWhyChooseScrollTrigger();
-                        }
-                        if (typeof window.initLivingHeroScrollTrigger === 'function') {
-                            window.initLivingHeroScrollTrigger();
-                        }
                         ScrollTrigger.refresh(true);
                     }
                 });

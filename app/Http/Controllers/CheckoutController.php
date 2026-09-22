@@ -52,7 +52,15 @@ class CheckoutController extends Controller
         $flatService     = app(\App\Services\Shipping\FlatShippingService::class);
         $weightService   = app(\App\Services\Shipping\WeightShippingService::class);
 
-        $shippingMethods = \App\Models\ShippingMethod::where('status', 1)->get()->map(function ($method) use ($zoneRateService, $zoneService, $flatService, $weightService) {
+        $isCartFreeDelivery = $this->checkCartFreeDelivery($cart);
+
+        $shippingMethods = \App\Models\ShippingMethod::where('status', 1)->get()->map(function ($method) use ($zoneRateService, $zoneService, $flatService, $weightService, $isCartFreeDelivery) {
+            if ($isCartFreeDelivery) {
+                $method->cost = 0.00;
+                $method->description = 'Free Delivery applied on your order.';
+                return $method;
+            }
+
             if ($method->code === 'zone_rate') {
                 $method->cost = $zoneRateService->getSettings(null, 223)->calculateShipping();
                 $method->description = 'Zone Rate delivery calculated based on weight, item count, or location price.';
@@ -82,7 +90,7 @@ class CheckoutController extends Controller
         $paymentMethods = \App\Models\PaymentMethod::active()->orderBy('id')->get();
         $countries = \App\Models\Country::active()->orderBy('name')->get();
 
-        return \theme_view('checkout.index', compact('customer', 'cart', 'shippingMethods', 'discount', 'paymentMethods', 'countries'));
+        return \theme_view('checkout.index', compact('customer', 'cart', 'shippingMethods', 'discount', 'paymentMethods', 'countries', 'isCartFreeDelivery', 'defaultShippingCost', 'subtotal'));
     }
 
     /**
@@ -224,7 +232,12 @@ class CheckoutController extends Controller
             $shippingMethodName = $shippingMethod->name;
         }
 
-        if ($shippingMethodCode === 'flat') {
+        $isCartFreeDelivery = $this->checkCartFreeDelivery($cart);
+
+        if ($isCartFreeDelivery) {
+            $shippingCharge = 0.00;
+            $shippingMethodName .= ' (Free Delivery)';
+        } else if ($shippingMethodCode === 'flat') {
             $shippingCharge = $flatService->getSettings()->calculateShipping();
         } else if ($shippingMethodCode === 'zone') {
             $shippingCharge = $zoneService->getSettings()->calculateShipping($shipCity);
@@ -389,7 +402,12 @@ class CheckoutController extends Controller
 
             $charge = 0.00;
 
-            if ($paymethod === 'flat') {
+            $cart = session()->get('cart', []);
+            $isCartFreeDelivery = $this->checkCartFreeDelivery($cart);
+
+            if ($isCartFreeDelivery) {
+                $charge = 0.00;
+            } else if ($paymethod === 'flat') {
                 $charge = $flatService->getSettings()->calculateShipping();
             } else if ($paymethod === 'zone') {
                 $charge = $zoneService->getSettings()->calculateShipping($cityId);
@@ -401,8 +419,6 @@ class CheckoutController extends Controller
                 $shippingMethod = \App\Models\ShippingMethod::where('code', $paymethod)->orWhere('name', 'like', '%' . $paymethod . '%')->first();
                 $charge = $shippingMethod ? (float) $shippingMethod->cost : 0.00;
             }
-
-            $cart = session()->get('cart', []);
             $subtotal = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
 
             // Calculate coupon discount
@@ -550,6 +566,29 @@ class CheckoutController extends Controller
             }
         }
         return min($discount, $subtotal + $shippingCharge);
+    }
+
+    /**
+     * Helper to check if cart items qualify for Free Delivery.
+     */
+    private function checkCartFreeDelivery($cart): bool
+    {
+        if (empty($cart)) {
+            return false;
+        }
+
+        foreach ($cart as $item) {
+            if (!empty($item['free_delivery'])) {
+                return true;
+            }
+        }
+
+        $productIds = collect($cart)->pluck('id')->filter()->unique()->toArray();
+        if (!empty($productIds)) {
+            return \App\Models\ProductFreeDelivery::whereIn('product_id', $productIds)->exists();
+        }
+
+        return false;
     }
 
     /**

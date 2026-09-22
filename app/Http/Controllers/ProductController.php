@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class ProductController extends Controller
 {
@@ -64,7 +65,7 @@ class ProductController extends Controller
             $bottomFeaturedProduct = Product::where('status', 1)->where('featured', 1)->with(['categories', 'images'])->oldest()->first();
         }
 
-        $query = Product::with(['categories', 'productAttributes', 'description', 'images', 'brand', 'productOptions.optionValue', 'special'])->where('status', 1);
+        $query = Product::with(['categories', 'productAttributes', 'description', 'images', 'brand', 'productOptions.optionValue', 'special', 'freeDelivery'])->where('status', 1);
 
         if ($currentCategory) {
             $catIds = [$currentCategory->id];
@@ -185,42 +186,57 @@ class ProductController extends Controller
     /**
      * Display product detail page.
      */
-
     public function productDetail($slug)
     {
-        $product = Product::where('slug', $slug)
-            ->orWhere('id', is_numeric($slug) ? $slug : 0)
-            ->with([
-                'categories',
-                'brand',
-                'images',
-                'description',
-                'overview',
-                'productAttributes.attributeGroup',
-                'productOptions.option',
-                'productOptions.optionValue',
-                'faqs',
-                'applications',
-                'special',
-                'relatedProducts.categories',
-                'relatedProducts.images',
-                'relatedProducts.special',
-            ])->firstOrFail();
+        $product = Cache::remember("product_detail_{$slug}", 3600, function () use ($slug) {
+            return Product::where('slug', $slug)
+                ->orWhere('id', is_numeric($slug) ? $slug : 0)
+                ->with([
+                    'categories',
+                    'brand',
+                    'images',
+                    'description',
+                    'overview',
+                    'productAttributes.attributeGroup',
+                    'productOptions.option',
+                    'productOptions.optionValue',
+                    'faqs',
+                    'applications',
+                    'special',
+                    'freeDelivery',
+                    'relatedProducts.categories',
+                    'relatedProducts.images',
+                    'relatedProducts.special',
+                    'relatedProducts.freeDelivery',
+                ])->first();
+        });
 
-        $relatedProducts = $product->relatedProducts;
-        if ($relatedProducts->isEmpty()) {
-            $catId = $product->categories->first()?->id;
-            $relatedQuery = Product::where('status', 1)->where('id', '!=', $product->id)->with(['categories', 'images', 'special']);
-            if ($catId) {
-                $relatedQuery->whereHas('categories', function ($q) use ($catId) {
-                    $q->where('product_categories.id', $catId);
-                });
-            }
-            $relatedProducts = $relatedQuery->take(6)->get();
-            if ($relatedProducts->isEmpty()) {
-                $relatedProducts = Product::where('status', 1)->where('id', '!=', $product->id)->with(['categories', 'images', 'special'])->take(6)->get();
-            }
+        if (!$product) {
+            abort(404);
         }
+
+        // Canonical 301 redirect if accessed via ID or mismatched slug
+        if (!empty($product->slug) && (string) $slug !== (string) $product->slug) {
+            return redirect()->route('products.detail', $product->slug, 301);
+        }
+
+        $relatedProducts = Cache::remember("product_related_{$product->id}", 3600, function () use ($product) {
+            $related = $product->relatedProducts;
+            if ($related->isEmpty()) {
+                $catId = $product->categories->first()?->id;
+                $relatedQuery = Product::where('status', 1)->where('id', '!=', $product->id)->with(['categories', 'images', 'special']);
+                if ($catId) {
+                    $relatedQuery->whereHas('categories', function ($q) use ($catId) {
+                        $q->where('product_categories.id', $catId);
+                    });
+                }
+                $related = $relatedQuery->take(6)->get();
+                if ($related->isEmpty()) {
+                    $related = Product::where('status', 1)->where('id', '!=', $product->id)->with(['categories', 'images', 'special'])->take(6)->get();
+                }
+            }
+            return $related;
+        });
 
         return \theme_view('products.show', compact('product', 'relatedProducts'));
     }
@@ -234,159 +250,169 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $product = Product::where('status', 1)
-            ->where(function ($q) use ($slug) {
-                $q->where('slug', $slug)
-                    ->orWhere('id', is_numeric($slug) ? $slug : 0);
-            })
-            ->with([
-                'categories',
-                'brand',
-                'images',
-                'description',
-                'overview',
-                'productAttributes.attributeGroup',
-                'productOptions.option',
-                'productOptions.optionValue',
-                'faqs',
-                'applications',
-                'special',
-                'relatedProducts.categories',
-                'relatedProducts.images',
-                'productLanding',
-            ])->first();
+        $cacheKey = "product_landing_{$slug}";
+        $data = Cache::remember($cacheKey, 3600, function () use ($slug) {
+            $product = Product::where('status', 1)
+                ->where(function ($q) use ($slug) {
+                    $q->where('slug', $slug)
+                        ->orWhere('id', is_numeric($slug) ? $slug : 0);
+                })
+                ->with([
+                    'categories',
+                    'brand',
+                    'images',
+                    'description',
+                    'overview',
+                    'productAttributes.attributeGroup',
+                    'productOptions.option',
+                    'productOptions.optionValue',
+                    'faqs',
+                    'applications',
+                    'special',
+                    'relatedProducts.categories',
+                    'relatedProducts.images',
+                    'productLanding',
+                ])->first();
 
-        if (!$product) {
+            if (!$product) {
+                return null;
+            }
+
+            $landing = $product->productLanding;
+            if (!$landing || (isset($landing->status) && (int) $landing->status === 0)) {
+                return null;
+            }
+
+            $relatedProducts = $product->relatedProducts ?? collect();
+
+            return compact('product', 'relatedProducts', 'landing');
+        });
+
+        if (!$data) {
             abort(404);
         }
 
-        $landing = $product->productLanding;
-
-        if (!$landing || (isset($landing->status) && (int)$landing->status === 0)) {
-            abort(404);
-        }
-
-        $relatedProducts = $product->relatedProducts ?? collect();
-
-        return \theme_view('products.landing', compact('product', 'relatedProducts', 'landing'));
+        return \theme_view('products.landing', $data);
     }
 
-
     /**
-     * Retrieve list of products and categories for live dropdown search.
-     */
-    /**
-     * Retrieve list of products and categories for live dropdown search.
+     * Retrieve list of products and categories for live dropdown search with caching.
      */
     public function dropdownList(Request $request)
     {
         $search = trim($request->query('search', ''));
         $categoryId = $request->query('category_id');
-
-        $query = Product::where('status', 1)->with(['categories', 'description', 'brand', 'productFilterOptions.filterOptionValue', 'applications']);
-
-        if ($categoryId) {
-            $query->whereHas('categories', function ($q) use ($categoryId) {
-                $q->where('product_categories.id', $categoryId);
-            });
-        }
-
-        if (!empty($search)) {
-            $keywords = array_filter(explode(' ', $search), fn($k) => mb_strlen(trim($k)) >= 3);
-
-            $query->where(function ($q) use ($search, $keywords) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('model', 'LIKE', "%{$search}%")
-                    ->orWhere('product_code', 'LIKE', "%{$search}%")
-                    ->orWhereHas('categories', function ($cq) use ($search) {
-                        $cq->where('category_name', 'LIKE', "%{$search}%");
-                    })
-                    ->orWhereHas('description', function ($dq) use ($search) {
-                        $dq->where('tag', 'LIKE', "%{$search}%")
-                            ->orWhere('meta_title', 'LIKE', "%{$search}%")
-                            ->orWhere('meta_description', 'LIKE', "%{$search}%");
-                    })
-                    ->orWhereHas('productFilterOptions.filterOptionValue', function ($foq) use ($search) {
-                        $foq->where('name', 'LIKE', "%{$search}%");
-                    })
-                    ->orWhereHas('applications', function ($aq) use ($search) {
-                        $aq->where('title', 'LIKE', "%{$search}%")
-                            ->orWhere('description', 'LIKE', "%{$search}%");
-                    });
-
-                if (!empty($keywords) && count($keywords) > 1) {
-                    foreach ($keywords as $kw) {
-                        $kw = trim($kw);
-                        if (in_array(strtolower($kw), ['for', 'the', 'and', 'with', 'air', 'all'])) continue;
-                        $q->orWhere('name', 'LIKE', "%{$kw}%")
-                            ->orWhere('model', 'LIKE', "%{$kw}%")
-                            ->orWhereHas('productFilterOptions.filterOptionValue', fn($foq) => $foq->where('name', 'LIKE', "%{$kw}%"))
-                            ->orWhereHas('applications', fn($aq) => $aq->where('title', 'LIKE', "%{$kw}%"));
-                    }
-                }
-            });
-        }
-
         $limit = (int) $request->query('limit', 8);
-        $products = $query->latest('id')->take($limit)->get()->map(function ($p) {
-            $firstCategory = $p->categories->first();
+
+        $cacheKey = 'search_dd_' . md5(json_encode([$search, $categoryId, $limit]));
+
+        $payload = Cache::remember($cacheKey, 300, function () use ($search, $categoryId, $limit) {
+            $query = Product::where('status', 1)->with(['categories', 'description', 'brand', 'productFilterOptions.filterOptionValue', 'applications']);
+
+            if ($categoryId) {
+                $query->whereHas('categories', function ($q) use ($categoryId) {
+                    $q->where('product_categories.id', $categoryId);
+                });
+            }
+
+            if (!empty($search)) {
+                $keywords = array_filter(explode(' ', $search), fn($k) => mb_strlen(trim($k)) >= 3);
+
+                $query->where(function ($q) use ($search, $keywords) {
+                    $q->where('name', 'LIKE', "%{$search}%")
+                        ->orWhere('model', 'LIKE', "%{$search}%")
+                        ->orWhere('product_code', 'LIKE', "%{$search}%")
+                        ->orWhereHas('categories', function ($cq) use ($search) {
+                            $cq->where('category_name', 'LIKE', "%{$search}%");
+                        })
+                        ->orWhereHas('description', function ($dq) use ($search) {
+                            $dq->where('tag', 'LIKE', "%{$search}%")
+                                ->orWhere('meta_title', 'LIKE', "%{$search}%")
+                                ->orWhere('meta_description', 'LIKE', "%{$search}%");
+                        })
+                        ->orWhereHas('productFilterOptions.filterOptionValue', function ($foq) use ($search) {
+                            $foq->where('name', 'LIKE', "%{$search}%");
+                        })
+                        ->orWhereHas('applications', function ($aq) use ($search) {
+                            $aq->where('title', 'LIKE', "%{$search}%")
+                                ->orWhere('description', 'LIKE', "%{$search}%");
+                        });
+
+                    if (!empty($keywords) && count($keywords) > 1) {
+                        foreach ($keywords as $kw) {
+                            $kw = trim($kw);
+                            if (in_array(strtolower($kw), ['for', 'the', 'and', 'with', 'air', 'all'])) continue;
+                            $q->orWhere('name', 'LIKE', "%{$kw}%")
+                                ->orWhere('model', 'LIKE', "%{$kw}%")
+                                ->orWhereHas('productFilterOptions.filterOptionValue', fn($foq) => $foq->where('name', 'LIKE', "%{$kw}%"))
+                                ->orWhereHas('applications', fn($aq) => $aq->where('title', 'LIKE', "%{$kw}%"));
+                        }
+                    }
+                });
+            }
+
+            $products = $query->latest('id')->take($limit)->get()->map(function ($p) {
+                $firstCategory = $p->categories->first();
+                return [
+                    'id'          => $p->id,
+                    'name'        => $p->name,
+                    'slug'        => $p->slug,
+                    'model'       => $p->model ?? '',
+                    'price'       => number_format((float) $p->price, 2),
+                    'raw_price'   => (float) $p->price,
+                    'image'       => $p->main_image ? getImageCacheUrl($p->main_image, 160, 160, 'webp') : asset('themes/default/assets/img/Air-Purify.png'),
+                    'url'         => route('products.detail', $p->slug ?: $p->id),
+                    'category'    => $firstCategory?->category_name ?? 'Air Care',
+                    'category_bg' => $firstCategory?->bg_color ?: '#0066cc',
+                    'tag'         => $p->description?->tag ?? '',
+                ];
+            });
+
+            // Also search matching categories if search query provided
+            $categories = [];
+            if (!empty($search)) {
+                $categories = \App\Models\ProductCategory::active()
+                    ->where('category_name', 'LIKE', "%{$search}%")
+                    ->take(4)
+                    ->get()
+                    ->map(function ($c) {
+                        return [
+                            'id'   => $c->id,
+                            'name' => $c->category_name,
+                            'slug' => $c->slug,
+                            'url'  => route('products.filter', $c->slug ?: $c->id),
+                        ];
+                    });
+            }
+
+            // Search matching requirement / application filter tags
+            $matchingTags = [];
+            if (!empty($search)) {
+                $matchingTags = \App\Models\FilterOptionValue::with('filterOption:id,name')
+                    ->where('name', 'LIKE', "%{$search}%")
+                    ->take(4)
+                    ->get()
+                    ->map(function ($fov) {
+                        return [
+                            'id'    => $fov->id,
+                            'name'  => $fov->name,
+                            'group' => $fov->filterOption?->name ?? 'Filter',
+                            'url'   => route('products.filter') . '?search=' . urlencode($fov->name),
+                        ];
+                    });
+            }
+
             return [
-                'id'          => $p->id,
-                'name'        => $p->name,
-                'slug'        => $p->slug,
-                'model'       => $p->model ?? '',
-                'price'       => number_format((float) $p->price, 2),
-                'raw_price'   => (float) $p->price,
-                'image'       => $p->main_image ? getImageUrl($p->main_image) : asset('themes/default/assets/img/Air-Purify.png'),
-                'url'         => route('products.detail', $p->slug ?: $p->id),
-                'category'    => $firstCategory?->category_name ?? 'Air Care',
-                'category_bg' => $firstCategory?->bg_color ?: '#0066cc',
-                'tag'         => $p->description?->tag ?? '',
+                'status'        => true,
+                'data'          => $products,
+                'products'      => $products,
+                'categories'    => $categories,
+                'matching_tags' => $matchingTags,
+                'total'         => $products->count(),
             ];
         });
 
-        // Also search matching categories if search query provided
-        $categories = [];
-        if (!empty($search)) {
-            $categories = \App\Models\ProductCategory::active()
-                ->where('category_name', 'LIKE', "%{$search}%")
-                ->take(4)
-                ->get()
-                ->map(function ($c) {
-                    return [
-                        'id'   => $c->id,
-                        'name' => $c->category_name,
-                        'slug' => $c->slug,
-                        'url'  => route('products.filter', $c->slug ?: $c->id),
-                    ];
-                });
-        }
-
-        // Search matching requirement / application filter tags
-        $matchingTags = [];
-        if (!empty($search)) {
-            $matchingTags = \App\Models\FilterOptionValue::with('filterOption:id,name')
-                ->where('name', 'LIKE', "%{$search}%")
-                ->take(4)
-                ->get()
-                ->map(function ($fov) {
-                    return [
-                        'id'    => $fov->id,
-                        'name'  => $fov->name,
-                        'group' => $fov->filterOption?->name ?? 'Filter',
-                        'url'   => route('products.filter') . '?search=' . urlencode($fov->name),
-                    ];
-                });
-        }
-
-        return response()->json([
-            'status'        => true,
-            'data'          => $products,
-            'products'      => $products,
-            'categories'    => $categories,
-            'matching_tags' => $matchingTags,
-            'total'         => $products->count(),
-        ]);
+        return response()->json($payload);
     }
 
     /**

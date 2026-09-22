@@ -28,9 +28,10 @@
                         </div>
 
                         @php
-                            $subtotal = collect($cart)->sum(function ($item) {
+                            $subtotal = $subtotal ?? collect($cart)->sum(function ($item) {
                                 return $item['price'] * $item['quantity'];
                             });
+                            $defaultShippingCost = $defaultShippingCost ?? (count($shippingMethods ?? []) > 0 ? ($shippingMethods[0]->cost ?? 0.00) : 0.00);
                         @endphp
 
                         <!-- Product Items List -->
@@ -46,17 +47,33 @@
                                         <span class="fs-15 fw-semibold text-dark mb-1 d-block text-truncate"
                                             style="max-width: 150px;">{{ $item['name'] }}</span>
                                         <p class="fs-13 text-muted mb-1">{{ $item['model'] ?? 'AIRE System' }}</p>
-                                        <div class="d-flex justify-content-between align-items-center fs-14">
+                                        <div class="d-flex justify-content-between align-items-center fs-13">
                                             <span class="text-muted">Qty: {{ $item['quantity'] }}</span>
                                             <span
                                                 class="fw-semibold text-dark">${{ number_format($item['price'] * $item['quantity'], 2) }}</span>
                                         </div>
+                                        @if (!empty($item['free_delivery']))
+                                            <div class="mt-1">
+                                                <span
+                                                    class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0 fs-11">
+                                                    <i class="bi bi-truck"></i> Free Delivery
+                                                </span>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
                         </div>
 
                         <hr class="my-4" style="border-color: #e5e7eb; opacity: 1;">
+
+                        @if (!empty($isCartFreeDelivery))
+                            <div
+                                class="alert alert-success d-flex align-items-center gap-2 py-2 px-3 mb-3 rounded-3 fs-13 border-0 bg-success-subtle text-success">
+                                <i class="bi bi-truck fs-16"></i>
+                                <span><strong>Free Delivery:</strong> Applied to your order!</span>
+                            </div>
+                        @endif
 
                         <!-- Totals Breakdown -->
                         <div class="d-flex justify-content-between align-items-center mb-3 fs-15">
@@ -66,7 +83,9 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3 fs-15">
                             <span class="text-muted">Shipping</span>
-                            <span class="fw-semibold text-dark"><span class="checkout-shipping-val">Free</span></span>
+                            <span
+                                class="fw-semibold {{ !empty($isCartFreeDelivery) ? 'text-success' : 'text-dark' }}"><span
+                                    class="checkout-shipping-val">{{ !empty($isCartFreeDelivery) ? 'Free' : ($defaultShippingCost > 0 ? '$' . number_format($defaultShippingCost, 2) : 'Free') }}</span></span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3 fs-15 checkout-discount-row"
                             style="display: {{ $discount > 0 ? 'flex' : 'none' }} !important;">
@@ -186,7 +205,8 @@
                         </div>
 
                         <!-- Connecting Line 1-2 -->
-                        <div class="flex-grow-1 mx-3" style="height: 2px; background-color: var(--color-primary, #1d4ed8); margin-top: -5%;">
+                        <div class="flex-grow-1 mx-3"
+                            style="height: 2px; background-color: var(--color-primary, #1d4ed8); margin-top: -5%;">
                         </div>
 
                         <!-- Step 2: Checkout -->

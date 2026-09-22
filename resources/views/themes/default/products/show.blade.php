@@ -1,6 +1,182 @@
 @extends('themes.default.layouts.master')
 
-@section('title', ($product->name ?? 'Product Details') . ' | AIRE')
+@php
+    $productDesc = $product->description;
+    $seoTitle = !empty($productDesc?->meta_title)
+        ? $productDesc->meta_title
+        : ($product->name ?? 'Product Details') . ' | AIRE';
+
+    $seoDescription = !empty($productDesc?->meta_description)
+        ? $productDesc->meta_description
+        : (!empty($productDesc?->description)
+            ? \Illuminate\Support\Str::limit(strip_tags($productDesc->description), 160)
+            : 'Explore ' . ($product->name ?? 'AIRE product') . ' - advanced clean air solutions and technology.');
+
+    $seoKeywords = $productDesc?->meta_keyword ?? '';
+
+    $rawImg = !empty($product->main_image) ? $product->main_image : (!empty($product->image) ? $product->image : '');
+    $productImg = !empty($rawImg) ? getImagePath($rawImg) : theme_asset('img/logo.png');
+    $productImgUrl = str_starts_with($productImg, 'http') ? $productImg : url($productImg);
+
+    $canonicalUrl = route('products.detail', $product->slug ?? $product->id);
+    $brandName = $product->brand?->name ?? 'AIRE';
+    $sku = $product->product_code ?? ($product->model ?? 'AIRE-' . $product->id);
+    $currentPrice =
+        (float) ($product->special && $product->special->price > 0 ? $product->special->price : $product->price ?? 0);
+    $inStock = ($product->quantity ?? 0) > 0;
+    $currency = 'USD';
+    $primaryCat = $product->categories->first();
+@endphp
+
+@section('title', $seoTitle)
+@section('meta_description', $seoDescription)
+@if (!empty($seoKeywords))
+    @section('meta_keywords', $seoKeywords)
+@endif
+@section('og_image', $productImgUrl)
+@section('og_type', 'product')
+@section('canonical_url', $canonicalUrl)
+
+@push('head')
+    <!-- Search Engine Directives & Core Web Vitals Optimization -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <link rel="preload" as="image" href="{{ $productImgUrl }}" fetchpriority="high">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $seoTitle }}">
+    <meta name="twitter:description" content="{{ $seoDescription }}">
+    <meta name="twitter:image" content="{{ $productImgUrl }}">
+
+    <!-- Open Graph Product Extensions -->
+    <meta property="product:price:amount" content="{{ number_format($currentPrice, 2, '.', '') }}">
+    <meta property="product:price:currency" content="{{ $currency }}">
+    <meta property="product:availability" content="{{ $inStock ? 'in stock' : 'out of stock' }}">
+    <meta property="product:brand" content="{{ $brandName }}">
+
+    <!-- Schema.org Product Structured Data (Google Shopping & Search) -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org/",
+        "@type": "Product",
+        "name": {!! json_encode($product->name ?? '') !!},
+        "image": [
+            {!! json_encode($productImgUrl) !!}
+        ],
+        "description": {!! json_encode($seoDescription) !!},
+        "sku": {!! json_encode($sku) !!},
+        "mpn": {!! json_encode($product->model ?? $sku) !!},
+        "brand": {
+            "@type": "Brand",
+            "name": {!! json_encode($brandName) !!}
+        },
+        "offers": {
+            "@type": "Offer",
+            "url": {!! json_encode($canonicalUrl) !!},
+            "priceCurrency": {!! json_encode($currency) !!},
+            "price": "{{ number_format($currentPrice, 2, '.', '') }}",
+            "priceValidUntil": "{{ date('Y-12-31', strtotime('+1 year')) }}",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "{{ $inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' }}",
+            "seller": {
+                "@type": "Organization",
+                "name": "AIRE"
+            }
+        }
+        @if(!empty($product->average_feedback) && $product->average_feedback > 0)
+        ,"aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "{{ $product->average_feedback }}",
+            "reviewCount": "5"
+        }
+        @endif
+    }
+    </script>
+
+    <!-- Schema.org BreadcrumbList Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ route('home') }}"
+            }
+            @if ($primaryCat && $primaryCat->parent)
+            ,{
+                "@type": "ListItem",
+                "position": 2,
+                "name": {!! json_encode($primaryCat->parent->category_name) !!},
+                "item": "{{ route('category.show', $primaryCat->parent->slug ?? $primaryCat->parent->id) }}"
+            }
+            ,{
+                "@type": "ListItem",
+                "position": 3,
+                "name": {!! json_encode($primaryCat->category_name) !!},
+                "item": "{{ route('category.show', $primaryCat->slug ?? $primaryCat->id) }}"
+            }
+            ,{
+                "@type": "ListItem",
+                "position": 4,
+                "name": {!! json_encode($product->name ?? '') !!},
+                "item": "{{ $canonicalUrl }}"
+            }
+            @elseif ($primaryCat)
+            ,{
+                "@type": "ListItem",
+                "position": 2,
+                "name": {!! json_encode($primaryCat->category_name) !!},
+                "item": "{{ route('category.show', $primaryCat->slug ?? $primaryCat->id) }}"
+            }
+            ,{
+                "@type": "ListItem",
+                "position": 3,
+                "name": {!! json_encode($product->name ?? '') !!},
+                "item": "{{ $canonicalUrl }}"
+            }
+            @else
+            ,{
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Products",
+                "item": "{{ route('products.index') }}"
+            }
+            ,{
+                "@type": "ListItem",
+                "position": 3,
+                "name": {!! json_encode($product->name ?? '') !!},
+                "item": "{{ $canonicalUrl }}"
+            }
+            @endif
+        ]
+    }
+    </script>
+
+    @if (!empty($product->faqs) && $product->faqs->count() > 0)
+        <!-- Schema.org FAQPage Structured Data (Rich Expandable Questions in Google SERP) -->
+        <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            @foreach ($product->faqs as $fIndex => $faq)
+            {
+                "@type": "Question",
+                "name": {!! json_encode($faq->question ?? '') !!},
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": {!! json_encode($faq->answer ?? '') !!}
+                }
+            }{{ !$loop->last ? ',' : '' }}
+            @endforeach
+        ]
+    }
+    </script>
+    @endif
+@endpush
 
 @push('styles')
     <style>
@@ -822,10 +998,10 @@
         /* Technology Physics Banner */
         .physics-banner {
             position: relative;
-            border-radius: 20px;
+            border-radius: 24px;
             overflow: hidden;
-            background-color: #0d1b2a;
-            min-height: 480px;
+            background-color: #0b1329;
+            min-height: 520px;
             display: flex;
             align-items: flex-end;
             padding: 35px;
@@ -1127,8 +1303,17 @@
                     <img src="{{ !empty($product->main_image) ? getImageUrl($product->main_image) : theme_asset('img/airpro_mask_fb2.png') }}"
                         alt="{{ $product->name ?? 'Airpro Mask FB2' }}" class="sticky-thumb flex-shrink-0">
                     <div class="min-w-0">
-                        <h6 class="fw-bold mb-0 text-dark fs-6 text-truncate sticky-product-title">
-                            {{ $product->name ?? 'Airpro Mask FB2' }}</h6>
+                        <h6
+                            class="fw-bold mb-0 text-dark fs-6 text-truncate sticky-product-title d-flex align-items-center gap-1">
+                            <span class="text-truncate">{{ $product->name ?? 'Airpro Mask FB2' }}</span>
+                            @if ($product->freeDelivery)
+                                <span
+                                    class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-0 fw-semibold flex-shrink-0"
+                                    style="font-size: 0.65rem;">
+                                    <i class="bi bi-truck"></i> Free Delivery
+                                </span>
+                            @endif
+                        </h6>
                         <p class="text-muted small mb-0 d-none d-md-block text-truncate" style="font-size: 0.75rem;">
                             Next-Generation Active Wearable Air
                             Purifier</p>
@@ -1140,13 +1325,13 @@
                     </a>
                 </div>
                 <div class="d-flex align-items-center gap-2 gap-sm-3 flex-shrink-0">
-                    <div class="fw-bold text-dark sticky-price me-1 me-sm-2 text-nowrap">
+                    <div class="fw-bold text-dark sticky-price me-1 me-sm-2 text-nowrap" id="stickyProductPrice">
                         @if ($product->special_price)
                             <span
-                                class="text-muted text-decoration-line-through me-1 fs-6 fw-normal">${{ number_format((float) $product->price, 2) }}</span>
-                            <span>${{ number_format((float) $product->special_price, 2) }}</span>
+                                class="text-muted text-decoration-line-through me-1 fs-6 fw-normal sticky-original-price">${{ number_format((float) $product->price, 2) }}</span>
+                            <span class="sticky-active-price">${{ number_format((float) $product->special_price, 2) }}</span>
                         @else
-                            ${{ number_format((float) ($product->price ?? 249), 2) }}
+                            <span class="sticky-active-price">${{ number_format((float) ($product->price ?? 249), 2) }}</span>
                         @endif
                     </div>
                     <div class="input-group border border-secondary-subtle rounded d-none d-md-flex sticky-qty-group"
@@ -1190,50 +1375,73 @@
     <!-- Product Main Top Section -->
     <section class="container py-3" id="productTopSection">
         <!-- Breadcrumb -->
-        <div class="cart-breadcrumb text-muted fs-13 mb-3">
-            <a href="{{ route('home') }}" class="text-decoration-none text-muted">Home</a> &nbsp;&gt;&nbsp;
-            <a href="" class="text-decoration-none text-muted">Products</a> &nbsp;&gt;&nbsp;
-            <span class="text-dark fw-bold">{{ strtoupper($product->name ?? 'AIRPRO MASK FB2') }}</span>
-        </div>
+        <nav aria-label="breadcrumb" class="cart-breadcrumb text-muted fs-13 mb-3">
+            <ol class="list-unstyled d-flex flex-wrap align-items-center gap-1 mb-0 p-0" style="list-style: none;">
+                <li><a href="{{ route('home') }}" class="text-decoration-none text-muted">Home</a></li>
+                <li class="text-muted px-1">&gt;</li>
+                @if ($primaryCat)
+                    @if ($primaryCat->parent)
+                        <li><a href="{{ route('category.show', $primaryCat->parent->slug ?? $primaryCat->parent->id) }}"
+                                class="text-decoration-none text-muted">{{ $primaryCat->parent->category_name }}</a></li>
+                        <li class="text-muted px-1">&gt;</li>
+                    @endif
+                    <li><a href="{{ route('category.show', $primaryCat->slug ?? $primaryCat->id) }}"
+                            class="text-decoration-none text-muted">{{ $primaryCat->category_name }}</a></li>
+                    <li class="text-muted px-1">&gt;</li>
+                @else
+                    <li><a href="{{ route('products.index') }}" class="text-decoration-none text-muted">Products</a></li>
+                    <li class="text-muted px-1">&gt;</li>
+                @endif
+                <li class="text-dark fw-bold" aria-current="page">{{ strtoupper($product->name ?? 'PRODUCT DETAILS') }}
+                </li>
+            </ol>
+        </nav>
 
         <div class="row g-5">
             <!-- Product Image Gallery (Dynamic Thumbnails + Main View) -->
             <div class="col-lg-6">
                 @php
-                    $galleryImages = [];
+                    $rawGallery = [];
                     if (!empty($product->main_image)) {
-                        $galleryImages[] = getImageUrl($product->main_image);
+                        $rawGallery[] = $product->main_image;
                     }
                     if (!empty($product->images) && count($product->images) > 0) {
                         foreach ($product->images as $imgObj) {
                             $imgPath = $imgObj->image ?? ($imgObj->image_path ?? '');
-                            if ($imgPath) {
-                                $fullUrl = getImageUrl($imgPath);
-                                if (!in_array($fullUrl, $galleryImages)) {
-                                    $galleryImages[] = $fullUrl;
-                                }
+                            if ($imgPath && !in_array($imgPath, $rawGallery)) {
+                                $rawGallery[] = $imgPath;
                             }
                         }
                     }
                     $fallbackImages = [
-                        theme_asset('img/airpro_mask_fb2.png'),
-                        theme_asset('img/aire_mini.png'),
-                        theme_asset('img/AIRE-Pro-S1-Hero.png'),
-                        theme_asset('img/photograph.png'),
+                        'themes/default/assets/img/airpro_mask_fb2.png',
+                        'themes/default/assets/img/aire_mini.png',
+                        'themes/default/assets/img/AIRE-Pro-S1-Hero.png',
+                        'themes/default/assets/img/photograph.png',
                     ];
 
-                    $needed = 4 - count($galleryImages);
+                    $needed = 4 - count($rawGallery);
                     for ($i = 0; $i < $needed; $i++) {
-                        $galleryImages[] = $fallbackImages[$i];
+                        $rawGallery[] = $fallbackImages[$i];
                     }
-                    $primaryImage = $galleryImages[0];
+
+                    $galleryItems = array_map(function ($path) {
+                        return [
+                            'thumb' => getImageCacheUrl($path, 160, 160, 'webp'),
+                            'large' => getImageCacheUrl($path, 900, 900, 'webp'),
+                            'srcset' => getImageSrcset($path, [400, 700, 1000, 1400], 1.0),
+                        ];
+                    }, $rawGallery);
+
+                    $primaryImage = $galleryItems[0];
                 @endphp
                 <div
                     class="product-gallery-wrapper d-flex flex-column-reverse flex-md-row gap-2 gap-md-3 align-items-stretch">
                     <div class="product-thumb-column d-flex flex-row flex-md-column gap-2 gap-md-3 overflow-auto"
                         id="thumbScrollContainer" data-lenis-prevent>
-                        @foreach ($galleryImages as $index => $imgUrl)
-                            <img src="{{ $imgUrl }}" data-large="{{ $imgUrl }}"
+                        @foreach ($galleryItems as $index => $item)
+                            <img src="{{ $item['thumb'] }}" data-large="{{ $item['large'] }}"
+                                data-srcset="{{ $item['srcset'] }}"
                                 class="img-fluid cursor-pointer thumb-img {{ $index === 0 ? 'active' : '' }}"
                                 draggable="false"
                                 alt="{{ $product->name ?? 'Product Image' }} Thumbnail {{ $index + 1 }}">
@@ -1243,9 +1451,18 @@
                         class="flex-1 main-image-wrapper p-0 text-center position-relative overflow-hidden cursor-crosshair d-flex align-items-center justify-content-center">
                         <div class="d-flex justify-content-between position-absolute top-0 start-0 w-100 p-3 z-1">
                             <span class="badge-render">NEW ARRIVAL</span>
+                            @if ($product->freeDelivery)
+                                <span
+                                    class="badge-render border-success-subtle text-success bg-white fw-bold d-inline-flex align-items-center gap-1">
+                                    <i class="bi bi-truck text-success"></i> FREE DELIVERY
+                                </span>
+                            @endif
                         </div>
-                        <img src="{{ $primaryImage }}" id="mainProductImg" class="img-fluid w-100 h-100"
-                            style="object-fit: cover;" alt="{{ $product->name ?? 'Product Image' }}">
+                        <img src="{{ $primaryImage['large'] }}"
+                            @if (!empty($primaryImage['srcset'])) srcset="{{ $primaryImage['srcset'] }}" @endif
+                            sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 650px" fetchpriority="high"
+                            id="mainProductImg" class="img-fluid w-100 h-100" style="object-fit: cover;"
+                            alt="{{ $product->name ?? 'Product Image' }}">
                         <div class="zoom-image-container d-none position-absolute top-0 start-0 w-100 h-100 bg-white"
                             id="zoomContainer"
                             style="background-repeat: no-repeat; background-size: 220% 220%; z-index: 5; pointer-events: none; opacity: 0; transition: opacity 0.2s ease;">
@@ -1261,21 +1478,32 @@
 
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h1 class="fw-bold mb-0 text-dark title-2">{{ $product->name ?? 'Airpro Mask FB2' }}</h1>
-                    <div class="text-end">
+                    <div class="text-end" id="mainProductPriceContainer"
+                        data-base-price="{{ (float) ($product->special_price !== null ? $product->special_price : $product->price) }}"
+                        data-original-price="{{ (float) $product->price }}"
+                        data-has-special="{{ $product->special_price !== null ? '1' : '0' }}">
                         @if ($product->special_price)
                             <span
-                                class="text-muted text-decoration-line-through fs-5 d-block">${{ number_format((float) $product->price, 2) }}</span>
-                            <h2 class="text-dark fw-bold mb-0 title-2">
+                                class="text-muted text-decoration-line-through fs-5 d-block main-original-price">${{ number_format((float) $product->price, 2) }}</span>
+                            <h2 class="text-dark fw-bold mb-0 title-2 main-active-price">
                                 ${{ number_format((float) $product->special_price, 2) }}</h2>
                         @else
-                            <h2 class="text-dark fw-bold mb-0 title-2">${{ number_format((float) $product->price, 2) }}
+                            <h2 class="text-dark fw-bold mb-0 title-2 main-active-price">${{ number_format((float) $product->price, 2) }}
                             </h2>
                         @endif
                     </div>
                 </div>
 
-                <p class="text-muted small mb-3">{{ $product->brand->name ?? '' }} {{ $product->model ? '|' : '' }}
-                    {{ $product->model ?? '' }} </p>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                    <p class="text-muted small mb-0">{{ $product->brand->name ?? '' }} {{ $product->model ? '|' : '' }}
+                        {{ $product->model ?? '' }} </p>
+                    @if ($product->freeDelivery)
+                        <span
+                            class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 fs-12 fw-semibold d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-truck"></i> Free Delivery
+                        </span>
+                    @endif
+                </div>
 
                 {{-- <div class="d-flex align-items-center gap-2 mb-3">
                     <div class="text-primary fs-6">★★★★★</div>
@@ -1290,7 +1518,7 @@
 
                     <!-- 2x2 Feature Check Cards -->
                     @if ($product->productAttributes && $product->productAttributes->count() > 0)
-                        <div class="row g-2">
+                        <div class="row g-2 mb-3">
                             @foreach ($product->productAttributes->take(4) as $attr)
                                 @php
                                     $label = $attr->details ?? $attr->name;
@@ -1378,29 +1606,35 @@
                                             $valId = $po->option_value_id;
                                             $firstChar = mb_substr($valName, 0, 1);
                                             $isHexColor = $firstChar === '#' && strlen($valName) === 7;
+                                            $poPrice = (float) ($po->price ?? 0);
+                                            $poPrefix = $po->price_prefix ?: ($po->subtract == 1 ? '-' : '+');
                                             $priceAdd =
-                                                $po->price && floatval($po->price) > 0
+                                                $poPrice > 0
                                                     ? ' (' .
-                                                        ($po->price_prefix ?? '+') .
+                                                        $poPrefix .
                                                         '$' .
-                                                        number_format($po->price, 2) .
+                                                        number_format($poPrice, 2) .
                                                         ')'
                                                     : '';
                                         @endphp
 
                                         @if ($isHexColor || $isColorOption)
                                             <div class="color-swatch {{ $index === 0 ? 'active' : '' }}"
-                                                title="{{ $valName }}" data-color="{{ $valName }}"
+                                                title="{{ $valName }}{{ $priceAdd }}" data-color="{{ $valName }}"
                                                 data-option-id="{{ $po->option_id }}"
                                                 data-option-name="{{ $optionName }}"
                                                 data-value-id="{{ $valId }}"
+                                                data-price="{{ $poPrice }}"
+                                                data-price-prefix="{{ $poPrefix }}"
                                                 style="background-color: {{ $isHexColor ? $valName : strtolower(str_replace(' ', '', $valName)) }};">
                                             </div>
                                         @else
                                             <button type="button" class="size-btn {{ $index === 0 ? 'active' : '' }}"
                                                 data-option-id="{{ $po->option_id }}"
                                                 data-option-name="{{ $optionName }}"
-                                                data-value-id="{{ $valId }}">
+                                                data-value-id="{{ $valId }}"
+                                                data-price="{{ $poPrice }}"
+                                                data-price-prefix="{{ $poPrefix }}">
                                                 {{ $valName }}{{ $priceAdd }}
                                             </button>
                                         @endif
@@ -1795,7 +2029,8 @@
                                             <h3 class="fw-bold text-dark mb-1" style="font-size: 2.2rem;">
                                                 {{ $desc->spec4_value }}
                                                 @if ($desc->spec4_unit)
-                                                    <span class="fs-5 fw-normal text-muted">{{ $desc->spec4_unit }}</span>
+                                                    <span
+                                                        class="fs-5 fw-normal text-muted">{{ $desc->spec4_unit }}</span>
                                                 @endif
                                             </h3>
                                         @endif
@@ -2276,10 +2511,16 @@
                     $thumb.addClass('active');
 
                     const largeImageSrc = $thumb.attr('data-large') || $thumb.attr('src');
+                    const largeImageSrcset = $thumb.attr('data-srcset');
                     if (!largeImageSrc) return;
 
                     const $mainImg = $('#mainProductImg');
                     $mainImg.stop(true, false).fadeTo(80, 0.25, function() {
+                        if (largeImageSrcset) {
+                            $mainImg.attr('srcset', largeImageSrcset);
+                        } else {
+                            $mainImg.removeAttr('srcset');
+                        }
                         $mainImg.attr('src', largeImageSrc).fadeTo(140, 1);
                     });
 
@@ -2661,11 +2902,53 @@
                     $zoomBox.css('background-position', posX + '% ' + posY + '%');
                 });
 
+                // Real-time Dynamic Price Calculation with Options
+                function updateProductPriceWithOptions() {
+                    const $container = $('#mainProductPriceContainer');
+                    if (!$container.length) return;
+
+                    const basePrice = parseFloat($container.attr('data-base-price')) || 0;
+                    const originalBasePrice = parseFloat($container.attr('data-original-price')) || 0;
+                    const hasSpecial = $container.attr('data-has-special') === '1';
+
+                    let totalOptionDiff = 0;
+
+                    // Sum price modifiers from all currently active option selectors
+                    $('.color-swatch.active, .size-btn.active').each(function() {
+                        const price = parseFloat($(this).attr('data-price')) || 0;
+                        const prefix = $(this).attr('data-price-prefix') || '+';
+                        if (prefix === '-') {
+                            totalOptionDiff -= price;
+                        } else {
+                            totalOptionDiff += price;
+                        }
+                    });
+
+                    const newActivePrice = Math.max(0, basePrice + totalOptionDiff);
+                    const newOriginalPrice = Math.max(0, originalBasePrice + totalOptionDiff);
+
+                    const formattedActive = '$' + newActivePrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    const formattedOriginal = '$' + newOriginalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    // Update main product price elements
+                    $('.main-active-price').text(formattedActive);
+                    if (hasSpecial) {
+                        $('.main-original-price').text(formattedOriginal);
+                    }
+
+                    // Update sticky header price elements
+                    $('.sticky-active-price').text(formattedActive);
+                    if (hasSpecial) {
+                        $('.sticky-original-price').text(formattedOriginal);
+                    }
+                }
+
                 // Color Swatch Selection (scoped to option group)
                 $(document).on('click', '.color-swatch', function() {
                     // Only deactivate swatches within the same option group
                     $(this).closest('.d-flex.gap-2').find('.color-swatch').removeClass('active');
                     $(this).addClass('active');
+                    updateProductPriceWithOptions();
                 });
 
                 // Size / Generic Option Button Selection (scoped to option group)
@@ -2673,7 +2956,11 @@
                     // Only deactivate buttons within the same option group
                     $(this).closest('.d-flex.gap-2').find('.size-btn').removeClass('active');
                     $(this).addClass('active');
+                    updateProductPriceWithOptions();
                 });
+
+                // Initial calculation on page load
+                updateProductPriceWithOptions();
 
                 // Sticky Header & Active Nav Scroll logic
                 const stickyHeader = $('#stickyProductHeader');

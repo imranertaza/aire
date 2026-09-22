@@ -25,12 +25,19 @@
     @if (
         $showCategoryBadge ||
             ($product->quantity <= 5 && $product->quantity > 0) ||
-            (isset($isFavoritePage) && $isFavoritePage && isset($catName)))
+            (isset($isFavoritePage) && $isFavoritePage && isset($catName)) ||
+            $product->freeDelivery)
         <div class="product-card__badge-wrapper">
             @if ($showCategoryBadge || (isset($isFavoritePage) && $isFavoritePage && isset($catName)))
                 <span class="product-card__badge-pill"
                     style="background-color: {{ isset($isFavoritePage) ? $catBg : $categoryBgColor }} !important; color: #ffffff !important;">
                     {{ isset($isFavoritePage) ? $catName : $categoryName }}
+                </span>
+            @endif
+            @if ($product->freeDelivery)
+                <span class="product-card__badge-pill"
+                    style="background-color: #198754 !important; color: #ffffff !important;">
+                    <i class="bi bi-truck me-1"></i> Free Delivery
                 </span>
             @endif
             @if ($product->quantity <= 5 && $product->quantity > 0)
@@ -79,8 +86,11 @@
         @endif
     </div>
     <div class="product-card__image-wrapper">
-        <a href="{{ route('products.detail', $product->slug ?: $product->id) }}">
+        <a
+            href="{{ $product->productLanding ? route('products.landing', $product->slug ?: $product->id) : route('products.detail', $product->slug ?: $product->id) }}">
             <img src="{{ $product->main_image ? getImageCacheUrl($product->main_image, 400, 400, 'webp') : theme_asset('img/Air-Purify.png') }}"
+                @if ($product->main_image) srcset="{{ getImageSrcset($product->main_image, [280, 400, 600], 1.0) }}"
+                    sizes="(max-width: 576px) 50vw, (max-width: 992px) 33vw, 300px" @endif
                 alt="{{ $product->name }}" class="product-card__image" loading="lazy" decoding="async">
         </a>
     </div>
@@ -99,7 +109,8 @@
                 data-product-id="{{ $product->id }}">Buy</a>
             <div class="d-flex flex-column gap-0">
                 @php
-                    $specialPrice = $product->special_price ?? ($product->special ? $product->special->special_price : null);
+                    $specialPrice =
+                        $product->special_price ?? ($product->special ? $product->special->special_price : null);
                 @endphp
                 @if (isset($specialPrice) && $specialPrice !== null && $specialPrice < $product->price)
                     <span class="product-card__price pre">${{ number_format((float) $product->price, 2) }}</span>
@@ -117,7 +128,7 @@
                 Remove
             </button>
         @else
-            <a href="{{ $product->productLanding ? route('products.landing', $product->slug ?: $product->id) : route('products.detail', $product->slug ?: $product->id) }}"
+            <a href="{{ route('products.detail', $product->slug ?: $product->id) }}"
                 class="product-card__btn-learn">Learn more</a>
         @endif
     </div>

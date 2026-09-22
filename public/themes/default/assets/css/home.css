@@ -897,9 +897,10 @@
 
 .home-lifestyle__img {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
     object-fit: cover;
+    object-position: center;
     will-change: transform;
     pointer-events: none;
 }
@@ -963,6 +964,8 @@
 
     .home-lifestyle__img-box {
         border-radius: 14px;
+        min-height: 200px;
+        aspect-ratio: 16 / 10;
     }
 }
 

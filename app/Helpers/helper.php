@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/ThemeHelper.php';
 
+use App\Services\ImageService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,30 +21,35 @@ if (! function_exists('getImageUrl')) {
     {
         // 1. Empty fallback
         if (empty($path)) {
-            return \App\Services\ImageService::getFallbackUrl();
+            return ImageService::getFallbackUrl();
         }
 
         // 2. If dimensions or optimization requested, delegate to ImageService
         if ($width !== null || $height !== null || !empty($options['optimize'])) {
             if (!empty($options['fit']) && $width && $height) {
-                return \App\Services\ImageService::fit($path, $width, $height, $options);
+                return ImageService::fit($path, $width, $height, $options);
             }
 
             if (!empty($options['optimize']) && !$width && !$height) {
-                return \App\Services\ImageService::optimize($path, $options);
+                return ImageService::optimize($path, $options);
             }
 
             if ($width !== null) {
-                return \App\Services\ImageService::resize($path, $width, $height, $options);
+                return ImageService::resize($path, $width, $height, $options);
             }
         }
 
         // 3. Direct fast bypass check for remote URLs and SVGs
-        if (\App\Services\ImageService::shouldBypass($path)) {
-            return \App\Services\ImageService::getBypassUrl($path);
+        if (ImageService::shouldBypass($path)) {
+            return ImageService::getBypassUrl($path);
         }
 
-        // 4. Default resolution (100% backward-compatible with existing calls)
+        // 4. Auto-optimize local bitmaps to WebP with two-tier caching (unless explicitly raw)
+        if (config('imagecache.auto_optimize', true) && empty($options['raw'])) {
+            return ImageService::optimize($path, $options);
+        }
+
+        // 5. Default resolution (100% backward-compatible fallback)
         $normalized = ltrim($path, '/');
 
         if (file_exists(public_path($normalized))) {
@@ -52,17 +58,17 @@ if (! function_exists('getImageUrl')) {
 
         if (str_starts_with($normalized, 'storage/')) {
             $sub = substr($normalized, 8);
-            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($sub) || file_exists(public_path($normalized))) {
+            if (Storage::disk('public')->exists($sub) || file_exists(public_path($normalized))) {
                 return asset($normalized);
             }
         }
 
-        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($normalized) || file_exists(public_path('storage/' . $normalized))) {
+        if (Storage::disk('public')->exists($normalized) || file_exists(public_path('storage/' . $normalized))) {
             return asset("storage/{$normalized}");
         }
 
         // Fallback
-        return \App\Services\ImageService::getFallbackUrl();
+        return ImageService::getFallbackUrl();
     }
 }
 
@@ -165,16 +171,48 @@ if (! function_exists('getImageCacheUrl')) {
      */
     function getImageCacheUrl(?string $filePath, int $width = 200, int $height = 200, string $format = 'webp'): string
     {
-
-        $baseUrl      = config('app.url') ?: env('APP_URL');
-        $relativePath = getImagePath($filePath);
-        // If already absolute URL, return as-is
-        if (str_starts_with($relativePath, 'http://') || str_starts_with($relativePath, 'https://')) {
-            return $relativePath;
+        if (empty($filePath)) {
+            return ImageService::getFallbackUrl();
         }
 
-        // Otherwise build dynamic resize route
-        return rtrim($baseUrl, '/') . "/image/{$width}/{$height}/{$format}/" . ltrim($relativePath, '/');
+        // Generate and return direct static cached file URL with zero PHP routing overhead
+        return ImageService::fit($filePath, $width, $height, ['format' => $format]);
+    }
+}
+
+if (! function_exists('getImageSrcset')) {
+    /**
+     * Generate a responsive srcset attribute string for an image.
+     *
+     * Produces high-performance WebP images at each target width with zero PHP routing overhead.
+     *
+     * @param string|null    $filePath Image path or URL
+     * @param array          $widths   Target widths in pixels (default: [400, 700, 1000])
+     * @param float|int|null $ratio    Height-to-width ratio (default: 1.0 for square crop; or custom float like 0.5625 for 16:9)
+     * @param string         $format   Output format ('webp' by default)
+     * @return string Space-separated srcset candidate string
+     */
+    function getImageSrcset(?string $filePath, array $widths = [400, 700, 1000], $ratio = 1.0, string $format = 'webp'): string
+    {
+        if (empty($filePath)) {
+            return '';
+        }
+
+        // External URLs or vector SVGs do not need multiple pixel density candidates
+        if (str_starts_with($filePath, 'http://') || str_starts_with($filePath, 'https://') || str_ends_with(strtolower($filePath), '.svg')) {
+            return '';
+        }
+
+        $sources = [];
+        foreach ($widths as $w) {
+            $w = (int) $w;
+            if ($w <= 0) continue;
+            $h = $ratio !== null && $ratio > 0 ? (int) round($w * $ratio) : $w;
+            $url = getImageCacheUrl($filePath, $w, $h, $format);
+            $sources[] = "{$url} {$w}w";
+        }
+
+        return implode(', ', $sources);
     }
 }
 

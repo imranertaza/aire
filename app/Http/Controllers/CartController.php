@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductOption;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -16,16 +17,22 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
         $savedForLater = session()->get('saved_for_later', []);
 
-        // Refresh cart items with current active pricing/specials
+        // Refresh cart items with current active pricing/specials + preserved option price adjustments
         $updated = false;
         foreach ($cart as $key => &$item) {
-            $product = Product::with('special')->find($item['id']);
+            $product = Product::with(['special', 'freeDelivery'])->find($item['id']);
             if ($product) {
-                $effectivePrice = $product->final_price;
-                if (!isset($item['price']) || (float)$item['price'] != $effectivePrice) {
+                $optDiff = (float) ($item['option_price_diff'] ?? 0);
+                $effectivePrice = max(0, (float) $product->final_price + $optDiff);
+                $originalPrice = max(0, (float) $product->price + $optDiff);
+                $specialPrice = $product->special_price !== null ? max(0, (float) $product->special_price + $optDiff) : null;
+                $isFree = (bool) $product->freeDelivery;
+
+                if (!isset($item['price']) || (float)$item['price'] != $effectivePrice || !isset($item['free_delivery']) || $item['free_delivery'] !== $isFree) {
                     $item['price'] = $effectivePrice;
-                    $item['original_price'] = (float) $product->price;
-                    $item['special_price'] = $product->special_price;
+                    $item['original_price'] = $originalPrice;
+                    $item['special_price'] = $specialPrice;
+                    $item['free_delivery'] = $isFree;
                     $updated = true;
                 }
             }
@@ -49,25 +56,54 @@ class CartController extends Controller
 
     public function addToCart(Request $request)
     {
-        $product = Product::with('special')->find($request->product_id);
+        $product = Product::with(['special', 'productOptions.option', 'productOptions.optionValue', 'freeDelivery'])->find($request->product_id);
         if (!$product) {
             return response()->json(['success' => false, 'message' => 'Product not found.'], 404);
         }
 
-        $cart = session()->get('cart', []);
-        $quantity = (int)$request->input('quantity', 1);
+        // If product has options but none were provided (e.g., quick add from catalog grid), prompt to choose options
+        $hasAvailableOptions = $product->productOptions && $product->productOptions->count() > 0;
+        $optionsInput = $request->input('options');
 
-        // Collect selected options from request (array: [value_id => {option_id, name, value}])
+        if ($hasAvailableOptions && (empty($optionsInput) || !is_array($optionsInput))) {
+            return response()->json([
+                'success'     => false,
+                'has_options' => true,
+                'redirect'    => route('products.detail', $product->slug ?: $product->id),
+                'message'     => 'Please select product options.',
+            ]);
+        }
+
+        $cart = session()->get('cart', []);
+        $quantity = max(1, (int)$request->input('quantity', 1));
+
+        // Collect selected options and calculate price adjustments
         $options = [];
-        if ($request->has('options') && is_array($request->input('options'))) {
-            foreach ($request->input('options') as $valueId => $optData) {
+        $optionPriceDiff = 0.0;
+
+        if ($hasAvailableOptions && is_array($optionsInput)) {
+            foreach ($optionsInput as $valueId => $optData) {
                 if (is_array($optData)) {
-                    $options[(int) $valueId] = [
-                        'option_id' => (int) ($optData['option_id'] ?? 0),
-                        'value_id'  => (int) $valueId,
-                        'name'      => trim($optData['name'] ?? ''),
-                        'value'     => trim($optData['value'] ?? ''),
-                    ];
+                    $valId = (int) $valueId;
+                    $po = $product->productOptions->firstWhere('option_value_id', $valId);
+                    if ($po) {
+                        $priceMod = (float) ($po->price ?? 0);
+                        $prefix = $po->price_prefix ?: ($po->subtract == 1 ? '-' : '+');
+                        if ($prefix === '-') {
+                            $optionPriceDiff -= $priceMod;
+                        } else {
+                            $optionPriceDiff += $priceMod;
+                        }
+
+                        $options[$valId] = [
+                            'option_id'    => (int) $po->option_id,
+                            'value_id'     => $valId,
+                            'name'         => trim($optData['name'] ?? ($po->option->name ?? 'Option')),
+                            'value'        => trim($optData['value'] ?? ($po->optionValue->name ?? '')),
+                            'price'        => $priceMod,
+                            'price_prefix' => $prefix,
+                        ];
+                    }
                 }
             }
         }
@@ -79,24 +115,30 @@ class CartController extends Controller
             $cartKey   = $product->id . '_' . $optionKey;
         }
 
-        $effectivePrice = $product->final_price;
+        $effectivePrice = max(0, (float) $product->final_price + $optionPriceDiff);
+        $originalPrice = max(0, (float) $product->price + $optionPriceDiff);
+        $specialPrice = $product->special_price !== null ? max(0, (float) $product->special_price + $optionPriceDiff) : null;
 
         if (isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity'] += $quantity;
             $cart[$cartKey]['price'] = $effectivePrice;
-            $cart[$cartKey]['original_price'] = (float) $product->price;
-            $cart[$cartKey]['special_price'] = $product->special_price;
+            $cart[$cartKey]['original_price'] = $originalPrice;
+            $cart[$cartKey]['special_price'] = $specialPrice;
+            $cart[$cartKey]['option_price_diff'] = $optionPriceDiff;
+            $cart[$cartKey]['free_delivery'] = (bool) $product->freeDelivery;
         } else {
             $cart[$cartKey] = [
-                "id"             => $product->id,
-                "name"           => $product->name,
-                "quantity"       => $quantity,
-                "price"          => $effectivePrice,
-                "original_price" => (float) $product->price,
-                "special_price"  => $product->special_price,
-                "image"          => $product->main_image ? getImageUrl($product->main_image) : theme_asset('img/Air-Purify.png'),
-                "model"          => $product->model,
-                "options"        => $options,
+                "id"                => $product->id,
+                "name"              => $product->name,
+                "quantity"          => $quantity,
+                "price"             => $effectivePrice,
+                "original_price"    => $originalPrice,
+                "special_price"     => $specialPrice,
+                "option_price_diff" => $optionPriceDiff,
+                "image"             => $product->main_image ? getImageUrl($product->main_image) : theme_asset('img/Air-Purify.png'),
+                "model"             => $product->model,
+                "options"           => $options,
+                "free_delivery"     => (bool) $product->freeDelivery,
             ];
         }
 

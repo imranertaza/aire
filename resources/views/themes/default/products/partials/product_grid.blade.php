@@ -57,8 +57,12 @@
         </a>
         <div class="product-hero__image-wrapper">
             <a href="{{ route('products.detail', $topFeaturedProduct->slug ?: $topFeaturedProduct->id) }}">
-                <img src="{{ $topFeaturedProduct->main_image ? getImageUrl($topFeaturedProduct->main_image) : theme_asset('img/Air-Purify.png') }}"
-                    alt="{{ $topFeaturedProduct->name }}" class="product-hero__image">
+                <img src="{{ $topFeaturedProduct->main_image ? getImageCacheUrl($topFeaturedProduct->main_image, 600, 600, 'webp') : theme_asset('img/Air-Purify.png') }}"
+                    @if ($topFeaturedProduct->main_image)
+                        srcset="{{ getImageSrcset($topFeaturedProduct->main_image, [360, 600, 900], 1.0) }}"
+                        sizes="(max-width: 768px) 100vw, 600px"
+                    @endif
+                    alt="{{ $topFeaturedProduct->name }}" class="product-hero__image" loading="eager" decoding="async">
             </a>
         </div>
     </div>

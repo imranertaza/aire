@@ -149,28 +149,32 @@
                 'Discover the top‑selling models trusted by thousands of families for cleaner, healthier air.';
             $bestSellingProductIds = $bestSellingSection['product_ids'] ?? [];
 
-            $bestSellingProducts = collect();
-            if (!empty($bestSellingProductIds) && is_array($bestSellingProductIds)) {
-                $orderedProducts = \App\Models\Product::with(['categories', 'images'])
-                    ->whereIn('id', $bestSellingProductIds)
-                    ->where('status', 1)
-                    ->get()
-                    ->keyBy('id');
+            $bestSellingProducts = \Illuminate\Support\Facades\Cache::remember('home_best_selling_products', 3600, function () use ($bestSellingProductIds) {
+                $prods = collect();
+                if (!empty($bestSellingProductIds) && is_array($bestSellingProductIds)) {
+                    $orderedProducts = \App\Models\Product::with(['categories', 'images'])
+                        ->whereIn('id', $bestSellingProductIds)
+                        ->where('status', 1)
+                        ->get()
+                        ->keyBy('id');
 
-                $bestSellingProducts = collect($bestSellingProductIds)
-                    ->map(fn($id) => $orderedProducts->get($id))
-                    ->filter()
-                    ->values();
-            }
+                    $prods = collect($bestSellingProductIds)
+                        ->map(fn($id) => $orderedProducts->get($id))
+                        ->filter()
+                        ->values();
+                }
 
-            // Fallback: If no products were selected or found, fetch latest active products
-            if ($bestSellingProducts->isEmpty()) {
-                $bestSellingProducts = \App\Models\Product::with(['categories', 'images'])
-                    ->where('status', 1)
-                    ->latest('id')
-                    ->take(4)
-                    ->get();
-            }
+                // Fallback: If no products were selected or found, fetch latest active products
+                if ($prods->isEmpty()) {
+                    $prods = \App\Models\Product::with(['categories', 'images'])
+                        ->where('status', 1)
+                        ->latest('id')
+                        ->take(4)
+                        ->get();
+                }
+
+                return $prods;
+            });
 
             // Fallback: If database has no products at all, preserve original mock cards
             if ($bestSellingProducts->isEmpty()) {
@@ -295,9 +299,11 @@
                                 </div>
                                 <div class="col-lg-8 col-md-7 home-lifestyle__col-img">
                                     <div class="home-lifestyle__img-box">
-                                        <img src="{{ getImageUrl($item['image'] ?? '') }}"
-                                            alt="{{ $item['title'] ?? 'Lifestyle' }}" width="856" height="285"
-                                            class="img-fluid home-lifestyle__img">
+                                        <img src="{{ getImageCacheUrl($item['image'] ?? '', 856, 385, 'webp') }}"
+                                            srcset="{{ getImageSrcset($item['image'] ?? '', [400, 600, 856, 1200], 385 / 856) }}"
+                                            sizes="(max-width: 768px) 100vw, 856px"
+                                            alt="{{ $item['title'] ?? 'Lifestyle' }}" width="856" height="385"
+                                            class="home-lifestyle__img" loading="lazy" decoding="async">
                                     </div>
                                 </div>
                             </div>
@@ -306,9 +312,11 @@
                             <div class="row align-items-center home-lifestyle__row">
                                 <div class="col-lg-8 col-md-7 order-2 order-md-1 home-lifestyle__col-img">
                                     <div class="home-lifestyle__img-box">
-                                        <img src="{{ getImageUrl($item['image'] ?? '') }}"
-                                            alt="{{ $item['title'] ?? 'Lifestyle' }}" width="856" height="285"
-                                            class="img-fluid home-lifestyle__img">
+                                        <img src="{{ getImageCacheUrl($item['image'] ?? '', 856, 385, 'webp') }}"
+                                            srcset="{{ getImageSrcset($item['image'] ?? '', [400, 600, 856, 1200], 385 / 856) }}"
+                                            sizes="(max-width: 768px) 100vw, 856px"
+                                            alt="{{ $item['title'] ?? 'Lifestyle' }}" width="856" height="385"
+                                            class="home-lifestyle__img" loading="lazy" decoding="async">
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-md-5 order-1 order-md-2 home-lifestyle__col-text ps-md-4 ps-lg-5">
@@ -334,28 +342,32 @@
                 'Explore the latest purifiers designed with advanced technology for modern living.';
             $newArrivalProductIds = $newArrivalSection['product_ids'] ?? [];
 
-            $newArrivalProducts = collect();
-            if (!empty($newArrivalProductIds) && is_array($newArrivalProductIds)) {
-                $orderedNewProducts = \App\Models\Product::with(['categories', 'images'])
-                    ->whereIn('id', $newArrivalProductIds)
-                    ->where('status', 1)
-                    ->get()
-                    ->keyBy('id');
+            $newArrivalProducts = \Illuminate\Support\Facades\Cache::remember('home_new_arrival_products', 3600, function () use ($newArrivalProductIds) {
+                $prods = collect();
+                if (!empty($newArrivalProductIds) && is_array($newArrivalProductIds)) {
+                    $orderedNewProducts = \App\Models\Product::with(['categories', 'images'])
+                        ->whereIn('id', $newArrivalProductIds)
+                        ->where('status', 1)
+                        ->get()
+                        ->keyBy('id');
 
-                $newArrivalProducts = collect($newArrivalProductIds)
-                    ->map(fn($id) => $orderedNewProducts->get($id))
-                    ->filter()
-                    ->values();
-            }
+                    $prods = collect($newArrivalProductIds)
+                        ->map(fn($id) => $orderedNewProducts->get($id))
+                        ->filter()
+                        ->values();
+                }
 
-            // Fallback: If no products were selected or found, fetch latest active products
-            if ($newArrivalProducts->isEmpty()) {
-                $newArrivalProducts = \App\Models\Product::with(['categories', 'images'])
-                    ->where('status', 1)
-                    ->latest('id')
-                    ->take(3)
-                    ->get();
-            }
+                // Fallback: If no products were selected or found, fetch latest active products
+                if ($prods->isEmpty()) {
+                    $prods = \App\Models\Product::with(['categories', 'images'])
+                        ->where('status', 1)
+                        ->latest('id')
+                        ->take(3)
+                        ->get();
+                }
+
+                return $prods;
+            });
 
             // Fallback: If database has no products at all, preserve original mock cards
             if ($newArrivalProducts->isEmpty()) {
@@ -467,28 +479,32 @@
                 'Discover the purifiers most chosen by families who value clean, healthy air.';
             $customerFavoritesProductIds = $customerFavoritesSection['product_ids'] ?? [];
 
-            $customerFavoritesProducts = collect();
-            if (!empty($customerFavoritesProductIds) && is_array($customerFavoritesProductIds)) {
-                $orderedFavProducts = \App\Models\Product::with(['categories', 'images'])
-                    ->whereIn('id', $customerFavoritesProductIds)
-                    ->where('status', 1)
-                    ->get()
-                    ->keyBy('id');
+            $customerFavoritesProducts = \Illuminate\Support\Facades\Cache::remember('home_customer_fav_products', 3600, function () use ($customerFavoritesProductIds) {
+                $prods = collect();
+                if (!empty($customerFavoritesProductIds) && is_array($customerFavoritesProductIds)) {
+                    $orderedFavProducts = \App\Models\Product::with(['categories', 'images'])
+                        ->whereIn('id', $customerFavoritesProductIds)
+                        ->where('status', 1)
+                        ->get()
+                        ->keyBy('id');
 
-                $customerFavoritesProducts = collect($customerFavoritesProductIds)
-                    ->map(fn($id) => $orderedFavProducts->get($id))
-                    ->filter()
-                    ->values();
-            }
+                    $prods = collect($customerFavoritesProductIds)
+                        ->map(fn($id) => $orderedFavProducts->get($id))
+                        ->filter()
+                        ->values();
+                }
 
-            // Fallback: If no products were selected or found, fetch latest active products
-            if ($customerFavoritesProducts->isEmpty()) {
-                $customerFavoritesProducts = \App\Models\Product::with(['categories', 'images'])
-                    ->where('status', 1)
-                    ->skip(3)
-                    ->take(3)
-                    ->get();
-            }
+                // Fallback: If no products were selected or found, fetch latest active products
+                if ($prods->isEmpty()) {
+                    $prods = \App\Models\Product::with(['categories', 'images'])
+                        ->where('status', 1)
+                        ->skip(3)
+                        ->take(3)
+                        ->get();
+                }
+
+                return $prods;
+            });
 
             // Fallback: If database has no products at all, preserve original mock cards
             if ($customerFavoritesProducts->isEmpty()) {
@@ -589,15 +605,17 @@
             $livingHeroSection = getSection('home_living_hero') ?? (getSection('living_hero') ?? []);
             $livingHeroEnabled = isset($livingHeroSection['enabled']) ? (bool) $livingHeroSection['enabled'] : true;
 
-            $livingProduct = null;
-            if (!empty($livingHeroSection['product_id'])) {
-                $livingProduct = \App\Models\Product::with(['description', 'categories', 'images'])->find(
-                    $livingHeroSection['product_id'],
-                );
-            }
-            if (!$livingProduct && isset($bottomFeaturedProduct) && $bottomFeaturedProduct) {
-                $livingProduct = $bottomFeaturedProduct;
-            }
+            $livingProductId = $livingHeroSection['product_id'] ?? null;
+            $livingProduct = \Illuminate\Support\Facades\Cache::remember('home_living_hero_product', 3600, function () use ($livingProductId, $bottomFeaturedProduct) {
+                $prod = null;
+                if (!empty($livingProductId)) {
+                    $prod = \App\Models\Product::with(['description', 'categories', 'images'])->find($livingProductId);
+                }
+                if (!$prod && isset($bottomFeaturedProduct) && $bottomFeaturedProduct) {
+                    $prod = $bottomFeaturedProduct;
+                }
+                return $prod;
+            });
 
             $rawBg = $livingHeroSection['image'] ?? null;
             if ($rawBg) {
@@ -629,7 +647,10 @@
                 <div class="living-hero__image-bg" id="living-hero-img-box">
                     <img src="{{ $livingBgImage }}" alt="Modern Living Room" class="living-hero__bg-img">
                     <!-- Animated product image that flies down from living room scene to above Buy Now button on scroll -->
-                    <img src="{{ getImageUrl($livingProduct->main_image) }}" alt="{{ $livingProduct->name }}"
+                    <img src="{{ getImageCacheUrl($livingProduct->main_image, 450, 450, 'webp') }}"
+                        srcset="{{ getImageSrcset($livingProduct->main_image, [280, 450, 700], 1.0) }}"
+                        sizes="(max-width: 576px) 260px, (max-width: 992px) 360px, 450px"
+                        alt="{{ $livingProduct->name }}"
                         class="living-hero__animated-product" id="living-hero-animated-product">
                 </div>
 

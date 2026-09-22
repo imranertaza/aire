@@ -15,7 +15,7 @@
                                 <div class="col-md-8">
                                     <!-- Placement Key Multiselect -->
                                     <div class="form-group">
-                                        <label>Placement / Section (Multi-Select)</label>
+                                        <label>Placement / Section (Multi-Select) <span class="text-danger">*</span></label>
                                         <Multiselect v-model="form.keys" mode="tags" :options="placementOptions"
                                             :close-on-select="false" :searchable="true" :create-option="true"
                                             placeholder="Select one or more placements / sections"
@@ -33,7 +33,7 @@
 
                                     <!-- Title -->
                                     <div class="form-group">
-                                        <label>Slide Title</label>
+                                        <label>Slide Title <span class="text-danger">*</span></label>
                                         <input v-model="form.title" type="text" class="form-control"
                                             placeholder="e.g. The Future of Pure Living" required />
                                     </div>
@@ -67,8 +67,8 @@
 
                                     <!-- Status -->
                                     <div class="form-group">
-                                        <label>Status</label>
-                                        <select v-model="form.enabled" class="custom-select"
+                                        <label>Status <span class="text-danger">*</span></label>
+                                        <select v-model="form.enabled" class="custom-select" required
                                             :class="form.enabled == 1 ? 'bg-success text-white' : 'bg-transparent text-dark'">
                                             <option :value="1">Active</option>
                                             <option :value="0">Inactive</option>
@@ -80,7 +80,7 @@
                                 <div class="col-md-4">
                                     <!-- File Upload -->
                                     <div class="form-group">
-                                        <label>Upload Slide Image</label>
+                                        <label>Upload Slide Image <span class="text-danger">*</span></label>
                                         <Vue3Dropzone v-model="fileUpload" :allowSelectOnPreview="true" :maxFiles="1" />
                                         
                                         <div class="mt-2 p-2 bg-light border rounded small">
@@ -151,6 +151,11 @@ const form = reactive({
 
 /* Submit new slide */
 const submitSlide = async () => {
+    if (!form.keys || form.keys.length === 0) {
+        toast.error('Please select at least one placement / section.');
+        return;
+    }
+
     if (!fileUpload.value || !fileUpload.value[0]?.file) {
         toast.error('Please upload an image for the slide.');
         return;

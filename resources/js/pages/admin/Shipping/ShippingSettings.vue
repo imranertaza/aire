@@ -35,16 +35,16 @@
                                     <div class="row">
                                         <div class="col-md-6" v-for="setting in formData.settings" :key="setting.id">
                                             <div class="form-group">
-                                                <label>{{ setting.title }}</label>
+                                                <label>{{ setting.title }} <span class="text-danger">*</span></label>
                                                 <!-- If it's a zone_rate_method, it might need a select dropdown, otherwise generic text -->
                                                 <select v-if="setting.label === 'zone_rate_method'"
-                                                    v-model="setting.value" class="form-control">
+                                                    v-model="setting.value" class="form-control" required>
                                                     <option value="1">Weight</option>
                                                     <option value="2">Price</option>
                                                     <option value="3">Item</option>
                                                 </select>
                                                 <input v-else v-model="setting.value" type="text"
-                                                    class="form-control" />
+                                                    class="form-control" required />
                                             </div>
                                         </div>
                                     </div>
@@ -62,8 +62,8 @@
                                         <table class="table table-bordered table-sm align-middle">
                                             <thead class="bg-light">
                                                 <tr>
-                                                    <th>Weight Label (e.g., Up to X kg)</th>
-                                                    <th>Cost / Value</th>
+                                                    <th>Weight Label (e.g., Up to X kg) <span class="text-danger">*</span></th>
+                                                    <th>Cost / Value <span class="text-danger">*</span></th>
                                                     <th style="width: 100px;">Action</th>
                                                 </tr>
                                             </thead>
@@ -106,9 +106,9 @@
                                         <table class="table table-bordered table-sm align-middle">
                                             <thead class="bg-light">
                                                 <tr>
-                                                    <th style="width: 40%">Geo Zone</th>
-                                                    <th style="width: 30%">Up To Value (Weight/Price/Qty)</th>
-                                                    <th style="width: 20%">Cost</th>
+                                                    <th style="width: 40%">Geo Zone <span class="text-danger">*</span></th>
+                                                    <th style="width: 30%">Up To Value (Weight/Price/Qty) <span class="text-danger">*</span></th>
+                                                    <th style="width: 20%">Cost <span class="text-danger">*</span></th>
                                                     <th style="width: 10%">Action</th>
                                                 </tr>
                                             </thead>

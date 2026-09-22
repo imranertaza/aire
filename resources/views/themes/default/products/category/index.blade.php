@@ -1,6 +1,23 @@
 @extends('themes.default.layouts.master')
 
-@section('title', 'Aire | Products')
+@php
+    $catModel = $categories instanceof \Illuminate\Database\Eloquent\Model ? $categories : null;
+    $seoTitle = $catModel ? (!empty($catModel->meta_title) ? $catModel->meta_title : $catModel->category_name . ' | Aire') : 'Aire | Products';
+    $seoDesc = $catModel ? (!empty($catModel->meta_description) ? $catModel->meta_description : ($catModel->description ?? '')) : '';
+    $seoKeyword = $catModel ? ($catModel->meta_keyword ?? '') : '';
+    $seoImage = $catModel && !empty($catModel->image) ? getImagePath($catModel->image) : null;
+@endphp
+
+@section('title', $seoTitle)
+@if(!empty($seoDesc))
+@section('meta_description', $seoDesc)
+@endif
+@if(!empty($seoKeyword))
+@section('meta_keywords', $seoKeyword)
+@endif
+@if(!empty($seoImage))
+@section('og_image', $seoImage)
+@endif
 
 @push('styles')
     <link rel="stylesheet" href="{{ theme_asset('css/product.css') }}">
@@ -185,7 +202,7 @@
                                             <h3 class="card-title fs-20">{{ $sub->category_name }}</h3>
                                             <span class="badge-custom">{{ strtoupper($cat->category_name) }}</span>
                                             <p class="card-desc">{{ getLimitedText($sub->description) }}</p>
-                                            <a href="{{ route('category.detail', $sub->slug) }}"
+                                            <a href="{{ route('category.detail', $sub->slug ?: ($sub->id ?: 'all')) }}"
                                                 class="card-link fs-12 mt-auto">VIEW DETAILS <i
                                                     class="bi bi-arrow-right"></i></a>
                                         </div>

@@ -86,7 +86,7 @@
                                         </div>
                                         <div class="card-body py-3">
                                             <div class="form-group mb-2">
-                                                <label class="small font-weight-bold">Card Title <small
+                                                <label class="small font-weight-bold">Card Title <span class="text-danger">*</span> <small
                                                         class="text-muted">(Supports &lt;br&gt; for line
                                                         break)</small></label>
                                                 <input v-model="card.title" type="text" class="form-control form-control-sm"
@@ -113,7 +113,7 @@
                                             </div>
 
                                             <div class="form-group mb-0">
-                                                <label class="small font-weight-bold">Description</label>
+                                                <label class="small font-weight-bold">Description <span class="text-danger">*</span></label>
                                                 <textarea v-model="card.description" rows="3"
                                                     class="form-control form-control-sm"
                                                     placeholder="Write card description here..." required></textarea>
@@ -220,7 +220,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group mb-0">
-                                                <label class="small font-weight-bold">Item Image</label>
+                                                <label class="small font-weight-bold">Item Image <span class="text-danger">*</span></label>
                                                 <Vue3Dropzone v-model="item.dropzoneFile" v-model:previews="item.previews"
                                                     mode="edit" :allowSelectOnPreview="true" :maxFiles="1" />
                                                 <div class="mt-1 small text-muted">
@@ -288,7 +288,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Parallax Background Banner Image</label>
+                                        <label>Parallax Background Banner Image <span class="text-danger">*</span></label>
                                         <Vue3Dropzone v-model="fileUpload" v-model:previews="previews" mode="edit"
                                             :allowSelectOnPreview="true" :maxFiles="1" />
                                         <div class="mt-2 p-2 bg-light border rounded small">
@@ -330,12 +330,12 @@
                                         </div>
                                         <div class="card-body py-2">
                                             <div class="form-group mb-2">
-                                                <label class="small font-weight-bold">Title</label>
+                                                <label class="small font-weight-bold">Title <span class="text-danger">*</span></label>
                                                 <input v-model="card.title" type="text" class="form-control form-control-sm"
                                                     placeholder="e.g. Authentic Products" required />
                                             </div>
                                             <div class="form-group mb-0">
-                                                <label class="small font-weight-bold">Description</label>
+                                                <label class="small font-weight-bold">Description <span class="text-danger">*</span></label>
                                                 <textarea v-model="card.description" rows="2" class="form-control form-control-sm"
                                                     placeholder="Card description..." required></textarea>
                                             </div>
@@ -509,14 +509,14 @@
                                         </div>
                                         <div class="card-body py-3">
                                             <div class="form-group mb-2">
-                                                <label class="small font-weight-bold">Badge Title</label>
+                                                <label class="small font-weight-bold">Badge Title <span class="text-danger">*</span></label>
                                                 <input v-model="badge.title" type="text"
                                                     class="form-control form-control-sm" placeholder="e.g. SECURE PAYMENTS"
                                                     required />
                                             </div>
 
                                             <div class="form-group mb-2">
-                                                <label class="small font-weight-bold">Icon Class <small
+                                                <label class="small font-weight-bold">Icon Class <span class="text-danger">*</span> <small
                                                         class="text-muted">(Bootstrap Icons)</small></label>
                                                 <input v-model="badge.icon" type="text" class="form-control form-control-sm"
                                                     placeholder="e.g. bi-shield-check" required />
@@ -525,7 +525,7 @@
                                             </div>
 
                                             <div class="form-group mb-0">
-                                                <label class="small font-weight-bold">Description</label>
+                                                <label class="small font-weight-bold">Description <span class="text-danger">*</span></label>
                                                 <textarea v-model="badge.description" rows="2"
                                                     class="form-control form-control-sm"
                                                     placeholder="Write badge description here..." required></textarea>
@@ -607,7 +607,7 @@
                                         <div class="d-flex justify-content-between align-items-center mb-3">
                                             <div class="d-flex align-items-center">
                                                 <div class="setting-step-num mr-2">2</div>
-                                                <label class="font-weight-bold text-dark mb-0">Video Media Source</label>
+                                                <label class="font-weight-bold text-dark mb-0">Video Media Source <span class="text-danger">*</span></label>
                                             </div>
                                             <!-- Pill Tab Switcher -->
                                             <div class="video-tab-switcher p-1 bg-light rounded-pill border d-inline-flex">
@@ -718,7 +718,7 @@
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <div class="d-flex align-items-center">
                                                 <div class="setting-step-num mr-2">3</div>
-                                                <label class="font-weight-bold text-dark mb-0">Video Poster / Cover Artwork</label>
+                                                <label class="font-weight-bold text-dark mb-0">Video Poster / Cover Artwork <span class="text-danger">*</span></label>
                                             </div>
                                             <span class="badge badge-light border text-muted small">
                                                 <i class="fas fa-vector-square mr-1"></i> 1920 × 1080px or 1280 × 720px (16:9 Widescreen)
@@ -1050,8 +1050,8 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-0">
-                                                        <label class="small font-weight-bold text-muted">Section Visibility</label>
-                                                        <select v-model="form.enabled" class="custom-select font-weight-bold">
+                                                        <label class="small font-weight-bold text-muted">Section Visibility <span class="text-danger">*</span></label>
+                                                        <select v-model="form.enabled" class="custom-select font-weight-bold" required>
                                                             <option :value="1">Visible on Storefront (Enabled)</option>
                                                             <option :value="0">Hidden from Storefront (Disabled)</option>
                                                         </select>
@@ -1172,7 +1172,7 @@
                                                 <label class="font-weight-bold text-dark mb-0">Call-to-Action Button</label>
                                             </div>
                                             <div class="form-group mb-0">
-                                                <label class="small font-weight-bold text-muted">Button Label</label>
+                                                <label class="small font-weight-bold text-muted">Button Label <span class="text-danger">*</span></label>
                                                 <div class="input-group">
                                                     <input v-model="form.button_text" type="text" class="form-control font-weight-500"
                                                         placeholder="e.g. Buy Now" />
@@ -1196,7 +1196,7 @@
                                             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                                                 <div class="d-flex align-items-center">
                                                     <div class="setting-step-num mr-2">5</div>
-                                                    <label class="font-weight-bold text-dark mb-0">Living Room Background</label>
+                                                    <label class="font-weight-bold text-dark mb-0">Living Room Background <span class="text-danger">*</span></label>
                                                 </div>
                                                 <button type="button" class="btn btn-outline-secondary btn-xs" @click="resetLivingBgToDefault" title="Reset to default scene">
                                                     <i class="fas fa-undo mr-1"></i> Reset Default Scene
@@ -1324,8 +1324,8 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Status</label>
-                                            <select v-model="form.status" class="custom-select">
+                                            <label>Status <span class="text-danger">*</span></label>
+                                            <select v-model="form.status" class="custom-select" required>
                                                 <option value="1">Active</option>
                                                 <option value="0">Inactive</option>
                                             </select>
@@ -1788,6 +1788,92 @@ const fetchSections = async () => {
 
 // Submit updated section
 const updateSections = async () => {
+    // Client-side required field validations
+    if (form.key === "why_choose_aire") {
+        if (!form.title?.trim()) {
+            toast.error("Section Title is required.");
+            return;
+        }
+        for (let i = 0; i < form.cards.length; i++) {
+            if (!form.cards[i].title?.trim()) {
+                toast.error(`Card #${i + 1} Title is required.`);
+                return;
+            }
+            if (!form.cards[i].description?.trim()) {
+                toast.error(`Card #${i + 1} Description is required.`);
+                return;
+            }
+        }
+    } else if (["home_lifestyle", "lifestyle"].includes(form.key)) {
+        if (!form.title?.trim()) {
+            toast.error("Section Title is required.");
+            return;
+        }
+        if (!form.badge?.trim()) {
+            toast.error("Section Badge is required.");
+            return;
+        }
+        if (!form.subtitle?.trim()) {
+            toast.error("Section Subtitle is required.");
+            return;
+        }
+        for (let i = 0; i < form.items.length; i++) {
+            if (!form.items[i].title?.trim()) {
+                toast.error(`Item #${i + 1} Title is required.`);
+                return;
+            }
+            if (!form.items[i].description?.trim()) {
+                toast.error(`Item #${i + 1} Description is required.`);
+                return;
+            }
+        }
+    } else if (["home_benefits", "benefits"].includes(form.key)) {
+        if (!form.title?.trim()) {
+            toast.error("Section Title is required.");
+            return;
+        }
+        if (!form.badge?.trim()) {
+            toast.error("Section Badge is required.");
+            return;
+        }
+        if (!form.subtitle?.trim()) {
+            toast.error("Section Subtitle is required.");
+            return;
+        }
+        for (let i = 0; i < form.cards.length; i++) {
+            if (!form.cards[i].title?.trim()) {
+                toast.error(`Benefit Card #${i + 1} Title is required.`);
+                return;
+            }
+            if (!form.cards[i].description?.trim()) {
+                toast.error(`Benefit Card #${i + 1} Description is required.`);
+                return;
+            }
+        }
+    } else if (form.key === "trust_badges") {
+        for (let i = 0; i < form.badges.length; i++) {
+            if (!form.badges[i].title?.trim() || !form.badges[i].icon?.trim() || !form.badges[i].description?.trim()) {
+                toast.error(`Badge #${i + 1} Title, Icon Class, and Description are required.`);
+                return;
+            }
+        }
+    } else if (form.key === "home_video" || form.key === "video") {
+        if (!form.title?.trim()) {
+            toast.error("Headline & Section Title is required.");
+            return;
+        }
+    } else if (['home_best_selling', 'best_selling', 'home_new_arrival', 'new_arrival', 'home_customer_favorites', 'customer_favorites'].includes(form.key)) {
+        if (!form.title?.trim()) {
+            toast.error("Section Title is required.");
+            return;
+        }
+    } else if (!['home_living_hero', 'living_hero'].includes(form.key)) {
+        if (!form.title?.trim()) {
+            toast.error("Section Title is required.");
+            return;
+        }
+    }
+
     saving.value = true;
     let data = {};
 
