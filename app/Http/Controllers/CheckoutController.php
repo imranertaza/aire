@@ -33,11 +33,15 @@ class CheckoutController extends Controller
         foreach ($cart as $key => &$item) {
             $product = Product::with('special')->find($item['id']);
             if ($product) {
-                $effectivePrice = $product->final_price;
+                $optDiff = (float) ($item['option_price_diff'] ?? 0);
+                $effectivePrice = max(0, (float) $product->final_price + $optDiff);
+                $originalPrice = max(0, (float) $product->price + $optDiff);
+                $specialPrice = $product->special_price !== null ? max(0, (float) $product->special_price + $optDiff) : null;
+
                 if (!isset($item['price']) || (float)$item['price'] != $effectivePrice) {
                     $item['price'] = $effectivePrice;
-                    $item['original_price'] = (float) $product->price;
-                    $item['special_price'] = $product->special_price;
+                    $item['original_price'] = $originalPrice;
+                    $item['special_price'] = $specialPrice;
                     $cartUpdated = true;
                 }
             }
@@ -143,10 +147,11 @@ class CheckoutController extends Controller
         foreach ($cart as $key => &$item) {
             $product = Product::with('special')->find($item['id']);
             if ($product) {
-                $effectivePrice = $product->final_price;
+                $optDiff = (float) ($item['option_price_diff'] ?? 0);
+                $effectivePrice = max(0, (float) $product->final_price + $optDiff);
                 $item['price'] = $effectivePrice;
-                $item['original_price'] = (float) $product->price;
-                $item['special_price'] = $product->special_price;
+                $item['original_price'] = max(0, (float) $product->price + $optDiff);
+                $item['special_price'] = $product->special_price !== null ? (float) $product->special_price + $optDiff : null;
             }
         }
         unset($item);
@@ -280,12 +285,26 @@ class CheckoutController extends Controller
         $order = null;
 
         DB::transaction(function () use (
-            $request, $cart,
-            $firstname, $lastname, $paymentCountryName,
-            $shipFirst, $shipLast, $shipAddr1, $shipAddr2, $shipCity, $shipZip,
-            $shipCountryName, $shipCountryId, $shipPhone,
-            $shippingMethodName, $shippingCharge,
-            $subtotal, $discount, $finalAmount, $couponCode,
+            $request,
+            $cart,
+            $firstname,
+            $lastname,
+            $paymentCountryName,
+            $shipFirst,
+            $shipLast,
+            $shipAddr1,
+            $shipAddr2,
+            $shipCity,
+            $shipZip,
+            $shipCountryName,
+            $shipCountryId,
+            $shipPhone,
+            $shippingMethodName,
+            $shippingCharge,
+            $subtotal,
+            $discount,
+            $finalAmount,
+            $couponCode,
             &$order
         ) {
             // --- Create the Order ---

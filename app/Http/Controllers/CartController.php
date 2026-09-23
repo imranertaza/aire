@@ -17,18 +17,26 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
         $savedForLater = session()->get('saved_for_later', []);
 
-        // Refresh cart items with current active pricing/specials + preserved option price adjustments
+        // Eager-load all products in cart in a single query (resolving N+1 query problem)
+        $productIds = collect($cart)->pluck('id')->filter()->unique()->values();
+        $products = Product::with(['special', 'freeDelivery'])
+            ->whereIn('id', $productIds)
+            ->get()
+            ->keyBy('id');
+
         $updated = false;
         foreach ($cart as $key => &$item) {
-            $product = Product::with(['special', 'freeDelivery'])->find($item['id']);
-            if ($product) {
+            $product = $products->get($item['id']);
+            if ($product && $product->status == 1) {
                 $optDiff = (float) ($item['option_price_diff'] ?? 0);
                 $effectivePrice = max(0, (float) $product->final_price + $optDiff);
                 $originalPrice = max(0, (float) $product->price + $optDiff);
                 $specialPrice = $product->special_price !== null ? max(0, (float) $product->special_price + $optDiff) : null;
                 $isFree = (bool) $product->freeDelivery;
 
-                if (!isset($item['price']) || (float)$item['price'] != $effectivePrice || !isset($item['free_delivery']) || $item['free_delivery'] !== $isFree) {
+                if (!isset($item['price']) || (float)$item['price'] != $effectivePrice
+                    || !isset($item['free_delivery']) || $item['free_delivery'] !== $isFree
+                    || !isset($item['original_price']) || (float)$item['original_price'] != $originalPrice) {
                     $item['price'] = $effectivePrice;
                     $item['original_price'] = $originalPrice;
                     $item['special_price'] = $specialPrice;
@@ -38,6 +46,7 @@ class CartController extends Controller
             }
         }
         unset($item);
+
         if ($updated) {
             session()->put('cart', $cart);
         }
@@ -56,9 +65,24 @@ class CartController extends Controller
 
     public function addToCart(Request $request)
     {
-        $product = Product::with(['special', 'productOptions.option', 'productOptions.optionValue', 'freeDelivery'])->find($request->product_id);
+        $productId = $request->input('product_id');
+        if (!$productId) {
+            return response()->json(['success' => false, 'message' => 'Product ID is required.'], 400);
+        }
+
+        $product = Product::with(['special', 'productOptions.option', 'productOptions.optionValue', 'freeDelivery'])->find($productId);
         if (!$product) {
             return response()->json(['success' => false, 'message' => 'Product not found.'], 404);
+        }
+
+        // Active status verification
+        if ($product->status != 1) {
+            return response()->json(['success' => false, 'message' => 'This product is currently unavailable.'], 400);
+        }
+
+        // Stock availability verification
+        if ($product->quantity <= 0) {
+            return response()->json(['success' => false, 'message' => 'Product is currently out of stock.'], 400);
         }
 
         // If product has options but none were provided (e.g., quick add from catalog grid), prompt to choose options
@@ -88,7 +112,8 @@ class CartController extends Controller
                     $po = $product->productOptions->firstWhere('option_value_id', $valId);
                     if ($po) {
                         $priceMod = (float) ($po->price ?? 0);
-                        $prefix = $po->price_prefix ?: ($po->subtract == 1 ? '-' : '+');
+                        // Fix prefix: default to '+' (subtract column in Laravel is stock subtraction, not price reduction)
+                        $prefix = in_array($po->price_prefix, ['+', '-']) ? $po->price_prefix : '+';
                         if ($prefix === '-') {
                             $optionPriceDiff -= $priceMod;
                         } else {
@@ -108,11 +133,24 @@ class CartController extends Controller
             }
         }
 
+        // Sort options by key for deterministic cart key generation
+        ksort($options);
+
         // Build a unique cart key based on product + selected option combination
-        $cartKey = $product->id;
+        $cartKey = (string) $product->id;
         if (!empty($options)) {
             $optionKey = implode('_', array_keys($options));
             $cartKey   = $product->id . '_' . $optionKey;
+        }
+
+        // Check if existing quantity in cart + requested quantity exceeds stock
+        $currentCartQty = isset($cart[$cartKey]) ? (int)$cart[$cartKey]['quantity'] : 0;
+        if ($currentCartQty + $quantity > $product->quantity) {
+            $availableToAdd = max(0, $product->quantity - $currentCartQty);
+            $msg = $availableToAdd > 0
+                ? "You already have {$currentCartQty} in your cart. Only {$availableToAdd} more can be added."
+                : "You already have all available stock ({$product->quantity}) in your cart.";
+            return response()->json(['success' => false, 'message' => $msg], 400);
         }
 
         $effectivePrice = max(0, (float) $product->final_price + $optionPriceDiff);
@@ -146,10 +184,10 @@ class CartController extends Controller
         $totalItems = collect($cart)->sum('quantity');
 
         return response()->json([
-            'success' => true,
-            'message' => 'Product added to cart successfully!',
+            'success'    => true,
+            'message'    => 'Product added to cart successfully!',
             'cart_count' => $totalItems,
-            'cart' => $cart
+            'cart'       => $cart
         ]);
     }
 
@@ -159,62 +197,127 @@ class CartController extends Controller
 
     public function updateCart(Request $request)
     {
-        if ($request->product_id && $request->quantity) {
-            $cart = session()->get('cart', []);
-            if (isset($cart[$request->product_id])) {
-                $cart[$request->product_id]["quantity"] = (int)$request->quantity;
-                session()->put('cart', $cart);
+        $cartKey = (string) $request->input('product_id');
+        if (!$cartKey) {
+            return response()->json(['success' => false, 'message' => 'Invalid product identifier.'], 400);
+        }
+
+        $cart = session()->get('cart', []);
+        if (!isset($cart[$cartKey])) {
+            return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
+        }
+
+        $rawQty = $request->input('quantity');
+        if (!is_numeric($rawQty)) {
+            return response()->json(['success' => false, 'message' => 'Invalid quantity.'], 400);
+        }
+
+        $quantity = (int) $rawQty;
+
+        // If quantity is 0 or negative, remove the item safely
+        if ($quantity <= 0) {
+            unset($cart[$cartKey]);
+            if (empty($cart)) {
+                session()->forget('applied_coupon');
             }
+            session()->put('cart', $cart);
+
             $totalItems = collect($cart)->sum('quantity');
-            $subtotal = collect($cart)->sum(function ($item) {
-                return $item['price'] * $item['quantity'];
-            });
+            $subtotal = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
+            $discount = $this->calculateDiscount($subtotal, 0.00);
+
             return response()->json([
-                'success' => true,
-                'message' => 'Cart updated successfully!',
-                'cart_count' => $totalItems,
-                'subtotal' => number_format($subtotal, 2),
-                'item_subtotal' => number_format($cart[$request->product_id]['price'] * $cart[$request->product_id]['quantity'], 2)
+                'success'       => true,
+                'message'       => 'Item removed from cart.',
+                'cart_count'    => $totalItems,
+                'subtotal'      => number_format($subtotal, 2),
+                'item_subtotal' => '0.00',
+                'discount'      => number_format($discount, 2),
+                'cart_empty'    => empty($cart),
             ]);
         }
-        return response()->json(['success' => false, 'message' => 'Invalid data.'], 400);
+
+        // Verify requested quantity against database stock
+        $productId = $cart[$cartKey]['id'];
+        $product = Product::find($productId);
+        if ($product && $quantity > $product->quantity) {
+            return response()->json([
+                'success' => false,
+                'message' => "Only {$product->quantity} items available in stock.",
+            ], 400);
+        }
+
+        $cart[$cartKey]["quantity"] = $quantity;
+        session()->put('cart', $cart);
+
+        $totalItems = collect($cart)->sum('quantity');
+        $subtotal = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
+        $itemSubtotal = $cart[$cartKey]['price'] * $cart[$cartKey]['quantity'];
+        $discount = $this->calculateDiscount($subtotal, 0.00);
+
+        return response()->json([
+            'success'       => true,
+            'message'       => 'Cart updated successfully!',
+            'cart_count'    => $totalItems,
+            'subtotal'      => number_format($subtotal, 2),
+            'item_subtotal' => number_format($itemSubtotal, 2),
+            'discount'      => number_format($discount, 2),
+        ]);
     }
 
     /**
      * Remove item from cart.
      */
-
     public function removeFromCart(Request $request)
     {
-        if ($request->product_id) {
-            $cart = session()->get('cart', []);
-            if (isset($cart[$request->product_id])) {
-                unset($cart[$request->product_id]);
-                session()->put('cart', $cart);
-            }
-            // Clear coupon if cart is now empty
-            if (empty($cart)) {
-                session()->forget('applied_coupon');
-            }
-            $totalItems = collect($cart)->sum('quantity');
-            $subtotal = collect($cart)->sum(function ($item) {
-                return $item['price'] * $item['quantity'];
-            });
-            return response()->json([
-                'success'    => true,
-                'message'    => 'Product removed from cart successfully!',
-                'cart_count' => $totalItems,
-                'subtotal'   => number_format($subtotal, 2),
-                'cart_empty' => empty($cart),
-            ]);
+        $identifier = (string) $request->input('product_id');
+        if (!$identifier) {
+            return response()->json(['success' => false, 'message' => 'Invalid product identifier.'], 400);
         }
-        return response()->json(['success' => false, 'message' => 'Invalid data.'], 400);
+
+        $cart = session()->get('cart', []);
+        $removed = false;
+
+        // Check direct cartKey match first
+        if (isset($cart[$identifier])) {
+            unset($cart[$identifier]);
+            $removed = true;
+        } else {
+            // Fallback: match by product id (for quick remove toggles from catalog/home cards)
+            foreach ($cart as $key => $item) {
+                if ((string)($item['id'] ?? '') === $identifier) {
+                    unset($cart[$key]);
+                    $removed = true;
+                }
+            }
+        }
+
+        if ($removed) {
+            session()->put('cart', $cart);
+        }
+
+        // Clear coupon if cart is now empty
+        if (empty($cart)) {
+            session()->forget('applied_coupon');
+        }
+
+        $totalItems = collect($cart)->sum('quantity');
+        $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        $discount = $this->calculateDiscount($subtotal, 0.00);
+
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Product removed from cart successfully!',
+            'cart_count' => $totalItems,
+            'subtotal'   => number_format($subtotal, 2),
+            'discount'   => number_format($discount, 2),
+            'cart_empty' => empty($cart),
+        ]);
     }
 
     /**
      * Alias for removeFromCart method.
      */
-
     public function removeCart(Request $request)
     {
         return $this->removeFromCart($request);
@@ -223,87 +326,122 @@ class CartController extends Controller
     /**
      * Save an item from the cart to Saved for Later.
      */
-
     public function saveForLater(Request $request)
     {
-        if ($request->product_id) {
-            $cart = session()->get('cart', []);
-            $saved = session()->get('saved_for_later', []);
-
-            if (isset($cart[$request->product_id])) {
-                $saved[$request->product_id] = $cart[$request->product_id];
-                unset($cart[$request->product_id]);
-
-                session()->put('cart', $cart);
-                session()->put('saved_for_later', $saved);
-            }
-
-            $totalItems = collect($cart)->sum('quantity');
-            $subtotal = collect($cart)->sum(function ($item) {
-                return $item['price'] * $item['quantity'];
-            });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Product saved for later successfully!',
-                'cart_count' => $totalItems,
-                'subtotal' => number_format($subtotal, 2)
-            ]);
+        $cartKey = (string) $request->input('product_id');
+        if (!$cartKey) {
+            return response()->json(['success' => false, 'message' => 'Invalid product identifier.'], 400);
         }
-        return response()->json(['success' => false, 'message' => 'Invalid data.'], 400);
+
+        $cart = session()->get('cart', []);
+        $saved = session()->get('saved_for_later', []);
+
+        if (!isset($cart[$cartKey])) {
+            return response()->json(['success' => false, 'message' => 'Item not found in cart.'], 404);
+        }
+
+        $saved[$cartKey] = $cart[$cartKey];
+        unset($cart[$cartKey]);
+
+        session()->put('cart', $cart);
+        session()->put('saved_for_later', $saved);
+
+        // Forget coupon if cart is now empty
+        if (empty($cart)) {
+            session()->forget('applied_coupon');
+        }
+
+        $totalItems = collect($cart)->sum('quantity');
+        $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        $discount = $this->calculateDiscount($subtotal, 0.00);
+
+        return response()->json([
+            'success'     => true,
+            'message'     => 'Product saved for later successfully!',
+            'cart_count'  => $totalItems,
+            'subtotal'    => number_format($subtotal, 2),
+            'discount'    => number_format($discount, 2),
+            'saved_count' => count($saved),
+        ]);
     }
 
     /**
      * Move an item from Saved for Later back to Cart.
      */
-
     public function moveToCart(Request $request)
     {
-        if ($request->product_id) {
-            $cart = session()->get('cart', []);
-            $saved = session()->get('saved_for_later', []);
-
-            if (isset($saved[$request->product_id])) {
-                $cart[$request->product_id] = $saved[$request->product_id];
-                unset($saved[$request->product_id]);
-
-                session()->put('cart', $cart);
-                session()->put('saved_for_later', $saved);
-            }
-
-            $totalItems = collect($cart)->sum('quantity');
-            $subtotal = collect($cart)->sum(function ($item) {
-                return $item['price'] * $item['quantity'];
-            });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Product moved to cart successfully!',
-                'cart_count' => $totalItems,
-                'subtotal' => number_format($subtotal, 2)
-            ]);
+        $cartKey = (string) $request->input('product_id');
+        if (!$cartKey) {
+            return response()->json(['success' => false, 'message' => 'Invalid product identifier.'], 400);
         }
-        return response()->json(['success' => false, 'message' => 'Invalid data.'], 400);
+
+        $cart = session()->get('cart', []);
+        $saved = session()->get('saved_for_later', []);
+
+        if (!isset($saved[$cartKey])) {
+            return response()->json(['success' => false, 'message' => 'Item not found in saved list.'], 404);
+        }
+
+        $savedItem = $saved[$cartKey];
+        $product = Product::with(['special', 'freeDelivery'])->find($savedItem['id']);
+
+        if (!$product || $product->status != 1) {
+            return response()->json(['success' => false, 'message' => 'This product is no longer available.'], 400);
+        }
+
+        // Refresh price with current active pricing
+        $optDiff = (float) ($savedItem['option_price_diff'] ?? 0);
+        $effectivePrice = max(0, (float) $product->final_price + $optDiff);
+        $savedItem['price'] = $effectivePrice;
+        $savedItem['original_price'] = max(0, (float) $product->price + $optDiff);
+        $savedItem['special_price'] = $product->special_price !== null ? max(0, (float) $product->special_price + $optDiff) : null;
+        $savedItem['free_delivery'] = (bool) $product->freeDelivery;
+
+        if (isset($cart[$cartKey])) {
+            $cart[$cartKey]['quantity'] += (int) $savedItem['quantity'];
+            $cart[$cartKey]['price'] = $effectivePrice;
+        } else {
+            $cart[$cartKey] = $savedItem;
+        }
+
+        unset($saved[$cartKey]);
+
+        session()->put('cart', $cart);
+        session()->put('saved_for_later', $saved);
+
+        $totalItems = collect($cart)->sum('quantity');
+        $subtotal = collect($cart)->sum(fn($item) => $item['price'] * $item['quantity']);
+        $discount = $this->calculateDiscount($subtotal, 0.00);
+
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Product moved to cart successfully!',
+            'cart_count' => $totalItems,
+            'subtotal'   => number_format($subtotal, 2),
+            'discount'   => number_format($discount, 2),
+        ]);
     }
 
     /**
      * Remove an item from Saved for Later list.
      */
-
     public function removeSaved(Request $request)
     {
-        if ($request->product_id) {
-            $saved = session()->get('saved_for_later', []);
-            if (isset($saved[$request->product_id])) {
-                unset($saved[$request->product_id]);
-                session()->put('saved_for_later', $saved);
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'Saved product removed successfully!'
-            ]);
+        $cartKey = (string) $request->input('product_id');
+        if (!$cartKey) {
+            return response()->json(['success' => false, 'message' => 'Invalid product identifier.'], 400);
         }
-        return response()->json(['success' => false, 'message' => 'Invalid data.'], 400);
+
+        $saved = session()->get('saved_for_later', []);
+        if (isset($saved[$cartKey])) {
+            unset($saved[$cartKey]);
+            session()->put('saved_for_later', $saved);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Saved product removed successfully!'
+        ]);
     }
 
     /**

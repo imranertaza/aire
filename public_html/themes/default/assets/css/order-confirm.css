@@ -47,22 +47,22 @@
 }
 
 .confirm-product-name {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 500;
     color: #0F172A;
     margin-bottom: 4px;
 }
 
 .confirm-product-sub {
-    font-size: 13px;
+    font-size: 11px;
     color: #64748b;
     margin-bottom: 6px;
 }
 
 .confirm-qty-pill {
     display: inline-block;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 400;
     color: #475569;
     background: #e2e8f0;
     padding: 2px 8px;

@@ -24,7 +24,7 @@
                                     <a class="nav-link" :class="{ active: activeTab === 'details' }" @click.prevent="activeTab = 'details'" href="#">Order Details</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" :class="{ active: activeTab === 'payment' }" @click.prevent="activeTab = 'payment'" href="#">Payment & Points</a>
+                                    <a class="nav-link" :class="{ active: activeTab === 'payment' }" @click.prevent="activeTab = 'payment'" href="#">Payment</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" :class="{ active: activeTab === 'history' }" @click.prevent="activeTab = 'history'" href="#">Status History</a>
@@ -208,7 +208,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Tab 2: Payment & Points -->
+                                <!-- Tab 2: Payment -->
                                 <div class="tab-pane fade" :class="{ 'show active': activeTab === 'payment' }">
                                     <div class="row">
                                         <!-- Payment status update -->
@@ -230,47 +230,6 @@
                                                         <button type="submit" class="btn btn-warning" :disabled="submittingPayment">
                                                             <span v-if="submittingPayment" class="spinner-border spinner-border-sm mr-1"></span>
                                                             Save Status
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-
-                                        <!-- Customer points update -->
-                                        <div class="col-md-6">
-                                            <div class="card card-outline card-success">
-                                                <div class="card-header"><h3 class="card-title font-weight-bold">Manage Points</h3></div>
-                                                <div class="card-body" v-if="!order.customer_id">
-                                                    <div class="alert alert-warning mb-0">Manual points cannot be updated for guest checkouts.</div>
-                                                </div>
-                                                <form v-else @submit.prevent="submitPoints">
-                                                    <div class="card-body">
-                                                        <div class="row">
-                                                            <div class="col-md-12 mb-3">
-                                                                <strong>Current Points:</strong> {{ order.customer?.point ?? 0 }} pts <br/>
-                                                                <strong>Total points from this order:</strong> {{ order.total_point ?? 0 }} pts
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label>Action</label>
-                                                                    <select v-model="pointsForm.status" class="form-control" required>
-                                                                        <option value="add">Add Points</option>
-                                                                        <option value="deduct">Deduct Points</option>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label>Points Amount</label>
-                                                                    <input v-model.number="pointsForm.amount" type="number" class="form-control" min="1" required placeholder="0" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="card-footer">
-                                                        <button type="submit" class="btn btn-success" :disabled="submittingPoints">
-                                                            <span v-if="submittingPoints" class="spinner-border spinner-border-sm mr-1"></span>
-                                                            Apply Points
                                                         </button>
                                                     </div>
                                                 </form>
