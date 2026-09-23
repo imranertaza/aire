@@ -233,7 +233,7 @@
                         <p class="lifestyle-desc">
                             {{ $landing?->lifestyle_description ?: 'Designed for your life, not just your air. AIRE Pro S1 harmonizes with modern architectural spaces, becoming an invisible guardian of your wellbeing.' }}
                         </p>
-                        <a href="{{ $landing?->lifestyle_button_url ?: '#' }}" class="lifestyle-link">
+                        <a href="{{ route('products.detail', $product->slug) }}" class="lifestyle-link">
                             {!! $landing?->lifestyle_button_text ?: 'More Details &rarr;' !!}
                         </a>
                     </div>

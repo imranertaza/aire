@@ -14,10 +14,10 @@
 /.zed
 /auth.json
 /node_modules
-/public/build
-/public/hot
-/public/storage
-public/cache/*.webp
+/public_html/build
+/public_html/hot
+/public_html/storage
+public_html/cache/*.webp
 /storage/*.key
 /storage/pail
 /vendor

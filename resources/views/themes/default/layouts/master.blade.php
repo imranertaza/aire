@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Aire | Indoor Air Quality Solutions')</title>
     <meta name="description" content="@yield('meta_description', 'Aire Industries delivers cutting-edge indoor air quality solutions for residential, commercial, healthcare, and industrial environments.')">
-    @if(trim($__env->yieldContent('meta_keywords')))
-    <meta name="keywords" content="@yield('meta_keywords')">
+    @if (trim($__env->yieldContent('meta_keywords')))
+        <meta name="keywords" content="@yield('meta_keywords')">
     @endif
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -17,10 +17,12 @@
     <meta property="og:image" content="@yield('og_image', theme_asset('img/logo.png'))">
     <meta property="og:type" content="@yield('og_type', 'website')">
     <meta property="og:url" content="@yield('canonical_url', url()->current())">
-    @if(trim($__env->yieldContent('canonical_url')))
-    <link rel="canonical" href="@yield('canonical_url')">
+    @if (trim($__env->yieldContent('canonical_url')))
+        <link rel="canonical" href="@yield('canonical_url')">
     @endif
-    <link rel="icon" href="{{ theme_asset('img/favicon.png') }}" type="image/png">
+    <link rel="icon" href="{{ getImageUrl($settings['store_icon'] ?? theme_asset('img/favicon.png')) }}"
+        type="image/png">
+
 
     <!-- Preconnect Fonts & CDNs -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

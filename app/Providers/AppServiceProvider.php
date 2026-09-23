@@ -13,7 +13,12 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind('path.public', function () {
+            return base_path('public_html');
+        });
+    }
 
     /**
      * Bootstrap any application services.
@@ -28,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
         // Share Active Theme & Add Theme View Path
         $activeTheme = config('theme.active', 'default');
         View::share('activeTheme', $activeTheme);
-        
+
         $themeViewPath = resource_path("views/themes/{$activeTheme}");
         if (is_dir($themeViewPath)) {
             View::addLocation($themeViewPath);

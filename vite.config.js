@@ -30,6 +30,7 @@ export default defineConfig({
                 // "resources/js/assets/plugins/chart.js/Chart.min.js",
             ],
             refresh: true,
+            publicDirectory: 'public_html',
         }),
         vue(),
     ],

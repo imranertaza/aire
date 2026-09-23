@@ -2,21 +2,29 @@
 
 @php
     $catModel = $categories instanceof \Illuminate\Database\Eloquent\Model ? $categories : null;
-    $seoTitle = $catModel ? (!empty($catModel->meta_title) ? $catModel->meta_title : $catModel->category_name . ' | Aire') : 'Aire | Products';
-    $seoDesc = $catModel ? (!empty($catModel->meta_description) ? $catModel->meta_description : ($catModel->description ?? '')) : '';
-    $seoKeyword = $catModel ? ($catModel->meta_keyword ?? '') : '';
+    $seoTitle = $catModel
+        ? (!empty($catModel->meta_title)
+            ? $catModel->meta_title
+            : $catModel->category_name . ' | Aire')
+        : 'Aire | Products';
+    $seoDesc = $catModel
+        ? (!empty($catModel->meta_description)
+            ? $catModel->meta_description
+            : $catModel->description ?? '')
+        : '';
+    $seoKeyword = $catModel ? $catModel->meta_keyword ?? '' : '';
     $seoImage = $catModel && !empty($catModel->image) ? getImagePath($catModel->image) : null;
 @endphp
 
 @section('title', $seoTitle)
-@if(!empty($seoDesc))
-@section('meta_description', $seoDesc)
+@if (!empty($seoDesc))
+    @section('meta_description', $seoDesc)
 @endif
-@if(!empty($seoKeyword))
-@section('meta_keywords', $seoKeyword)
+@if (!empty($seoKeyword))
+    @section('meta_keywords', $seoKeyword)
 @endif
-@if(!empty($seoImage))
-@section('og_image', $seoImage)
+@if (!empty($seoImage))
+    @section('og_image', $seoImage)
 @endif
 
 @push('styles')
@@ -184,8 +192,8 @@
 
                                     <div class="solution-card">
                                         <img class="card-img-bg"
-                                            src="{{ $sub->image ? getImagePath($sub->image) : theme_asset('img/apartments.jpg') }}"
-                                            alt="{{ $sub->category_name }}">
+                                            src="{{ $sub->image ? getImageCacheUrl($sub->image, 110, 410, 'webp') : theme_asset('img/apartments.jpg') }}"
+                                            alt="{{ $sub->category_name }}" loading="lazy">
                                         <div class="card-gradient-overlay"></div>
                                         <div class="card-content">
                                             <div class="card-icon-wrapper">

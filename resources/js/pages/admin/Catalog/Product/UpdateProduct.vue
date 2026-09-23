@@ -2377,13 +2377,29 @@ const submitForm = async () => {
     if (technologyImageFile.value && technologyImageFile.value[0]) formData.append('technology_image', technologyImageFile.value[0].file);
 
     try {
-        await axios.post(`/api/products/${productId}`, formData, {
+        const response = await axios.post(`/api/products/${productId}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
         toast.success("Product updated successfully!");
-        router.push({ name: 'Products' });
+
+        // Reset temporary file inputs and sync updated image previews
+        const updated = response.data?.data;
+        if (updated) {
+            if (updated.main_image) {
+                mainImagePreviews.value = [getImageCacheUrl(updated.main_image, 120, 120, 'webp')];
+            }
+            if (updated.images) {
+                existingGalleryImages.value = updated.images;
+                galleryPreviews.value = updated.images.map(img => getImageCacheUrl(img.image, 120, 120, 'webp'));
+            }
+        }
+        mainImageFile.value = null;
+        galleryImageFiles.value = [];
+        deletedGalleryImages.value = [];
+        deletedFiles.value = [];
     } catch (error) {
         toast.validationError(error);
+    } finally {
         loading.value = false;
     }
 };
