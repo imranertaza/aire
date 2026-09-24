@@ -196,6 +196,25 @@
                                     <option value="">None</option>
                                 </select>
                             </div>
+
+                            <!-- Test SMTP Delivery Section -->
+                            <div class="col-12 mt-3 pt-3 border-top">
+                                <h6 class="font-weight-bold text-dark mb-1"><i class="fas fa-paper-plane mr-2 text-primary"></i>Test SMTP Delivery</h6>
+                                <p class="text-muted small mb-2">Send a real-time test email to verify your SMTP connection credentials and inbox delivery.</p>
+                                <div class="input-group" style="max-width: 480px;">
+                                    <input v-model="testEmailRecipient" type="email" class="form-control" placeholder="Enter recipient email (e.g. your email)" />
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-primary" :disabled="sendingTestEmail || !testEmailRecipient" @click="sendTestEmail">
+                                            <span v-if="sendingTestEmail" class="spinner-border spinner-border-sm mr-1"></span>
+                                            <i v-else class="fas fa-paper-plane mr-1"></i>
+                                            Send Test Email
+                                        </button>
+                                    </div>
+                                </div>
+                                <div v-if="testEmailResult" class="mt-2 alert small p-2" :class="testEmailResult.success ? 'alert-success' : 'alert-danger'" role="alert">
+                                    <strong>{{ testEmailResult.success ? 'Delivered:' : 'Failed:' }}</strong> {{ testEmailResult.message }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <!-- Security Tab -->
@@ -584,6 +603,30 @@ const submitSettings = async () => {
         toast.success('Settings saved successfully');
     } catch (error) {
         toast.validationError(error);
+    }
+};
+
+// Test SMTP Email Delivery
+const testEmailRecipient = ref('');
+const sendingTestEmail = ref(false);
+const testEmailResult = ref(null);
+
+const sendTestEmail = async () => {
+    if (!testEmailRecipient.value) return;
+    sendingTestEmail.value = true;
+    testEmailResult.value = null;
+    try {
+        const { data } = await axios.post('/api/settings/test-mail', {
+            email: testEmailRecipient.value
+        });
+        testEmailResult.value = { success: true, message: data.message || 'Test email delivered successfully!' };
+        toast.success(data.message || 'Test email delivered successfully!');
+    } catch (e) {
+        const errorMsg = e.response?.data?.message || e.message || 'Failed to send test email.';
+        testEmailResult.value = { success: false, message: errorMsg };
+        toast.error(errorMsg);
+    } finally {
+        sendingTestEmail.value = false;
     }
 };
 

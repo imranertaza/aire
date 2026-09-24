@@ -129,6 +129,7 @@ Route::middleware('auth:user')->prefix('settings')->controller(SettingsControlle
     Route::get('/', 'index');
     Route::post('/update', 'update');
     Route::get('/security', 'getSecuritySettings');
+    Route::post('/test-mail', 'sendTestEmail');
 });
 
 /* Categories */

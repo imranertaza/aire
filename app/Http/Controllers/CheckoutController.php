@@ -2,17 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\OrderPlacedMail;
+use App\Events\OrderPlaced;
 use App\Models\Coupon;
 use App\Models\Customer;
 use App\Models\OrderCardDetail;
 use App\Models\OrderHistory;
 use App\Models\OrderOption;
 use App\Models\Product;
+use App\Models\Setting;
+use App\Services\Mail\OrderMailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class CheckoutController extends Controller
 {
@@ -402,6 +407,9 @@ class CheckoutController extends Controller
         // Clear Cart & Coupon
         session()->forget(['cart', 'applied_coupon']);
         session()->put('last_order', $order);
+
+        // Dispatch OrderPlaced event (Listeners handle customer invoice & admin alerts)
+        OrderPlaced::dispatch($order);
 
         // Process payment via PaymentManager service (Matching cCart Payment Libraries)
         $paymentManager = app(\App\Services\Payment\PaymentManager::class);

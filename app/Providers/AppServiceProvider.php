@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\Setting;
-use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
@@ -25,10 +24,32 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        require_once app_path('Helpers/ThemeHelper.php');
-
-        $settings = $settings = Setting::allCached();
+        $settings = Setting::allCached();
         View::share('settings', $settings);
+
+        // Lazy-load dynamic SMTP configuration ONLY when an email is being sent
+        $this->app->resolving('mail.manager', function () {
+            $settings = Setting::allCached();
+            if (!empty($settings['mail_protocol']) && $settings['mail_protocol'] === 'smtp' && !empty($settings['smtp_host'])) {
+                $scheme = null;
+                if (($settings['smtp_crypto'] ?? '') === 'ssl') {
+                    $scheme = 'smtps';
+                }
+                config([
+                    'mail.default' => 'smtp',
+                    'mail.mailers.smtp.transport' => 'smtp',
+                    'mail.mailers.smtp.host' => $settings['smtp_host'],
+                    'mail.mailers.smtp.port' => (int) ($settings['smtp_port'] ?? 465),
+                    'mail.mailers.smtp.encryption' => ($settings['smtp_crypto'] ?? 'ssl') ?: null,
+                    'mail.mailers.smtp.scheme' => $scheme,
+                    'mail.mailers.smtp.username' => $settings['smtp_username'] ?? null,
+                    'mail.mailers.smtp.password' => $settings['smtp_password'] ?? null,
+                    'mail.mailers.smtp.timeout' => (int) ($settings['smtp_timeout'] ?? 60),
+                    'mail.from.address' => $settings['send_from'] ?? ($settings['mail_address'] ?? ($settings['email'] ?? config('mail.from.address'))),
+                    'mail.from.name' => $settings['brand_name'] ?? ($settings['store_name'] ?? config('app.name')),
+                ]);
+            }
+        });
 
         // Share Active Theme & Add Theme View Path
         $activeTheme = config('theme.active', 'default');

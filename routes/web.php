@@ -65,7 +65,7 @@ Route::get('/clear-sections', function () {
     \Illuminate\Support\Facades\Cache::forget('section_home_best_selling');
     \Illuminate\Support\Facades\Cache::forget('section_home_living_hero');
     \Illuminate\Support\Facades\Cache::forget('section_living_hero');
-    Artisan::call('db:seed', ['--class' => 'SectionSeeder', '--force' => true]);
+    // Artisan::call('db:seed', ['--class' => 'SectionSeeder', '--force' => true]);
     return response()->json([
         'status'  => true,
         'message' => 'CMS sections re-seeded and cached successfully!',

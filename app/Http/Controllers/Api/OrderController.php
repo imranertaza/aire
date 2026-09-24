@@ -12,10 +12,14 @@ use App\Models\OrderCardDetail;
 use App\Models\OrderHistory;
 use App\Models\OrderItem;
 use App\Models\OrderOption;
+use App\Events\OrderStatusUpdated;
 use App\Models\OrderStatus;
+use App\Services\Mail\OrderMailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
@@ -127,6 +131,16 @@ class OrderController extends Controller
                 }
             }
         });
+
+        // Dispatch OrderStatusUpdated event (Listeners handle customer notifications, etc.)
+        $status = OrderStatus::find($validated['order_status_id']);
+        $statusName = $status ? $status->name : 'Updated';
+        OrderStatusUpdated::dispatch(
+            $order,
+            $statusName,
+            $validated['comment'] ?? null,
+            (bool) ($validated['notify'] ?? false)
+        );
 
         return ApiResponse::success(null, 'Order history status updated successfully');
     }

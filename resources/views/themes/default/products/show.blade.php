@@ -1607,7 +1607,7 @@
                                             $firstChar = mb_substr($valName, 0, 1);
                                             $isHexColor = $firstChar === '#' && strlen($valName) === 7;
                                             $poPrice = (float) ($po->price ?? 0);
-                                            $poPrefix = $po->price_prefix ?: ($po->subtract == 1 ? '-' : '+');
+                                            $poPrefix = in_array($po->price_prefix, ['+', '-']) ? $po->price_prefix : '+';
                                             $priceAdd =
                                                 $poPrice > 0
                                                     ? ' (' .

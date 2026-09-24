@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Services\Mail\OrderMailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -231,5 +232,28 @@ class SettingsController extends Controller
             'nocaptcha_sitekey' => config('services.sitekey'),
             'nocaptcha_secret'  => config('services.secret'),
         ]);
+    }
+
+    /**
+     * Send a diagnostic test email using the currently configured SMTP settings.
+     *
+     * @param Request $request
+     * @param OrderMailService $mailService
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function sendTestEmail(Request $request, OrderMailService $mailService)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|max:155',
+            'type'  => 'nullable|string|in:placed,status,raw',
+        ]);
+
+        $res = $mailService->sendTestEmail($validated['email'], $validated['type'] ?? 'placed');
+
+        if ($res['success']) {
+            return ApiResponse::success($res, $res['message']);
+        }
+
+        return ApiResponse::error($res['message'], 400, $res);
     }
 }
