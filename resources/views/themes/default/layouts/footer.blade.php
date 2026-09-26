@@ -153,18 +153,7 @@
             <div
                 class="col-lg-9 pt-4 pb-4 px-4 px-xl-4 gap-4 pb-xl-4 bg-footer-black d-flex flex-column justify-content-between">
                 <div>
-                    @php
-                        $footerMenus = \App\Models\Menu::where(function ($q) {
-                            $q->where('position', 'footer')->orWhere('position', 'Footer');
-                        })
-                            ->where('enabled', 1)
-                            ->with([
-                                'menus' => function ($q) {
-                                    $q->where('enabled', 1)->orderBy('order', 'asc');
-                                },
-                            ])
-                            ->get();
-                    @endphp
+
 
                     <!-- Dynamic Nav Link Columns Grid -->
                     <div class="row g-4 row-cols-2 row-cols-sm-3 row-cols-lg-5">
@@ -192,21 +181,7 @@
                         class="img-fluid">
                 </div>
 
-                @php
-                    $legalMenu = \App\Models\Menu::where(function ($q) {
-                        $q->where('position', 'footer_bottom')
-                            ->orWhere('position', 'Footer Bottom')
-                            ->orWhere('name', 'Footer Legal')
-                            ->orWhere('name', 'Legal');
-                    })
-                        ->where('enabled', 1)
-                        ->with([
-                            'menus' => function ($q) {
-                                $q->where('enabled', 1)->orderBy('order', 'asc');
-                            },
-                        ])
-                        ->first();
-                @endphp
+
 
                 <!-- Footer Legal Links & Copyright -->
                 <div

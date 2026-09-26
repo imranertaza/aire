@@ -66,67 +66,73 @@
                                 }
                             }
 
-                            // 2. Otherwise dynamically fetch from Database
+                            // 2. Otherwise dynamically fetch from Database (Cached for 24h)
                             if (empty($list)) {
-                                // Active Product Categories (excluding generic names)
-                                $categories = \App\Models\ProductCategory::active()
-                                    ->whereNotIn('category_name', [
-                                        'Products',
-                                        'All Products',
-                                        'Uncategorized',
-                                        'Default',
-                                    ])
-                                    ->where(function ($q) {
-                                        $q->whereNull('parent_id')
-                                            ->orWhere('show_in_filter', 1)
-                                            ->orWhere('header_menu', 1);
+                                $list = \Illuminate\Support\Facades\Cache::remember('search_modal_suggested_keywords_v1', 86400, function () {
+                                    $items = [];
+
+                                    // Active Product Categories (excluding generic names)
+                                    $categories = \App\Models\ProductCategory::active()
+                                        ->whereNotIn('category_name', [
+                                            'Products',
+                                            'All Products',
+                                            'Uncategorized',
+                                            'Default',
+                                        ])
+                                        ->where(function ($q) {
+                                            $q->whereNull('parent_id')
+                                                ->orWhere('show_in_filter', 1)
+                                                ->orWhere('header_menu', 1);
+                                        })
+                                        ->take(4)
+                                        ->pluck('category_name')
+                                        ->toArray();
+
+                                    foreach ($categories as $catName) {
+                                        $items[] = [
+                                            'keyword' => $catName,
+                                            'label'   => $catName,
+                                        ];
+                                    }
+
+                                    // Dynamic Filter Options (Problems, Requirements, Applications)
+                                    $filterValues = \App\Models\FilterOptionValue::whereHas('filterOption', function ($q) {
+                                        $q->whereIn('name', [
+                                            'Problem',
+                                            'Requirement',
+                                            'Solution',
+                                            'Application',
+                                            'Building',
+                                            'Health Concern',
+                                        ]);
                                     })
-                                    ->take(4)
-                                    ->pluck('category_name')
-                                    ->toArray();
+                                        ->take(4)
+                                        ->pluck('name')
+                                        ->toArray();
 
-                                foreach ($categories as $catName) {
-                                    $list[] = [
-                                        'keyword' => $catName,
-                                        'label' => $catName,
-                                    ];
-                                }
+                                    foreach ($filterValues as $valName) {
+                                        $items[] = [
+                                            'keyword' => $valName,
+                                            'label'   => $valName,
+                                        ];
+                                    }
 
-                                // Dynamic Filter Options (Problems, Requirements, Applications)
-                                $filterValues = \App\Models\FilterOptionValue::whereHas('filterOption', function ($q) {
-                                    $q->whereIn('name', [
-                                        'Problem',
-                                        'Requirement',
-                                        'Solution',
-                                        'Application',
-                                        'Building',
-                                        'Health Concern',
-                                    ]);
-                                })
-                                    ->take(4)
-                                    ->pluck('name')
-                                    ->toArray();
+                                    // Product Model
+                                    $model = \App\Models\Product::where('status', 1)
+                                        ->whereNotNull('model')
+                                        ->where('model', '!=', '')
+                                        ->latest('id')
+                                        ->value('model');
 
-                                foreach ($filterValues as $valName) {
-                                    $list[] = [
-                                        'keyword' => $valName,
-                                        'label' => $valName,
-                                    ];
-                                }
+                                    if ($model) {
+                                        $items[] = [
+                                            'keyword' => $model,
+                                            'label'   => 'Model ' . $model,
+                                        ];
+                                    }
 
-                                // Product Model
-                                $model = \App\Models\Product::where('status', 1)
-                                    ->whereNotNull('model')
-                                    ->where('model', '!=', '')
-                                    ->latest('id')
-                                    ->value('model');
-
-                                if ($model) {
-                                    $list[] = [
-                                        'keyword' => $model,
-                                        'label' => 'Model ' . $model,
-                                    ];
-                                }
+                                    return $items;
+                                });
                             }
 
                             // 3. Fallback defaults if database has no entries

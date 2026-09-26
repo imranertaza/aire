@@ -62,11 +62,13 @@
                             <div class="col-sm-6">
                                 <div class="card border-light-subtle shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-row align-items-center gap-3">
                                     <div class="bg-primary-subtle text-primary rounded-4 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
-                                        <i class="bi bi-arrow-down-left-circle fs-22"></i>
+                                        <i class="bi bi-journal-text fs-22"></i>
                                     </div>
                                     <div>
-                                        <span class="text-secondary fs-12 text-uppercase fw-bold">Total Deposit Requests</span>
-                                        <h3 class="fw-bold text-dark mb-0 fs-24 mt-1">{{ count($fundRequests) }}</h3>
+                                        <span class="text-secondary fs-12 text-uppercase fw-bold">Account Ledger</span>
+                                        <h5 class="fw-bold text-dark mb-0 fs-16 mt-1">
+                                            <a href="{{ route('customer.ledger') }}" class="text-primary text-decoration-none">View Statement &rarr;</a>
+                                        </h5>
                                     </div>
                                 </div>
                             </div>
@@ -74,15 +76,12 @@
                     </div>
                 </div>
 
-                <!-- Deposit History Table -->
+                <!-- Recent Fund Requests -->
                 <div class="card border-light-subtle shadow-sm rounded-4 bg-white p-4">
                     <div class="d-flex align-items-center justify-content-between mb-4">
-                        <div>
-                            <h4 class="fw-bold text-dark mb-1 fs-18">Fund Deposit Requests</h4>
-                            <p class="text-muted fs-13 mb-0">History of your wallet top-up requests and status</p>
-                        </div>
-                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fs-13 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#addFundsModal">
-                            <i class="bi bi-plus-lg me-1"></i> New Fund Request
+                        <h4 class="fw-bold text-dark mb-0 fs-18">Deposit & Fund Requests</h4>
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold fs-13" data-bs-toggle="modal" data-bs-target="#addFundsModal">
+                            <i class="bi bi-plus-lg me-1"></i> New Request
                         </button>
                     </div>
 
@@ -91,9 +90,9 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light fs-13 text-secondary fw-bold">
                                     <tr>
-                                        <th>REF ID</th>
+                                        <th>REQUEST ID</th>
                                         <th>DATE</th>
-                                        <th>PAYMENT METHOD</th>
+                                        <th>METHOD</th>
                                         <th>AMOUNT</th>
                                         <th>STATUS</th>
                                     </tr>
@@ -143,32 +142,38 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow-lg">
             <div class="modal-header border-bottom px-4 py-3">
-                <h5 class="modal-title fw-bold text-dark fs-16" id="addFundsModalLabel"><i class="bi bi-plus-circle text-primary me-2"></i>Add Funds to Wallet</h5>
+                <h5 class="modal-title fw-bold text-dark fs-16" id="addFundsModalLabel">Add Funds to Wallet</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('customer.wallet.add-funds') }}" method="POST">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label fs-13 fw-semibold text-dark">Amount ($) *</label>
-                        <input type="number" step="0.01" min="1" name="amount" class="form-control shadow-none fs-14 py-2" placeholder="e.g. 100.00" required>
+                        <label class="form-label fs-13 fw-semibold text-secondary">Deposit Amount ($) <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">$</span>
+                            <input type="number" step="0.01" min="1" name="amount" class="form-control" placeholder="50.00" required>
+                        </div>
                     </div>
+
                     <div class="mb-3">
-                        <label class="form-label fs-13 fw-semibold text-dark">Payment Method *</label>
-                        <select name="payment_method_id" class="form-select shadow-none fs-14 py-2" required>
-                            @foreach($paymentMethods as $method)
-                                <option value="{{ $method->id }}">{{ $method->name }}</option>
+                        <label class="form-label fs-13 fw-semibold text-secondary">Payment Method <span class="text-danger">*</span></label>
+                        <select name="payment_method_id" class="form-select" required>
+                            <option value="">Select a payment method...</option>
+                            @foreach($paymentMethods as $pm)
+                                <option value="{{ $pm->id }}">{{ $pm->name }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fs-13 fw-semibold text-dark">Notes / Reference (Optional)</label>
-                        <textarea name="notes" class="form-control shadow-none fs-14" rows="2" placeholder="Transaction ref or payment notes..."></textarea>
+
+                    <div class="mb-0">
+                        <label class="form-label fs-13 fw-semibold text-secondary">Transaction Notes / Reference (Optional)</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="Enter bank transaction ID, reference, or details..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-top px-4 py-3 bg-light-subtle rounded-bottom-4">
-                    <button type="button" class="btn btn-outline-secondary rounded-2 fw-semibold fs-13 px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary rounded-2 fw-semibold fs-13 px-4">Submit Deposit Request</button>
+                <div class="modal-footer border-top px-4 py-3">
+                    <button type="button" class="btn btn-light rounded-pill px-4 fs-13 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fs-13 fw-semibold text-white">Submit Request</button>
                 </div>
             </form>
         </div>

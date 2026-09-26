@@ -14,9 +14,6 @@
     @section('body_class', 'product-filter-page')
 
     @push('styles')
-        <!-- Google Fonts Playfair Display -->
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
-            rel="stylesheet">
         <!-- BEM Product Filter Page CSS -->
         <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
     @endpush
@@ -279,6 +276,9 @@
 @endsection
 
 @push('scripts')
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
     <!-- Custom Product Filter JS -->
     <script src="{{ theme_asset('js/product-filter.js') }}" defer></script>
 

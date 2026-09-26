@@ -140,6 +140,9 @@
             hasMore: false
         };
     </script>
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
     <!-- Custom Product Filter JS -->
     <script src="{{ theme_asset('js/product-filter.js') }}" defer></script>
 @endpush

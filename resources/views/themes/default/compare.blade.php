@@ -258,43 +258,37 @@
 
                         <!-- Trust Badges 2x3 Grid -->
                         @php
-                            $trustBadgesSection = \App\Models\Section::where('name', 'trust_badges')->first();
-                            if (!$trustBadgesSection) {
-                                $trustBadgesSection = \App\Models\Section::create([
-                                    'name' => 'trust_badges',
-                                    'data' => [
-                                        'badges' => [
-                                            [
-                                                'icon' => 'bi-shield-check',
-                                                'title' => 'SECURE PAYMENTS',
-                                                'description' => '100% secure and encrypted payments.',
-                                            ],
-                                            [
-                                                'icon' => 'bi-box-seam',
-                                                'title' => 'FREE SHIPPING',
-                                                'description' => 'On all orders over $150.',
-                                            ],
-                                            [
-                                                'icon' => 'bi-arrow-repeat',
-                                                'title' => '30-DAY RETURNS',
-                                                'description' => 'Return or exchange within 30 days.',
-                                            ],
-                                            [
-                                                'icon' => 'bi-award',
-                                                'title' => '1 YEAR WARRANTY',
-                                                'description' => 'Full protection and quality assurance.',
-                                            ],
-                                            [
-                                                'icon' => 'bi-headset',
-                                                'title' => 'DEDICATED SUPPORT',
-                                                'description' => 'Expert assistance whenever you need it.',
-                                            ],
-                                        ],
-                                    ],
-                                    'status' => 1,
-                                ]);
-                            }
-                            $trustBadges = $trustBadgesSection->data['badges'] ?? [];
+                            $defaultBadges = [
+                                [
+                                    'icon' => 'bi-shield-check',
+                                    'title' => 'SECURE PAYMENTS',
+                                    'description' => '100% secure and encrypted payments.',
+                                ],
+                                [
+                                    'icon' => 'bi-box-seam',
+                                    'title' => 'FREE SHIPPING',
+                                    'description' => 'On all orders over $150.',
+                                ],
+                                [
+                                    'icon' => 'bi-arrow-repeat',
+                                    'title' => '30-DAY RETURNS',
+                                    'description' => 'Return or exchange within 30 days.',
+                                ],
+                                [
+                                    'icon' => 'bi-award',
+                                    'title' => '1 YEAR WARRANTY',
+                                    'description' => 'Full protection and quality assurance.',
+                                ],
+                                [
+                                    'icon' => 'bi-headset',
+                                    'title' => 'DEDICATED SUPPORT',
+                                    'description' => 'Expert assistance whenever you need it.',
+                                ],
+                            ];
+                            $trustBadgesSection = getSection('trust_badges', ['badges' => $defaultBadges]);
+                            $trustBadges = is_array($trustBadgesSection)
+                                ? ($trustBadgesSection['badges'] ?? $defaultBadges)
+                                : ($trustBadgesSection->data['badges'] ?? $defaultBadges);
                         @endphp
                         <div class="row g-4 my-4 center-feed">
                             @foreach ($trustBadges as $badge)

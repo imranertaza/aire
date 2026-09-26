@@ -288,11 +288,7 @@
                     <div class="col-lg-7">
                         @foreach ($specGroups as $g)
                             @php
-                                $imgSrc = !empty($g['image'])
-                                    ? (str_starts_with($g['image'], 'http')
-                                        ? $g['image']
-                                        : getImageUrl($g['image']))
-                                    : 'https://picsum.photos/500/500';
+                                $imgSrc = getImageUrl($g['image'] ?? null);
                             @endphp
                             <div class="spec-group-block" data-image="{{ $imgSrc }}">
                                 <span class="spec-group-tag">{{ $g['tag'] ?? '' }}</span>

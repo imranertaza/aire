@@ -24,7 +24,12 @@ if (! function_exists('getImageUrl')) {
             return ImageService::getFallbackUrl();
         }
 
-        // 2. If dimensions or optimization requested, delegate to ImageService
+        // 2. Direct fast bypass check for remote URLs, videos (mp4, webm, mov, etc.), audios, SVGs, and documents
+        if (ImageService::shouldBypass($path)) {
+            return ImageService::getBypassUrl($path);
+        }
+
+        // 3. If dimensions or optimization requested, delegate to ImageService
         if ($width !== null || $height !== null || !empty($options['optimize'])) {
             if (!empty($options['fit']) && $width && $height) {
                 return ImageService::fit($path, $width, $height, $options);
@@ -37,11 +42,6 @@ if (! function_exists('getImageUrl')) {
             if ($width !== null) {
                 return ImageService::resize($path, $width, $height, $options);
             }
-        }
-
-        // 3. Direct fast bypass check for remote URLs and SVGs
-        if (ImageService::shouldBypass($path)) {
-            return ImageService::getBypassUrl($path);
         }
 
         // 4. Auto-optimize local bitmaps to WebP with two-tier caching (unless explicitly raw)
@@ -69,6 +69,32 @@ if (! function_exists('getImageUrl')) {
 
         // Fallback
         return ImageService::getFallbackUrl();
+    }
+}
+
+if (! function_exists('getMediaUrl')) {
+    /**
+     * Retrieve public URL for media files (videos, audios, documents, images).
+     *
+     * @param string|null $path Original media path or URL
+     * @return string
+     */
+    function getMediaUrl(?string $path): string
+    {
+        return getImageUrl($path);
+    }
+}
+
+if (! function_exists('getVideoUrl')) {
+    /**
+     * Retrieve public URL for video files.
+     *
+     * @param string|null $path Original video path or URL
+     * @return string
+     */
+    function getVideoUrl(?string $path): string
+    {
+        return getImageUrl($path);
     }
 }
 

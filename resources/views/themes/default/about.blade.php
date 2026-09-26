@@ -12,12 +12,14 @@
     @php
         $sidebarAds =
             $aboutAds ??
-            \App\Models\Slider::where('enabled', 1)
-                ->where(function ($q) {
-                    $q->where('key', 'about_us')->orWhere('key', 'like', '%about_us%');
-                })
-                ->orderBy('order', 'asc')
-                ->get();
+            \Illuminate\Support\Facades\Cache::remember('about_us_sidebar_ads_v1', 86400, function () {
+                return \App\Models\Slider::where('enabled', 1)
+                    ->where(function ($q) {
+                        $q->where('key', 'about_us')->orWhere('key', 'like', '%about_us%');
+                    })
+                    ->orderBy('order', 'asc')
+                    ->get();
+            });
         $hasAds = $sidebarAds && $sidebarAds->count() > 0;
     @endphp
 

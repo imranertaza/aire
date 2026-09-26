@@ -80,15 +80,7 @@
                             <!-- Dynamic Icon Rendering Start -->
                             <div class="icon-wrapper mb-3 d-flex align-items-center justify-content-center"
                                 style="font-size: 40px; color: var(--common-color); height: 60px;">
-                                @if (strpos($category->icon_class, '<svg') !== false)
-                                    {!! $category->icon_class !!}
-                                @elseif($category->icon_class)
-                                    <i class="{{ $category->icon_class }}"></i>
-                                @elseif($category->icon)
-                                    {!! $category->icon->code !!}
-                                @else
-                                    <i class="fa fa-box"></i>
-                                @endif
+                                <x-category-icon :category="$category" fallback="fa fa-box" />
                             </div>
                             <!-- Dynamic Icon Rendering End -->
 

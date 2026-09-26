@@ -3,29 +3,6 @@
     $favCount = (int) count(session()->get('favorites', []));
     $compareCount = (int) count(session()->get('compare', []));
 @endphp
-<script>
-    window.updateHeaderBadges = function(type, count) {
-        count = parseInt(count) || 0;
-        let badge;
-        if (type === 'cart') {
-            badge = document.querySelector('.cart-count-badge');
-        } else if (type === 'favorite' || type === 'favorites' || type === 'wishlist') {
-            badge = document.querySelector('.favorite-count-badge');
-        } else if (type === 'compare') {
-            badge = document.querySelector('.compare-count-badge');
-        }
-        if (badge) {
-            badge.textContent = count;
-            if (count > 0) {
-                badge.classList.remove('d-none');
-                badge.style.setProperty('display', 'inline-flex', 'important');
-            } else {
-                badge.classList.add('d-none');
-                badge.style.setProperty('display', 'none', 'important');
-            }
-        }
-    };
-</script>
 <!-- Header -->
 <header class="site-header bg-white py-md-3">
     <div class="container main-container">
@@ -51,18 +28,7 @@
 
             <!-- Col 2: Main Nav -->
             <div class="col-lg-9 col-xl-6 d-none d-lg-block px-md-0">
-                @php
-                    $mainHeaderMenu = \App\Models\Menu::where(function ($q) {
-                        $q->where('position', 'header')->orWhere('position', 'Header')->orWhere('name', 'Main Header');
-                    })
-                        ->where('enabled', 1)
-                        ->with([
-                            'menus' => function ($q) {
-                                $q->where('enabled', 1)->orderBy('order', 'asc');
-                            },
-                        ])
-                        ->first();
-                @endphp
+
 
                 <nav class="main-nav d-flex align-items-center gap-1">
                     @if ($mainHeaderMenu && $mainHeaderMenu->menus->count() > 0)
@@ -162,18 +128,22 @@
                         </div>
                         <div class="ms-md-2 d-flex align-items-center gap-3">
                             @if (\Illuminate\Support\Facades\Auth::guard('customer')->check())
+                                @php
+                                    $headerCustomer = \Illuminate\Support\Facades\Auth::guard('customer')->user();
+                                    $headerCustomerName = $headerCustomer?->full_name ?: ($headerCustomer?->firstname ?? 'Customer');
+                                @endphp
                                 <div class="dropdown">
                                     <a href="#"
                                         class="d-flex align-items-center text-decoration-none dropdown-toggle-nocaret"
                                         id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                        @if (session()->get('customer_pic'))
-                                            <img src="{{ getImageUrl(session()->get('customer_pic')) }}"
+                                        @if ($headerCustomer?->pic)
+                                            <img src="{{ getImageUrl($headerCustomer->pic) }}"
                                                 class="rounded-circle border" alt="User"
                                                 style="width: 40px; height: 40px; object-fit: cover;">
                                         @else
                                             <div class="rounded-circle border bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-14"
                                                 style="width: 40px; height: 40px; background: linear-gradient(135deg, #0066CC 0%, #0055BB 100%) !important;">
-                                                {{ strtoupper(substr(session()->get('customer_name'), 0, 1)) }}
+                                                {{ strtoupper(substr($headerCustomerName, 0, 1)) }}
                                             </div>
                                         @endif
                                     </a>
@@ -181,9 +151,9 @@
                                         aria-labelledby="userMenuDropdown"
                                         style="min-width: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.075) !important;">
                                         <li class="px-3 py-2 border-bottom border-light-subtle mb-1">
-                                            <div class="fw-bold text-dark fs-14">{{ session()->get('customer_name') }}
+                                            <div class="fw-bold text-dark fs-14">{{ $headerCustomerName }}
                                             </div>
-                                            <div class="text-muted fs-12">{{ session()->get('customer_email') }}</div>
+                                            <div class="text-muted fs-12">{{ $headerCustomer?->email }}</div>
                                         </li>
                                         <li><a class="dropdown-item fs-13 py-2"
                                                 href="{{ route('customer.dashboard') }}"><i
@@ -378,14 +348,24 @@
         <!-- Mobile Auth Actions -->
         <div class="pt-3 border-top mt-auto">
             @if (\Illuminate\Support\Facades\Auth::guard('customer')->check())
+                @php
+                    $mobileCustomer = \Illuminate\Support\Facades\Auth::guard('customer')->user();
+                    $mobileCustomerName = $mobileCustomer?->full_name ?: ($mobileCustomer?->firstname ?? 'Customer');
+                @endphp
                 <div class="d-flex align-items-center gap-2 mb-3">
-                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-13"
-                        style="width: 36px; height: 36px;">
-                        {{ strtoupper(substr(session()->get('customer_name'), 0, 1)) }}
-                    </div>
+                    @if ($mobileCustomer?->pic)
+                        <img src="{{ getImageUrl($mobileCustomer->pic) }}"
+                            class="rounded-circle border" alt="User"
+                            style="width: 36px; height: 36px; object-fit: cover;">
+                    @else
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-13"
+                            style="width: 36px; height: 36px;">
+                            {{ strtoupper(substr($mobileCustomerName, 0, 1)) }}
+                        </div>
+                    @endif
                     <div>
-                        <div class="fw-bold fs-14 text-dark">{{ session()->get('customer_name') }}</div>
-                        <div class="text-muted fs-12">{{ session()->get('customer_email') }}</div>
+                        <div class="fw-bold fs-14 text-dark">{{ $mobileCustomerName }}</div>
+                        <div class="text-muted fs-12">{{ $mobileCustomer?->email }}</div>
                     </div>
                 </div>
                 <div class="d-grid gap-2">

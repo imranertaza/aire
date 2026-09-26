@@ -28,15 +28,7 @@
                             <a href="{{ route('category.show', $cat->slug ?? $cat->id) }}"
                                 class="menu-item {{ isset($category) && $category->id == $cat->id ? 'active' : '' }}">
                                 <div class="icon-box">
-                                    @if (strpos($cat->icon_class, '<svg') !== false)
-                                        {!! $cat->icon_class !!}
-                                    @elseif($cat->icon_class)
-                                        <i class="{{ $cat->icon_class }}"></i>
-                                    @elseif($cat->icon)
-                                        {!! $cat->icon->code !!}
-                                    @else
-                                        <i class="bi bi-box"></i>
-                                    @endif
+                                    <x-category-icon :category="$cat" />
                                 </div>
                                 <div class="text-box">
                                     <h2 class="mb-0">{{ $cat->category_name }}</h2>

@@ -102,9 +102,10 @@ class ImageService
             return static::getFallbackUrl();
         }
 
-        // 3. Check for vector SVG or unsupported file types that resolved
+        // 3. Check for vector SVG, video, audio, or unsupported file types that resolved
         $ext = strtolower(pathinfo($sourcePath, PATHINFO_EXTENSION));
-        if (in_array($ext, ['svg', 'ico', 'pdf', 'gif'])) {
+        $supportedRaster = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'avif'];
+        if (!in_array($ext, $supportedRaster)) {
             return static::getBypassUrl($path);
         }
 
@@ -207,9 +208,14 @@ class ImageService
             return true;
         }
 
-        // Non-raster image extensions or SVGs
-        $ext = strtolower(pathinfo(parse_url($path, PHP_URL_PATH) ?? $path, PATHINFO_EXTENSION));
-        if (in_array($ext, ['svg', 'ico', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'zip'])) {
+        // Non-raster image extensions, videos (mp4, webm, mov, etc.), audio, vector SVGs, and documents
+        $cleanPath = parse_url($path, PHP_URL_PATH) ?? $path;
+        $ext = strtolower(pathinfo($cleanPath, PATHINFO_EXTENSION));
+
+        // Supported raster image formats for Intervention Image GD driver
+        $supportedRaster = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'avif'];
+
+        if (!in_array($ext, $supportedRaster)) {
             return true;
         }
 

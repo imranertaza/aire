@@ -3,16 +3,20 @@
 @section('body_class', 'product-filter-page')
 
 @push('styles')
-    <!-- Google Fonts Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
-    <!-- Google Fonts Playfair Display -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
-        rel="stylesheet">
-    <!-- BEM Product Filter Page CSS -->
+    <!-- BEM Product Filter Page & Home CSS -->
     <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
-    <link href="{{ theme_asset('css/home.css') }}?v={{ filemtime(public_path('themes/default/assets/css/home.css')) }}"
-        rel="stylesheet">
+    <link href="{{ theme_asset('css/home.css') }}" rel="stylesheet">
+@endpush
+
+@push('head')
+    @php
+        $firstHeroSlide = $heroSlides->first() ?? null;
+        $firstSlideRaw = is_object($firstHeroSlide) ? $firstHeroSlide->image ?? '' : $firstHeroSlide['image'] ?? '';
+        $firstSlideUrl = !empty($firstSlideRaw) ? getImageUrl($firstSlideRaw) : null;
+    @endphp
+    @if ($firstSlideUrl)
+        <link rel="preload" as="image" href="{{ $firstSlideUrl }}" fetchpriority="high">
+    @endif
 @endpush
 
 @section('content')
@@ -26,12 +30,7 @@
                         @foreach ($heroSlides as $slide)
                             @php
                                 $rawImage = is_object($slide) ? $slide->image ?? '' : $slide['image'] ?? '';
-                                $slideImage =
-                                    str_starts_with($rawImage, 'http') ||
-                                    str_starts_with($rawImage, 'themes/') ||
-                                    str_starts_with($rawImage, '/themes/')
-                                        ? $rawImage
-                                        : getImageUrl($rawImage);
+                                $slideImage = getImageUrl($rawImage);
 
                                 $slideTitle = is_object($slide) ? $slide->title ?? '' : $slide['title'] ?? '';
                                 $slideSubtitle = is_object($slide)
@@ -124,7 +123,8 @@
                 <div class="home-benefits__banner">
                     <!-- Parallax Background Image (Dynamic) -->
                     <div class="home-benefits__banner-bg">
-                        <img src="{{ $benefitsBannerImage }}" alt="{{ $benefitTitle }}" class="home-benefits__bg-img">
+                        <img src="{{ $benefitsBannerImage }}" alt="{{ $benefitTitle }}" class="home-benefits__bg-img"
+                            width="1200" height="400" loading="lazy" decoding="async">
                     </div>
                     <div class="home-benefits__overlay"></div>
                     <div class="home-benefits__grid">
@@ -149,32 +149,8 @@
                 'Discover the top‑selling models trusted by thousands of families for cleaner, healthier air.';
             $bestSellingProductIds = $bestSellingSection['product_ids'] ?? [];
 
-            $bestSellingProducts = \Illuminate\Support\Facades\Cache::remember('home_best_selling_products', 3600, function () use ($bestSellingProductIds) {
-                $prods = collect();
-                if (!empty($bestSellingProductIds) && is_array($bestSellingProductIds)) {
-                    $orderedProducts = \App\Models\Product::with(['categories', 'images'])
-                        ->whereIn('id', $bestSellingProductIds)
-                        ->where('status', 1)
-                        ->get()
-                        ->keyBy('id');
-
-                    $prods = collect($bestSellingProductIds)
-                        ->map(fn($id) => $orderedProducts->get($id))
-                        ->filter()
-                        ->values();
-                }
-
-                // Fallback: If no products were selected or found, fetch latest active products
-                if ($prods->isEmpty()) {
-                    $prods = \App\Models\Product::with(['categories', 'images'])
-                        ->where('status', 1)
-                        ->latest('id')
-                        ->take(4)
-                        ->get();
-                }
-
-                return $prods;
-            });
+            // Products resolved and batched from StorefrontController
+            $bestSellingProducts = $bestSellingProducts ?? collect();
 
             // Fallback: If database has no products at all, preserve original mock cards
             if ($bestSellingProducts->isEmpty()) {
@@ -342,32 +318,8 @@
                 'Explore the latest purifiers designed with advanced technology for modern living.';
             $newArrivalProductIds = $newArrivalSection['product_ids'] ?? [];
 
-            $newArrivalProducts = \Illuminate\Support\Facades\Cache::remember('home_new_arrival_products', 3600, function () use ($newArrivalProductIds) {
-                $prods = collect();
-                if (!empty($newArrivalProductIds) && is_array($newArrivalProductIds)) {
-                    $orderedNewProducts = \App\Models\Product::with(['categories', 'images'])
-                        ->whereIn('id', $newArrivalProductIds)
-                        ->where('status', 1)
-                        ->get()
-                        ->keyBy('id');
-
-                    $prods = collect($newArrivalProductIds)
-                        ->map(fn($id) => $orderedNewProducts->get($id))
-                        ->filter()
-                        ->values();
-                }
-
-                // Fallback: If no products were selected or found, fetch latest active products
-                if ($prods->isEmpty()) {
-                    $prods = \App\Models\Product::with(['categories', 'images'])
-                        ->where('status', 1)
-                        ->latest('id')
-                        ->take(3)
-                        ->get();
-                }
-
-                return $prods;
-            });
+            // Products resolved and batched from StorefrontController
+            $newArrivalProducts = $newArrivalProducts ?? collect();
 
             // Fallback: If database has no products at all, preserve original mock cards
             if ($newArrivalProducts->isEmpty()) {
@@ -479,32 +431,8 @@
                 'Discover the purifiers most chosen by families who value clean, healthy air.';
             $customerFavoritesProductIds = $customerFavoritesSection['product_ids'] ?? [];
 
-            $customerFavoritesProducts = \Illuminate\Support\Facades\Cache::remember('home_customer_fav_products', 3600, function () use ($customerFavoritesProductIds) {
-                $prods = collect();
-                if (!empty($customerFavoritesProductIds) && is_array($customerFavoritesProductIds)) {
-                    $orderedFavProducts = \App\Models\Product::with(['categories', 'images'])
-                        ->whereIn('id', $customerFavoritesProductIds)
-                        ->where('status', 1)
-                        ->get()
-                        ->keyBy('id');
-
-                    $prods = collect($customerFavoritesProductIds)
-                        ->map(fn($id) => $orderedFavProducts->get($id))
-                        ->filter()
-                        ->values();
-                }
-
-                // Fallback: If no products were selected or found, fetch latest active products
-                if ($prods->isEmpty()) {
-                    $prods = \App\Models\Product::with(['categories', 'images'])
-                        ->where('status', 1)
-                        ->skip(3)
-                        ->take(3)
-                        ->get();
-                }
-
-                return $prods;
-            });
+            // Products resolved and batched from StorefrontController
+            $customerFavoritesProducts = $customerFavoritesProducts ?? collect();
 
             // Fallback: If database has no products at all, preserve original mock cards
             if ($customerFavoritesProducts->isEmpty()) {
@@ -583,7 +511,7 @@
                     <!-- Initial Exploded View Poster (hides once video starts) -->
                     <div class="home-video__poster" id="homeVideoPoster">
                         <img src="{{ $videoPoster }}" alt="{{ $videoTitle }}" class="home-video__img"
-                            loading="lazy">
+                            width="1200" height="600" loading="lazy" decoding="async">
                     </div>
 
                     <!-- Glowing Play Button Overlay (always visible on pause, ended, or initial state) -->
@@ -605,29 +533,15 @@
             $livingHeroSection = getSection('home_living_hero') ?? (getSection('living_hero') ?? []);
             $livingHeroEnabled = isset($livingHeroSection['enabled']) ? (bool) $livingHeroSection['enabled'] : true;
 
-            $livingProductId = $livingHeroSection['product_id'] ?? null;
-            $livingProduct = \Illuminate\Support\Facades\Cache::remember('home_living_hero_product', 3600, function () use ($livingProductId, $bottomFeaturedProduct) {
-                $prod = null;
-                if (!empty($livingProductId)) {
-                    $prod = \App\Models\Product::with(['description', 'categories', 'images'])->find($livingProductId);
-                }
-                if (!$prod && isset($bottomFeaturedProduct) && $bottomFeaturedProduct) {
-                    $prod = $bottomFeaturedProduct;
-                }
-                return $prod;
-            });
+            // Living hero product resolved and batched from StorefrontController
+            $livingProduct = $livingProduct ?? ($bottomFeaturedProduct ?? null);
 
             $rawBg = $livingHeroSection['image'] ?? null;
-            if ($rawBg) {
-                $livingBgImage =
-                    str_starts_with($rawBg, 'themes/') || str_starts_with($rawBg, 'http')
-                        ? asset($rawBg)
-                        : getImageUrl($rawBg);
-            } else {
-                $livingBgImage = file_exists(public_path('themes/default/assets/img/background-without-product.png'))
+            $livingBgImage = $rawBg
+                ? getImageUrl($rawBg)
+                : (file_exists(public_path('themes/default/assets/img/background-without-product.png'))
                     ? theme_asset('img/background-without-product.png')
-                    : getImageUrl('home/bg-of-home.png');
-            }
+                    : getImageUrl('home/bg-of-home.png'));
 
             $livingTitle = !empty($livingHeroSection['title'])
                 ? $livingHeroSection['title']
@@ -645,13 +559,15 @@
         @if ($livingHeroEnabled && $livingProduct)
             <section class="living-hero" id="living-hero-section">
                 <div class="living-hero__image-bg" id="living-hero-img-box">
-                    <img src="{{ $livingBgImage }}" alt="Modern Living Room" class="living-hero__bg-img">
+                    <img src="{{ $livingBgImage }}" alt="Modern Living Room" class="living-hero__bg-img" width="1200"
+                        height="600" loading="lazy" decoding="async">
                     <!-- Animated product image that flies down from living room scene to above Buy Now button on scroll -->
                     <img src="{{ getImageCacheUrl($livingProduct->main_image, 450, 450, 'webp') }}"
                         srcset="{{ getImageSrcset($livingProduct->main_image, [280, 450, 700], 1.0) }}"
                         sizes="(max-width: 576px) 260px, (max-width: 992px) 360px, 450px"
-                        alt="{{ $livingProduct->name }}"
-                        class="living-hero__animated-product" id="living-hero-animated-product">
+                        alt="{{ $livingProduct->name }}" width="450" height="450"
+                        class="living-hero__animated-product" id="living-hero-animated-product" loading="lazy"
+                        decoding="async">
                 </div>
 
                 <h2 class="living-hero__title">{{ $livingTitle }}</h2>
@@ -846,6 +762,9 @@
 
         });
     </script>
+    <!-- GSAP & ScrollTrigger for Homepage Scroll Animations -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
     <!-- Custom Product Filter JS -->
     <script src="{{ theme_asset('js/product-filter.js') }}" defer></script>
     <script src="{{ theme_asset('js/home.js') }}" defer></script>

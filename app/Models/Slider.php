@@ -10,6 +10,14 @@ class Slider extends Model
     protected $guarded = ['id'];
 
     /**
+     * Get resolved image URL for the slider ($slider->image_url).
+     */
+    public function getImageUrlAttribute(): string
+    {
+        return getImageUrl($this->image);
+    }
+
+    /**
      * Boot model events for automatic cache invalidation.
      */
     protected static function booted()
@@ -59,7 +67,7 @@ class Slider extends Model
             return static::where('enabled', 1)
                 ->where(function ($q) use ($placement) {
                     $q->where('key', $placement)
-                      ->orWhere('key', 'like', "%{$placement}%");
+                        ->orWhere('key', 'like', "%{$placement}%");
                 })
                 ->orderBy('order', 'asc')
                 ->orderBy('id', 'desc')

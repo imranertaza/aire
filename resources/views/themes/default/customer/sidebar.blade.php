@@ -43,11 +43,19 @@
             </a>
 
 
+            {{-- Temporarily hidden from customer UI: Wallet & Account Ledger --}}
+            {{--
+            <a class="nav-link rounded-3 px-3 py-2 fs-14 fw-semibold {{ $currentRoute == 'customer.wallet' ? 'active' : 'text-dark' }}"
+                href="{{ route('customer.wallet') }}"
+                @if ($currentRoute == 'customer.wallet') style="background: var(--color-primary-bg); color: var(--color-primary);" @endif>
+                <i class="bi bi-wallet2 me-2" style="color: var(--color-primary);"></i> Wallet
+            </a>
             <a class="nav-link rounded-3 px-3 py-2 fs-14 fw-semibold {{ $currentRoute == 'customer.ledger' ? 'active' : 'text-dark' }}"
                 href="{{ route('customer.ledger') }}"
                 @if ($currentRoute == 'customer.ledger') style="background: var(--color-primary-bg); color: var(--color-primary);" @endif>
                 <i class="bi bi-journal-text me-2" style="color: var(--color-primary);"></i> Ledger
             </a>
+            --}}
 
             <hr class="my-2">
             <form action="{{ route('logout') }}" method="POST">

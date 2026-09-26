@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('firstname', 32);
             $table->string('lastname', 32);
-            $table->string('email', 96);
+            $table->string('email', 96)->unique();
             $table->string('phone', 32);
             $table->string('password');
+            $table->rememberToken();
             $table->decimal('balance', 10, 2)->nullable()->default(0.00);
             $table->unsignedInteger('point')->nullable()->default(0);
             $table->string('salt', 9);

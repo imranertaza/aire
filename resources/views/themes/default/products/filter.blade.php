@@ -3,9 +3,6 @@
 @section('body_class', 'product-filter-page')
 
 @push('styles')
-    <!-- Google Fonts Playfair Display -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap"
-        rel="stylesheet">
     <!-- BEM Product Filter Page CSS -->
     <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
 @endpush
@@ -32,84 +29,10 @@
         </div>
         <div class="offcanvas-body p-3 p-sm-4" data-lenis-prevent>
             <div class="filter-sidebar filter-sidebar--mobile" id="mobileFilterSidebarContainer">
-                <form action="{{ route('products.filter') }}" method="GET" id="mobileFilterForm">
-                    @if (request('search'))
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                    @endif
-
-                    <a href="{{ route('products.filter') }}"
-                        class="filter-sidebar__subtitle filter-sidebar__subtitle--link mb-3 d-inline-block">All Products</a>
-
-                    @php
-                        $filterMobileIndex = 1;
-                        $activeCategory = request(
-                            'category',
-                            $currentCategory->slug ?? ($currentCategory->id ?? 'any'),
-                        );
-                        $selectedCats = (array) request('category', []);
-                        if (empty($selectedCats) && isset($currentCategory) && $currentCategory) {
-                            $selectedCats = [$currentCategory->slug ?? $currentCategory->id];
-                        }
-                        $catType = $filterOptionTypes['Categories'] ?? ($filterOptionTypes['Category'] ?? 'radio');
-                        $isCatCheckbox = $catType === 'checkbox';
-                        $hasCatChecked = $isCatCheckbox
-                            ? !empty($selectedCats)
-                            : $activeCategory !== 'any' && $activeCategory !== 'all';
-                    @endphp
-
-                    <!-- 1. CATEGORIES -->
-                    @if (!empty($filterCategories))
-                        <div class="filter-group {{ $hasCatChecked ? '' : 'collapsed' }}">
-                            <div class="filter-group__header">
-                                <h3 class="filter-group__title">CATEGORIES</h3>
-                                <i class="bi bi-chevron-down filter-group__icon"></i>
-                            </div>
-                            <div class="filter-group__content">
-                                @foreach ($filterCategories as $val => $label)
-                                    @php
-                                        $isCatChecked = $isCatCheckbox
-                                            ? in_array($val, $selectedCats)
-                                            : $activeCategory == $val ||
-                                                (isset($currentCategory) &&
-                                                    ($currentCategory->slug == $val || $currentCategory->id == $val));
-                                    @endphp
-                                    <label class="filter-option">
-                                        <input type="{{ $isCatCheckbox ? 'checkbox' : 'radio' }}"
-                                            name="{{ $isCatCheckbox ? 'category[]' : 'category' }}"
-                                            value="{{ $val }}" class="filter-option__input auto-filter-input"
-                                            {{ $isCatChecked ? 'checked' : '' }}>
-                                        <span class="filter-option__text">{{ $label }}</span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- DYNAMIC FILTER OPTIONS -->
-                    @if (!empty($dynamicFilterSections))
-                        @foreach ($dynamicFilterSections as $section)
-                            @if (!empty($section['options']))
-                                <div class="filter-group {{ $section['has_checked'] ? '' : 'collapsed' }}">
-                                    <div class="filter-group__header">
-                                        <h3 class="filter-group__title">{{ strtoupper($section['name']) }}</h3>
-                                        <i class="bi bi-chevron-down filter-group__icon"></i>
-                                    </div>
-                                    <div class="filter-group__content">
-                                        @foreach ($section['options'] as $val => $optData)
-                                            <label class="filter-option">
-                                                <input type="{{ $section['is_checkbox'] ? 'checkbox' : 'radio' }}"
-                                                    name="{{ $section['input_name'] }}" value="{{ $val }}"
-                                                    class="filter-option__input auto-filter-input"
-                                                    {{ $optData['is_checked'] ? 'checked' : '' }}>
-                                                <span class="filter-option__text">{{ $optData['label'] }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-                        @endforeach
-                    @endif
-                </form>
+                @include('themes.default.products.partials.filter_sidebar', [
+                    'formId' => 'mobileFilterForm',
+                    'showHeader' => false,
+                ])
             </div>
         </div>
         <div class="offcanvas-footer border-top p-3 bg-white position-sticky bottom-0">
@@ -386,6 +309,9 @@
 @endsection
 
 @push('scripts')
+    <!-- GSAP & ScrollTrigger -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
     <!-- Standard Full-Page Filter Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {

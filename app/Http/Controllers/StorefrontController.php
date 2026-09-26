@@ -3,12 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Customer;
-use App\Models\Coupon;
 use App\Models\Newsletter;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -21,18 +17,78 @@ class StorefrontController extends Controller
      */
     public function index()
     {
-        $topFeaturedProduct = Cache::remember('home_top_featured_product', 3600, function () {
-            return Product::where('status', 1)->where('featured', 1)->with(['categories', 'images', 'special'])->latest()->first();
-        });
-
-        $bottomFeaturedProduct = Cache::remember('home_bottom_featured_product', 3600, function () {
-            return Product::where('status', 1)->with(['categories', 'images', 'special'])->latest()->first();
-        });
-
-        $products = Product::with('special')->latest()->paginate(50)->withQueryString();
         $heroSlides = \App\Models\Slider::getByPlacement('banner_section');
 
-        return \theme_view('home', compact('products', 'topFeaturedProduct', 'bottomFeaturedProduct', 'heroSlides'));
+        // Batch resolve and cache all homepage product sections in a single consolidated operation
+        $homeProductSections = Cache::remember(Product::HOME_SECTIONS_CACHE_KEY, 3600, function () {
+            $bestSellingSection = getSection('home_best_selling') ?? (getSection('best_selling') ?? []);
+            $newArrivalSection = getSection('home_new_arrival') ?? (getSection('new_arrival') ?? []);
+            $customerFavoritesSection = getSection('home_customer_favorites') ?? (getSection('customer_favorites') ?? (getSection('home_customer_fav') ?? []));
+            $livingHeroSection = getSection('home_living_hero') ?? (getSection('living_hero') ?? []);
+
+            $bestSellingIds = is_array($bestSellingSection['product_ids'] ?? null) ? $bestSellingSection['product_ids'] : [];
+            $newArrivalIds = is_array($newArrivalSection['product_ids'] ?? null) ? $newArrivalSection['product_ids'] : [];
+            $favIds = is_array($customerFavoritesSection['product_ids'] ?? null) ? $customerFavoritesSection['product_ids'] : [];
+            $livingId = $livingHeroSection['product_id'] ?? null;
+
+            // Collect all unique product IDs configured across all 4 sections
+            $allConfiguredIds = array_values(array_filter(array_unique(array_merge(
+                $bestSellingIds,
+                $newArrivalIds,
+                $favIds,
+                $livingId ? [$livingId] : []
+            ))));
+
+            $relations = [
+                'categories',
+                'images',
+                'special',
+                'freeDelivery',
+                'description:id,product_id,description',
+                'productLanding:id,product_id,status'
+            ];
+
+            // 1. Single batch query for all explicitly configured products across all sections
+            $loadedProducts = !empty($allConfiguredIds)
+                ? Product::with($relations)->whereIn('id', $allConfiguredIds)->where('status', 1)->get()->keyBy('id')
+                : collect();
+
+            // 2. Map Best Selling products (or fallback to latest)
+            $bestSellingProducts = collect($bestSellingIds)->map(fn($id) => $loadedProducts->get($id))->filter()->values();
+            if ($bestSellingProducts->isEmpty()) {
+                $bestSellingProducts = Product::with($relations)->where('status', 1)->latest('id')->take(4)->get();
+            }
+
+            // 3. Map New Arrival products (or fallback to latest)
+            $newArrivalProducts = collect($newArrivalIds)->map(fn($id) => $loadedProducts->get($id))->filter()->values();
+            if ($newArrivalProducts->isEmpty()) {
+                $newArrivalProducts = Product::with($relations)->where('status', 1)->latest('id')->take(3)->get();
+            }
+
+            // 4. Map Customer Favorites products (or fallback to offset latest)
+            $customerFavoritesProducts = collect($favIds)->map(fn($id) => $loadedProducts->get($id))->filter()->values();
+            if ($customerFavoritesProducts->isEmpty()) {
+                $customerFavoritesProducts = Product::with($relations)->where('status', 1)->skip(3)->take(3)->get();
+            }
+
+            // 5. Map Living Hero product (or fallback to latest bottom featured)
+            $livingProduct = $livingId ? $loadedProducts->get($livingId) : null;
+            if (!$livingProduct) {
+                $livingProduct = Product::where('status', 1)->with($relations)->latest('id')->first();
+            }
+
+            return [
+                'bestSellingProducts'       => $bestSellingProducts,
+                'newArrivalProducts'        => $newArrivalProducts,
+                'customerFavoritesProducts' => $customerFavoritesProducts,
+                'livingProduct'             => $livingProduct,
+                'bottomFeaturedProduct'     => $livingProduct,
+            ];
+        });
+
+        return \theme_view('home', array_merge([
+            'heroSlides' => $heroSlides,
+        ], $homeProductSections));
     }
 
     public function categories(Request $request)
@@ -66,7 +122,9 @@ class StorefrontController extends Controller
      */
     public function about()
     {
-        $aboutAds = \App\Models\Slider::getByPlacement('about_us');
+        $aboutAds = Cache::remember('storefront_about_ads_v1', 3600, function () {
+            return \App\Models\Slider::getByPlacement('about_us');
+        });
 
         return \theme_view('about', compact('aboutAds'));
     }

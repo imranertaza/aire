@@ -14,9 +14,7 @@
 
     $seoKeywords = $productDesc?->meta_keyword ?? '';
 
-    $rawImg = !empty($product->main_image) ? $product->main_image : (!empty($product->image) ? $product->image : '');
-    $productImg = !empty($rawImg) ? getImagePath($rawImg) : theme_asset('img/logo.png');
-    $productImgUrl = str_starts_with($productImg, 'http') ? $productImg : url($productImg);
+    $productImgUrl = getImageUrl($product->main_image ?: ($product->image ?: null));
 
     $canonicalUrl = route('products.detail', $product->slug ?? $product->id);
     $brandName = $product->brand?->name ?? 'AIRE';

@@ -187,9 +187,6 @@ class CheckoutController extends Controller
                 ]);
 
                 Auth::guard('customer')->login($customer);
-                session()->put('customer_id', $customer->id);
-                session()->put('customer_name', $customer->firstname . ' ' . $customer->lastname);
-                session()->put('customer_email', $customer->email);
             }
         }
 

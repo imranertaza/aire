@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use App\Models\Menu;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (str_starts_with((string) config('app.url'), 'https://') || request()->isSecure() || request()->header('x-forwarded-proto') === 'https') {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         $settings = Setting::allCached();
         View::share('settings', $settings);
 
@@ -59,6 +65,65 @@ class AppServiceProvider extends ServiceProvider
         if (is_dir($themeViewPath)) {
             View::addLocation($themeViewPath);
         }
+
+        // View Composers for Header & Footer Layouts (Automated Cached Injection)
+        View::composer([
+            'themes.*.layouts.header',
+            'themes.default.layouts.header',
+            'layouts.header',
+        ], function ($view) {
+            $mainHeaderMenu = Cache::remember('layout_main_header_menu_v1', 86400, function () {
+                return Menu::where(function ($q) {
+                    $q->where('position', 'header')->orWhere('position', 'Header')->orWhere('name', 'Main Header');
+                })->where('enabled', 1)->with([
+                    'menus' => function ($q) {
+                        $q->where('enabled', 1)->orderBy('order', 'asc');
+                    },
+                ])->first();
+            });
+
+            $view->with('mainHeaderMenu', $mainHeaderMenu);
+        });
+
+        View::composer([
+            'themes.*.layouts.footer',
+            'themes.default.layouts.footer',
+            'layouts.footer',
+        ], function ($view) {
+            $footerMenus = Cache::remember('layout_footer_menus_v1', 86400, function () {
+                return Menu::where(function ($q) {
+                    $q->where('position', 'footer')->orWhere('position', 'Footer');
+                })
+                    ->where('enabled', 1)
+                    ->with([
+                        'menus' => function ($q) {
+                            $q->where('enabled', 1)->orderBy('order', 'asc');
+                        },
+                    ])
+                    ->get();
+            });
+
+            $legalMenu = Cache::remember('layout_footer_legal_menu_v1', 86400, function () {
+                return Menu::where(function ($q) {
+                    $q->where('position', 'footer_bottom')
+                        ->orWhere('position', 'Footer Bottom')
+                        ->orWhere('name', 'Footer Legal')
+                        ->orWhere('name', 'Legal');
+                })
+                    ->where('enabled', 1)
+                    ->with([
+                        'menus' => function ($q) {
+                            $q->where('enabled', 1)->orderBy('order', 'asc');
+                        },
+                    ])
+                    ->first();
+            });
+
+            $view->with([
+                'footerMenus' => $footerMenus,
+                'legalMenu'   => $legalMenu,
+            ]);
+        });
 
         // Auto-copy assets for default theme if public/themes/default/assets doesn't exist
         $publicAssetsPath = public_path("themes/{$activeTheme}/assets");

@@ -3,31 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\CustomerLedger;
+use App\Models\CustomerPointHistory;
+use App\Models\FundRequest;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CustomerDashboardController extends Controller
 {
     /**
      * Display customer dashboard.
+     * Eager-loads orderStatus to prevent N+1 queries and limits to 5 recent orders.
      */
     public function dashboard()
     {
         $customer = Auth::guard('customer')->user();
-        $orders = \App\Models\Order::where('customer_id', $customer->id)->latest()->get();
+        $orders = Order::with('orderStatus')
+            ->where('customer_id', $customer->id)
+            ->latest('id')
+            ->limit(5)
+            ->get();
 
         return \theme_view('customer.dashboard', compact('customer', 'orders'));
     }
 
     /**
      * Display paginated orders list for the logged-in customer.
+     * Eager-loads orderStatus to prevent N+1 queries on status_name.
      */
     public function customerOrders()
     {
         $customerId = Auth::guard('customer')->id();
-        $orders = \App\Models\Order::where('customer_id', $customerId)
-            ->latest()
+        $orders = Order::with('orderStatus')
+            ->where('customer_id', $customerId)
+            ->latest('id')
             ->paginate(10);
 
         return \theme_view('customer.orders', compact('orders'));
@@ -35,17 +50,17 @@ class CustomerDashboardController extends Controller
 
     /**
      * Display order details page.
+     * Eager-loads orderStatus, products, and selected options.
      */
     public function customerOrderDetail(int $id)
     {
         $customerId = Auth::guard('customer')->id();
-        $order = \App\Models\Order::where('id', $id)
+        $order = Order::with(['orderStatus', 'items.product', 'items.options'])
+            ->where('id', $id)
             ->where('customer_id', $customerId)
             ->firstOrFail();
 
-        $orderItems = \App\Models\OrderItem::with(['product', 'options'])
-            ->where('order_id', $order->id)
-            ->get();
+        $orderItems = $order->items;
 
         return \theme_view('customer.order-details', compact('order', 'orderItems'));
     }
@@ -56,14 +71,12 @@ class CustomerDashboardController extends Controller
     public function orderInvoice(int $id)
     {
         $customerId = Auth::guard('customer')->id();
-        $order = \App\Models\Order::with('orderStatus')
+        $order = Order::with(['orderStatus', 'items.product.images', 'items.options'])
             ->where('id', $id)
             ->where('customer_id', $customerId)
             ->firstOrFail();
 
-        $orderItems = \App\Models\OrderItem::with(['product.images', 'options'])
-            ->where('order_id', $order->id)
-            ->get();
+        $orderItems = $order->items;
 
         return \theme_view('customer.invoice', compact('order', 'orderItems'));
     }
@@ -79,23 +92,25 @@ class CustomerDashboardController extends Controller
 
     /**
      * Handle profile update (personal info + optional password change).
+     * Automatically cleans up old profile picture from disk to prevent storage bloat.
      */
     public function updateProfile(Request $request)
     {
         $customer = Auth::guard('customer')->user();
 
         $request->validate([
-            'firstname'   => 'required|string|max:64',
-            'lastname'    => 'required|string|max:64',
-            'email'       => 'required|email|max:96|unique:customers,email,' . $customer->id,
-            'phone'       => 'nullable|string|max:32',
-            'new_password'  => 'nullable|string|min:6|confirmed',
-            'pic'         => 'nullable|image|max:2048',
+            'firstname'        => 'required|string|max:64',
+            'lastname'         => 'required|string|max:64',
+            'email'            => 'required|email|max:96|unique:customers,email,' . $customer->id,
+            'phone'            => 'nullable|string|max:32',
+            'current_password' => 'required_with:new_password',
+            'new_password'     => 'nullable|string|min:6|confirmed',
+            'pic'              => 'nullable|image|max:2048',
         ]);
 
-        $customer->firstname = $request->firstname;
-        $customer->lastname  = $request->lastname;
-        $customer->email     = $request->email;
+        $customer->firstname = trim($request->firstname);
+        $customer->lastname  = trim($request->lastname);
+        $customer->email     = Str::lower(trim($request->email));
         $customer->phone     = $request->phone;
 
         // Change password if provided
@@ -106,39 +121,38 @@ class CustomerDashboardController extends Controller
             $customer->password = Hash::make($request->new_password);
         }
 
-        // Upload profile picture
+        // Upload profile picture and clean up previous image
         if ($request->hasFile('pic')) {
-            $path = $request->file('pic')->store('customers/pics', 'public');
-            $customer->pic = $path;
-            session()->put('customer_pic', $path);
+            if ($customer->pic && Storage::disk('public')->exists($customer->pic)) {
+                Storage::disk('public')->delete($customer->pic);
+            }
+            $customer->pic = $request->file('pic')->store('customers/pics', 'public');
         }
 
         $customer->save();
-
-        // Refresh session data for compatibility
-        session()->put('customer_name', $customer->firstname . ' ' . $customer->lastname);
-        session()->put('customer_email', $customer->email);
 
         return back()->with('success', 'Profile updated successfully!');
     }
 
     /**
      * Display customer wallet page.
+     * Filters payment methods to only show active ones.
      */
     public function customerWallet()
     {
         $customer = Auth::guard('customer')->user();
-        $fundRequests = \App\Models\FundRequest::with('paymentMethod')
+        $fundRequests = FundRequest::with('paymentMethod')
             ->where('customer_id', $customer->id)
             ->latest('id')
-            ->get();
-        $paymentMethods = \App\Models\PaymentMethod::all();
+            ->paginate(15);
+        $paymentMethods = PaymentMethod::active()->get();
 
         return \theme_view('customer.wallet', compact('customer', 'fundRequests', 'paymentMethods'));
     }
 
     /**
      * Handle adding funds (wallet deposit request).
+     * Validates that payment_method_id actually exists in payment_methods table.
      */
     public function customerAddFund(Request $request)
     {
@@ -146,11 +160,11 @@ class CustomerDashboardController extends Controller
 
         $request->validate([
             'amount'            => 'required|numeric|min:1',
-            'payment_method_id' => 'required',
+            'payment_method_id' => 'required|exists:payment_methods,id',
             'notes'             => 'nullable|string|max:255',
         ]);
 
-        \App\Models\FundRequest::create([
+        FundRequest::create([
             'customer_id'       => $customerId,
             'amount'            => $request->amount,
             'payment_method_id' => $request->payment_method_id,
@@ -167,7 +181,7 @@ class CustomerDashboardController extends Controller
     public function customerLedger()
     {
         $customer = Auth::guard('customer')->user();
-        $ledgers = \App\Models\CustomerLedger::where('customer_id', $customer->id)
+        $ledgers = CustomerLedger::where('customer_id', $customer->id)
             ->latest('id')
             ->paginate(15);
 
@@ -180,10 +194,44 @@ class CustomerDashboardController extends Controller
     public function customerPoints()
     {
         $customer = Auth::guard('customer')->user();
-        $points = \App\Models\CustomerPointHistory::where('customer_id', $customer->id)
+        $points = CustomerPointHistory::where('customer_id', $customer->id)
             ->latest('id')
             ->paginate(15);
 
         return \theme_view('customer.points', compact('customer', 'points'));
+    }
+
+    /**
+     * Toggle product in/out of customer's persistent wishlist.
+     */
+    public function toggleWishlist(Request $request)
+    {
+        $productId = (int) $request->product_id;
+        if (!$productId) {
+            return response()->json(['success' => false, 'message' => 'Invalid product.'], 400);
+        }
+
+        $customer = Auth::guard('customer')->user();
+        $list = json_decode($customer->wishlist ?? '[]', true) ?: [];
+
+        if (in_array($productId, $list)) {
+            $list = array_values(array_diff($list, [$productId]));
+            $added = false;
+            $msg = 'Removed from wishlist.';
+        } else {
+            $list[] = $productId;
+            $added = true;
+            $msg = 'Added to wishlist!';
+        }
+
+        $customer->wishlist = json_encode($list);
+        $customer->save();
+
+        return response()->json([
+            'success'        => true,
+            'added'          => $added,
+            'message'        => $msg,
+            'wishlist_count' => count($list),
+        ]);
     }
 }

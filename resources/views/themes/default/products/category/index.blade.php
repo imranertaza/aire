@@ -63,15 +63,7 @@
                     @foreach ($displayCategories as $cat)
                         <a href="#cat-{{ $cat->id }}" class="menu-item {{ $loop->first ? 'active' : '' }}">
                             <div class="icon-box">
-                                @if (strpos($cat->icon_class, '<svg') !== false)
-                                    {!! $cat->icon_class !!}
-                                @elseif($cat->icon_class)
-                                    <i class="{{ $cat->icon_class }}"></i>
-                                @elseif($cat->icon)
-                                    {!! $cat->icon->code !!}
-                                @else
-                                    <i class="bi bi-box"></i>
-                                @endif
+                                <x-category-icon :category="$cat" />
                             </div>
                             <div class="text-box">
                                 <h2 class="mb-0">{{ $cat->category_name }}</h2>
@@ -131,15 +123,7 @@
                         @foreach ($displayCategories as $cat)
                             <a href="#cat-{{ $cat->id }}" class="mobile-cat-pill {{ $loop->first ? 'active' : '' }}">
                                 <span class="mobile-cat-pill__icon">
-                                    @if (strpos($cat->icon_class, '<svg') !== false)
-                                        {!! $cat->icon_class !!}
-                                    @elseif($cat->icon_class)
-                                        <i class="{{ $cat->icon_class }}"></i>
-                                    @elseif($cat->icon)
-                                        {!! $cat->icon->code !!}
-                                    @else
-                                        <i class="bi bi-box"></i>
-                                    @endif
+                                    <x-category-icon :category="$cat" />
                                 </span>
                                 <span>{{ $cat->category_name }}</span>
                             </a>
@@ -197,15 +181,7 @@
                                         <div class="card-gradient-overlay"></div>
                                         <div class="card-content">
                                             <div class="card-icon-wrapper">
-                                                @if (strpos($sub->icon_class, '<svg') !== false)
-                                                    {!! $sub->icon_class !!}
-                                                @elseif($sub->icon_class)
-                                                    <i class="{{ $sub->icon_class }}"></i>
-                                                @elseif($sub->icon)
-                                                    {!! $sub->icon->code !!}
-                                                @else
-                                                    <i class="bi bi-box"></i>
-                                                @endif
+                                                <x-category-icon :category="$sub" />
                                             </div>
                                             <h3 class="card-title fs-20">{{ $sub->category_name }}</h3>
                                             <span class="badge-custom">{{ strtoupper($cat->category_name) }}</span>

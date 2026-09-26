@@ -1,15 +1,21 @@
-<form action="{{ route('products.filter') }}" method="GET" id="desktopFilterForm">
+@php
+    $formId = $formId ?? 'desktopFilterForm';
+    $showHeader = $showHeader ?? true;
+@endphp
+<form action="{{ route('products.filter') }}" method="GET" id="{{ $formId }}">
     @if (request('search'))
         <input type="hidden" name="search" value="{{ request('search') }}">
     @endif
-    <div class="filter-sidebar__header">
-        <h2 class="filter-sidebar__title">FILTERS</h2>
-        <a href="{{ route('products.filter') }}"
-            class="filter-sidebar__reset-btn text-decoration-none">RESET ALL</a>
-    </div>
+    @if ($showHeader)
+        <div class="filter-sidebar__header">
+            <h2 class="filter-sidebar__title">FILTERS</h2>
+            <a href="{{ route('products.filter') }}"
+                class="filter-sidebar__reset-btn text-decoration-none">RESET ALL</a>
+        </div>
+    @endif
 
-    <a href="{{ route('products.filter') }}" class="filter-sidebar__subtitle filter-sidebar__subtitle--link">All
-        Products</a>
+    <a href="{{ route('products.filter') }}"
+        class="filter-sidebar__subtitle filter-sidebar__subtitle--link {{ !$showHeader ? 'mb-3 d-inline-block' : '' }}">All Products</a>
 
     @php
         $filterIndex = 1;

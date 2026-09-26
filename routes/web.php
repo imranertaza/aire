@@ -28,17 +28,34 @@ Route::get('/clear', function () {
         }
     }
 
+    // Rebuild theme CSS bundle from source files
+    $cssBundleBytes = 0;
+    if (function_exists('rebuild_theme_css_bundle')) {
+        $cssBundleBytes = rebuild_theme_css_bundle();
+    }
+
     return response()->json([
         'status'  => true,
-        'message' => 'Application cache cleared, storage linked, and ' . $deletedImages . ' cached image(s) purged successfully!',
+        'message' => 'Application cache cleared, storage linked, theme CSS bundled, and ' . $deletedImages . ' cached image(s) purged successfully!',
         'cleared' => [
-            'config_cache'      => true,
-            'route_cache'       => true,
-            'view_cache'        => true,
-            'application_cache' => true,
-            'storage_symlink'   => true,
-            'image_cache_files' => $deletedImages,
+            'config_cache'       => true,
+            'route_cache'        => true,
+            'view_cache'         => true,
+            'application_cache'  => true,
+            'storage_symlink'    => true,
+            'image_cache_files'  => $deletedImages,
+            'theme_css_bundle_kb' => round($cssBundleBytes / 1024, 2),
         ],
+    ]);
+});
+
+// Rebuild Theme CSS Bundle On-Demand
+Route::get('/build-css', function () {
+    $cssBundleBytes = function_exists('rebuild_theme_css_bundle') ? rebuild_theme_css_bundle() : 0;
+    return response()->json([
+        'status'  => true,
+        'message' => 'Theme CSS bundle compiled and minified successfully! Total size: ' . round($cssBundleBytes / 1024, 2) . ' KB',
+        'bundle_size_kb' => round($cssBundleBytes / 1024, 2),
     ]);
 });
 
@@ -196,7 +213,6 @@ Route::middleware('customer.auth')->group(function () {
 Route::controller(FrontendController::class)->group(function () {
     Route::get('match-fixtures', 'matchFixtures')->name('match-fixtures');
     Route::get('notice-board', 'noticeBoard')->name('notice-board');
-    // Route::get('tournament-result', 'tournamentResult')->name('tournament-result');
     Route::get('/photo-gallery', 'gallery')->name('gallery');
     Route::get('gallery-details/{id}', 'galleryDetails')->name('gallery-details');
     Route::get('news-and-updates', 'newsAndUpdates')->name('news-and-updates');

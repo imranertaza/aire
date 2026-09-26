@@ -116,6 +116,34 @@ class ProductCategory extends Model
     }
 
     /**
+     * Render category icon HTML (SVG, font-icon class, custom icon relation, or fallback).
+     */
+    public function renderIcon(string $fallback = 'bi bi-box'): string
+    {
+        if (!empty($this->icon_class) && str_contains($this->icon_class, '<svg')) {
+            return $this->icon_class;
+        }
+
+        if (!empty($this->icon_class)) {
+            return '<i class="' . e($this->icon_class) . '"></i>';
+        }
+
+        if (!empty($this->icon?->code)) {
+            return $this->icon->code;
+        }
+
+        return '<i class="' . e($fallback) . '"></i>';
+    }
+
+    /**
+     * Accessor for rendered icon HTML ($category->rendered_icon)
+     */
+    public function getRenderedIconAttribute(): string
+    {
+        return $this->renderIcon();
+    }
+
+    /**
      * Category Featured Products Pivot Entries
      */
     public function categoryFeaturedProducts(): HasMany

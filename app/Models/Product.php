@@ -4,9 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
+    public const HOME_SECTIONS_CACHE_KEY = 'storefront_home_product_sections_v2';
+
     protected $guarded = ['id'];
 
     protected $casts = [
@@ -25,7 +29,7 @@ class Product extends Model
     {
         static::saving(function ($product) {
             if (empty($product->slug) && !empty($product->name)) {
-                $baseSlug = \Illuminate\Support\Str::slug($product->name);
+                $baseSlug = Str::slug($product->name);
                 $slug = $baseSlug;
                 $count = 1;
                 while (static::where('slug', $slug)->where('id', '!=', $product->id ?? 0)->exists()) {
@@ -37,32 +41,45 @@ class Product extends Model
         });
 
         static::saved(function ($product) {
-            \Illuminate\Support\Facades\Cache::forget("product_detail_{$product->slug}");
-            \Illuminate\Support\Facades\Cache::forget("product_detail_{$product->id}");
-            \Illuminate\Support\Facades\Cache::forget("product_landing_{$product->slug}");
-            \Illuminate\Support\Facades\Cache::forget("product_landing_{$product->id}");
-            \Illuminate\Support\Facades\Cache::forget("product_related_{$product->id}");
-            \Illuminate\Support\Facades\Cache::forget('home_best_selling_products');
-            \Illuminate\Support\Facades\Cache::forget('home_new_arrival_products');
-            \Illuminate\Support\Facades\Cache::forget('home_customer_fav_products');
-            \Illuminate\Support\Facades\Cache::forget('home_top_featured_product');
-            \Illuminate\Support\Facades\Cache::forget('home_bottom_featured_product');
-            \Illuminate\Support\Facades\Cache::forget('home_living_hero_product');
+            static::clearProductCache($product);
         });
 
         static::deleted(function ($product) {
-            \Illuminate\Support\Facades\Cache::forget("product_detail_{$product->slug}");
-            \Illuminate\Support\Facades\Cache::forget("product_detail_{$product->id}");
-            \Illuminate\Support\Facades\Cache::forget("product_landing_{$product->slug}");
-            \Illuminate\Support\Facades\Cache::forget("product_landing_{$product->id}");
-            \Illuminate\Support\Facades\Cache::forget("product_related_{$product->id}");
-            \Illuminate\Support\Facades\Cache::forget('home_best_selling_products');
-            \Illuminate\Support\Facades\Cache::forget('home_new_arrival_products');
-            \Illuminate\Support\Facades\Cache::forget('home_customer_fav_products');
-            \Illuminate\Support\Facades\Cache::forget('home_top_featured_product');
-            \Illuminate\Support\Facades\Cache::forget('home_bottom_featured_product');
-            \Illuminate\Support\Facades\Cache::forget('home_living_hero_product');
+            static::clearProductCache($product);
         });
+    }
+
+    /**
+     * Invalidate all storefront, catalog, and product caches.
+     */
+    public static function clearProductCache(?Product $product = null): void
+    {
+        // 1. Homepage consolidated & fallback sections
+        Cache::forget(self::HOME_SECTIONS_CACHE_KEY);
+        Cache::forget('site_default_featured_products');
+        Cache::forget('total_active_products_count');
+        Cache::forget('filter_steps_data_v9');
+
+        // Legacy individual section keys for backward compatibility
+        Cache::forget('home_best_selling_products');
+        Cache::forget('home_new_arrival_products');
+        Cache::forget('home_customer_fav_products');
+        Cache::forget('home_top_featured_product');
+        Cache::forget('home_bottom_featured_product');
+        Cache::forget('home_living_hero_product');
+
+        // 2. Specific product item caches
+        if ($product) {
+            if (!empty($product->slug)) {
+                Cache::forget("product_detail_{$product->slug}");
+                Cache::forget("product_landing_{$product->slug}");
+            }
+            if (!empty($product->id)) {
+                Cache::forget("product_detail_{$product->id}");
+                Cache::forget("product_landing_{$product->id}");
+                Cache::forget("product_related_{$product->id}");
+            }
+        }
     }
 
     public function getRouteKeyName()
@@ -221,11 +238,10 @@ class Product extends Model
             : '<span class="badge bg-danger">Inactive</span>';
     }
 
-    public function getMainImageUrlAttribute()
+    public function getMainImageUrlAttribute(): string
     {
-        return $this->main_image
-            ? asset('storage/' . $this->main_image)
-            : asset('images/no-image.jpg');
+        $raw = !empty($this->main_image) ? $this->main_image : (!empty($this->image) ? $this->image : null);
+        return getImageUrl($raw);
     }
 
     public function getSpecialPriceAttribute(): ?float

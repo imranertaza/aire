@@ -1,21 +1,37 @@
 // Global Real-Time Header Badges Update Function
 window.updateHeaderBadges = function (type, count) {
     count = parseInt(count) || 0;
-    let $badge;
+    let selector = '';
     if (type === 'cart') {
-        $badge = $('.cart-count-badge');
+        selector = '.cart-count-badge';
     } else if (type === 'favorite' || type === 'favorites' || type === 'wishlist') {
-        $badge = $('.favorite-count-badge');
+        selector = '.favorite-count-badge';
     } else if (type === 'compare') {
-        $badge = $('.compare-count-badge');
+        selector = '.compare-count-badge';
     }
-    if ($badge && $badge.length) {
-        $badge.text(count);
-        if (count > 0) {
-            $badge.removeClass('d-none').css('cssText', 'display: inline-flex !important;');
-        } else {
-            $badge.addClass('d-none').css('cssText', 'display: none !important;');
+    if (!selector) return;
+
+    if (window.jQuery) {
+        const $badge = window.jQuery(selector);
+        if ($badge && $badge.length) {
+            $badge.text(count);
+            if (count > 0) {
+                $badge.removeClass('d-none').css('cssText', 'display: inline-flex !important;');
+            } else {
+                $badge.addClass('d-none').css('cssText', 'display: none !important;');
+            }
         }
+    } else {
+        document.querySelectorAll(selector).forEach(function (badge) {
+            badge.textContent = count;
+            if (count > 0) {
+                badge.classList.remove('d-none');
+                badge.style.setProperty('display', 'inline-flex', 'important');
+            } else {
+                badge.classList.add('d-none');
+                badge.style.setProperty('display', 'none', 'important');
+            }
+        });
     }
 };
 

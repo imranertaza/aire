@@ -78,19 +78,6 @@
 <div class="row row-cols-1 row-cols-sm-2 {{ $gridColsClass }} g-2 g-sm-3 product-grid">
     @forelse($products as $product)
         @php
-            $cadr = '320 m³/h';
-            $filterGrade = 'HEPA H13';
-            if ($product->productAttributes) {
-                $cadrAttr = $product->productAttributes->firstWhere('name', 'CADR Rating');
-                if ($cadrAttr) {
-                    $cadr = $cadrAttr->details;
-                }
-
-                $filterAttr = $product->productAttributes->firstWhere('name', 'Filter Grade');
-                if ($filterAttr) {
-                    $filterGrade = $filterAttr->details;
-                }
-            }
             $firstCategory = $product->categories->first();
             $categoryName = $firstCategory?->category_name ?? 'Air Care';
             $categoryBgColor = $firstCategory?->bg_color ?: '#0066cc';
