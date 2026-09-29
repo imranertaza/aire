@@ -117,9 +117,10 @@ import DashboardHeader from '@/components/DashboardHeader.vue';
 import Pagination from '@/components/Paginations/Pagination.vue';
 import SearchBox from '@/components/SearchBox.vue';
 import { useToast } from '@/composables/useToast';
+import { useConfirmDelete } from '@/composables/useConfirmDelete';
 
 const toast = useToast();
-const $swal = inject('$swal');
+const { confirmDelete } = useConfirmDelete();
 const modalToggleBtn = ref(null);
 
 const colorFamilies = ref([]);
@@ -195,28 +196,15 @@ const saveColor = async () => {
     }
 };
 
-const deleteColor = async (color) => {
-    const result = await $swal({
-        title: `Delete "${color.color_name}"?`,
-        text: 'This action cannot be undone.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes, delete',
-        cancelButtonText: 'Cancel',
-        reverseButtons: true
-    });
-
-    if (result.isConfirmed) {
-        try {
-            await axios.delete(`/api/color-families/${color.id}`);
-            toast.success('Color deleted successfully!');
+const deleteColor = (color) => {
+    confirmDelete({
+        url: `/api/color-families/${color.id}`,
+        title: color.color_name,
+        successMessage: 'Color deleted successfully!',
+        onSuccess: () => {
             colorFamilies.value.data = colorFamilies.value.data.filter(c => c.id !== color.id);
-        } catch (error) {
-            toast.validationError(error);
         }
-    } else {
-        toast.info('Deletion cancelled.');
-    }
+    });
 };
 
 onMounted(() => {

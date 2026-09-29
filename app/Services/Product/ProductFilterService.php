@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Services\Product;
 
 use App\Models\FilterOption;
 use App\Models\FilterOptionValue;

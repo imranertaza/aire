@@ -1,6 +1,6 @@
 @php
     $cartCount = (int) collect(session()->get('cart', []))->sum('quantity');
-    $favCount = (int) count(session()->get('favorites', []));
+    $favCount = (int) count(app(\App\Services\Product\WishlistService::class)->getWishlistIds());
     $compareCount = (int) count(session()->get('compare', []));
 @endphp
 <!-- Header -->

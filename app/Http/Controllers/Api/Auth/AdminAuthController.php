@@ -4,13 +4,10 @@ namespace App\Http\Controllers\Api\Auth;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\Auth\AdminLoginRequest;
+use App\Services\Auth\AdminAuthService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 /**
  * API Controller for admin authentication.
@@ -21,91 +18,72 @@ use Illuminate\Validation\ValidationException;
 class AdminAuthController extends Controller
 {
     /**
-     * Authenticate an admin user and issue a Sanctum token.
+     * AdminAuthController constructor.
      *
-     * Revokes all existing tokens before issuing a new one.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     * @throws ValidationException
+     * @param AdminAuthService $authService
      */
-    public function login(Request $request)
+    public function __construct(
+        protected AdminAuthService $authService
+    ) {}
+
+    /**
+     * Authenticate an admin user and issue a token or session.
+     *
+     * @param AdminLoginRequest $request
+     * @return JsonResponse
+     */
+    public function login(AdminLoginRequest $request): JsonResponse
     {
-        $request->validate(['email' => 'required|email', 'password' => 'required']);
+        $request->ensureIsNotRateLimited();
 
-        $isHttpOnly = filter_var(env('IS_HTTPONLY', false), FILTER_VALIDATE_BOOLEAN);
+        $result = $this->authService->attemptLogin(
+            $request->only('email', 'password'),
+            $request
+        );
 
-        if ($isHttpOnly) {
-            if (Auth::guard('web')->attempt($request->only('email', 'password'))) {
-                $admin = Auth::guard('web')->user();
-                $request->session()->regenerate();
-                return ApiResponse::success(['admin' => $admin], 'Login successful');
-            }
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        } else {
-            $admin = User::where('email', $request->email)->first();
-            if (!$admin || !Hash::check($request->password, $admin->password)) {
-                return response()->json(['message' => 'Invalid credentials'], 401);
-            }
-
-            // $admin->tokens()->delete(); --- IGNORE ---
-            $token = $admin->createToken('admin-token', ['*'])->plainTextToken;
-            return ApiResponse::success(['admin' => $admin, 'token' => $token], 'Login successful');
+        if (!$result['success']) {
+            $request->hitRateLimiter();
+            return response()->json(['message' => $result['message']], 401);
         }
+
+        $request->clearRateLimiter();
+
+        return ApiResponse::success($result['data'], $result['message']);
     }
 
     /**
      * Get the authenticated admin user's full profile.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function profile(Request $request)
+    public function profile(Request $request): JsonResponse
     {
         return response()->json($request->user());
     }
 
     /**
-     * Get the current authenticated admin's role and permissions.
+     * Get the current authenticated admin's role, permissions, and active modules.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function me(Request $request)
+    public function me(Request $request): JsonResponse
     {
-        $admin = $request->user();
-        $data = Cache::remember("admin_me_{$admin->id}", 3600, function () use ($admin) {
-            $modules = DB::table('modules')
-                ->where('status', 1)
-                ->pluck('module_key');
-
-            return [
-                'role' => $admin->roles->pluck('name')->first(),
-                'permissions' => $admin->getAllPermissions()->pluck('name'),
-                'modules' => $modules,
-            ];
-        });
+        $data = $this->authService->getAdminPermissionsAndModules($request->user());
 
         return response()->json($data);
     }
 
     /**
-     * Logout the authenticated admin by revoking all tokens.
+     * Logout the authenticated admin.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
-        $isHttpOnly = filter_var(env('IS_HTTPONLY', false), FILTER_VALIDATE_BOOLEAN);
-
-        if ($isHttpOnly) {
-            Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
-        } else {
-            $request->user()->tokens()->delete();
-        }
+        $this->authService->logout($request);
 
         return response()->json(['message' => 'Logged out']);
     }

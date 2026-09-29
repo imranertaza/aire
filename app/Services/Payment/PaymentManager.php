@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderCardDetail;
 use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
 
 class PaymentManager
 {
@@ -50,7 +51,7 @@ class PaymentManager
         if (str_contains($code, 'paypal')) {
             $res = $this->paypalService->processPayment($order, $amount);
             if ($res['success'] && !empty($res['redirect_url'])) {
-                return redirect()->away($res['redirect_url']);
+                return Redirect::away($res['redirect_url']);
             }
 
             // Fallback for Sandbox demo credentials
@@ -72,31 +73,41 @@ class PaymentManager
             return redirect()->route('order.confirm')->with('success', 'Stripe payment processed successfully!');
         }
 
-        // 4. eWallet Payment matching cCart reference (Debits balance & writes Ledger entry)
+        // 4. eWallet Payment matching cCart reference (Debits balance & writes Ledger entry with pessimistic locking)
         if (str_contains($code, 'wallet')) {
-            $customer = \App\Models\Customer::find($order->customer_id);
-            if ($customer && $customer->balance >= $amount) {
-                $newBalance = $customer->balance - $amount;
-                $customer->balance = $newBalance;
-                $customer->save();
+            $isPaid = \Illuminate\Support\Facades\DB::transaction(function () use ($order, $amount, $paymentMethod) {
+                $customer = \App\Models\Customer::where('id', $order->customer_id)->lockForUpdate()->first();
+                if ($customer && $customer->balance >= $amount) {
+                    $newBalance = $customer->balance - $amount;
+                    $customer->balance = $newBalance;
+                    $customer->save();
 
-                // Insert ledger record
-                \App\Models\CustomerLedger::create([
-                    'customer_id'       => $customer->id,
-                    'order_id'          => $order->id,
-                    'payment_method_id' => $paymentMethod ? $paymentMethod->id : 8,
-                    'particulars'       => 'Product purchase',
-                    'trangaction_type'  => 'Dr.',
-                    'amount'            => $amount,
-                    'rest_balance'      => $newBalance,
-                ]);
+                    // Insert ledger record
+                    \App\Models\CustomerLedger::create([
+                        'customer_id'       => $customer->id,
+                        'order_id'          => $order->id,
+                        'payment_method_id' => $paymentMethod ? $paymentMethod->id : 8,
+                        'particulars'       => 'Product purchase',
+                        'transaction_type'  => 'Dr.',
+                        'amount'            => $amount,
+                        'rest_balance'      => $newBalance,
+                    ]);
 
-                $order->payment_status = 'Paid';
-                $order->status = 2; // Complete
-                $order->save();
+                    $order->payment_status = 'Paid';
+                    $order->status = 2; // Complete
+                    $order->save();
 
+                    return true;
+                }
+
+                return false;
+            });
+
+            if ($isPaid) {
                 return redirect()->route('order.confirm')->with('success', 'Order placed successfully using eWallet!');
             }
+
+            return Redirect::route('cart')->withErrors(['cart' => 'Insufficient wallet balance to complete this order.']);
         }
 
         // 4. Default / Bank Transfer / Cash On Delivery / Western Union / MoneyGram

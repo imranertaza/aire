@@ -12,7 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE category_featured_products MODIFY COLUMN position VARCHAR(20) NOT NULL DEFAULT 'top'");
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('category_featured_products', function (Blueprint $table) {
+                $table->string('position', 20)->default('top')->change();
+            });
+        } else {
+            DB::statement("ALTER TABLE category_featured_products MODIFY COLUMN position VARCHAR(20) NOT NULL DEFAULT 'top'");
+        }
     }
 
     /**
@@ -20,6 +26,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE category_featured_products MODIFY COLUMN position ENUM('top', 'bottom') NOT NULL DEFAULT 'top'");
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('category_featured_products', function (Blueprint $table) {
+                $table->string('position', 20)->default('top')->change();
+            });
+        } else {
+            DB::statement("ALTER TABLE category_featured_products MODIFY COLUMN position ENUM('top', 'bottom') NOT NULL DEFAULT 'top'");
+        }
     }
 };

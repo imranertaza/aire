@@ -3,10 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 
+/**
+ * @mixin \Illuminate\Database\Eloquent\Model
+ *
+ * @method static void saved(\Closure|string|array $callback)
+ * @method static void deleted(\Closure|string|array $callback)
+ */
 class Post extends Model
 {
-    protected $guarded=['id'];
+    protected $guarded = ['id'];
 
     /**
      * Relationship: A news item can belong to many categories.
@@ -46,7 +53,7 @@ class Post extends Model
         return $query->where('status', '1');
     }
 
-    
+
 
     /**
      * Helper: Sync categories.
@@ -55,5 +62,4 @@ class Post extends Model
     {
         $this->categories()->sync($categoryIds);
     }
-    
 }

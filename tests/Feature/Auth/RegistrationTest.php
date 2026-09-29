@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Customer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -9,16 +10,31 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_new_users_can_register(): void
+    protected function setUp(): void
     {
-        $response = $this->post('/register', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+        parent::setUp();
+
+        \App\Models\Store::create([
+            'id'         => 1,
+            'name'       => 'Default Store',
+            'is_default' => 1,
+        ]);
+    }
+
+    public function test_new_customers_can_register(): void
+    {
+        $response = $this->post(route('signup.post'), [
+            'name'                  => 'Test Customer',
+            'email'                 => 'customer@example.com',
+            'phone'                 => '01700000000',
+            'password'              => 'password123',
+            'password_confirmation' => 'password123',
         ]);
 
-        $this->assertAuthenticated();
-        $response->assertNoContent();
+        $response->assertSessionHasNoErrors();
+        $this->assertAuthenticated('customer');
+        $this->assertDatabaseHas('customers', [
+            'email' => 'customer@example.com',
+        ]);
     }
 }

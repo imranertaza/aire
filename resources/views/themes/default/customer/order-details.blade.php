@@ -1,6 +1,6 @@
 @extends('themes.default.layouts.master')
 
-@section('title', 'Order #' . $order->id . ' Details | Aire')
+@section('title', 'Order ' . $order->order_number . ' Details | Aire')
 
 @section('content')
 <main class="py-5 bg-light-subtle min-vh-100">
@@ -18,7 +18,7 @@
                         <a href="{{ route('customer.orders') }}" class="text-decoration-none text-secondary fs-13 fw-semibold mb-1 d-inline-block">
                             <i class="bi bi-arrow-left me-1"></i> Back to Orders
                         </a>
-                        <h3 class="fw-bold text-dark mb-0 fs-22">Order #{{ $order->id }}</h3>
+                        <h3 class="fw-bold text-dark mb-0 fs-22">Order <span class="text-primary font-monospace">{{ $order->order_number }}</span></h3>
                     </div>
                     <div class="d-flex gap-2">
                         <a href="{{ route('customer.invoice', $order->id) }}" target="_blank" class="btn btn-outline-primary rounded-2 px-3 py-2 fs-13 fw-semibold">

@@ -321,25 +321,52 @@
                     <!-- SEO Tab -->
                     <div class="tab-pane fade" id="seo" role="tabpanel">
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <label class="form-label">Meta Title</label>
-                                <input v-model="form.meta_title" type="text" class="form-control" />
+                            <div class="col-md-6">
+                                <label class="form-label d-flex justify-content-between align-items-center">
+                                    <span>Meta Title</span>
+                                    <span class="badge badge-light text-muted">{{ form.meta_title ? form.meta_title.length : 0 }}/60 chars</span>
+                                </label>
+                                <input v-model="form.meta_title" type="text" class="form-control" placeholder="Store or site title" />
+                                <small class="text-muted">Recommended: 50–60 characters for optimal search snippet display.</small>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label class="form-label">Meta Keyword</label>
-                                <input v-model="form.meta_keyword" type="text" class="form-control" />
+                                <input v-model="form.meta_keyword" type="text" class="form-control" placeholder="comma-separated keywords" />
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Meta Description</label>
-                                <input v-model="form.meta_description" type="text" class="form-control" />
+                            <div class="col-md-12">
+                                <label class="form-label d-flex justify-content-between align-items-center">
+                                    <span>Meta Description</span>
+                                    <span class="badge badge-light text-muted">{{ form.meta_description ? form.meta_description.length : 0 }}/160 chars</span>
+                                </label>
+                                <textarea v-model="form.meta_description" class="form-control" rows="2" placeholder="Brief summary of your site"></textarea>
+                                <small class="text-muted">Recommended: 150–160 characters for high search result click-through rates.</small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Meta Author</label>
-                                <input v-model="form.meta_author" type="text" class="form-control" />
+                                <input v-model="form.meta_author" type="text" class="form-control" placeholder="e.g. Aire Industries" />
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Meta News Keywords</label>
-                                <input v-model="form.meta_news_keywords" type="text" class="form-control" />
+                                <input v-model="form.meta_news_keywords" type="text" class="form-control" placeholder="news, updates" />
+                            </div>
+
+                            <!-- Search Console & Analytics Integration -->
+                            <div class="col-12 mt-4">
+                                <h6 class="font-weight-bold text-primary border-bottom pb-2">
+                                    <i class="fas fa-chart-line mr-1"></i> Webmaster & Search Analytics
+                                </h6>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Google Site Verification Token</label>
+                                <input v-model="form.google_site_verification" type="text" class="form-control"
+                                    placeholder="e.g. aBcDeFgHiJkLmNoPqRsTuVwXyZ012345" />
+                                <small class="text-muted">Verification code from Google Search Console &lt;meta&gt; tag.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Google Analytics 4 / Measurement ID</label>
+                                <input v-model="form.google_analytics_id" type="text" class="form-control"
+                                    placeholder="e.g. G-XXXXXXXXXX" />
+                                <small class="text-muted">Google Analytics 4 measurement ID for visitor tracking.</small>
                             </div>
                         </div>
                     </div>
@@ -391,8 +418,18 @@
                                     placeholder="e.g. summary_large_image" />
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label">Twitter / X Username / Handle</label>
+                                <input v-model="form.twitter_handle" type="text" class="form-control"
+                                    placeholder="e.g. @AireIAQ" />
+                                <small class="text-muted">Used for twitter:site and twitter:creator attribution tags.</small>
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label">Twitter Title</label>
                                 <input v-model="form.twitter_title" type="text" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Twitter Domain</label>
+                                <input v-model="form.twitter_domain" type="url" class="form-control" placeholder="https://yourdomain.com" />
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">Twitter Description</label>
@@ -407,10 +444,6 @@
                                     <img :src="twitterImagePreview[0]" alt="Twitter Image Preview" class="img-thumbnail"
                                         style="max-width:250px;height:auto;" />
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Twitter Domain</label>
-                                <input v-model="form.twitter_domain" type="url" class="form-control" />
                             </div>
                         </div>
                     </div>
@@ -481,12 +514,16 @@ const form = ref({
     meta_description: '',
     meta_author: '',
     meta_news_keywords: '',
+    // Search Console & Webmaster
+    google_site_verification: '',
+    google_analytics_id: '',
     og_type: '',
     og_title: '',
     og_description: '',
     og_image_width: '',
     og_image_height: '',
     twitter_card: '',
+    twitter_handle: '',
     twitter_title: '',
     twitter_description: '',
     twitter_domain: '',

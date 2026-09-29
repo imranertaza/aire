@@ -230,6 +230,7 @@
 
                     <form action="{{ route('checkout.post') }}" method="POST" id="checkout-form">
                         @csrf
+                        <input type="hidden" name="g-recaptcha-response" id="checkoutRecaptchaToken">
 
                         <!-- Error Messages -->
                         @if ($errors->any())
@@ -687,5 +688,16 @@
     </main>
 @endsection
 @push('scripts')
+@if (config('services.use_recaptcha') && config('services.sitekey'))
+    <style>
+        .grecaptcha-badge {
+            visibility: hidden !important;
+        }
+    </style>
+    <script>
+        window.aireRecaptchaSiteKey = "{{ config('services.sitekey') }}";
+    </script>
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.sitekey') }}" async defer></script>
+@endif
     <script src="{{ theme_asset('js/checkout.js') }}" defer></script>
 @endpush

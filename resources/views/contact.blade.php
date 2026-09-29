@@ -25,7 +25,7 @@
                                 fill="#00786E" />
                         </svg>
                     </span>
-                    <p class="content-text mb-0">{{ $settings['address'] }}</p>
+                    <p class="content-text mb-0">{{ $settings['address'] ?? 'Aire HQ, Dhaka, Bangladesh' }}</p>
                 </div>
 
                 <div class="contact-info-item d-flex gap-3 align-items-center mb-md-4">
@@ -39,8 +39,8 @@
                                 fill="#00786E" />
                         </svg>
                     </span>
-                    <a href="tel:{{ $settings['phone'] }}" class="content-text mb-0">
-                        {{ $settings['phone'] }} </a>
+                    <a href="tel:{{ $settings['phone'] ?? '' }}" class="content-text mb-0">
+                        {{ $settings['phone'] ?? '+880 1700-000000' }} </a>
                 </div>
 
                 <div class="contact-info-item d-flex gap-3 align-items-center mb-md-4">
@@ -54,15 +54,15 @@
                                 fill="#00786E" />
                         </svg>
                     </span>
-                    <a href="mailto:{{ $settings['email'] }}" class="content-text mb-0">
-                        {{ $settings['email'] }}
+                    <a href="mailto:{{ $settings['email'] ?? '' }}" class="content-text mb-0">
+                        {{ $settings['email'] ?? 'info@aire.test' }}
                     </a>
                 </div>
 
                 <div class="social-section pt-5 pb-md-0 pb-5">
                     <h6 class="title-two mb-4 fade-in-observer">Social Media</h6>
                     <div class="d-flex gap-3">
-                        <a href="{{ $settings['fb_url'] }}" aria-label="Facebook" target="_blank" class="social-icon">
+                        <a href="{{ $settings['fb_url'] ?? '#' }}" aria-label="Facebook" target="_blank" class="social-icon">
                             <svg width="31" height="30" viewBox="0 0 31 30" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -70,7 +70,7 @@
                                     fill="#00786E" />
                             </svg>
                         </a>
-                        <a href="{{ $settings['twitter_url'] }}" aria-label="Twitter" target="_blank" class="social-icon">
+                        <a href="{{ $settings['twitter_url'] ?? '#' }}" aria-label="Twitter" target="_blank" class="social-icon">
                             <svg width="31" height="30" viewBox="0 0 31 30" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path
@@ -78,7 +78,7 @@
                                     fill="#00786E" />
                             </svg>
                         </a>
-                        <a href="{{ $settings['instagram_url'] }}" aria-label="Instagram" target="_blank"
+                        <a href="{{ $settings['instagram_url'] ?? '#' }}" aria-label="Instagram" target="_blank"
                             class="social-icon">
                             <svg width="31" height="30" viewBox="0 0 31 30" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
@@ -87,7 +87,7 @@
                                     fill="#00786E" />
                             </svg>
                         </a>
-                        <a href="{{ $settings['linkedin_url'] }}" aria-label="LinkedIn" target="_blank" class="social-icon">
+                        <a href="{{ $settings['linkedin_url'] ?? '#' }}" aria-label="LinkedIn" target="_blank" class="social-icon">
                             <svg width="31" height="30" viewBox="0 0 31 30" fill="none"
                                 xmlns="http://www.w3.org/2000/svg">
                                 <path

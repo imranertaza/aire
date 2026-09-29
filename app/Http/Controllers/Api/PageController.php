@@ -2,16 +2,24 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Helpers\ApiResponse;
+use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Services\Common\FileUploadService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class PageController extends Controller
 {
+    /**
+     * PageController constructor.
+     *
+     * @param FileUploadService $fileUploader
+     */
+    public function __construct(
+        protected FileUploadService $fileUploader
+    ) {}
     /**
      * Display a listing of pages with optional search and pagination.
      *
@@ -23,7 +31,7 @@ class PageController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Page::latest();
+        $query = Page::latest('id');
 
         // Apply search if provided
         if ($request->filled('search')) {
@@ -85,7 +93,7 @@ class PageController extends Controller
             'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:255',
             'meta_keyword'     => 'nullable|string|max:255',
-            'status'           => ['required', Rule::in(['Active', 'Inactive'])],
+            'status'           => ['required', 'in:0,1'],
             'createdBy'        => 'nullable|integer',
             'updatedBy'        => 'nullable|integer',
         ], [
@@ -99,10 +107,12 @@ class PageController extends Controller
 
         $page = Page::create($validated);
 
-        // Handle image upload after page is created (so we have ID)
+        // Handle image upload with common FileUploadService
         if ($request->hasFile('f_image')) {
-            $filename = uniqid('image_') . '.' . $request->file('f_image')->getClientOriginalExtension();
-            $path = $request->file('f_image')->storeAs("pages/{$page->id}", $filename, 'public');
+            $path = $this->fileUploader->upload(
+                file: $request->file('f_image'),
+                directory: "pages/{$page->id}"
+            );
             $page->update(['f_image' => $path]);
         }
 
@@ -136,25 +146,24 @@ class PageController extends Controller
             'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:255',
             'meta_keyword'     => 'nullable|string|max:255',
-            'status'           => ['required', Rule::in(['Active', 'Inactive'])],
+            'status'           => ['required', 'in:0,1'],
         ], [
             'f_image.image' => 'Please upload a valid image file.',
             'f_image.mimes' => 'We only support JPG, JPEG, PNG, and GIF formats.',
             'f_image.max'   => 'That file is too big! Keep it under 2MB.',
         ]);
 
-        if ($request->hasFile('f_image')) {
-            if ($page->f_image && Storage::disk('public')->exists($page->f_image)) {
-                Storage::disk('public')->delete($page->f_image);
-            }
-
-            $filename = uniqid('image_') . '.' . $request->file('f_image')->getClientOriginalExtension();
-            $validated['f_image'] = $request->file('f_image')->storeAs("pages/{$page->id}", $filename, 'public');
-        } elseif ($request->input('remove_f_image') == 1) {
-            if ($page->f_image && Storage::disk('public')->exists($page->f_image)) {
-                Storage::disk('public')->delete($page->f_image);
-            }
+        if ($request->input('remove_f_image') == 1 && !$request->hasFile('f_image')) {
+            $this->fileUploader->delete($page->f_image);
             $validated['f_image'] = null;
+        }
+
+        if ($request->hasFile('f_image')) {
+            $validated['f_image'] = $this->fileUploader->replace(
+                newFile: $request->file('f_image'),
+                directory: "pages/{$page->id}",
+                oldPath: $page->f_image
+            );
         }
 
         $page->update($validated);
@@ -164,21 +173,26 @@ class PageController extends Controller
     /**
      * Toggle the active/inactive status of a page.
      *
-     * Finds a page by slug and switches its status between 'Active' and 'Inactive'.
+     * Finds a page by slug and switches its status between 1 (Active) and 0 (Inactive).
      *
-     * @param  string  $slug
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
-    public function toggleStatus($id)
+    public function toggleStatus(Request $request, $id)
     {
         $page = Page::findOrFail($id);
-        $page->status = $page->status === 'Active' ? 'Inactive' : 'Active';
+        if ($request->has('status')) {
+            $page->status = (int) $request->input('status') === 1 ? 1 : 0;
+        } else {
+            $page->status = (int) $page->status === 1 ? 0 : 1;
+        }
         $page->save();
 
         return response()->json([
-            'message' => $page->status === 'Active' ? 'Page activated' : 'Page deactivated',
+            'message' => $page->status === 1 ? 'Page activated' : 'Page deactivated',
             'status'  => $page->status,
         ]);
     }
@@ -197,9 +211,7 @@ class PageController extends Controller
     {
         $page = Page::findOrFail($id);
 
-        if ($page->f_image && Storage::disk('public')->exists($page->f_image)) {
-            Storage::disk('public')->delete($page->f_image);
-        }
+        $this->fileUploader->delete($page->f_image);
 
         $page->delete();
         return ApiResponse::success($page, 'Page deleted successfully');

@@ -95,9 +95,14 @@ class SettingsController extends Controller
 
             // Twitter Card
             'twitter_card'        => 'sometimes|string|max:50',
+            'twitter_handle'      => 'sometimes|nullable|string|max:100',
             'twitter_title'       => 'sometimes|string|max:255',
             'twitter_description' => 'sometimes|string|max:500',
-            'twitter_domain'      => 'sometimes|url|max:255',
+            'twitter_domain'      => 'sometimes|nullable|url|max:255',
+
+            // Webmaster & Analytics
+            'google_site_verification' => 'sometimes|nullable|string|max:255',
+            'google_analytics_id'      => 'sometimes|nullable|string|max:100',
 
             // Brand
             'brand_name'          => 'sometimes|string|max:255',

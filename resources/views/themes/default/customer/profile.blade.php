@@ -42,13 +42,13 @@
                             <div class="card-body p-4">
                                 {{-- Profile Picture --}}
                                 <div class="d-flex align-items-center gap-4 mb-4">
-                                    <div id="picPreviewWrap">
+                                    <div id="picPreviewWrap" class="position-relative">
                                         @if ($customer->pic)
                                             <img src="{{ getImageUrl($customer->pic) }}" id="picPreview"
-                                                class="rounded-circle border border-primary p-1"
+                                                class="rounded-circle border border-2 border-primary p-1 shadow-sm"
                                                 style="width: 80px; height: 80px; object-fit: cover;" alt="Avatar">
                                         @else
-                                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white fs-4"
+                                            <div id="picPlaceholder" class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white fs-4 shadow-sm"
                                                 style="width:80px;height:80px;background:linear-gradient(135deg, #0066CC, #004499);">
                                                 {{ strtoupper(substr($customer->firstname, 0, 1)) }}
                                             </div>
@@ -156,11 +156,26 @@
     <script>
         function previewPic(input) {
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Selected image exceeds 2 MB limit. Please select a smaller file.');
+                    input.value = '';
+                    return;
+                }
+
                 const reader = new FileReader();
-                reader.onload = e => {
-                    document.getElementById('picPreview').src = e.target.result;
+                reader.onload = function(e) {
+                    const wrap = document.getElementById('picPreviewWrap');
+                    if (wrap) {
+                        wrap.innerHTML = `
+                            <img src="${e.target.result}" id="picPreview"
+                                class="rounded-circle border border-2 border-primary p-1 shadow-sm"
+                                style="width: 80px; height: 80px; object-fit: cover;" alt="New Avatar Preview">
+                        `;
+                    }
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
     </script>

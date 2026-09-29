@@ -77,8 +77,8 @@
                                     <div class="form-group">
                                         <label>Status</label>
                                         <select v-model="form.status" class="custom-select">
-                                            <option value="Active">Active</option>
-                                            <option value="Inactive">Inactive</option>
+                                            <option :value="1">Active</option>
+                                            <option :value="0">Inactive</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -117,7 +117,7 @@ const form = reactive({
     short_des: '',
     page_description: '',
     f_image: null,
-    status: 'Active',
+    status: 1,
     meta_title: '',
     meta_keyword: '',
     meta_description: '',

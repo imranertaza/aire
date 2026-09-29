@@ -30,7 +30,7 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Post::latest();
+        $query = Post::query()->latest();
 
         if ($request->filled('search')) {
             $search = $request->input('search');

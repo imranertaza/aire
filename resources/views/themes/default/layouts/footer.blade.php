@@ -258,66 +258,96 @@
                     feedback.className = 'fs-13 mb-3 fw-medium';
                 }
 
-                const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
                     form.querySelector('input[name="_token"]')?.value;
 
-                fetch(form.action, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': token,
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: JSON.stringify({
-                            email: email
+                const submitNewsletter = function(recaptchaToken) {
+                    fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                email: email,
+                                'g-recaptcha-response': recaptchaToken || ''
+                            })
                         })
-                    })
-                    .then(res => res.json().then(data => ({
-                        status: res.status,
-                        body: data
-                    })))
-                    .then(({
-                        status,
-                        body
-                    }) => {
-                        if (status >= 200 && status < 300 && body.success) {
-                            if (feedback) {
-                                feedback.textContent = body.message || 'Thank you for subscribing!';
-                                feedback.classList.add('text-success');
-                                feedback.style.display = 'block';
+                        .then(res => res.json().then(data => ({
+                            status: res.status,
+                            body: data
+                        })))
+                        .then(({
+                            status,
+                            body
+                        }) => {
+                            if (status >= 200 && status < 300 && body.success) {
+                                if (feedback) {
+                                    feedback.textContent = body.message || 'Thank you for subscribing!';
+                                    feedback.classList.add('text-success');
+                                    feedback.style.display = 'block';
+                                }
+                                emailInput.value = '';
+                                if (typeof window.showNewsletterToast === 'function') {
+                                    window.showNewsletterToast(body.message || 'Thank you for subscribing!',
+                                        true);
+                                }
+                            } else {
+                                if (feedback) {
+                                    feedback.textContent = body.message ||
+                                        'Could not subscribe. Please try again.';
+                                    feedback.classList.add('text-danger');
+                                    feedback.style.display = 'block';
+                                }
+                                if (typeof window.showNewsletterToast === 'function') {
+                                    window.showNewsletterToast(body.message || 'Could not subscribe.',
+                                        false);
+                                }
                             }
-                            emailInput.value = '';
-                            if (typeof window.showNewsletterToast === 'function') {
-                                window.showNewsletterToast(body.message || 'Thank you for subscribing!',
-                                    true);
-                            }
-                        } else {
+                        })
+                        .catch(err => {
                             if (feedback) {
-                                feedback.textContent = body.message ||
-                                    'Could not subscribe. Please try again.';
+                                feedback.textContent = 'A network error occurred. Please try again later.';
                                 feedback.classList.add('text-danger');
                                 feedback.style.display = 'block';
                             }
-                            if (typeof window.showNewsletterToast === 'function') {
-                                window.showNewsletterToast(body.message || 'Could not subscribe.',
-                                    false);
-                            }
-                        }
-                    })
-                    .catch(err => {
-                        if (feedback) {
-                            feedback.textContent = 'A network error occurred. Please try again later.';
-                            feedback.classList.add('text-danger');
-                            feedback.style.display = 'block';
-                        }
-                    })
-                    .finally(() => {
-                        if (submitBtn) submitBtn.disabled = false;
-                        if (iconNormal) iconNormal.classList.remove('d-none');
-                        if (spinner) spinner.classList.add('d-none');
+                        })
+                        .finally(() => {
+                            if (submitBtn) submitBtn.disabled = false;
+                            if (iconNormal) iconNormal.classList.remove('d-none');
+                            if (spinner) spinner.classList.add('d-none');
+                        });
+                };
+
+                const siteKey = "{{ config('services.sitekey') }}";
+                const useRecaptcha = {{ config('services.use_recaptcha') ? 'true' : 'false' }};
+
+                if (useRecaptcha && siteKey && typeof grecaptcha !== 'undefined') {
+                    grecaptcha.ready(function() {
+                        grecaptcha.execute(siteKey, { action: 'newsletter_subscribe' })
+                            .then(function(token) {
+                                submitNewsletter(token);
+                            })
+                            .catch(function(err) {
+                                console.warn('Newsletter reCAPTCHA error:', err);
+                                submitNewsletter('');
+                            });
                     });
+                } else {
+                    submitNewsletter('');
+                }
             });
         });
     </script>
 @endpush
+
+@if (config('services.use_recaptcha') && config('services.sitekey'))
+    <style>
+        .grecaptcha-badge {
+            visibility: hidden !important;
+        }
+    </style>
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.sitekey') }}" async defer></script>
+@endif

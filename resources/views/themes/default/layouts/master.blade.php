@@ -4,19 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Aire | Indoor Air Quality Solutions')</title>
-    <meta name="description" content="@yield('meta_description', 'Aire Industries delivers cutting-edge indoor air quality solutions for residential, commercial, healthcare, and industrial environments.')">
-    @if (trim($__env->yieldContent('meta_keywords')))
-        <meta name="keywords" content="@yield('meta_keywords')">
-    @endif
+    <title>@yield('title', $settings['meta_title'] ?? 'Aire | Indoor Air Quality Solutions')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Open Graph -->
-    <meta property="og:title" content="@yield('title', 'Aire | Indoor Air Quality Solutions')">
-    <meta property="og:description" content="@yield('meta_description', 'Cutting-edge indoor air quality solutions for residential, commercial, healthcare, and industrial environments.')">
-    <meta property="og:image" content="@yield('og_image', theme_asset('img/logo.png'))">
-    <meta property="og:type" content="@yield('og_type', 'website')">
-    <meta property="og:url" content="@yield('canonical_url', url()->current())">
+    {{-- Central Reusable SEO & Social Meta Partial --}}
+    @include('layouts.partial.seo')
+
     @if (trim($__env->yieldContent('canonical_url')))
         <link rel="canonical" href="@yield('canonical_url')">
     @endif

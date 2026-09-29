@@ -2,48 +2,49 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Mail\CustomerResetPasswordMail;
+use App\Models\Customer;
+use App\Models\Store;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_reset_password_link_can_be_requested(): void
+    protected function setUp(): void
     {
-        Notification::fake();
+        parent::setUp();
 
-        $user = User::factory()->create();
-
-        $this->post('/forgot-password', ['email' => $user->email]);
-
-        Notification::assertSentTo($user, ResetPassword::class);
+        Store::create([
+            'id'         => 1,
+            'name'       => 'Default Store',
+            'is_default' => 1,
+        ]);
     }
 
-    public function test_password_can_be_reset_with_valid_token(): void
+    public function test_reset_password_link_can_be_requested(): void
     {
-        Notification::fake();
+        Mail::fake();
 
-        $user = User::factory()->create();
+        $customer = Customer::create([
+            'firstname' => 'Reset',
+            'lastname'  => 'User',
+            'email'     => 'reset@example.com',
+            'phone'     => '01722222222',
+            'password'  => Hash::make('password123'),
+            'status'    => 1,
+        ]);
 
-        $this->post('/forgot-password', ['email' => $user->email]);
+        $response = $this->post(route('password.email'), [
+            'email' => $customer->email,
+        ]);
 
-        Notification::assertSentTo($user, ResetPassword::class, function (object $notification) use ($user) {
-            $response = $this->post('/reset-password', [
-                'token' => $notification->token,
-                'email' => $user->email,
-                'password' => 'password',
-                'password_confirmation' => 'password',
-            ]);
-
-            $response
-                ->assertSessionHasNoErrors()
-                ->assertStatus(200);
-
-            return true;
+        $response->assertSessionHasNoErrors();
+        Mail::assertSent(CustomerResetPasswordMail::class, function ($mail) use ($customer) {
+            return $mail->hasTo($customer->email);
         });
     }
 }

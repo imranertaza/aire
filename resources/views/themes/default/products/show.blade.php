@@ -40,12 +40,6 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
     <link rel="preload" as="image" href="{{ $productImgUrl }}" fetchpriority="high">
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $seoTitle }}">
-    <meta name="twitter:description" content="{{ $seoDescription }}">
-    <meta name="twitter:image" content="{{ $productImgUrl }}">
-
     <!-- Open Graph Product Extensions -->
     <meta property="product:price:amount" content="{{ number_format($currentPrice, 2, '.', '') }}">
     <meta property="product:price:currency" content="{{ $currency }}">

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Cache;
@@ -28,6 +29,14 @@ class Product extends Model
     protected static function booted()
     {
         static::saving(function ($product) {
+            if (empty($product->store_id)) {
+                $product->store_id = 1;
+            }
+
+            if (empty($product->model)) {
+                $product->model = Str::slug($product->name ?? 'item');
+            }
+
             if (empty($product->slug) && !empty($product->name)) {
                 $baseSlug = Str::slug($product->name);
                 $slug = $baseSlug;
@@ -59,6 +68,7 @@ class Product extends Model
         Cache::forget('site_default_featured_products');
         Cache::forget('total_active_products_count');
         Cache::forget('filter_steps_data_v9');
+        Cache::forget(\App\Services\Admin\AdminDashboardService::CACHE_KEY);
 
         // Legacy individual section keys for backward compatibility
         Cache::forget('home_best_selling_products');
@@ -123,7 +133,7 @@ class Product extends Model
 
     public function special()
     {
-        $today = now()->toDateString();
+        $today = Carbon::now()->toDateString();
         return $this->hasOne(ProductSpecial::class)
             ->where(function ($q) use ($today) {
                 $q->whereNull('start_date')
@@ -197,33 +207,138 @@ class Product extends Model
     // Scopes
     // ========================================
 
+    /**
+     * Scope a query to only include active products.
+     */
     public function scopeActive($query)
     {
         return $query->where('status', 1);
     }
 
+    /**
+     * Scope a query to only include inactive products.
+     */
     public function scopeInactive($query)
     {
         return $query->where('status', 0);
     }
 
+    /**
+     * Scope a query to only include featured products.
+     */
     public function scopeFeatured($query)
     {
         return $query->where('featured', 1);
     }
 
+    /**
+     * Scope a query to only include in-stock products.
+     */
     public function scopeInStock($query)
     {
         return $query->where('quantity', '>', 0);
     }
 
-    public function scopeLowStock($query, $threshold = 10)
+    /**
+     * Scope a query to only include low stock products.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int $threshold
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeLowStock($query, int $threshold = 5)
     {
         return $query->where('quantity', '<=', $threshold);
     }
 
+    /**
+     * Scope a query to filter by specific category IDs.
+     */
+    public function scopeInCategories($query, array $categoryIds)
+    {
+        if (empty($categoryIds)) {
+            return $query;
+        }
+
+        return $query->whereHas('categories', fn($q) => $q->whereIn('product_categories.id', $categoryIds));
+    }
+
+    /**
+     * Scope a query to search products by name, model, code, tags, or description.
+     */
+    public function scopeSearch($query, ?string $search)
+    {
+        $search = trim((string) $search);
+        if (empty($search)) {
+            return $query;
+        }
+
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('model', 'like', "%{$search}%")
+                ->orWhere('product_code', 'like', "%{$search}%")
+                ->orWhereHas('categories', fn($cq) => $cq->where('category_name', 'like', "%{$search}%"))
+                ->orWhereHas('description', function ($dq) use ($search) {
+                    $dq->where('tag', 'like', "%{$search}%")
+                        ->orWhere('meta_title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+        });
+    }
+
+    /**
+     * Scope a query with standard catalog relations eager loaded.
+     */
+    public function scopeWithCatalogRelations($query)
+    {
+        return $query->with([
+            'categories',
+            'images',
+            'special',
+            'freeDelivery',
+            'productLanding:id,product_id,status',
+            'description:id,product_id,description',
+        ]);
+    }
+
+    /**
+     * Scope a query for latest active catalog products with relations.
+     */
+    public function scopeLatestCatalog($query, int $limit = 4, int $skip = 0)
+    {
+        $q = $query->active()->withCatalogRelations()->latest('id');
+        if ($skip > 0) {
+            $q->skip($skip);
+        }
+        return $q->take($limit);
+    }
+
+    /**
+     * Fallback scope for best selling showcase products.
+     */
+    public function scopeBestSellingFallback($query, int $limit = 4)
+    {
+        return $query->latestCatalog($limit);
+    }
+
+    /**
+     * Fallback scope for new arrivals showcase products.
+     */
+    public function scopeNewArrivalsFallback($query, int $limit = 3)
+    {
+        return $query->latestCatalog($limit);
+    }
+
+    /**
+     * Fallback scope for customer favorites showcase products.
+     */
+    public function scopeCustomerFavoritesFallback($query, int $limit = 3, int $skip = 3)
+    {
+        return $query->latestCatalog($limit, $skip);
+    }
+
     // ========================================
-    // Accessors
+    // Accessors & Mutators
     // ========================================
 
     public function getStatusTextAttribute(): string

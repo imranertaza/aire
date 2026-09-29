@@ -23,10 +23,11 @@ return new class extends Migration
             $table->string('meta_title', 255)->nullable();
             $table->string('meta_description', 255)->nullable();
             $table->string('meta_keyword', 255)->nullable();
-            $table->enum('status', ['Active', 'Inactive']);
+            $table->tinyInteger('status')->default(1)->comment('1 = Active, 0 = Inactive');
             $table->foreignId('createdBy')->constrained('users');
             $table->foreignId('updatedBy')->nullable()->constrained('users');
             $table->timestamps();
+            $table->index('status');
         });
     }
 

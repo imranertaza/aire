@@ -5,13 +5,21 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Services\Common\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    /**
+     * CategoryController constructor.
+     *
+     * @param FileUploadService $fileUploader
+     */
+    public function __construct(
+        protected FileUploadService $fileUploader
+    ) {}
     /**
      * Display a listing of categories with optional search and pagination.
      *
@@ -97,10 +105,12 @@ class CategoryController extends Controller
         $validated['createdBy'] = Auth::id();
 
         $category = Category::create($validated);
-        // Handle image upload if present
+
         if ($request->hasFile('image')) {
-            $filename = uniqid('cat_image_') . '.' . $request->file('image')->getClientOriginalExtension();
-            $path = $request->file('image')->storeAs("posts/category/{$category->id}", $filename, 'public');
+            $path = $this->fileUploader->upload(
+                file: $request->file('image'),
+                directory: "posts/category/{$category->id}"
+            );
             $category->update(['image' => $path]);
         }
 
@@ -135,29 +145,18 @@ class CategoryController extends Controller
             'sort_order'       => 'integer',
             'status'           => 'in:0,1',
         ]);
-        if ($request->remove_image == 1) {
-            if ($category->image && Storage::disk('public')->exists($category->image)) {
-                Storage::disk('public')->delete($category->image);
-            }
+        if ($request->remove_image == 1 && !$request->hasFile('image')) {
+            $this->fileUploader->delete($category->image);
             $validated['image'] = null;
-        } else {
-            // Keep existing image if no new file uploaded
-            $validated['image'] = $category->image;
         }
+
         if ($request->hasFile('image')) {
-            if ($category->image && Storage::disk('public')->exists($category->image)) {
-                Storage::disk('public')->delete($category->image);
-            }
-
-            // Build a unique filename
-            $filename = uniqid('cat_image_') . '.' . $request->file('image')->getClientOriginalExtension();
-
-            $path = $request->file('image')
-                ->storeAs("posts/category/{$category->id}", $filename, 'public');
-
-            $validated['image'] = $path;
+            $validated['image'] = $this->fileUploader->replace(
+                newFile: $request->file('image'),
+                directory: "posts/category/{$category->id}",
+                oldPath: $category->image
+            );
         }
-
 
         $validated['updatedBy'] = Auth::id();
         $category->update($validated);
@@ -197,10 +196,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        // Delete image file if it exists
-        if ($category->image && Storage::disk('public')->exists($category->image)) {
-            Storage::disk('public')->delete($category->image);
-        }
+        $this->fileUploader->delete($category->image);
 
         $category->delete();
 

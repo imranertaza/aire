@@ -4,19 +4,25 @@ namespace App\Listeners;
 
 use App\Events\OrderPlaced;
 use App\Services\Mail\OrderMailService;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
 
-class SendOrderPlacedNotification
+class SendOrderPlacedNotification implements ShouldQueue
 {
-    protected OrderMailService $mailService;
+    use InteractsWithQueue;
+
+    /**
+     * The number of times the queued listener may be attempted.
+     */
+    public int $tries = 3;
 
     /**
      * Create the event listener.
      */
-    public function __construct(OrderMailService $mailService)
-    {
-        $this->mailService = $mailService;
-    }
+    public function __construct(
+        protected OrderMailService $mailService
+    ) {}
 
     /**
      * Handle the event.

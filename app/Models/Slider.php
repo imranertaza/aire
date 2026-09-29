@@ -54,6 +54,28 @@ class Slider extends Model
         }
     }
 
+    // ========================================
+    // Scopes
+    // ========================================
+
+    public function scopeActive($query)
+    {
+        return $query->where('enabled', 1);
+    }
+
+    public function scopePlacement($query, string $placement)
+    {
+        return $query->where(function ($q) use ($placement) {
+            $q->where('key', $placement)
+                ->orWhere('key', 'like', "%{$placement}%");
+        });
+    }
+
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('order', 'asc')->orderBy('id', 'desc');
+    }
+
     /**
      * Get active sliders for a specific placement with caching.
      *
@@ -64,13 +86,9 @@ class Slider extends Model
     public static function getByPlacement(string $placement = 'banner_section', int $ttl = 86400)
     {
         return Cache::remember("sliders_placement_{$placement}", $ttl, function () use ($placement) {
-            return static::where('enabled', 1)
-                ->where(function ($q) use ($placement) {
-                    $q->where('key', $placement)
-                        ->orWhere('key', 'like', "%{$placement}%");
-                })
-                ->orderBy('order', 'asc')
-                ->orderBy('id', 'desc')
+            return static::active()
+                ->placement($placement)
+                ->ordered()
                 ->get();
         });
     }

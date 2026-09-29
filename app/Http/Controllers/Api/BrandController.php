@@ -6,18 +6,27 @@ use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Models\Brand;
 use App\Models\Product;
+use App\Services\Common\FileUploadService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 
 class BrandController extends Controller
 {
     /**
+     * BrandController constructor.
+     *
+     * @param FileUploadService $fileUploader
+     */
+    public function __construct(
+        protected FileUploadService $fileUploader
+    ) {}
+
+    /**
      * Retrieve a paginated list of brands with optional search.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $query = Brand::orderBy('sort_order', 'asc')->latest();
 
@@ -38,18 +47,19 @@ class BrandController extends Controller
     /**
      * Retrieve all active brands for dropdown.
      */
-    public function allBrands()
+    public function allBrands(): JsonResponse
     {
         $brands = Cache::rememberForever('all_brands', function () {
             return Brand::select('id', 'name')->where('status', 1)->orderBy('sort_order', 'asc')->get();
         });
+
         return ApiResponse::success($brands, 'All active brands retrieved successfully');
     }
 
     /**
      * Retrieve a single brand.
      */
-    public function show(Brand $brand)
+    public function show(Brand $brand): JsonResponse
     {
         return ApiResponse::success($brand, 'Brand retrieved successfully');
     }
@@ -57,7 +67,7 @@ class BrandController extends Controller
     /**
      * Store a new brand.
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name'       => 'required|string|max:255',
@@ -70,25 +80,23 @@ class BrandController extends Controller
         $validated['alt_name'] = $request->input('alt_name') ?: $request->input('name');
         $validated['createdBy'] = Auth::id();
         $validated['updatedBy'] = Auth::id();
-
-        if (!isset($validated['sort_order'])) {
-            $validated['sort_order'] = 0;
-        }
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
         // Create brand first (without image)
         $brand = Brand::create($validated);
 
-        // Handle file upload if present
+        // Handle file upload with common FileUploadService
         if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            $filename = uniqid('brand_') . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs("brands/{$brand->id}", $filename, 'public');
-
-            $fullPath = Storage::disk('public')->path($path);
-            Image::make($fullPath)->fit(250, 150)->save();
-
+            $path = $this->fileUploader->uploadAndFit(
+                file: $request->file('image'),
+                directory: "brands/{$brand->id}",
+                width: 250,
+                height: 150
+            );
             $brand->update(['image' => $path]);
         }
+
+        Cache::forget('all_brands');
 
         return ApiResponse::success($brand, 'Brand created successfully');
     }
@@ -96,7 +104,7 @@ class BrandController extends Controller
     /**
      * Update an existing brand.
      */
-    public function update(Request $request, Brand $brand)
+    public function update(Request $request, Brand $brand): JsonResponse
     {
         $isImageRequired = empty($brand->image) || $request->remove_image == 1;
 
@@ -108,32 +116,26 @@ class BrandController extends Controller
             'sort_order' => 'nullable|integer',
         ]);
 
-        if ($request->remove_image == 1) {
-            if ($brand->image && Storage::disk('public')->exists($brand->image)) {
-                Storage::disk('public')->delete($brand->image);
-            }
-            $validated['image'] = null;
-        }
-
         $validated['alt_name'] = $request->input('alt_name') ?: $request->input('name');
         $validated['updatedBy'] = Auth::id();
 
+        if ($request->remove_image == 1 && !$request->hasFile('image')) {
+            $this->fileUploader->delete($brand->image);
+            $validated['image'] = null;
+        }
+
         if ($request->hasFile('image')) {
-            if ($brand->image && Storage::disk('public')->exists($brand->image)) {
-                Storage::disk('public')->delete($brand->image);
-            }
-
-            $file = $request->file('image');
-            $filename = uniqid('brand_') . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs("brands/{$brand->id}", $filename, 'public');
-
-            $fullPath = Storage::disk('public')->path($path);
-            Image::make($fullPath)->fit(250, 150)->save();
-
-            $validated['image'] = $path;
+            $validated['image'] = $this->fileUploader->replaceAndFit(
+                newFile: $request->file('image'),
+                directory: "brands/{$brand->id}",
+                width: 250,
+                height: 150,
+                oldPath: $brand->image
+            );
         }
 
         $brand->update($validated);
+        Cache::forget('all_brands');
 
         return ApiResponse::success($brand, 'Brand updated successfully');
     }
@@ -141,11 +143,12 @@ class BrandController extends Controller
     /**
      * Toggle the status (active/inactive) of a brand.
      */
-    public function toggleStatus(Brand $brand)
+    public function toggleStatus(Brand $brand): JsonResponse
     {
-        $brand->status = $brand->status == 1 ? 0 : 1;
+        $brand->status = (int) $brand->status === 1 ? 0 : 1;
         $brand->updatedBy = Auth::id();
         $brand->save();
+        Cache::forget('all_brands');
 
         return ApiResponse::success([
             'status' => $brand->status,
@@ -155,16 +158,16 @@ class BrandController extends Controller
     /**
      * Permanently delete a brand along with its associated image.
      */
-    public function destroy(Brand $brand)
+    public function destroy(Brand $brand): JsonResponse
     {
-        if ($brand->image && Storage::disk('public')->exists($brand->image)) {
-            Storage::disk('public')->delete($brand->image);
-        }
+        $this->fileUploader->delete($brand->image);
 
         Product::where('brand_id', $brand->id)->update(['brand_id' => null]);
 
         $brand->delete();
+        Cache::forget('all_brands');
 
         return ApiResponse::success(null, 'Brand deleted successfully');
     }
 }
+

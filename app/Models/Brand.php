@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\InvalidatesDashboardCache;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
 class Brand extends Model
 {
+    use InvalidatesDashboardCache;
+
     protected $guarded=['id'];
 
     protected static function booted()

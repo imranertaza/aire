@@ -1,6 +1,6 @@
 @extends('themes.default.layouts.master')
 
-@section('title', 'Invoice #' . ($order->invoice_no ?: $order->id) . ' | ' . ($settings['brand_name'] ?? 'Aire'))
+@section('title', 'Invoice ' . ($order->invoice_no ?: $order->order_number) . ' | ' . ($settings['brand_name'] ?? 'Aire'))
 
 @section('content')
     <main class="py-5 bg-light-subtle">
@@ -122,13 +122,13 @@
                                                             class="text-muted fs-12 text-uppercase fw-semibold d-block">Invoice
                                                             Number</span>
                                                         <span
-                                                            class="fw-bold text-dark fs-16">#{{ $order->invoice_no ?: $order->id }}</span>
+                                                            class="fw-bold text-dark fs-16 font-monospace">{{ $order->invoice_no ?: $order->order_number }}</span>
                                                     </div>
                                                     <div class="col-sm-3 col-6">
                                                         <span
                                                             class="text-muted fs-12 text-uppercase fw-semibold d-block">Order
-                                                            ID</span>
-                                                        <span class="fw-bold text-dark fs-16">#{{ $order->id }}</span>
+                                                            Reference</span>
+                                                        <span class="fw-bold text-dark fs-16 font-monospace">{{ $order->order_number }}</span>
                                                     </div>
                                                     <div class="col-sm-3 col-6">
                                                         <span

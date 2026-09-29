@@ -4,6 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * App\Models\Category
+ *
+ * @method bool|null delete()
+ * @mixin \Illuminate\Database\Eloquent\Builder
+ */
 class Category extends Model
 {
     protected $guarded = ['id'];

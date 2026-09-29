@@ -36,12 +36,12 @@
                                     </td>
                                     <td v-if="authStore.hasPermission('publish-pages')" class="align-middle">
                                         <select v-model="page.status" @change="updateStatus(page)" class="custom-select"
-                                            :class="page.status === 'Active'
+                                            :class="Number(page.status) === 1
                                                     ? 'bg-success text-white'
                                                     : 'bg-transparent text-dark'
                                                 ">
-                                            <option value="Active">Active</option>
-                                            <option value="Inactive">Inactive</option>
+                                            <option :value="1">Active</option>
+                                            <option :value="0">Inactive</option>
                                         </select>
                                     </td>
                                     <td class="align-middle">{{ page.temp }}</td>
@@ -127,7 +127,7 @@ const updateStatus = async (page) => {
             status: page.status,
         });
 
-        if (response.data.status === "Active") {
+        if (Number(response.data.status) === 1) {
             toast.success("Page activated");
         } else {
             toast.info("Page deactivated");

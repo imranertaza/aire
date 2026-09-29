@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 
 class ImageService
@@ -125,7 +127,15 @@ class ImageService
 
         $hash           = md5("{$path}|{$mtime}|{$size}|{$operation}|{$w}x{$h}|{$format}|{$quality}");
         $cacheKey       = "img_cache_{$hash}";
-        $cachedFileName = "{$hash}.{$format}";
+
+        // 4.1. Generate SEO-friendly slugged filename: {slug}-{dimension}-{short_hash}.{format}
+        $rawBaseName    = pathinfo($sourcePath, PATHINFO_FILENAME);
+        $slug           = Str::slug($rawBaseName);
+        $slug           = !empty($slug) ? Str::limit($slug, 60, '') : 'img';
+        $shortHash      = substr($hash, 0, 10);
+        $dimension      = ($w > 0 || $h > 0) ? "-{$w}x{$h}" : '';
+        $cachedFileName = "{$slug}{$dimension}-{$shortHash}.{$format}";
+
         $cachedDir      = config('imagecache.cache_dir', public_path('cache'));
         $cachedPath     = $cachedDir . DIRECTORY_SEPARATOR . $cachedFileName;
         $url            = asset('cache/' . $cachedFileName);
@@ -138,7 +148,7 @@ class ImageService
 
         // 6. Tier 1: Check Disk File
         if (file_exists($cachedPath) && filesize($cachedPath) > 0) {
-            Cache::put($cacheKey, $url, now()->addSeconds($lifetime));
+            Cache::put($cacheKey, $url, Carbon::now()->addSeconds($lifetime));
             return $url;
         }
 
@@ -185,7 +195,7 @@ class ImageService
             $image->save($cachedPath, $quality, $format);
 
             // Register in Laravel cache
-            Cache::put($cacheKey, $url, now()->addSeconds($lifetime));
+            Cache::put($cacheKey, $url, Carbon::now()->addSeconds($lifetime));
 
             return $url;
         } catch (\Throwable $e) {
@@ -344,10 +354,14 @@ class ImageService
             return 0;
         }
 
-        // Search files related to path
-        $pathPrefix = md5($path);
+        $rawBaseName = pathinfo($sourcePath, PATHINFO_FILENAME);
+        $slug        = Str::slug($rawBaseName);
+        $slugPrefix  = !empty($slug) ? Str::limit($slug, 60, '') : '';
+        $pathPrefix  = md5($path);
+
         foreach ($files as $file) {
-            if (str_starts_with($file->getFilename(), $pathPrefix)) {
+            $filename = $file->getFilename();
+            if (($slugPrefix && str_starts_with($filename, $slugPrefix)) || str_starts_with($filename, $pathPrefix)) {
                 if (File::delete($file->getPathname())) {
                     $deleted++;
                 }
@@ -370,7 +384,7 @@ class ImageService
             return 0;
         }
 
-        $threshold = now()->subDays($daysOld)->getTimestamp();
+        $threshold = Carbon::now()->subDays($daysOld)->getTimestamp();
         $deleted   = 0;
         $files     = File::files($cachedDir);
 

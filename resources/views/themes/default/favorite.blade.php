@@ -132,4 +132,5 @@
                 });
             });
         });
-    @endpush
+    </script>
+@endpush

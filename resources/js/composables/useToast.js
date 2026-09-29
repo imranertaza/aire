@@ -2,7 +2,13 @@ import { toast } from "vue3-toastify";
 
 /**
  * Composable for centralized toast notifications
- * @returns {object} Toast helper methods
+ * @returns {{
+ *   success: (msg: string) => any,
+ *   error: (msg: string) => any,
+ *   info: (msg: string) => any,
+ *   warn: (msg: string) => any,
+ *   validationError: (error: any) => void
+ * }} Toast helper methods
  */
 export function useToast() {
     return {
@@ -28,21 +34,27 @@ export function useToast() {
 
         /**
          * Handle validation/form errors (422) and generic API errors
+         * @param {any} error
          */
         validationError: (error) => {
-            // Custom message from backend
-            if (error.response?.data?.message) {
-                toast.error(error.response.data.message);
-            }
             // Laravel validation errors (422)
-            else if (
+            if (
                 error?.response?.status === 422 &&
                 error.response?.data?.errors
             ) {
+                /** @type {Record<string, string[]>} */
                 const errors = error.response.data.errors;
                 Object.values(errors).forEach((messages) => {
-                    messages.forEach((msg) => toast.error(msg));
+                    if (Array.isArray(messages)) {
+                        messages.forEach((/** @type {string} */ msg) => toast.error(msg));
+                    } else if (typeof messages === "string") {
+                        toast.error(messages);
+                    }
                 });
+            }
+            // Custom message from backend
+            else if (error?.response?.data?.message) {
+                toast.error(error.response.data.message);
             }
             // Fallback error message
             else {

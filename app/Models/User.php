@@ -10,11 +10,21 @@ use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * App\Models\User
+ *
+ * @mixin \Illuminate\Database\Eloquent\Builder
+ * @mixin \Illuminate\Database\Eloquent\Model
+ *
+ * @method bool|null delete()
+ * @method static void saved(\Closure|string|array $callback)
+ * @method static void deleted(\Closure|string|array $callback)
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens,HasFactory, Notifiable, HasRoles;
-    
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+
     protected $guard_name = 'user';
 
     protected static function booted()

@@ -55,7 +55,7 @@
                                     <tbody class="fs-14">
                                         @foreach ($orders->take(5) as $order)
                                             <tr>
-                                                <td class="fw-bold text-primary">#{{ $order->id }}</td>
+                                                <td class="fw-bold text-primary font-monospace fs-13">{{ $order->order_number }}</td>
                                                 <td class="text-secondary fs-13">
                                                     {{ $order->created_at ? $order->created_at->format('M d, Y') : 'N/A' }}
                                                 </td>

@@ -2,243 +2,240 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
-use Illuminate\Auth\Events\Registered;
+use App\Http\Requests\Auth\CustomerForgotPasswordRequest;
+use App\Http\Requests\Auth\CustomerResetPasswordRequest;
+use App\Http\Requests\Auth\CustomerSigninRequest;
+use App\Http\Requests\Auth\CustomerSignupRequest;
+use App\Services\Auth\CustomerAuthService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class CustomerAuthController extends Controller
 {
     /**
-     * Display the customer signin view.
+     * CustomerAuthController constructor.
      */
-    public function signin()
+    public function __construct(
+        protected CustomerAuthService $authService
+    ) {}
+
+    /**
+     * Display the customer signin modal / redirect to home.
+     */
+    public function signin(): RedirectResponse
     {
-        return \theme_view('auth.signin');
+        return Redirect::route('home', ['auth' => 'signin']);
     }
 
     /**
      * Handle customer signin authentication with brute-force throttling and active status validation.
      */
-    public function postSignin(Request $request)
+    public function postSignin(CustomerSigninRequest $request): JsonResponse|RedirectResponse
     {
-        // Normalize email input to lowercase and trim whitespace
-        $request->merge([
-            'email' => Str::lower(trim((string) $request->input('email', ''))),
-        ]);
+        $request->ensureIsNotRateLimited();
 
-        $validator = Validator::make($request->all(), [
-            'email'    => 'required|email|max:96',
-            'password' => 'required|string',
-        ]);
+        $credentials = $request->only('email', 'password');
+        $remember = $request->boolean('remember', false);
 
-        if ($validator->fails()) {
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => $validator->errors()->first(),
-                    'errors'  => $validator->errors(),
-                ], 422);
-            }
-
-            return Redirect::back()->withErrors($validator)->withInput($request->except('password'));
-        }
-
-        // Throttle key based on normalized email and client IP
-        $throttleKey = Str::transliterate($request->input('email') . '|' . $request->ip());
-
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
-            $message = "Too many failed login attempts. Please try again in {$seconds} seconds.";
-
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => $message,
-                    'errors'  => ['email' => [$message]],
-                ], 429);
-            }
-
-            return Redirect::back()->withErrors(['email' => $message])->withInput($request->except('password'));
-        }
-
-        $credentials = [
-            'email'    => $request->input('email'),
-            'password' => $request->input('password'),
-            'status'   => 1, // Only active/non-suspended accounts can authenticate
-        ];
-
-        if (Auth::guard('customer')->attempt($credentials, $request->boolean('remember', false))) {
-            RateLimiter::clear($throttleKey);
+        if ($this->authService->attemptLogin($credentials, $remember)) {
+            $request->clearRateLimiter();
             $request->session()->regenerate();
 
-            /** @var Customer $customer */
-            $customer = Auth::guard('customer')->user();
-            $fullName = $customer->full_name;
-
+            /** @var \App\Models\Customer $customer */
+            $customer = auth('customer')->user();
             $redirectUrl = $this->getSafeRedirectUrl($request);
 
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json([
-                    'status'   => true,
-                    'message'  => 'Logged in successfully!',
-                    'redirect' => $redirectUrl,
-                    'user'     => [
-                        'name'  => $fullName,
+            return $this->respondSuccess(
+                message: 'Logged in successfully!',
+                redirectUrl: $redirectUrl,
+                extraData: [
+                    'user' => [
+                        'name'  => $customer->full_name,
                         'email' => $customer->email,
                     ],
-                ]);
-            }
-
-            return Redirect::intended($redirectUrl)->with('success', 'Logged in successfully!');
+                ]
+            );
         }
 
-        // Register failed attempt in rate limiter
-        RateLimiter::hit($throttleKey, 60);
+        $request->hitRateLimiter();
 
-        // Determine if account exists but is suspended for clear user feedback
-        $inactiveCustomer = Customer::where('email', $request->input('email'))
-            ->where('status', 0)
-            ->first();
-
-        $errorMessage = $inactiveCustomer
+        $isDeactivated = $this->authService->isAccountDeactivated($credentials['email']);
+        $errorMessage = $isDeactivated
             ? 'Your account has been deactivated. Please contact customer support.'
             : 'Invalid email or password.';
 
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'status'  => false,
-                'message' => $errorMessage,
-                'errors'  => ['email' => [$errorMessage]],
-            ], 422);
-        }
-
-        return Redirect::back()->withErrors(['email' => $errorMessage])->withInput($request->except('password'));
+        throw ValidationException::withMessages([
+            'email' => $errorMessage,
+        ]);
     }
 
     /**
-     * Display the customer signup view.
+     * Display the customer signup modal / redirect to home.
      */
-    public function signup()
+    public function signup(): RedirectResponse
     {
-        return \theme_view('auth.signup');
+        return Redirect::route('home', ['auth' => 'signup']);
     }
 
     /**
-     * Handle customer registration with rate limiting, safe string boundaries, and event dispatching.
+     * Handle customer registration with rate limiting and auto login.
      */
-    public function postSignup(Request $request)
+    public function postSignup(CustomerSignupRequest $request): JsonResponse|RedirectResponse
     {
-        // Rate limit registrations to prevent automated bot flooding (5 registrations / hour per IP)
-        $regThrottleKey = 'signup|' . $request->ip();
+        $request->ensureIsNotRateLimited();
 
-        if (RateLimiter::tooManyAttempts($regThrottleKey, 5)) {
-            $seconds = RateLimiter::availableIn($regThrottleKey);
-            $minutes = (int) ceil($seconds / 60);
-            $message = "Too many registration attempts. Please try again in {$minutes} minute(s).";
-
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => $message,
-                    'errors'  => ['email' => [$message]],
-                ], 429);
-            }
-
-            return Redirect::back()->withErrors(['email' => $message])->withInput($request->except('password'));
+        // Honeypot check for spam bots
+        if ($request->filled('b_extra_field')) {
+            return $this->respondSuccess(
+                message: 'Registered and logged in successfully!',
+                redirectUrl: $this->getSafeRedirectUrl($request),
+            );
         }
 
-        // Normalize email input
-        $request->merge([
-            'email' => Str::lower(trim((string) $request->input('email', ''))),
-        ]);
-
-        $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:64',
-            'email'    => 'required|email|max:96|unique:customers,email',
-            'password' => 'required|string|min:6',
-            'phone'    => 'nullable|string|max:32',
-        ]);
-
-        if ($validator->fails()) {
-            if ($request->expectsJson() || $request->ajax()) {
-                return response()->json([
-                    'status'  => false,
-                    'message' => $validator->errors()->first(),
-                    'errors'  => $validator->errors(),
-                ], 422);
-            }
-
-            return Redirect::back()->withErrors($validator)->withInput($request->except('password'));
-        }
-
-        RateLimiter::hit($regThrottleKey, 3600);
-        $validated = $validator->validated();
-
-        // Safely parse name and clamp to 32 characters to prevent MySQL varchar(32) truncation errors
-        $parts = preg_split('/\s+/', trim((string) $validated['name']), 2);
-        $firstname = Str::substr($parts[0] ?? '', 0, 32);
-        $lastname  = Str::substr($parts[1] ?? '', 0, 32);
-
-        $customer = Customer::create([
-            'firstname' => $firstname,
-            'lastname'  => $lastname,
-            'email'     => $validated['email'],
-            'phone'     => $validated['phone'] ?? '',
-            'password'  => Hash::make($validated['password']),
-            'salt'      => Str::random(9),
-            'ip'        => $request->ip(),
-            'status'    => 1,
-        ]);
-
-        event(new Registered($customer));
-
-        Auth::guard('customer')->login($customer);
+        $request->hitRateLimiter();
         $request->session()->regenerate();
 
-        $fullName = $customer->full_name;
+        $customer = $this->authService->register($request->validated(), $request->ip());
 
         $redirectUrl = $this->getSafeRedirectUrl($request);
 
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'status'   => true,
-                'message'  => 'Registered and logged in successfully!',
-                'redirect' => $redirectUrl,
-                'user'     => [
-                    'name'  => $fullName,
+        return $this->respondSuccess(
+            message: 'Registered and logged in successfully!',
+            redirectUrl: $redirectUrl,
+            extraData: [
+                'user' => [
+                    'name'  => $customer->full_name,
                     'email' => $customer->email,
                 ],
-            ]);
-        }
-
-        return Redirect::intended($redirectUrl)->with('success', 'Registered and logged in successfully!');
+            ]
+        );
     }
 
     /**
      * Handle customer logout.
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse|RedirectResponse
     {
-        Auth::guard('customer')->logout();
+        $this->authService->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'status'   => true,
-                'message'  => 'Logged out successfully!',
-                'redirect' => route('home'),
+        return $this->respondSuccess(
+            message: 'Logged out successfully!',
+            redirectUrl: route('home')
+        );
+    }
+
+    /**
+     * Display the forgot password modal / redirect to home.
+     */
+    public function forgotPassword(): RedirectResponse
+    {
+        return Redirect::route('home', ['auth' => 'forgot']);
+    }
+
+    /**
+     * Send a password reset link to the given user.
+     */
+    public function sendResetLinkEmail(CustomerForgotPasswordRequest $request): JsonResponse|RedirectResponse
+    {
+        $request->ensureIsNotRateLimited();
+        $request->hitRateLimiter();
+
+        try {
+            $this->authService->sendResetLink($request->validated('email'));
+        } catch (\Throwable $e) {
+            Log::error('CustomerAuthController: Failed to send password reset email.', [
+                'email' => $request->validated('email'),
+                'error' => $e->getMessage(),
             ]);
+
+            return $this->respondError(
+                message: 'Unable to send password reset email. Please try again later.',
+                status: 500
+            );
         }
 
-        return Redirect::route('home')->with('success', 'Logged out successfully!');
+        return $this->respondSuccess('We have sent password reset instructions to your email address.');
+    }
+
+    /**
+     * Display the password reset view / open reset password modal.
+     */
+    public function resetPassword(Request $request, ?string $token = null): RedirectResponse
+    {
+        return Redirect::route('home', [
+            'auth'  => 'reset',
+            'token' => $token,
+            'email' => $request->query('email', old('email')),
+        ]);
+    }
+
+    /**
+     * Reset the given user's password.
+     */
+    public function updatePassword(CustomerResetPasswordRequest $request): JsonResponse|RedirectResponse
+    {
+        $status = $this->authService->resetPassword($request->validated());
+
+        if ($status === Password::PASSWORD_RESET) {
+            return $this->respondSuccess(
+                message: 'Your password has been successfully reset! You may now sign in with your new password.',
+                redirectUrl: route('home', ['auth' => 'signin'])
+            );
+        }
+
+        $errorMessage = __($status);
+        if ($errorMessage === $status) {
+            $errorMessage = 'This password reset link is invalid or has expired.';
+        }
+
+        throw ValidationException::withMessages([
+            'email' => $errorMessage,
+        ]);
+    }
+
+    /**
+     * Unified response handler for AJAX and standard Browser requests.
+     */
+    protected function respondSuccess(string $message, ?string $redirectUrl = null, array $extraData = []): JsonResponse|RedirectResponse
+    {
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json(array_merge([
+                'status'   => true,
+                'message'  => $message,
+                'redirect' => $redirectUrl,
+            ], $extraData));
+        }
+
+        if ($redirectUrl) {
+            return Redirect::to($redirectUrl)->with('status', $message)->with('success', $message);
+        }
+
+        return Redirect::back()->with('status', $message)->with('success', $message);
+    }
+
+    /**
+     * Unified error response handler for unexpected runtime exceptions.
+     */
+    protected function respondError(string $message, int $status = 422, array $errors = []): JsonResponse|RedirectResponse
+    {
+        if (request()->expectsJson() || request()->ajax()) {
+            return response()->json([
+                'status'  => false,
+                'message' => $message,
+                'errors'  => $errors,
+            ], $status);
+        }
+
+        return Redirect::back()->withErrors(['email' => $message])->withInput();
     }
 
     /**
@@ -250,12 +247,10 @@ class CustomerAuthController extends Controller
         $appHost  = parse_url(config('app.url', url('/')), PHP_URL_HOST);
 
         if ($redirect && is_string($redirect)) {
-            // Permit relative paths while rejecting protocol-relative (//evil.com) and backslash payloads
             if (Str::startsWith($redirect, '/') && !Str::startsWith($redirect, '//') && !Str::startsWith($redirect, '/\\')) {
                 return url($redirect);
             }
 
-            // Permit explicit matches where host strictly matches the application host
             $redirectHost = parse_url($redirect, PHP_URL_HOST);
             if ($redirectHost && $appHost && strtolower($redirectHost) === strtolower($appHost)) {
                 return $redirect;
@@ -265,7 +260,6 @@ class CustomerAuthController extends Controller
         $previous = url()->previous();
         $excludedAuthUrls = [route('signin'), route('signup'), route('login')];
 
-        // Ensure previous URL is internal and not an authentication form
         if ($previous && !in_array($previous, $excludedAuthUrls)) {
             $prevHost = parse_url($previous, PHP_URL_HOST);
             if ($prevHost && $appHost && strtolower($prevHost) === strtolower($appHost)) {

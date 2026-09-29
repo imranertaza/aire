@@ -367,14 +367,20 @@ class FrontendController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
-   public function contactSubmit(Request $request)
-    {
         $request->validate([
             'email'                => 'required|email',
+            'name'                 => 'nullable|string|max:100',
+            'phone'                => 'nullable|string|max:30',
             'subject'              => 'nullable|string|max:255',
-            'description'          => 'required|string|max:1000',
-            'g-recaptcha-response' => 'required|captcha',
+            'description'          => 'nullable|string|max:2000',
+            'message'              => 'nullable|string|max:2000',
+            'g-recaptcha-response' => [new \App\Rules\Recaptcha()],
         ]);
+
+        $messageBody = $request->input('description') ?? $request->input('message') ?? '';
+        if (empty(trim((string)$messageBody))) {
+            return back()->withErrors(['message' => 'Message is required.'])->withInput();
+        }
 
         $settings = Setting::whereIn('label', [
             'mail_protocol',

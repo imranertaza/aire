@@ -51,7 +51,7 @@ $(document).ready(function () {
         $('.payment-opt-btn').removeClass('active');
         $(this).addClass('active');
 
-        const val          = $(this).data('value');
+        const val = $(this).data('value');
         const requiresCard = $(this).data('requires-card') == 1;
         $('#selectedPaymentMethod').val(val);
 
@@ -80,7 +80,7 @@ $(document).ready(function () {
         const countryId = isDifferentShipping ? $('#sh_countryName').val() : $('#countryName1').val();
 
         // Calculate rate for each shipping method option dynamically
-        $('input[name="shippingMethod"]').each(function() {
+        $('input[name="shippingMethod"]').each(function () {
             const methodCode = $(this).val();
             const $radio = $(this);
 
@@ -124,21 +124,21 @@ $(document).ready(function () {
         let fName, lName, country, district, addr1, addr2, phone;
 
         if (isDifferentShipping) {
-            fName    = $('#shipFname').val() || '';
-            lName    = $('#shipLname').val() || '';
-            phone    = $('#shipPhone').val() || '';
-            country  = $('#sh_countryName option:selected').text() || '—';
+            fName = $('#shipFname').val() || '';
+            lName = $('#shipLname').val() || '';
+            phone = $('#shipPhone').val() || '';
+            country = $('#sh_countryName option:selected').text() || '—';
             district = $('#sh_stateView option:selected').text() || '—';
-            addr1    = $('#shipAddr1').val() || '';
-            addr2    = $('#shipAddr2').val() || '';
+            addr1 = $('#shipAddr1').val() || '';
+            addr2 = $('#shipAddr2').val() || '';
         } else {
-            fName    = $('#fname1').val() || '';
-            lName    = $('#lname1').val() || '';
-            phone    = $('#phone').val() || '';
-            country  = $('#countryName1 option:selected').text() || '—';
+            fName = $('#fname1').val() || '';
+            lName = $('#lname1').val() || '';
+            phone = $('#phone').val() || '';
+            country = $('#countryName1 option:selected').text() || '—';
             district = $('#stateView option:selected').text() || '—';
-            addr1    = $('#addr1').val() || '';
-            addr2    = $('#addr2').val() || '';
+            addr1 = $('#addr1').val() || '';
+            addr2 = $('#addr2').val() || '';
         }
 
         if (country.includes('Please select')) country = '—';
@@ -177,30 +177,73 @@ $(document).ready(function () {
             $('#shipFname, #shipLname, #shipPhone, #sh_countryName, #sh_stateView, #shipAddr1, #shipZip').removeAttr('required');
         }
         updateLiveShipSummary();
-    });
+        // ─── reCAPTCHA v3 Helper ────────────────────────────────────────────────
+        function getRecaptchaToken(action) {
+            return new Promise(function (resolve) {
+                if (typeof window.aireRecaptchaSiteKey !== 'undefined' && window.aireRecaptchaSiteKey && typeof grecaptcha !== 'undefined') {
+                    grecaptcha.ready(function () {
+                        grecaptcha.execute(window.aireRecaptchaSiteKey, { action: action || 'checkout' })
+                            .then(function (token) { resolve(token); })
+                            .catch(function () { resolve(''); });
+                    });
+                } else {
+                    resolve('');
+                }
+            });
+        }
 
-    // ─── Apply Promo Code ─────────────────────────────────────────────────────
-    $(document).on('click', '#btnApplyPromo', function () {
-        const code = $('#promoCodeInput').val().trim();
-        if (!code) return;
+        // ─── Checkout Form Submit Interceptor for reCAPTCHA v3 ──────────────────
+        $('#checkoutForm').on('submit', function (e) {
+            const $form = $(this);
+            const $tokenInput = $('#checkoutRecaptchaToken');
 
-        const $btn = $(this).prop('disabled', true).text('Applying…');
-        $('#promoFeedback').text('').removeClass('text-success text-danger');
+            if (typeof window.aireRecaptchaSiteKey !== 'undefined' && window.aireRecaptchaSiteKey && typeof grecaptcha !== 'undefined') {
+                if (!$tokenInput.val()) {
+                    e.preventDefault();
+                    const $submitBtn = $form.find('button[type="submit"]');
+                    $submitBtn.prop('disabled', true);
 
-        $.ajax({
-            url: '/coupon/apply',
-            method: 'POST',
-            data: {
-                _token: csrfToken,
-                coupon_code: code
-            },
-            success(res) {
-                if (res.success) {
-                    couponDiscount = parseFloat(res.discount) || 0;
+                    grecaptcha.ready(function () {
+                        grecaptcha.execute(window.aireRecaptchaSiteKey, { action: 'checkout_submit' })
+                            .then(function (token) {
+                                $tokenInput.val(token);
+                                $form[0].submit();
+                            })
+                            .catch(function (err) {
+                                console.warn('reCAPTCHA checkout error:', err);
+                                $tokenInput.val('');
+                                $form[0].submit();
+                            });
+                    });
+                }
+            }
+        });
 
-                    // Swap the promo input form for the applied banner
-                    const saving = couponDiscount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    const banner = `
+        // ─── Apply Promo Code ─────────────────────────────────────────────────────
+        $(document).on('click', '#btnApplyPromo', async function () {
+            const code = $('#promoCodeInput').val().trim();
+            if (!code) return;
+
+            const $btn = $(this).prop('disabled', true).text('Applying…');
+            $('#promoFeedback').text('').removeClass('text-success text-danger');
+
+            const recaptchaToken = await getRecaptchaToken('apply_coupon');
+
+            $.ajax({
+                url: '/coupon/apply',
+                method: 'POST',
+                data: {
+                    _token: csrfToken,
+                    coupon_code: code,
+                    'g-recaptcha-response': recaptchaToken
+                },
+                success(res) {
+                    if (res.success) {
+                        couponDiscount = parseFloat(res.discount) || 0;
+
+                        // Swap the promo input form for the applied banner
+                        const saving = couponDiscount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        const banner = `
                         <div class="d-flex align-items-center justify-content-between gap-2 rounded-3 px-3 py-2" id="appliedCouponBanner"
                             style="background: var(--color-primary-bg); border: 1.5px solid var(--color-primary-light);">
                             <div class="d-flex align-items-center gap-2">
@@ -216,38 +259,38 @@ $(document).ready(function () {
                                 <i class="bi bi-x-circle me-1"></i>Remove
                             </button>
                         </div>`;
-                    $('#promoInputWrapper').replaceWith(banner);
+                        $('#promoInputWrapper').replaceWith(banner);
 
-                    // Show discount row and update totals
-                    $('.checkout-discount-val').text(saving);
-                    $('.checkout-discount-row').css('display', 'flex');
-                    updateCheckoutTotals();
-                } else {
-                    $('#promoFeedback').text(res.message).addClass('text-danger');
+                        // Show discount row and update totals
+                        $('.checkout-discount-val').text(saving);
+                        $('.checkout-discount-row').css('display', 'flex');
+                        updateCheckoutTotals();
+                    } else {
+                        $('#promoFeedback').text(res.message).addClass('text-danger');
+                        $btn.prop('disabled', false).text('Apply');
+                    }
+                },
+                error() {
+                    $('#promoFeedback').text('Something went wrong. Please try again.').addClass('text-danger');
                     $btn.prop('disabled', false).text('Apply');
                 }
-            },
-            error() {
-                $('#promoFeedback').text('Something went wrong. Please try again.').addClass('text-danger');
-                $btn.prop('disabled', false).text('Apply');
-            }
+            });
         });
-    });
 
-    // ─── Remove Coupon ────────────────────────────────────────────────────────
-    $(document).on('click', '#btnRemoveCoupon', function () {
-        const $btn = $(this).prop('disabled', true);
+        // ─── Remove Coupon ────────────────────────────────────────────────────────
+        $(document).on('click', '#btnRemoveCoupon', function () {
+            const $btn = $(this).prop('disabled', true);
 
-        $.ajax({
-            url: '/coupon/remove',
-            method: 'POST',
-            data: { _token: csrfToken },
-            success(res) {
-                if (res.success) {
-                    couponDiscount = 0;
+            $.ajax({
+                url: '/coupon/remove',
+                method: 'POST',
+                data: { _token: csrfToken },
+                success(res) {
+                    if (res.success) {
+                        couponDiscount = 0;
 
-                    // Replace the banner back with the promo input form
-                    const inputForm = `
+                        // Replace the banner back with the promo input form
+                        const inputForm = `
                         <div id="promoInputWrapper">
                             <a class="text-decoration-none fw-semibold fs-14 text-dark d-flex justify-content-between align-items-center"
                                 data-bs-toggle="collapse" href="#promoCodeCollapse" role="button" aria-expanded="false"
@@ -263,14 +306,15 @@ $(document).ready(function () {
                                 <div id="promoFeedback" class="mt-2 fs-13 fw-semibold"></div>
                             </div>
                         </div>`;
-                    $('#appliedCouponBanner').replaceWith(inputForm);
+                        $('#appliedCouponBanner').replaceWith(inputForm);
 
-                    // Hide discount row and recalculate
-                    $('.checkout-discount-row').css('display', 'none');
-                    $('.checkout-discount-val').text('0.00');
-                    updateCheckoutTotals();
+                        // Hide discount row and recalculate
+                        $('.checkout-discount-row').css('display', 'none');
+                        $('.checkout-discount-val').text('0.00');
+                        updateCheckoutTotals();
+                    }
                 }
-            }
+            });
         });
     });
 });

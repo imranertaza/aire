@@ -138,7 +138,11 @@ Route::controller(\App\Http\Controllers\StorefrontController::class)->group(func
     Route::get('/about', 'about')->name('about');
     Route::get('/docs', 'docs')->name('docs');
     Route::get('/contact', 'contact')->name('contact');
+    Route::get('/page/{slug}', 'pageDetails')->name('page.show');
+    Route::get('/pages/{slug}', 'pageDetails')->name('page.details');
     Route::post('/newsletter/subscribe', 'subscribeNewsletter')->name('newsletter.subscribe');
+    Route::match(['get', 'post'], '/newsletter/unsubscribe/{token}', 'unsubscribe')->name('newsletter.unsubscribe');
+    Route::post('/newsletter/resubscribe/{token}', 'resubscribe')->name('newsletter.resubscribe');
 });
 
 Route::controller(\App\Http\Controllers\ProductController::class)->group(function () {
@@ -188,6 +192,12 @@ Route::middleware('customer.guest')->group(function () {
         Route::get('/login', 'signin')->name('login');
         Route::get('/signup', 'signup')->name('signup');
         Route::post('/signup', 'postSignup')->name('signup.post');
+
+        // Password Reset Routes
+        Route::get('/forgot-password', 'forgotPassword')->name('password.request');
+        Route::post('/forgot-password', 'sendResetLinkEmail')->name('password.email');
+        Route::get('/reset-password/{token}', 'resetPassword')->name('password.reset');
+        Route::post('/reset-password', 'updatePassword')->name('password.update');
     });
 });
 

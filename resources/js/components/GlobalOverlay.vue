@@ -4,7 +4,7 @@
       <circle class="ring" cx="25" cy="25" r="20" />
       <circle class="ball" cx="25" cy="5" r="3" />
     </svg>
-    <span class="ml-2">{{ loadingStore.message }} {{ loadingStore.progress }}%</span>
+    <span class="ml-2">{{ loadingStore.message }} <template v-if="loadingStore.progress > 0">{{ loadingStore.progress }}%</template></span>
   </div>
 </template>
 
