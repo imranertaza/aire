@@ -40,8 +40,13 @@ class PageSeeder extends Seeder
                 'meta_description'  => 'Learn about Aire’s mission to deliver cutting-edge air purification systems, HEPA filtration, and smart clean air technologies.',
                 'meta_keyword'      => 'About Aire, indoor air quality, cleanroom technology, HEPA filtration, smart air purifier',
                 'status'            => 1,
+<<<<<<< HEAD
                 'createdBy'         => $adminId,
                 'updatedBy'         => $adminId,
+=======
+                'createdBy'         => 1,
+                'updatedBy'         => 1,
+>>>>>>> 9d4263d40313bc3158e1cd219112a3ef620a211e
             ]
         );
         Page::updateOrCreate(
@@ -58,8 +63,13 @@ class PageSeeder extends Seeder
                 'meta_description'  => 'Reach out to the Aire support team for consultations, technical support, warranty inquiries, and enterprise solutions.',
                 'meta_keyword'      => 'Contact Aire, clean air consultation, air purifier support, commercial filtration inquiries',
                 'status'            => 1,
+<<<<<<< HEAD
                 'createdBy'         => $adminId,
                 'updatedBy'         => $adminId,
+=======
+                'createdBy'         => 1,
+                'updatedBy'         => 1,
+>>>>>>> 9d4263d40313bc3158e1cd219112a3ef620a211e
             ]
         );
         Page::updateOrCreate(
@@ -76,8 +86,13 @@ class PageSeeder extends Seeder
                 'meta_description'  => 'Explore Aire’s journey from an aerosol research laboratory to an international leader in clean air solutions.',
                 'meta_keyword'      => 'Aire history, air purification innovations, clean air engineering milestones',
                 'status'            => 1,
+<<<<<<< HEAD
                 'createdBy'         => $adminId,
                 'updatedBy'         => $adminId,
+=======
+                'createdBy'         => 1,
+                'updatedBy'         => 1,
+>>>>>>> 9d4263d40313bc3158e1cd219112a3ef620a211e
             ]
         );
         Page::updateOrCreate(
@@ -94,8 +109,13 @@ class PageSeeder extends Seeder
                 'meta_description'  => 'Discover Aire’s cutting-edge H13 HEPA filtration and smart indoor air quality sensing technologies.',
                 'meta_keyword'      => 'HEPA technology, air purifier filtration, VOC reduction, clean air engineering',
                 'status'            => 1,
+<<<<<<< HEAD
                 'createdBy'         => $adminId,
                 'updatedBy'         => $adminId,
+=======
+                'createdBy'         => 1,
+                'updatedBy'         => 1,
+>>>>>>> 9d4263d40313bc3158e1cd219112a3ef620a211e
             ]
         );
     }
