@@ -16,15 +16,7 @@ class PageSeeder extends Seeder
     {
         $faker = Faker::create();
 
-        $adminUser = \App\Models\User::first();
-        if (!$adminUser) {
-            $adminUser = \App\Models\User::create([
-                'name'     => 'Super Admin',
-                'email'    => 'super@gmail.com',
-                'password' => \Illuminate\Support\Facades\Hash::make('12345678'),
-            ]);
-        }
-        $adminId = $adminUser->id;
+        $adminId = \App\Models\User::value('id') ?: 1;
 
         Page::updateOrCreate(
             ["slug" => Str::slug('About Us')],

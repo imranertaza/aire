@@ -20,6 +20,8 @@ class ProductFilterOptionsSeeder extends Seeder
      */
     public function run(): void
     {
+        $adminId = \App\Models\User::value('id') ?: 1;
+
         $products = Product::with(['description', 'categories', 'productAttributes'])->get();
         if ($products->isEmpty()) {
             $this->command->error('No products found to seed options for!');
@@ -36,52 +38,130 @@ class ProductFilterOptionsSeeder extends Seeder
         $options = Option::with('optionValues')->get()->keyBy(fn($o) => Str::slug($o->name, '_'));
 
         $buildingTypes = [
-            'Apartment', 'House', 'Villa', 'Office', 'Shopping Mall',
-            'Hospital', 'School', 'Car', 'Factory', 'Warehouse', 'Airport', 'Public Building'
+            'Apartment',
+            'House',
+            'Villa',
+            'Office',
+            'Shopping Mall',
+            'Hospital',
+            'School',
+            'Car',
+            'Factory',
+            'Warehouse',
+            'Airport',
+            'Public Building'
         ];
 
         $roomTypes = [
-            'Bedroom', 'Whole Apartment', 'Whole House', 'Villa', 'Meeting Room',
-            'Office Floor', 'Public Area', 'Ward', 'Classroom', 'Vehicle',
-            'Production Area', 'Warehouse', 'Terminal', 'Lobby'
+            'Bedroom',
+            'Whole Apartment',
+            'Whole House',
+            'Villa',
+            'Meeting Room',
+            'Office Floor',
+            'Public Area',
+            'Ward',
+            'Classroom',
+            'Vehicle',
+            'Production Area',
+            'Warehouse',
+            'Terminal',
+            'Lobby'
         ];
 
         $areaRanges = [
-            '10-20', '20-50', '50-80', '80-120', '120-200', '200-300',
-            '300-500', '500-1000', '1000-2000', '2000-4000', '4000-10000', '10000-20000', '20000+'
+            '10-20',
+            '20-50',
+            '50-80',
+            '80-120',
+            '120-200',
+            '200-300',
+            '300-500',
+            '500-1000',
+            '1000-2000',
+            '2000-4000',
+            '4000-10000',
+            '10000-20000',
+            '20000+'
         ];
 
         $occupancies = [
-            '1', '1-2', '3-5', '5-10', '10-50', '50-100', '100+', '1000+'
+            '1',
+            '1-2',
+            '3-5',
+            '5-10',
+            '10-50',
+            '50-100',
+            '100+',
+            '1000+'
         ];
 
         $healthConcerns = [
-            'Allergies', 'Asthma', 'Family Health', 'Luxury Wellness', 'Productivity',
-            'Employee Wellness', 'Public Health', 'Virus Protection', 'Respiratory Safety',
-            "Children's Health", 'Driver Health', 'Worker Safety', 'Compliance', 'MegaFacility'
+            'Allergies',
+            'Asthma',
+            'Family Health',
+            'Luxury Wellness',
+            'Productivity',
+            'Employee Wellness',
+            'Public Health',
+            'Virus Protection',
+            'Respiratory Safety',
+            "Children's Health",
+            'Driver Health',
+            'Worker Safety',
+            'Compliance',
+            'MegaFacility'
         ];
 
         $problems = [
-            'PM2.5', 'High CO2', 'IAQ', 'Mold, Poor Ventilation', 'PM2.5 + CO2',
-            'Poor Air Quality', 'Smoke & Odor', 'Virus & Bacteria', 'Airborne Particles',
-            'Dust & VOCs', 'Large Building Ventilation', 'Large Space Air Quality',
-            'HVAC Treatment', 'PM2.5 Monitoring'
+            'PM2.5',
+            'High CO2',
+            'IAQ',
+            'Mold, Poor Ventilation',
+            'PM2.5 + CO2',
+            'Poor Air Quality',
+            'Smoke & Odor',
+            'Virus & Bacteria',
+            'Airborne Particles',
+            'Dust & VOCs',
+            'Large Building Ventilation',
+            'Large Space Air Quality',
+            'HVAC Treatment',
+            'PM2.5 Monitoring'
         ];
 
         $solutions = [
-            'Air Purification', 'Fresh Air + Heat Recovery', 'Ventilation + Monitoring',
-            'Whole House Ventilation', 'Air Quality Management', 'Personal Protection',
-            'Vehicle Air Quality', 'CO2 Monitoring', 'Central Ventilation',
-            'Purification + HVAC', 'HVAC Treatment', 'Monitoring'
+            'Air Purification',
+            'Fresh Air + Heat Recovery',
+            'Ventilation + Monitoring',
+            'Whole House Ventilation',
+            'Air Quality Management',
+            'Personal Protection',
+            'Vehicle Air Quality',
+            'CO2 Monitoring',
+            'Central Ventilation',
+            'Purification + HVAC',
+            'HVAC Treatment',
+            'Monitoring'
         ];
 
         $filterGrades = [
-            'HEPA H13 (99.95%)', 'HEPA H14 (99.995%)', 'Medical-Grade True HEPA',
-            'ULPA U15 (99.9995%)', 'Activated Carbon + HEPA H13', 'Nano-Silver Antimicrobial HEPA'
+            'HEPA H13 (99.95%)',
+            'HEPA H14 (99.995%)',
+            'Medical-Grade True HEPA',
+            'ULPA U15 (99.9995%)',
+            'Activated Carbon + HEPA H13',
+            'Nano-Silver Antimicrobial HEPA'
         ];
 
         $cadrRatings = [
-            '250 m³/h', '450 m³/h', '600 m³/h', '800 m³/h', '1200 m³/h', '2500 m³/h', '5000 m³/h'
+            '250 m³/h',
+            '450 m³/h',
+            '600 m³/h',
+            '800 m³/h',
+            '1200 m³/h',
+            '2500 m³/h',
+            '5000 m³/h'
         ];
 
         // 3. Industry child category IDs
@@ -148,7 +228,7 @@ class ProductFilterOptionsSeeder extends Seeder
                 ['name' => 'CADR Rating',         'details' => $selCadr],
                 ['name' => 'Problem Solved',      'details' => "{$selProblem1}, {$selProblem2}"],
                 ['name' => 'Health Benefits',     'details' => "{$selHealth1}, {$selHealth2}"],
-                ['name' => 'Recommended Solution','details' => "{$selSolution1}, {$selSolution2}"],
+                ['name' => 'Recommended Solution', 'details' => "{$selSolution1}, {$selSolution2}"],
                 ['name' => 'Operating Noise',     'details' => (18 + ($i % 30)) . ' dB(A)'],
                 ['name' => 'Power Consumption',   'details' => (25 + ($i % 120)) . ' W'],
                 ['name' => 'Efficiency Rating',   'details' => 'A++ European Standard'],
@@ -162,8 +242,8 @@ class ProductFilterOptionsSeeder extends Seeder
                     'details'            => $a['details'],
                     'sort_order'         => $sortIdx + 1,
                     'status'             => 1,
-                    'createdBy'          => 1,
-                    'updatedBy'          => 1,
+                    'createdBy'          => $adminId,
+                    'updatedBy'          => $adminId,
                     'created_at'         => now(),
                     'updated_at'         => now(),
                 ];
@@ -226,11 +306,20 @@ class ProductFilterOptionsSeeder extends Seeder
 
             // 4. Update Product Description with searchable tags and rich keywords
             $tagList = array_unique([
-                $selBuilding, $selRoom, $selArea, $selOcc,
-                $selHealth1, $selHealth2, $selProblem1, $selProblem2,
-                $selSolution1, $selSolution2,
-                Str::slug($selBuilding, '_'), Str::slug($selRoom, '_'),
-                Str::slug($selHealth1, '_'), Str::slug($selProblem1, '_'),
+                $selBuilding,
+                $selRoom,
+                $selArea,
+                $selOcc,
+                $selHealth1,
+                $selHealth2,
+                $selProblem1,
+                $selProblem2,
+                $selSolution1,
+                $selSolution2,
+                Str::slug($selBuilding, '_'),
+                Str::slug($selRoom, '_'),
+                Str::slug($selHealth1, '_'),
+                Str::slug($selProblem1, '_'),
                 Str::slug($selSolution1, '_')
             ]);
 
@@ -275,7 +364,7 @@ class ProductFilterOptionsSeeder extends Seeder
         $this->call(ProductFilterOptionSeeder::class);
 
         echo "Successfully seeded " . count($productAttributeInserts) . " attributes, " .
-             count($productOptionInserts) . " option associations, and updated category links & tags for " .
-             $products->count() . " products.\n";
+            count($productOptionInserts) . " option associations, and updated category links & tags for " .
+            $products->count() . " products.\n";
     }
 }

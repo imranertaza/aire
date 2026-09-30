@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Coupon;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -47,8 +48,8 @@ class CuponSeeder extends Seeder
                 'for_registered_user'   => 1,
                 'total_useable'         => null,        // Unlimited
                 'total_used'            => 12,
-                'date_start'            => now()->format('Y-m-d'),
-                'date_end'              => now()->addMonths(3)->format('Y-m-d'),
+                'date_start'            => Carbon::now()->format('Y-m-d'),
+                'date_end'              => Carbon::now()->addMonths(3)->format('Y-m-d'),
                 'status'                => 1,
                 'createdBy'             => $adminId,
                 'updatedBy'             => $adminId,

@@ -242,7 +242,6 @@ class AdvancedProductController extends Controller
 
                 foreach ($attributes as $attr) {
 
-                    // dd($attr);
                     if (!is_array($attr)) {
                         continue;
                     }

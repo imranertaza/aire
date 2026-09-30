@@ -17,6 +17,8 @@ class ProductAttributeSeeder extends Seeder
     {
         $this->command->info('Seeding Product Attributes...');
 
+        $adminId = \App\Models\User::value('id') ?: 1;
+
         // Get existing records
         $products = Product::pluck('id')->toArray();
         $groups = ProductAttributeGroup::pluck('id')->toArray();
@@ -35,8 +37,8 @@ class ProductAttributeSeeder extends Seeder
                 'details'             => 'Midnight Black',
                 'sort_order'          => 1,
                 'status'              => 1,
-                'createdBy'           => 1,
-                'updatedBy'           => 1,
+                'createdBy'           => $adminId,
+                'updatedBy'           => $adminId,
             ],
             [
                 'product_id'          => $products[0] ?? 1,
@@ -45,8 +47,8 @@ class ProductAttributeSeeder extends Seeder
                 'details'             => '256 GB',
                 'sort_order'          => 2,
                 'status'              => 1,
-                'createdBy'           => 1,
-                'updatedBy'           => 1,
+                'createdBy'           => $adminId,
+                'updatedBy'           => $adminId,
             ],
             [
                 'product_id'          => $products[0] ?? 1,
@@ -55,8 +57,8 @@ class ProductAttributeSeeder extends Seeder
                 'details'             => 'Snapdragon 8 Gen 2',
                 'sort_order'          => 1,
                 'status'              => 1,
-                'createdBy'           => 1,
-                'updatedBy'           => 1,
+                'createdBy'           => $adminId,
+                'updatedBy'           => $adminId,
             ],
 
             // Product 2
@@ -67,21 +69,17 @@ class ProductAttributeSeeder extends Seeder
                 'details'             => 'US 10',
                 'sort_order'          => 1,
                 'status'              => 1,
-                'createdBy'           => 1,
-                'updatedBy'           => 1,
+                'createdBy'           => $adminId,
+                'updatedBy'           => $adminId,
             ],
         ];
 
-        $adminId = \App\Models\User::value('id') ?: 1;
-
         foreach ($data as $item) {
-            $item['createdBy'] = $adminId;
-            $item['updatedBy'] = $adminId;
             ProductAttribute::updateOrCreate(
                 [
-                    'product_id'         => $item['product_id'],
+                    'product_id' => $item['product_id'],
                     'attribute_group_id' => $item['attribute_group_id'],
-                    'name'               => $item['name'],
+                    'name' => $item['name'],
                 ],
                 $item
             );
