@@ -1,0 +1,47 @@
+[23-Dec-2025 06:17:08 UTC] PHP Warning:  require(/home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/../symfony/deprecation-contracts/function.php): Failed to open stream: No such file or directory in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php on line 41
+[23-Dec-2025 06:17:08 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/../symfony/deprecation-contracts/function.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php(45): {closure}()
+#1 /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/autoload.php(22): ComposerAutoloaderInit2c1f0bf233d77f5c4f5bb44355ffbc4a::getLoader()
+#2 /home/httpstestnpcbang/staging.test.npcbangladesh.org/public/index.php(14): require('/home/httpstest...')
+#3 {main}
+  thrown in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php on line 41
+[23-Dec-2025 06:17:10 UTC] PHP Warning:  require(/home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/../symfony/deprecation-contracts/function.php): Failed to open stream: No such file or directory in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php on line 41
+[23-Dec-2025 06:17:10 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/../symfony/deprecation-contracts/function.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php(45): {closure}()
+#1 /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/autoload.php(22): ComposerAutoloaderInit2c1f0bf233d77f5c4f5bb44355ffbc4a::getLoader()
+#2 /home/httpstestnpcbang/staging.test.npcbangladesh.org/public/index.php(14): require('/home/httpstest...')
+#3 {main}
+  thrown in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php on line 41
+[23-Dec-2025 06:17:12 UTC] PHP Warning:  require(/home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/../symfony/deprecation-contracts/function.php): Failed to open stream: No such file or directory in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php on line 41
+[23-Dec-2025 06:17:15 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/../symfony/deprecation-contracts/function.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php(45): {closure}()
+#1 /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/autoload.php(22): ComposerAutoloaderInit2c1f0bf233d77f5c4f5bb44355ffbc4a::getLoader()
+#2 /home/httpstestnpcbang/staging.test.npcbangladesh.org/public/index.php(14): require('/home/httpstest...')
+#3 {main}
+  thrown in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php on line 41
+[23-Dec-2025 06:17:17 UTC] PHP Warning:  require(/home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/../symfony/deprecation-contracts/function.php): Failed to open stream: No such file or directory in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php on line 41
+[23-Dec-2025 06:17:17 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/../symfony/deprecation-contracts/function.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php(45): {closure}()
+#1 /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/autoload.php(22): ComposerAutoloaderInit2c1f0bf233d77f5c4f5bb44355ffbc4a::getLoader()
+#2 /home/httpstestnpcbang/staging.test.npcbangladesh.org/public/index.php(14): require('/home/httpstest...')
+#3 {main}
+  thrown in /home/httpstestnpcbang/staging.test.npcbangladesh.org/vendor/composer/autoload_real.php on line 41
+[20-Jan-2026 15:53:37 UTC] PHP Warning:  require(/home/npcbangladesh/public_html/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/npcbangladesh/public_html/index.php on line 14
+[20-Jan-2026 15:53:37 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/npcbangladesh/public_html/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/npcbangladesh/public_html/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/npcbangladesh/public_html/index.php on line 14
+[20-Jan-2026 15:53:37 UTC] PHP Warning:  require(/home/npcbangladesh/public_html/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/npcbangladesh/public_html/index.php on line 14
+[20-Jan-2026 15:53:37 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/npcbangladesh/public_html/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/npcbangladesh/public_html/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/npcbangladesh/public_html/index.php on line 14
+[20-Jan-2026 15:53:40 UTC] PHP Warning:  require(/home/npcbangladesh/public_html/../vendor/autoload.php): Failed to open stream: No such file or directory in /home/npcbangladesh/public_html/index.php on line 14
+[20-Jan-2026 15:53:40 UTC] PHP Fatal error:  Uncaught Error: Failed opening required '/home/npcbangladesh/public_html/../vendor/autoload.php' (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/npcbangladesh/public_html/index.php:14
+Stack trace:
+#0 {main}
+  thrown in /home/npcbangladesh/public_html/index.php on line 14

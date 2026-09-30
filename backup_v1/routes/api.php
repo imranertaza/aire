@@ -1,0 +1,507 @@
+<?php
+
+use App\Http\Controllers\Api\AdminDashboardController;
+use App\Http\Controllers\Api\AdminRoleController;
+use App\Http\Controllers\Api\Auth\AdminAuthController;
+use App\Http\Controllers\Api\BlogCategoryController;
+use App\Http\Controllers\Api\BlogController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\CommitteeMemberController;
+use App\Http\Controllers\Api\EventController;
+use App\Http\Controllers\Api\GalleryController;
+use App\Http\Controllers\Api\MediaController;
+use App\Http\Controllers\Api\MenuController;
+use App\Http\Controllers\Api\MenuItemController;
+use App\Http\Controllers\Api\NewsCategoryController;
+use App\Http\Controllers\Api\FundRequestController;
+use App\Http\Controllers\Api\ColorFamilyController;
+use App\Http\Controllers\Api\EmailSendController;
+use App\Http\Controllers\Api\EmailCampaignController;
+use App\Http\Controllers\Api\NewsController;
+use App\Http\Controllers\Api\NoticeController;
+use App\Http\Controllers\Api\PageController;
+use App\Http\Controllers\Api\PlayerController;
+use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\ResultController;
+use App\Http\Controllers\Api\SectionController;
+use App\Http\Controllers\Api\SettingsController;
+use App\Http\Controllers\Api\SliderController;
+use App\Http\Controllers\Api\BrandController;
+use App\Http\Controllers\Api\ProductCategoryController;
+use App\Http\Controllers\Api\EventCategoryController;
+use App\Http\Controllers\Api\AdvancedProductController;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
+
+/* Admin Authentication Routes */
+
+Route::prefix('admin')->controller(AdminAuthController::class)->group(function () {
+    Route::post('login', 'login')->name('admin.login');
+
+    Route::middleware('auth:user')->group(function () {
+        Route::get('me', 'me')->name('admin.me');
+        Route::get('profile', 'profile')->name('admin.profile');
+        Route::post('logout', 'logout')->name('admin.logout');
+    });
+});
+Route::get('/dashboard', [AdminDashboardController::class, 'index'])->middleware('auth:user');
+/* Admin Users & Role/Permission Management */
+Route::middleware(['auth:user'])->controller(AdminRoleController::class)->group(function () {
+    Route::get('admins', 'index');
+    Route::get('admins/{admin}', 'show');
+    Route::put('admins/{admin}', 'updateUser')->middleware('permission:update-users');
+    Route::put('admins/{admin}/role', 'updateUserRole')->middleware('permission:update-users');
+    Route::post('admins', 'store')->middleware('permission:create-users');
+    Route::delete('admins/{admin}', 'destroy')->middleware('permission:delete-users');
+
+    // Role & Permissions
+    Route::get('roles', 'roles');
+    Route::get('roles-with-permissions', 'rolesWithPermissions');
+    Route::put('roles/{role}/permissions', 'updatePermissions')->middleware('permission:update-permissions');
+    Route::get('permissions', 'permissions');
+});
+
+Route::middleware(['auth:user'])->group(function () {
+    Route::get('modules', [\App\Http\Controllers\Api\ModuleController::class, 'index']);
+    Route::post('modules/{module}/toggle', [\App\Http\Controllers\Api\ModuleController::class, 'toggle']);
+
+    // Newsletters
+    Route::apiResource('newsletters', \App\Http\Controllers\Api\NewsletterController::class);
+    Route::post('newsletters/{newsletter}/toggle', [\App\Http\Controllers\Api\NewsletterController::class, 'toggleStatus']);
+
+    // Email Send
+    Route::get('email-send/recipients', [\App\Http\Controllers\Api\EmailSendController::class, 'getRecipients']);
+    Route::post('email-send', [EmailSendController::class, 'send']);
+
+    // Email Campaigns
+    Route::get('email-campaigns', [EmailCampaignController::class, 'index']);
+
+    // Fund Requests
+    Route::apiResource('fund-requests', \App\Http\Controllers\Api\FundRequestController::class);
+
+    // Color Families
+    Route::apiResource('color-families', \App\Http\Controllers\Api\ColorFamilyController::class);
+});
+
+/* Posts Management */
+Route::middleware('auth:user')->prefix('posts')->controller(PostController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:view-posts');
+    Route::post('/', 'store')->middleware('permission:create-posts');
+    Route::get('{id}', 'show')->middleware('permission:view-posts');
+    Route::put('{id}', 'update')->middleware('permission:edit-posts');
+    Route::delete('{id}', 'destroy')->middleware('permission:delete-posts');
+    Route::patch('{id}/status', 'toggleStatus')->middleware('permission:publish-posts');
+});
+
+/* Pages Management */
+Route::middleware('auth:user')->prefix('pages')->controller(PageController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:view-pages');
+    Route::post('/', 'store')->middleware('permission:create-pages');
+    Route::get('{id}', 'show')->middleware('permission:view-pages');
+    Route::put('{id}', 'update')->middleware('permission:edit-pages');
+    Route::delete('{id}', 'destroy')->middleware('permission:delete-pages');
+    Route::patch('{id}/status', 'toggleStatus')->middleware('permission:publish-pages');
+});
+
+/* Frontend Sections & Sliders */
+Route::prefix('sections')->middleware(['auth:user', 'permission:manage-frontend'])->controller(SectionController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::get('home-sections', 'homeSections')->name('sections.home-sections');
+    Route::get('by-name/{name}', 'getByName')->name('sections.by-name');
+    Route::post('by-name/{name}', 'updateByName')->name('sections.update-by-name');
+    Route::put('by-name/{name}', 'updateByName');
+    Route::get('{id}', 'show')->name('sections.show');
+    Route::put('{id}', 'update')->name('sections.update');
+});
+
+Route::prefix('sliders')->middleware(['auth:user', 'permission:manage-frontend'])->controller(SliderController::class)->group(function () {
+    Route::get('/{key?}', 'bannerSliders');
+    Route::get('/{id}/show', 'show');
+    Route::post('/', 'store');
+    Route::post('/{id}', 'update');
+    Route::patch('/{id}/toggle', 'toggle')->name('sliders.toggle');
+    Route::delete('/{id}', 'destroy');
+});
+
+/* Global Settings */
+Route::middleware('auth:user')->prefix('settings')->controller(SettingsController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/update', 'update');
+    Route::get('/security', 'getSecuritySettings');
+    Route::post('/test-mail', 'sendTestEmail');
+});
+
+/* Categories */
+Route::prefix('categories')->middleware(['auth:user'])->controller(CategoryController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:view-categories');
+    Route::post('/', 'store')->middleware('permission:create-categories');
+
+    Route::prefix('{category}')->group(function () {
+        Route::get('/', 'show')->middleware('permission:view-categories');
+        Route::put('/', 'update')->middleware('permission:edit-categories');
+        Route::patch('/', 'updateStatus')->middleware('permission:edit-categories');
+        Route::delete('/', 'destroy')->middleware('permission:delete-categories');
+    });
+});
+
+/* News & News Categories */
+Route::middleware('auth:user')->prefix('news')->controller(NewsController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:view-news');
+    Route::post('/', 'store')->middleware('permission:create-news');
+    Route::get('{id}', 'show')->middleware('permission:view-news');
+    Route::put('{id}', 'update')->middleware('permission:edit-news');
+    Route::delete('{id}', 'destroy')->middleware('permission:delete-news');
+    Route::patch('{id}/status', 'toggleStatus')->middleware('permission:publish-news');
+});
+
+Route::prefix('news-categories')->middleware(['auth:user'])->controller(NewsCategoryController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:view-news-categories');
+    Route::post('/', 'store')->middleware('permission:create-news-categories');
+
+    Route::prefix('{category}')->group(function () {
+        Route::get('/', 'show')->middleware('permission:view-news-categories');
+        Route::put('/', 'update')->middleware('permission:edit-news-categories');
+        Route::patch('/', 'updateStatus')->middleware('permission:edit-news-categories');
+        Route::delete('/', 'destroy')->middleware('permission:delete-news-categories');
+    });
+});
+
+/* Blogs & Blog Categories */
+Route::middleware(['auth:user', 'module:blog'])->prefix('blogs')->controller(BlogController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:view-blog');
+    Route::post('/', 'store')->middleware('permission:create-blog');
+    Route::get('{id}', 'show')->middleware('permission:view-blog');
+    Route::put('{id}', 'update')->middleware('permission:edit-blog');
+    Route::delete('{id}', 'destroy')->middleware('permission:delete-blog');
+    Route::patch('{id}/status', 'toggleStatus')->middleware('permission:publish-blog');
+});
+
+Route::prefix('blog-categories')->middleware(['auth:user', 'module:blog'])->controller(BlogCategoryController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:view-blog-categories');
+    Route::post('/', 'store')->middleware('permission:create-blog-categories');
+
+    Route::prefix('{category}')->group(function () {
+        Route::get('/', 'show')->middleware('permission:view-blog-categories');
+        Route::put('/', 'update')->middleware('permission:edit-blog-categories');
+        Route::patch('/', 'updateStatus')->middleware('permission:edit-blog-categories');
+        Route::delete('/', 'destroy')->middleware('permission:delete-blog-categories');
+    });
+});
+
+/* Menus & Menu Items */
+Route::prefix('menus')->middleware(['auth:user', 'permission:manage-menus'])->controller(MenuController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::prefix('{menu}')->group(function () {
+        Route::get('/', 'show');
+        Route::put('/', 'update');
+        Route::delete('/', 'destroy');
+    });
+});
+
+Route::prefix('menu-items')->middleware(['auth:user', 'permission:manage-menus'])->controller(MenuItemController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/', 'store');
+    Route::get('{menuItem}', 'show');
+    Route::put('{menuItem}', 'update');
+    Route::delete('{menuItem}', 'destroy');
+    Route::post('reorder', 'reorder');
+});
+
+/* Media Management */
+Route::middleware(['auth:user'])->prefix('media')->controller(MediaController::class)->group(function () {
+    Route::get('/', 'index');
+    Route::post('/upload', 'upload');
+    Route::delete('/file', 'deleteFile');
+});
+
+/* Gallery Management */
+Route::middleware(['auth:user', 'module:album'])->prefix('gallery')->controller(GalleryController::class)->group(function () {
+    Route::get('/', 'index')->name('gallery.index')->middleware('permission:view-galleries');
+    Route::post('/', 'store')->name('gallery.store')->middleware('permission:create-galleries');
+    Route::get('{gallery}', 'show')->name('gallery.show')->middleware('permission:view-galleries');
+    Route::put('{gallery}', 'update')->name('gallery.update')->middleware('permission:edit-galleries');
+    Route::delete('{gallery}', 'destroy')->name('gallery.destroy')->middleware('permission:delete-galleries');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('gallery.toggle')->middleware('permission:edit-galleries');
+
+    // Gallery Details (Images)
+    Route::post('details', 'storeDetail')->name('gallery.details.store')->middleware('permission:edit-galleries');
+    Route::patch('details/{detail}', 'updateDetail')->name('gallery.details.update')->middleware('permission:edit-galleries');
+    Route::delete('details/{detail}', 'destroyGalleryDetail')->name('gallery.details.destroy')->middleware('permission:delete-galleries');
+});
+
+/* Events & Event Categories */
+Route::prefix('events')->middleware(['auth:user'])->controller(EventController::class)->group(function () {
+    Route::get('/', 'index')->name('events.index')->middleware('permission:view-events');
+    Route::post('/', 'store')->name('events.store')->middleware('permission:create-events');
+    Route::get('{id}', 'show')->name('events.show')->middleware('permission:view-events');
+    Route::put('{id}', 'update')->name('events.update')->middleware('permission:edit-events');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('events.toggle')->middleware('permission:edit-events');
+    Route::delete('{id}', 'destroy')->name('events.destroy')->middleware('permission:delete-events');
+});
+
+Route::prefix('events-categories')->middleware(['auth:user'])->controller(EventCategoryController::class)->group(function () {
+    Route::get('/', 'index')->middleware('permission:view-events-categories');
+    Route::post('/', 'store')->middleware('permission:create-events-categories');
+
+    Route::prefix('{category}')->group(function () {
+        Route::get('/', 'show')->middleware('permission:view-events-categories');
+        Route::put('/', 'update')->middleware('permission:edit-events-categories');
+        Route::patch('/', 'updateStatus')->middleware('permission:edit-events-categories');
+        Route::delete('/', 'destroy')->middleware('permission:delete-events-categories');
+    });
+});
+
+/* Notices */
+Route::prefix('notices')->middleware(['auth:user'])->controller(NoticeController::class)->group(function () {
+    Route::get('/', 'index')->name('notices.index')->middleware('permission:view-notices');
+    Route::post('/', 'store')->name('notices.store')->middleware('permission:create-notices');
+    Route::get('{id}', 'show')->name('notices.show')->middleware('permission:view-notices');
+    Route::put('{id}', 'update')->name('notices.update')->middleware('permission:edit-notices');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('notices.toggle')->middleware('permission:edit-notices');
+    Route::delete('{id}', 'destroy')->name('notices.destroy')->middleware('permission:delete-notices');
+});
+
+/* Brands */
+Route::prefix('brands')->middleware(['auth:user'])->controller(BrandController::class)->group(function () {
+    Route::get('/', 'index')->name('brands.index')->middleware('permission:view-brands');
+    Route::post('/', 'store')->name('brands.store')->middleware('permission:create-brands');
+    Route::get('all', 'allBrands')->name('brands.all');
+    Route::get('{brand}', 'show')->name('brands.show')->middleware('permission:view-brands');
+    Route::put('{brand}', 'update')->name('brands.update')->middleware('permission:edit-brands');
+    Route::patch('{brand}/toggle-status', 'toggleStatus')->name('brands.toggle')->middleware('permission:edit-brands');
+    Route::delete('{brand}', 'destroy')->name('brands.destroy')->middleware('permission:delete-brands');
+});
+
+/* Coupons */
+Route::prefix('coupons')->middleware(['auth:user', 'module:coupon'])->controller(\App\Http\Controllers\Api\CouponController::class)->group(function () {
+    Route::get('/', 'index')->name('coupons.index')->middleware('permission:view-coupons');
+    Route::post('/', 'store')->name('coupons.store')->middleware('permission:create-coupons');
+    Route::get('all', 'allCoupons')->name('coupons.all');
+    Route::get('{id}', 'show')->name('coupons.show')->middleware('permission:view-coupons');
+    Route::put('{id}', 'update')->name('coupons.update')->middleware('permission:edit-coupons');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('coupons.toggle')->middleware('permission:edit-coupons');
+    Route::delete('{id}', 'destroy')->name('coupons.destroy')->middleware('permission:delete-coupons');
+});
+
+/* Reviews / Feedbacks */
+Route::prefix('reviews')->middleware(['auth:user', 'module:review'])->controller(\App\Http\Controllers\Api\ProductFeedbackController::class)->group(function () {
+    Route::get('/', 'index')->name('reviews.index')->middleware('permission:view-reviews');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('reviews.toggle-status')->middleware('permission:edit-reviews');
+    Route::delete('{id}', 'destroy')->name('reviews.destroy')->middleware('permission:delete-reviews');
+});
+
+/* Customers CRUD with Ledger and Point History */
+Route::prefix('customers')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\CustomerController::class)->group(function () {
+    Route::get('/', 'index')->name('customers.index')->middleware('permission:view-customers');
+    Route::post('/', 'store')->name('customers.store')->middleware('permission:create-customers');
+    Route::get('{id}', 'show')->name('customers.show')->middleware('permission:view-customers');
+    Route::put('{id}', 'update')->name('customers.update')->middleware('permission:edit-customers');
+    Route::delete('{id}', 'destroy')->name('customers.destroy')->middleware('permission:delete-customers');
+    Route::get('{id}/ledger', 'ledger')->name('customers.ledger')->middleware('permission:view-customers');
+    Route::get('{id}/point', 'point')->name('customers.point')->middleware(['permission:view-customers', 'module:point']);
+});
+
+/* Orders CRUD and Tracking */
+Route::prefix('orders')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\OrderController::class)->group(function () {
+    Route::get('/', 'index')->name('orders.index')->middleware('permission:view-orders');
+    Route::get('{id}', 'show')->name('orders.show')->middleware('permission:view-orders');
+    Route::post('{id}/history', 'history')->name('orders.history')->middleware('permission:edit-orders');
+    Route::patch('{id}/payment-status', 'paymentStatus')->name('orders.payment-status')->middleware('permission:edit-orders');
+    Route::post('{id}/points', 'updatePoints')->name('orders.points')->middleware(['permission:edit-orders', 'module:point']);
+    Route::delete('{id}', 'destroy')->name('orders.destroy')->middleware('permission:delete-orders');
+});
+
+/* Offers CRUD */
+Route::prefix('offers')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\OfferController::class)->group(function () {
+    Route::get('/', 'index')->name('offers.index')->middleware('permission:view-offers');
+    Route::post('/', 'store')->name('offers.store')->middleware('permission:create-offers');
+    Route::get('all', 'allOffers')->name('offers.all');
+    Route::get('zone-data', 'getZoneData')->name('offers.zone-data');
+    Route::get('{id}', 'show')->name('offers.show')->middleware('permission:view-offers');
+    Route::post('{id}', 'update')->name('offers.update')->middleware('permission:edit-offers'); // POST for multipart/form-data
+    Route::delete('{id}', 'destroy')->name('offers.destroy')->middleware('permission:delete-offers');
+});
+
+/* Shipping Methods */
+Route::prefix('shipping-methods')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ShippingMethodController::class)->group(function () {
+    Route::get('all', 'allMethods');
+    Route::get('', 'index')->name('shipping.index')->middleware('permission:view-shipping-methods');
+    Route::patch('{id}/status', 'updateStatus')->name('shipping.update-status')->middleware('permission:edit-shipping-methods');
+    Route::get('{id}/settings', 'settings')->name('shipping.settings')->middleware('permission:view-shipping-methods');
+    Route::post('{id}/settings', 'updateSettings')->name('shipping.update-settings')->middleware('permission:edit-shipping-methods');
+    Route::delete('zone-rate/{id}', 'deleteZoneRate')->name('shipping.delete-zone-rate')->middleware('permission:edit-shipping-methods');
+    Route::delete('weight-rate/{id}', 'deleteWeightRate')->name('shipping.delete-weight-rate')->middleware('permission:edit-shipping-methods');
+});
+
+/* Payment Methods */
+Route::prefix('payment-methods')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\PaymentMethodController::class)->group(function () {
+    Route::get('all', 'allMethods');
+    Route::get('', 'index')->name('payment.index')->middleware('permission:view-payment-methods');
+    Route::patch('{id}/status', 'updateStatus')->name('payment.update-status')->middleware('permission:edit-payment-methods');
+    Route::get('{id}/settings', 'settings')->name('payment.settings')->middleware('permission:view-payment-methods');
+    Route::post('{id}/settings', 'updateSettings')->name('payment.update-settings')->middleware('permission:edit-payment-methods');
+});
+
+/* Geo Zones */
+Route::prefix('geo-zones')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\GeoZoneController::class)->group(function () {
+    Route::get('/countries', 'getCountries');
+    Route::get('/countries/{countryId}/zones', 'getZones');
+    Route::get('', 'index')->middleware('permission:view-geo-zones');
+    Route::post('', 'store')->middleware('permission:edit-geo-zones');
+    Route::get('{id}', 'show')->middleware('permission:view-geo-zones');
+    Route::put('{id}', 'update')->middleware('permission:edit-geo-zones');
+    Route::delete('{id}', 'destroy')->middleware('permission:delete-geo-zones');
+    Route::patch('{id}/status', 'updateStatus')->middleware('permission:edit-geo-zones');
+    Route::delete('details/{id}', 'removeDetail')->middleware('permission:edit-geo-zones');
+});
+
+/* Icons */
+Route::middleware(['auth:user'])->get('icons', [\App\Http\Controllers\Api\IconController::class, 'index']);
+
+/* Product Categories */
+Route::prefix('product-categories')->middleware(['auth:user'])->controller(ProductCategoryController::class)->group(function () {
+    Route::get('/', 'index')->name('product-categories.index')->middleware('permission:view-product-categories');
+    Route::get('all', 'allCategories')->name('product-categories.all')->middleware('permission:view-product-categories');
+    Route::post('/', 'store')->name('product-categories.store')->middleware('permission:create-product-categories');
+    Route::get('{id}', 'show')->name('product-categories.show')->middleware('permission:view-product-categories');
+    Route::put('{id}', 'update')->name('product-categories.update')->middleware('permission:edit-product-categories');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('product-categories.toggle')->middleware('permission:edit-product-categories');
+    Route::patch('{id}/toggle-show-in-filter', 'toggleShowInFilter')->name('product-categories.toggle-show-in-filter')->middleware('permission:edit-product-categories');
+    Route::delete('{id}', 'destroy')->name('product-categories.destroy')->middleware('permission:delete-product-categories');
+});
+
+/* Product Attribute Groups */
+Route::prefix('product-attribute-groups')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductAttributeGroupController::class)->group(function () {
+    Route::get('/', 'index')->name('product-attribute-groups.index')->middleware('permission:view-attribute-groups');
+    Route::get('all', 'allAttributeGroups')->name('product-attribute-groups.all')->middleware('permission:view-attribute-groups');
+    Route::post('/', 'store')->name('product-attribute-groups.store')->middleware('permission:create-attribute-groups');
+    Route::get('{id}', 'show')->name('product-attribute-groups.show')->middleware('permission:view-attribute-groups');
+    Route::put('{id}', 'update')->name('product-attribute-groups.update')->middleware('permission:edit-attribute-groups');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('product-attribute-groups.toggle')->middleware('permission:edit-attribute-groups');
+    Route::delete('{id}', 'destroy')->name('product-attribute-groups.destroy')->middleware('permission:delete-attribute-groups');
+});
+
+/* Options */
+Route::prefix('options')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\OptionController::class)->group(function () {
+    Route::get('/', 'index')->name('options.index')->middleware('permission:view-options');
+    Route::get('all', 'allOptions')->name('options.all')->middleware('permission:view-options');
+    Route::post('/', 'store')->name('options.store')->middleware('permission:create-options');
+    Route::get('{id}', 'show')->name('options.show')->middleware('permission:view-options');
+    Route::put('{id}', 'update')->name('options.update')->middleware('permission:edit-options');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('options.toggle')->middleware('permission:edit-options');
+    Route::delete('{id}', 'destroy')->name('options.destroy')->middleware('permission:delete-options');
+});
+
+/* Filter Options */
+Route::prefix('filter-options')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\FilterOptionController::class)->group(function () {
+    Route::get('/', 'index')->name('filter-options.index')->middleware('permission:view-options');
+    Route::get('all', 'allOptions')->name('filter-options.all')->middleware('permission:view-options');
+    Route::post('/', 'store')->name('filter-options.store')->middleware('permission:create-options');
+    Route::get('{id}', 'show')->name('filter-options.show')->middleware('permission:view-options');
+    Route::put('{id}', 'update')->name('filter-options.update')->middleware('permission:edit-options');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('filter-options.toggle')->middleware('permission:edit-options');
+    Route::patch('{id}/toggle-show-in-filter', 'toggleShowInFilter')->name('filter-options.toggle-show-in-filter')->middleware('permission:edit-options');
+    Route::delete('{id}', 'destroy')->name('filter-options.destroy')->middleware('permission:delete-options');
+});
+
+/* Products */
+Route::prefix('products')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductController::class)->group(function () {
+    Route::get('all-dropdown', 'dropdownList')->name('products.dropdown');
+    Route::get('/', 'index')->name('products.index')->middleware('permission:view-products');
+    Route::post('/', 'store')->name('products.store')->middleware('permission:create-products');
+    Route::post('/copy', 'copy')->name('products.copy')->middleware('permission:create-products');
+    Route::post('/bulk-status', 'bulkStatus')->name('products.bulk-status')->middleware('permission:edit-products');
+    Route::delete('/bulk-delete', 'bulkDelete')->name('products.bulk-delete')->middleware('permission:delete-products');
+    Route::get('{id}', 'show')->name('products.show')->middleware('permission:view-products');
+    Route::post('{id}', 'update')->name('products.update')->middleware('permission:edit-products'); // using POST because of multipart/form-data for files
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('products.toggle')->middleware('permission:edit-products');
+    Route::delete('{id}', 'destroy')->name('products.destroy')->middleware('permission:delete-products');
+});
+
+/* Advanced Products (Bulk Product Editing) */
+Route::prefix('advanced-products')->middleware(['auth:user', 'permission:edit-products', 'module:bulk_edit_products'])->controller(AdvancedProductController::class)->group(function () {
+    Route::get('/', 'index')->name('advanced-products.index');
+    Route::post('update-row', 'updateRow')->name('advanced-products.update-row');
+    Route::post('update-description', 'updateDescription')->name('advanced-products.update-description');
+    Route::post('update-field', 'updateField')->name('advanced-products.update-field');
+    Route::post('bulk/options', 'bulkUpdateOptions')->name('advanced-products.bulk.options');
+    Route::post('bulk/filter-options', 'bulkUpdateFilterOptions')->name('advanced-products.bulk.filter-options');
+    Route::post('bulk/attributes', 'bulkUpdateAttributes')->name('advanced-products.bulk.attributes');
+    Route::post('bulk/categories', 'bulkUpdateCategories')->name('advanced-products.bulk.categories');
+    Route::post('bulk/status', 'bulkUpdateStatus')->name('advanced-products.bulk.status');
+});
+
+/* Players */
+Route::prefix('players')->middleware(['auth:user'])->controller(PlayerController::class)->group(function () {
+    Route::get('/', 'index')->name('players.index')->middleware('permission:view-players');
+    Route::post('/', 'store')->name('players.store')->middleware('permission:create-players');
+    Route::get('{id}', 'show')->name('players.show')->middleware('permission:view-players');
+    Route::put('{id}', 'update')->name('players.update')->middleware('permission:edit-players');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('players.toggle')->middleware('permission:edit-players');
+    Route::delete('{id}', 'destroy')->name('players.destroy')->middleware('permission:delete-players');
+});
+
+/* Results */
+Route::prefix('results')->middleware(['auth:user'])->controller(ResultController::class)->group(function () {
+    Route::get('/', 'index')->name('results.index')->middleware('permission:view-results');
+    Route::post('/', 'store')->name('results.store')->middleware('permission:create-results');
+    Route::get('{id}', 'show')->name('results.show')->middleware('permission:view-results');
+    Route::put('{id}', 'update')->name('results.update')->middleware('permission:edit-results');
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('results.toggle')->middleware('permission:edit-results');
+    Route::delete('{id}', 'destroy')->name('results.destroy')->middleware('permission:delete-results');
+});
+
+/* Committee Members */
+Route::prefix('committee-members')
+    ->middleware(['auth:user', 'permission:manage-committee-members'])
+    ->controller(CommitteeMemberController::class)
+    ->group(function () {
+        Route::get('/', 'index')->name('committee-members.index');
+        Route::post('/', 'store')->name('committee-members.store');
+        Route::get('{id}', 'show')->name('committee-members.show');
+        Route::put('{id}', 'update')->name('committee-members.update');
+        Route::patch('{id}/toggle-status', 'toggleStatus')->name('committee-members.toggle');
+        Route::delete('{id}', 'destroy')->name('committee-members.destroy');
+    });
+
+/* Geo Zones */
+Route::prefix('geo-zones')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\GeoZoneController::class)->group(function () {
+    Route::get('/countries', 'getCountries');
+    Route::get('/countries/{countryId}/zones', 'getZones');
+    Route::get('', 'index')->middleware('permission:view-geo-zones');
+    Route::post('', 'store')->middleware('permission:create-geo-zones');
+    Route::get('{id}', 'show')->middleware('permission:view-geo-zones');
+    Route::put('{id}', 'update')->middleware('permission:edit-geo-zones');
+    Route::patch('{id}/status', 'updateStatus')->middleware('permission:edit-geo-zones');
+    Route::delete('{id}', 'destroy')->middleware('permission:delete-geo-zones');
+    Route::delete('details/{detailId}', 'removeDetail')->middleware('permission:edit-geo-zones');
+});
+
+/* Modules */
+Route::prefix('modules')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ModuleController::class)->group(function () {
+    Route::get('', 'index')->middleware('permission:view-modules');
+    Route::get('{id}', 'show')->middleware('permission:view-modules');
+    Route::put('{id}/settings', 'updateSettings')->middleware('permission:edit-modules');
+    Route::patch('{id}/status', 'updateStatus')->middleware('permission:edit-modules');
+});
+
+/* Utility: List available frontend template files */
+Route::middleware(['auth:user'])->get('templates', function () {
+    $path  = resource_path('views/layouts/frontend');
+    $files = [];
+
+    if (File::exists($path)) {
+        $files = collect(File::files($path))
+            ->filter(fn($file) => Str::endsWith($file->getFilename(), '.blade.php'))
+            ->map(fn($file) => Str::replaceLast('.blade', '', pathinfo($file->getFilename(), PATHINFO_FILENAME)))
+            ->values()
+            ->toArray();
+    }
+
+    return response()->json($files);
+});
+
+Route::match(['get', 'post'], 'filter-wizard/query', [\App\Http\Controllers\ProductController::class, 'filterStepApi']);
+

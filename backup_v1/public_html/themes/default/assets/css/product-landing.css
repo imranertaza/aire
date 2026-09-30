@@ -1,0 +1,1017 @@
+/* =============================================================
+   AIRE INDUSTRIES — PRODUCT-DETAIL.CSS
+   Optimized page-specific components for AIRE Pro S1 Spotlight.
+   Reuses global design system tokens from style.css & layout.css
+   ============================================================= */
+
+/* ── Header Visibility on Scroll ────────────────────────── */
+.site-header,
+.site-header.sticky-top,
+header.site-header {
+    position: relative !important;
+    top: auto !important;
+}
+
+/* ── Secondary Sticky Sub-Header Bar ────────────────────── */
+.sub-header-bar {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border);
+    padding: 12px 0;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+
+/* ── Top Breadcrumb Bar ─────────────────────────────────── */
+.landing-breadcrumb-bar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--color-border);
+    padding: 14px 0;
+}
+
+.sub-header-breadcrumb {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.sub-header-breadcrumb a {
+    color: #0f172a;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.sub-header-breadcrumb a:hover {
+    color: var(--color-primary);
+}
+
+.sub-header-product {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.sub-header-thumb-box {
+    width: 82px;
+    height: 82px;
+    min-width: 82px;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    background-color: #f8fafc;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.sub-header-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.sub-header-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    min-width: 0;
+}
+
+.sub-header-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0b1528;
+    margin: 0 0 2px 0;
+    line-height: 1.25;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.sub-header-subtitle {
+    font-size: 15px;
+    font-weight: 400;
+    color: #5c6b84;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    max-width: 550px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sub-header-details-btn {
+    background-color: #000000;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+    line-height: 1.4;
+    border: 1px solid #000000;
+    transition: all 0.2s ease-in-out;
+}
+
+.sub-header-details-btn:hover {
+    background-color: #222222;
+    color: #ffffff;
+    border-color: #222222;
+}
+
+.sub-header-qty-box {
+    width: 100px;
+    justify-content: space-between;
+    border-radius: 4px;
+}
+
+.sub-header-qty-num {
+    font-size: 14px;
+}
+
+.sub-header-buy-btn {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 4px;
+    background-color: var(--color-primary) !important;
+    border: none;
+    color: var(--color-white) !important;
+}
+
+.btn-buy-header {
+    background: var(--color-dark);
+    color: var(--color-white);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    padding: 6px 18px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-buy-header:hover {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* ── Feature Check Item Components ───────────────────────── */
+.feature-check-icon {
+    color: #475569 !important;
+}
+
+.feature-check-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-muted);
+}
+
+/* ── Bottom CTA Section Components ──────────────────────── */
+.bottom-cta-section {
+    padding: 80px 0;
+    background: var(--color-white);
+}
+
+.bottom-cta-tag {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-dark);
+    text-transform: uppercase;
+}
+
+.bottom-cta-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-dark);
+}
+
+.bottom-cta-desc {
+    font-size: 16px;
+    color: var(--color-muted);
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+.bottom-cta-btn {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 36px;
+    border-radius: 30px;
+    background-color: var(--color-primary) !important;
+    border: none;
+    color: var(--color-white) !important;
+}
+
+.bottom-cta-img-holder {
+    max-width: 580px;
+    margin: 0 auto;
+}
+
+.bottom-cta-img-holder img {
+    width: 100%;
+    height: auto;
+    max-height: 480px;
+    object-fit: contain;
+}
+
+/* ── Footer Helpers ──────────────────────────────────────── */
+.footer-brand-logo {
+    max-height: 34px;
+}
+
+.footer-tagline {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ── Hero Spotlight Section ─────────────────────────────── */
+.product-hero-section {
+    padding: 80px 0 0 0;
+    text-align: center;
+    background: var(--color-white);
+    overflow: visible;
+}
+
+.hero-model-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: var(--color-dark);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.hero-display-title {
+    font-family: var(--font-sans, 'Inter', sans-serif);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-dark);
+    margin-bottom: 20px;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+}
+
+.hero-display-desc {
+    font-size: 16px;
+    color: var(--color-muted);
+    max-width: 580px;
+    margin: 0 auto 28px auto;
+    line-height: 1.6;
+}
+
+.hero-action-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 50px;
+}
+
+.hero-action-link {
+    color: var(--color-primary-light);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.hero-action-link:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.hero-img-box {
+    position: relative;
+    width: auto;
+    margin: 0 auto;
+    z-index: 999;
+    will-change: transform, opacity;
+}
+
+.hero-img-box img {
+    height: 360px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* ── Science of Synthesis Section ────────────────────────── */
+.science-section {
+    padding: 80px 0;
+    background: var(--color-bg);
+}
+
+.science-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: var(--color-muted-mid);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.science-title {
+    margin-bottom: 24px;
+}
+
+.science-title span.italic-light {
+    font-weight: 300;
+    color: var(--color-muted-mid);
+    font-style: italic;
+}
+
+.science-desc {
+    font-size: 14px;
+    color: var(--color-muted);
+    line-height: 1.7;
+    margin-bottom: 48px;
+    max-width: 460px;
+}
+
+.stat-box-num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-dark);
+    margin-bottom: 4px;
+}
+
+.stat-box-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--color-muted-mid);
+    text-transform: uppercase;
+}
+
+.science-card-img-box {
+    /* background: #eef2f6; */
+    border-radius: 24px;
+    padding: 60px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 420px;
+    position: relative;
+    z-index: 999;
+    will-change: transform, opacity;
+}
+
+.science-card-img-box img {
+    height: 360px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+/* ── Lifestyle Integration Section ───────────────────────── */
+.lifestyle-section {
+    position: relative;
+    overflow: hidden;
+}
+
+.lifestyle-banner-box {
+    position: relative;
+    width: 100%;
+    min-height: 588px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.lifestyle-banner-box img.bg-lifestyle-img {
+    position: absolute;
+    top: -15%;
+    left: 0;
+    width: 100%;
+    height: 130%;
+    object-fit: cover;
+    will-change: transform;
+}
+
+/* Floating product image — GSAP owns all transforms (xPercent/yPercent center it) */
+.lifestyle-product-img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    height: 360px;
+    width: auto;
+    object-fit: contain;
+    z-index: 3;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+    filter: drop-shadow(0 40px 80px rgba(0, 0, 0, 0.4));
+}
+
+.lifestyle-banner-box .main-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.lifestyle-content-card {
+    position: relative;
+    z-index: 2;
+    max-width: 440px;
+    padding: 40px 0;
+    color: #ffffff;
+}
+
+.lifestyle-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: block;
+    font-family: var(--font-sans, 'Inter', sans-serif);
+}
+
+.lifestyle-title {
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.lifestyle-desc {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.65;
+    margin-bottom: 24px;
+}
+
+.lifestyle-link {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.lifestyle-link:hover {
+    color: #ffffff;
+    opacity: 0.8;
+    transform: translateX(4px);
+}
+
+/* ── Medical Grade Filter Section ───────────────────────── */
+.medical-filter-section {
+    padding: 80px 0;
+    text-align: center;
+    background: var(--color-white);
+}
+
+.section-main-heading {
+    font-family: var(--font-sans, 'Inter', sans-serif);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-dark);
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+}
+
+.section-main-sub {
+    font-size: 15px;
+    color: var(--color-muted);
+    max-width: 600px;
+    margin: 0 auto 50px auto;
+    line-height: 1.6;
+}
+
+.filter-tech-img-box {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    width: 100%;
+    height: 480px;
+    max-height: 580px;
+    margin: 0 auto;
+}
+
+.filter-tech-img-box img {
+    position: absolute;
+    top: -15%;
+    left: 0;
+    width: 100%;
+    height: 130%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    will-change: transform;
+}
+
+.filter-tech-overlay-badge {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border-radius: 12px;
+    padding: 20px 24px;
+    max-width: 320px;
+    text-align: left;
+    font-size: 13px;
+    color: var(--color-dark);
+    line-height: 1.5;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+/* ── Precision Engineering Specs Section ───────────────── */
+.specs-section {
+    padding: 80px 0;
+    background: var(--color-white);
+}
+
+.specs-heading {
+    font-family: var(--font-sans, 'Inter', sans-serif);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--color-dark);
+    margin-bottom: 8px;
+}
+
+.specs-sub {
+    font-size: 14px;
+    color: var(--color-muted);
+    margin-bottom: 60px;
+}
+
+.specs-exploded-box {
+    background: #f8fafc;
+    border-radius: 24px;
+    /* padding: 20px; */
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 380px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+}
+
+.specs-exploded-box img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
+}
+
+.specs-more-link {
+    color: var(--color-primary-light);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.specs-more-link:hover {
+    color: var(--color-primary);
+    transform: translateX(4px);
+}
+
+.specs-sticky-col {
+    position: sticky;
+    top: 110px;
+    align-self: flex-start;
+    transition: all 0.3s ease;
+}
+
+.spec-group-block {
+    margin-bottom: 64px;
+}
+
+.spec-group-block:last-child {
+    margin-bottom: 0;
+}
+
+.spec-group-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: var(--color-primary-light);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: block;
+    font-family: var(--font-sans, 'Inter', sans-serif);
+}
+
+.spec-group-title {
+    font-family: var(--font-sans, 'Inter', sans-serif);
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--color-dark-alt);
+    margin-bottom: 24px;
+    letter-spacing: -0.3px;
+}
+
+.spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px solid var(--color-border);
+}
+
+.spec-table tr {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.spec-table td {
+    padding: 16px 0;
+    font-size: 14px;
+}
+
+.spec-table td.label-td {
+    color: var(--color-muted);
+    font-weight: 400;
+    width: 50%;
+}
+
+.spec-table td.value-td {
+    color: var(--color-dark);
+    font-weight: 400;
+    text-align: right;
+}
+
+/* ── Related Products Section ───────────────────────────── */
+.related-products-section {
+    padding: 80px 0;
+    background: var(--color-white);
+}
+
+.related-products-card {
+    background: var(--color-white);
+    border-radius: 28px;
+    padding: 36px 32px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(15, 23, 42, 0.04);
+}
+
+.related-products-card:hover {
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.related-card-title {
+    font-family: var(--font-sans, 'Inter', sans-serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-dark);
+    margin-bottom: 10px;
+    letter-spacing: -0.4px;
+}
+
+.related-card-desc {
+    font-size: 13px;
+    color: var(--color-muted);
+    line-height: 1.55;
+    margin-bottom: 24px;
+    max-width: 380px;
+}
+
+.related-img-holder {
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.related-img-holder img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+.related-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0;
+    border-top: none;
+}
+
+.related-tag-text {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--color-muted-mid);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.related-price-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-dark);
+}
+
+.btn-blue-pill {
+    background: var(--color-primary-light);
+    color: var(--color-white);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-blue-pill:hover {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* ── Swiper Pagination Dots ──────────────────────────────── */
+.related-swiper-pagination {
+    position: relative !important;
+    bottom: auto !important;
+    margin-top: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.related-swiper-pagination .swiper-pagination-bullet {
+    width: 8px;
+    height: 8px;
+    background: #0f172a;
+    opacity: 0.25;
+    margin: 0 !important;
+    transition: all 0.3s ease;
+}
+
+.related-swiper-pagination .swiper-pagination-bullet-active {
+    opacity: 1;
+    background: #0f172a;
+    width: 10px;
+    height: 10px;
+}
+
+/* ── Responsive Overrides ───────────────────────────────── */
+@media (max-width: 1399.98px) {
+
+    .product-hero-section,
+    .science-section,
+    .medical-filter-section,
+    .specs-section,
+    .related-products-section {
+        padding: 80px 0;
+    }
+
+    .hero-img-box img,
+    .science-card-img-box img,
+    .lifestyle-product-img {
+        height: 320px;
+    }
+
+    .lifestyle-banner-box {
+        min-height: 520px;
+    }
+
+    .filter-tech-img-box {
+        max-height: 480px;
+    }
+}
+
+@media (max-width: 1199.98px) {
+
+    .product-hero-section,
+    .science-section,
+    .medical-filter-section,
+    .specs-section,
+    .related-products-section {
+        padding: 70px 0;
+    }
+
+    .hero-display-title {
+        font-size: 30px;
+    }
+
+    .science-title,
+    .lifestyle-title,
+    .section-main-heading,
+    .specs-heading {
+        font-size: 28px;
+    }
+
+    .hero-img-box img,
+    .science-card-img-box img,
+    .lifestyle-product-img {
+        height: 290px;
+    }
+
+    .lifestyle-banner-box {
+        min-height: 460px;
+    }
+
+    .lifestyle-content-card {
+        max-width: 380px;
+    }
+
+    .filter-tech-img-box {
+        max-height: 420px;
+    }
+}
+
+@media (max-width: 991.98px) {
+
+    .product-hero-section,
+    .science-section,
+    .medical-filter-section,
+    .specs-section,
+    .related-products-section {
+        padding: 60px 0;
+    }
+
+    .hero-display-title {
+        font-size: 28px;
+    }
+
+    .science-title,
+    .lifestyle-title,
+    .section-main-heading,
+    .specs-heading {
+        font-size: 26px;
+    }
+
+    /* Image Box Height Normalization for Tablet */
+    .hero-img-box img,
+    .science-card-img-box img,
+    .lifestyle-product-img {
+        height: 280px;
+    }
+
+    .lifestyle-banner-box {
+        min-height: 440px;
+    }
+
+    .lifestyle-content-card {
+        padding: 24px 0;
+        max-width: 100%;
+    }
+
+    .filter-tech-img-box {
+        max-height: 400px;
+        border-radius: 18px;
+        width: 100%;
+    }
+
+    .filter-tech-overlay-badge {
+        bottom: 24px;
+        left: 24px;
+        right: 24px;
+        max-width: calc(100% - 48px);
+        font-size: 12px;
+        padding: 16px 20px;
+    }
+
+    .science-card-img-box {
+        min-height: auto;
+        padding: 30px 20px;
+    }
+
+    /* Precision Engineering Specs Responsive Tablet */
+    .specs-sticky-col {
+        position: static !important;
+        top: auto !important;
+        margin-bottom: 40px;
+    }
+
+    .specs-exploded-box {
+        padding: 0;
+        min-height: 360px;
+    }
+
+    .specs-exploded-box img {
+        max-height: none;
+    }
+
+    .spec-group-block {
+        margin-bottom: 40px;
+    }
+}
+
+@media (max-width: 575.98px) {
+
+    .product-hero-section,
+    .science-section,
+    .medical-filter-section,
+    .specs-section,
+    .related-products-section {
+        padding: 40px 0;
+    }
+
+    .hero-display-title {
+        font-size: 24px;
+        line-height: 1.2;
+    }
+
+    .science-title,
+    .lifestyle-title,
+    .section-main-heading,
+    .specs-heading {
+        font-size: 22px;
+        line-height: 1.25;
+    }
+
+    /* Image Box Height Normalization for Mobile */
+    .hero-img-box img,
+    .science-card-img-box img,
+    .lifestyle-product-img {
+        height: 200px;
+    }
+
+    .lifestyle-banner-box {
+        min-height: 400px;
+    }
+
+    .filter-tech-img-box {
+        max-height: 260px;
+        border-radius: 14px;
+        width: 100%;
+    }
+
+    .filter-tech-overlay-badge {
+        position: relative;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        margin-top: 14px;
+        max-width: 100%;
+        font-size: 12px;
+        padding: 14px 16px;
+        box-shadow: none;
+        border: 1px solid var(--color-border);
+    }
+
+    /* Precision Engineering Specs Responsive Mobile */
+    .specs-exploded-box {
+        padding: 0;
+        border-radius: 18px;
+        min-height: 280px;
+    }
+
+    .specs-exploded-box img {
+        max-height: none;
+    }
+
+    .spec-group-block {
+        margin-bottom: 32px;
+    }
+
+    .spec-table {
+        font-size: 12px;
+    }
+
+    .spec-table td {
+        padding: 8px 0;
+    }
+
+    .related-products-card {
+        padding: 24px 20px;
+        border-radius: 20px;
+    }
+
+    .related-card-title {
+        font-size: 18px;
+    }
+
+    .related-img-holder {
+        height: 180px;
+    }
+
+    .bottom-cta-img-holder {
+        max-width: 320px;
+    }
+}

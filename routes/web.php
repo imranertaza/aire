@@ -7,128 +7,138 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Middleware\EnsureAdminOrSecretKey;
+use App\Jobs\RunTestSuiteJob;
+
 /* =========================================================================
-| Browser Maintenance & Utility Routes
+| Protected Browser Maintenance & Admin Utility Routes
 | ========================================================================= */
 
-// Universal Cache & Image Clear
-Route::get('/clear', function () {
-    Artisan::call('optimize:clear');
-    Artisan::call('cache:clear');
-    Artisan::call('storage:link');
+Route::middleware([EnsureAdminOrSecretKey::class, 'throttle:30,1'])->group(function () {
 
-    // Remove the public/cache directory & flush image keys
-    $deletedImages = 0;
-    if (class_exists(\App\Services\ImageService::class)) {
-        $deletedImages = \App\Services\ImageService::clearCache();
-    } else {
-        $cacheDir = public_path('cache');
-        if (File::exists($cacheDir)) {
-            File::deleteDirectory($cacheDir);
+    // Dispatch Background or Sync Test Suite Job
+    Route::get('/trigger-tests', function (\Illuminate\Http\Request $request) {
+        $secret = $request->query('key') ?: $request->query('secret');
+        $redirectUrl = '/test-report' . ($secret ? '?key=' . urlencode($secret) : '');
+
+        if ($request->has('sync') || $request->wantsJson() === false) {
+            // Run immediately so report is generated right away
+            RunTestSuiteJob::dispatchSync();
+
+            return redirect($redirectUrl);
         }
-    }
 
-    // Rebuild theme CSS bundle from source files
-    $cssBundleBytes = 0;
-    if (function_exists('rebuild_theme_css_bundle')) {
-        $cssBundleBytes = rebuild_theme_css_bundle();
-    }
+        RunTestSuiteJob::dispatch();
 
-    return response()->json([
-        'status'  => true,
-        'message' => 'Application cache cleared, storage linked, theme CSS bundled, and ' . $deletedImages . ' cached image(s) purged successfully!',
-        'cleared' => [
-            'config_cache'       => true,
-            'route_cache'        => true,
-            'view_cache'         => true,
-            'application_cache'  => true,
-            'storage_symlink'    => true,
-            'image_cache_files'  => $deletedImages,
-            'theme_css_bundle_kb' => round($cssBundleBytes / 1024, 2),
-        ],
-    ]);
-});
+        return response()->json([
+            'status'    => true,
+            'message'   => 'Test suite execution dispatched to background queue worker! Ensure "php artisan queue:work" is running.',
+            'view_url'  => url($redirectUrl),
+        ]);
+    });
 
-// Rebuild Theme CSS Bundle On-Demand
-Route::get('/build-css', function () {
-    $cssBundleBytes = function_exists('rebuild_theme_css_bundle') ? rebuild_theme_css_bundle() : 0;
-    return response()->json([
-        'status'  => true,
-        'message' => 'Theme CSS bundle compiled and minified successfully! Total size: ' . round($cssBundleBytes / 1024, 2) . ' KB',
-        'bundle_size_kb' => round($cssBundleBytes / 1024, 2),
-    ]);
-});
+    // View Latest Test Suite Execution Report
+    Route::get('/test-report', function (\Illuminate\Http\Request $request) {
+        $reportLogPath = storage_path('app/test-reports/latest.log');
+        $meta = cache('latest_test_run');
+        $secret = $request->query('key') ?: $request->query('secret');
+        $keyQuery = $secret ? '?key=' . urlencode($secret) : '';
 
-// Image Cache Clear Only
-Route::get('/clear-images', function () {
-    $deleted = \App\Services\ImageService::clearCache();
-    return response()->json([
-        'status'  => true,
-        'message' => "Image cache cleared successfully! Deleted {$deleted} cached image file(s).",
-    ]);
-});
+        if (!File::exists($reportLogPath)) {
+            return '<div style="background:#121212; color:#eee; font-family:system-ui, sans-serif; padding:30px; min-height:100vh;">'
+                . '<h2 style="color:#60a5fa; margin-top:0;">Automated Test Suite Runner</h2>'
+                . '<p style="color:#aaa;">No test report found yet.</p>'
+                . '<a href="/trigger-tests' . $keyQuery . '" style="display:inline-block; padding:10px 18px; background:#2563eb; color:#fff; text-decoration:none; border-radius:6px; font-weight:bold;">Trigger Tests Now</a>'
+                . '</div>';
+        }
 
-// Re-seed & Refresh CMS Sections (Hero, Benefits, Lifestyle, etc.)
-Route::get('/clear-sections', function () {
-    \Illuminate\Support\Facades\Cache::forget('all_sections');
-    \Illuminate\Support\Facades\Cache::forget('section_home_faq');
-    \Illuminate\Support\Facades\Cache::forget('section_home_lifestyle');
-    \Illuminate\Support\Facades\Cache::forget('section_home_benefits');
-    \Illuminate\Support\Facades\Cache::forget('section_why_choose_aire');
-    \Illuminate\Support\Facades\Cache::forget('section_trust_badges');
-    \Illuminate\Support\Facades\Cache::forget('section_home_video');
-    \Illuminate\Support\Facades\Cache::forget('section_home_new_arrival');
-    \Illuminate\Support\Facades\Cache::forget('section_home_customer_favorites');
-    \Illuminate\Support\Facades\Cache::forget('section_home_best_selling');
-    \Illuminate\Support\Facades\Cache::forget('section_home_living_hero');
-    \Illuminate\Support\Facades\Cache::forget('section_living_hero');
-    // Artisan::call('db:seed', ['--class' => 'SectionSeeder', '--force' => true]);
-    return response()->json([
-        'status'  => true,
-        'message' => 'CMS sections re-seeded and cached successfully!',
-    ]);
-});
+        $logContent = File::get($reportLogPath);
+        $status = $meta['status'] ?? 'completed';
+        $statusColor = $status === 'passed' ? '#22c55e' : ($status === 'running' ? '#f59e0b' : '#ef4444');
+        $time = $meta['completed_at'] ?? ($meta['started_at'] ?? 'Recently');
 
-// Re-seed & Refresh Sliders
-Route::get('/clear-sliders', function () {
-    \Illuminate\Support\Facades\Cache::forget('active_sliders');
-    Artisan::call('db:seed', ['--class' => 'SliderSeeder', '--force' => true]);
-    return response()->json([
-        'status'  => true,
-        'message' => 'Sliders re-seeded and cached successfully!',
-    ]);
-});
+        return '<div style="background:#121212; color:#eee; font-family:system-ui, sans-serif; padding:30px; min-height:100vh;">'
+            . '<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; margin-bottom:20px; border-bottom:1px solid #27272a; padding-bottom:15px;">'
+            . '<div>'
+            . '<h2 style="margin:0; color:#f8fafc;">Laravel Test Suite Report</h2>'
+            . '<p style="margin:6px 0 0 0; color:#a1a1aa; font-size:14px;">Last Run: <strong>' . htmlspecialchars($time) . '</strong> | Status: <span style="font-weight:bold; color:' . $statusColor . '; text-transform:uppercase;">' . htmlspecialchars($status) . '</span></p>'
+            . '</div>'
+            . '<div style="margin-top:10px;">'
+            . '<a href="/trigger-tests' . $keyQuery . '" style="padding:9px 16px; background:#2563eb; color:#fff; text-decoration:none; border-radius:6px; font-size:14px; font-weight:600; margin-right:10px;">Re-run Tests</a>'
+            . '<a href="/test-report' . $keyQuery . '" style="padding:9px 16px; background:#27272a; color:#fff; text-decoration:none; border-radius:6px; font-size:14px; font-weight:600;">Refresh</a>'
+            . '</div>'
+            . '</div>'
+            . '<pre style="background:#09090b; color:#4ade80; border:1px solid #27272a; padding:20px; border-radius:8px; overflow-x:auto; font-size:13px; line-height:1.6; font-family:Consolas, Monaco, monospace; white-space:pre-wrap;">'
+            . htmlspecialchars($logContent)
+            . '</pre>'
+            . '</div>';
+    });
 
-// Storage Symlink Route
-Route::get('/storage-link', function () {
-    Artisan::call('storage:link');
-    return response()->json([
-        'status'  => true,
-        'message' => 'Storage symlink created/verified!',
-    ]);
-});
+    // Universal Cache & Image Clear
+    Route::get('/clear', function () {
+        Artisan::call('optimize:clear');
+        Artisan::call('cache:clear');
+        Artisan::call('storage:link');
 
-// Production Cache & Optimize
-Route::get('/optimize', function () {
-    Artisan::call('optimize');
-    return response()->json([
-        'status'  => true,
-        'message' => 'Application config, routes, and views compiled & optimized successfully!',
-    ]);
-});
+        // Remove the public/cache directory & flush image keys
+        $deletedImages = 0;
+        if (class_exists(\App\Services\ImageService::class)) {
+            $deletedImages = \App\Services\ImageService::clearCache();
+        } else {
+            $cacheDir = public_path('cache');
+            if (File::exists($cacheDir)) {
+                File::deleteDirectory($cacheDir);
+            }
+        }
 
-Route::get('/seed-filter-options', function () {
-    if (\App\Models\ProductCategory::where('slug', 'industries')->orWhere('category_name', 'Industries')->doesntExist()) {
-        $catSeeder = new \Database\Seeders\ProductCategorySeeder();
-        $catSeeder->run();
-    }
-    $seeder = new \Database\Seeders\ProductFilterOptionSeeder();
-    $seeder->run();
-    \Illuminate\Support\Facades\Cache::forget('all_filter_options');
-    return response()->json([
-        'status'  => true,
-        'message' => 'Successfully seeded and assigned filter options and Industry categories to all products!'
-    ]);
+        // Rebuild theme CSS bundle from source files
+        $cssBundleBytes = 0;
+        if (function_exists('rebuild_theme_css_bundle')) {
+            $cssBundleBytes = rebuild_theme_css_bundle();
+        }
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Application cache cleared, storage linked, theme CSS bundled, and ' . $deletedImages . ' cached image(s) purged successfully!',
+            'cleared' => [
+                'config_cache'       => true,
+                'route_cache'        => true,
+                'view_cache'         => true,
+                'application_cache'  => true,
+                'storage_symlink'    => true,
+                'image_cache_files'  => $deletedImages,
+                'theme_css_bundle_kb' => round($cssBundleBytes / 1024, 2),
+            ],
+        ]);
+    });
+
+    // Rebuild Theme CSS Bundle On-Demand
+    Route::get('/build-css', function () {
+        $cssBundleBytes = function_exists('rebuild_theme_css_bundle') ? rebuild_theme_css_bundle() : 0;
+        return response()->json([
+            'status'  => true,
+            'message' => 'Theme CSS bundle compiled and minified successfully! Total size: ' . round($cssBundleBytes / 1024, 2) . ' KB',
+            'bundle_size_kb' => round($cssBundleBytes / 1024, 2),
+        ]);
+    });
+
+    // Storage Symlink Route
+    Route::get('/storage-link', function () {
+        Artisan::call('storage:link');
+        return response()->json([
+            'status'  => true,
+            'message' => 'Storage symlink created/verified!',
+        ]);
+    });
+
+    // Production Cache & Optimize
+    Route::get('/optimize', function () {
+        Artisan::call('optimize');
+        return response()->json([
+            'status'  => true,
+            'message' => 'Application config, routes, and views compiled & optimized successfully!',
+        ]);
+    });
 });
 
 /* Storefront Multi-Theme Routes */
@@ -138,7 +148,11 @@ Route::controller(\App\Http\Controllers\StorefrontController::class)->group(func
     Route::get('/about', 'about')->name('about');
     Route::get('/docs', 'docs')->name('docs');
     Route::get('/contact', 'contact')->name('contact');
+    Route::get('/page/{slug}', 'pageDetails')->name('page.show');
+    Route::get('/pages/{slug}', 'pageDetails')->name('page.details');
     Route::post('/newsletter/subscribe', 'subscribeNewsletter')->name('newsletter.subscribe');
+    Route::match(['get', 'post'], '/newsletter/unsubscribe/{token}', 'unsubscribe')->name('newsletter.unsubscribe');
+    Route::post('/newsletter/resubscribe/{token}', 'resubscribe')->name('newsletter.resubscribe');
 });
 
 Route::controller(\App\Http\Controllers\ProductController::class)->group(function () {
@@ -188,6 +202,12 @@ Route::middleware('customer.guest')->group(function () {
         Route::get('/login', 'signin')->name('login');
         Route::get('/signup', 'signup')->name('signup');
         Route::post('/signup', 'postSignup')->name('signup.post');
+
+        // Password Reset Routes
+        Route::get('/forgot-password', 'forgotPassword')->name('password.request');
+        Route::post('/forgot-password', 'sendResetLinkEmail')->name('password.email');
+        Route::get('/reset-password/{token}', 'resetPassword')->name('password.reset');
+        Route::post('/reset-password', 'updatePassword')->name('password.update');
     });
 });
 
