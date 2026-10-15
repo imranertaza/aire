@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\Facades\Image;
 
 class CustomerController extends Controller
 {
@@ -25,10 +24,14 @@ class CustomerController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
+            $concat = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+                ? "firstname || ' ' || lastname"
+                : "CONCAT(firstname, ' ', lastname)";
+
+            $query->where(function ($q) use ($search, $concat) {
                 $q->where('firstname', 'like', "%{$search}%")
                     ->orWhere('lastname', 'like', "%{$search}%")
-                    ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$search}%"])
+                    ->orWhereRaw("{$concat} like ?", ["%{$search}%"])
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%");
             });

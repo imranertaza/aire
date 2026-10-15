@@ -126,6 +126,11 @@ class Product extends Model
         return $this->hasOne(ProductOverview::class);
     }
 
+    public function showcase()
+    {
+        return $this->hasOne(ProductShowcase::class);
+    }
+
     public function freeDelivery()
     {
         return $this->hasOne(ProductFreeDelivery::class);
@@ -284,6 +289,69 @@ class Product extends Model
                         ->orWhere('description', 'like', "%{$search}%");
                 });
         });
+    }
+
+    /**
+     * Scope a query with complete admin relations eager loaded (for view and edit).
+     */
+    public function scopeWithAdminRelations($query)
+    {
+        return $query->with([
+            'productOptions.option',
+            'productOptions.optionValue',
+            'productFilterOptions.filterOption',
+            'productFilterOptions.filterOptionValue',
+            'productAttributes',
+            'images',
+            'brand',
+            'description',
+            'overview',
+            'freeDelivery',
+            'specials',
+            'relatedProducts',
+            'boughtTogether',
+            'categories',
+            'faqs',
+            'applications',
+            'productLanding',
+            'showcase'
+        ]);
+    }
+
+    /**
+     * Scope a query with relations needed for advanced/bulk product management.
+     */
+    public function scopeWithBulkEditRelations($query)
+    {
+        return $query->with([
+            'brand',
+            'categories',
+            'productOptions',
+            'productAttributes',
+            'description',
+        ]);
+    }
+
+    /**
+     * Scope a query with relations needed for duplication/copying.
+     */
+    public function scopeWithReplicationRelations($query)
+    {
+        return $query->with([
+            'productOptions',
+            'productAttributes',
+            'images',
+            'description',
+            'freeDelivery',
+            'specials',
+            'categories',
+            'relatedProducts',
+            'boughtTogether',
+            'faqs',
+            'applications',
+            'showcase',
+            'productLanding'
+        ]);
     }
 
     /**

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Cache;
+
 /**
  * API Controller for managing dynamic content sections (e.g., About Us, Mission, Vision, etc.).
  *
@@ -25,45 +27,7 @@ class SectionController extends Controller
      */
     public function index()
     {
-        if (!Section::where('name', 'home_best_selling')->exists()) {
-            $defaultProductIds = \App\Models\Product::where('status', 1)->take(4)->pluck('id')->toArray();
-            Section::create([
-                'name' => 'home_best_selling',
-                'data' => [
-                    'badge' => 'Product',
-                    'title' => 'Best Selling Product',
-                    'subtitle' => 'Discover the top‑selling models trusted by thousands of families for cleaner, healthier air.',
-                    'product_ids' => $defaultProductIds,
-                ],
-            ]);
-        }
-        if (!Section::where('name', 'home_new_arrival')->exists()) {
-            $defaultNewArrivalIds = \App\Models\Product::where('status', 1)->latest('id')->take(3)->pluck('id')->toArray();
-            Section::create([
-                'name' => 'home_new_arrival',
-                'data' => [
-                    'badge' => 'New arrival',
-                    'title' => 'Freshly Launched Models',
-                    'subtitle' => 'Explore the latest purifiers designed with advanced technology for modern living.',
-                    'product_ids' => $defaultNewArrivalIds,
-                ],
-            ]);
-        }
-        if (!Section::where('name', 'home_customer_favorites')->exists()) {
-            $defaultFavoriteIds = \App\Models\Product::where('status', 1)->skip(3)->take(3)->pluck('id')->toArray();
-            if (empty($defaultFavoriteIds)) {
-                $defaultFavoriteIds = \App\Models\Product::where('status', 1)->take(2)->pluck('id')->toArray();
-            }
-            Section::create([
-                'name' => 'home_customer_favorites',
-                'data' => [
-                    'badge' => 'Customers Favorites',
-                    'title' => 'Loved by Our Community',
-                    'subtitle' => 'Discover the purifiers most chosen by families who value clean, healthy air.',
-                    'product_ids' => $defaultFavoriteIds,
-                ],
-            ]);
-        }
+        $this->ensureDefaultSectionsExist();
 
         $sections = Section::paginate(15);
 
@@ -71,13 +35,71 @@ class SectionController extends Controller
     }
 
     /**
-     * Retrieve a single section by ID.
-     *
-     * @param int $id The ID of the section
-     * @return \Illuminate\Http\JsonResponse
-     * @throws ModelNotFoundException
+     * Ensure standard homepage sections exist in database without querying on every request.
      */
-        /**
+    protected function ensureDefaultSectionsExist(): void
+    {
+        Cache::remember('default_home_sections_ensured_v1', 86400, function () {
+            if (!Section::where('name', 'home_best_selling')->exists()) {
+                $defaultProductIds = \App\Models\Product::where('status', 1)->take(4)->pluck('id')->toArray();
+                Section::create([
+                    'name' => 'home_best_selling',
+                    'data' => [
+                        'badge'       => 'Product',
+                        'title'       => 'Best Selling Product',
+                        'subtitle'    => 'Discover the top‑selling models trusted by thousands of families for cleaner, healthier air.',
+                        'product_ids' => $defaultProductIds,
+                    ],
+                ]);
+            }
+            if (!Section::where('name', 'home_new_arrival')->exists()) {
+                $defaultNewArrivalIds = \App\Models\Product::where('status', 1)->latest('id')->take(3)->pluck('id')->toArray();
+                Section::create([
+                    'name' => 'home_new_arrival',
+                    'data' => [
+                        'badge'       => 'New arrival',
+                        'title'       => 'Freshly Launched Models',
+                        'subtitle'    => 'Explore the latest purifiers designed with advanced technology for modern living.',
+                        'product_ids' => $defaultNewArrivalIds,
+                    ],
+                ]);
+            }
+            if (!Section::where('name', 'home_customer_favorites')->exists()) {
+                $defaultFavoriteIds = \App\Models\Product::where('status', 1)->skip(3)->take(3)->pluck('id')->toArray();
+                if (empty($defaultFavoriteIds)) {
+                    $defaultFavoriteIds = \App\Models\Product::where('status', 1)->take(2)->pluck('id')->toArray();
+                }
+                Section::create([
+                    'name' => 'home_customer_favorites',
+                    'data' => [
+                        'badge'       => 'Customers Favorites',
+                        'title'       => 'Loved by Our Community',
+                        'subtitle'    => 'Discover the purifiers most chosen by families who value clean, healthy air.',
+                        'product_ids' => $defaultFavoriteIds,
+                    ],
+                ]);
+            }
+            if (!Section::where('name', 'home_living_hero')->exists()) {
+                $defaultLivingHeroProduct = \App\Models\Product::where('status', 1)->latest('id')->first();
+                Section::create([
+                    'name' => 'home_living_hero',
+                    'data' => [
+                        'enabled'     => 1,
+                        'badge'       => 'INNOVATION',
+                        'title'       => 'The Future of Pure Living',
+                        'subtitle'    => 'Engineered for complete atmospheric transformation. Seamlessly integrates into modern living spaces with intelligent active air purification.',
+                        'description' => 'Engineered for complete atmospheric transformation. Seamlessly integrates into modern living spaces with intelligent active air purification.',
+                        'image'       => 'themes/default/assets/img/background-without-product.png',
+                        'product_id'  => $defaultLivingHeroProduct ? $defaultLivingHeroProduct->id : null,
+                        'button_text' => 'Buy Now',
+                    ],
+                ]);
+            }
+            return true;
+        });
+    }
+
+    /**
      * Retrieve all sections configured on the storefront homepage, sorted in display sequence.
      *
      * @param Request $request
@@ -97,62 +119,7 @@ class SectionController extends Controller
             'home_faq',
         ];
 
-        // Ensure default records exist for essential sections if missing
-        if (!Section::where('name', 'home_best_selling')->exists()) {
-            $defaultProductIds = \App\Models\Product::where('status', 1)->take(4)->pluck('id')->toArray();
-            Section::create([
-                'name' => 'home_best_selling',
-                'data' => [
-                    'badge' => 'Product',
-                    'title' => 'Best Selling Product',
-                    'subtitle' => 'Discover the top‑selling models trusted by thousands of families for cleaner, healthier air.',
-                    'product_ids' => $defaultProductIds,
-                ],
-            ]);
-        }
-        if (!Section::where('name', 'home_new_arrival')->exists()) {
-            $defaultNewArrivalIds = \App\Models\Product::where('status', 1)->latest('id')->take(3)->pluck('id')->toArray();
-            Section::create([
-                'name' => 'home_new_arrival',
-                'data' => [
-                    'badge' => 'New arrival',
-                    'title' => 'Freshly Launched Models',
-                    'subtitle' => 'Explore the latest purifiers designed with advanced technology for modern living.',
-                    'product_ids' => $defaultNewArrivalIds,
-                ],
-            ]);
-        }
-        if (!Section::where('name', 'home_customer_favorites')->exists()) {
-            $defaultFavoriteIds = \App\Models\Product::where('status', 1)->skip(3)->take(3)->pluck('id')->toArray();
-            if (empty($defaultFavoriteIds)) {
-                $defaultFavoriteIds = \App\Models\Product::where('status', 1)->take(2)->pluck('id')->toArray();
-            }
-            Section::create([
-                'name' => 'home_customer_favorites',
-                'data' => [
-                    'badge' => 'Customers Favorites',
-                    'title' => 'Loved by Our Community',
-                    'subtitle' => 'Discover the purifiers most chosen by families who value clean, healthy air.',
-                    'product_ids' => $defaultFavoriteIds,
-                ],
-            ]);
-        }
-        if (!Section::where('name', 'home_living_hero')->exists()) {
-            $defaultLivingHeroProduct = \App\Models\Product::where('status', 1)->latest('id')->first();
-            Section::create([
-                'name' => 'home_living_hero',
-                'data' => [
-                    'enabled' => 1,
-                    'badge' => 'INNOVATION',
-                    'title' => 'The Future of Pure Living',
-                    'subtitle' => 'Engineered for complete atmospheric transformation. Seamlessly integrates into modern living spaces with intelligent active air purification.',
-                    'description' => 'Engineered for complete atmospheric transformation. Seamlessly integrates into modern living spaces with intelligent active air purification.',
-                    'image' => 'themes/default/assets/img/background-without-product.png',
-                    'product_id' => $defaultLivingHeroProduct ? $defaultLivingHeroProduct->id : null,
-                    'button_text' => 'Buy Now',
-                ],
-            ]);
-        }
+        $this->ensureDefaultSectionsExist();
 
         $sections = Section::whereIn('name', $homeSectionKeys)->get();
 
@@ -166,7 +133,39 @@ class SectionController extends Controller
         return ApiResponse::success($ordered, 'Home sections retrieved successfully');
     }
 
-public function show($id)
+    /**
+     * Retrieve all sections configured on the About Us page, sorted in display sequence.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function aboutSections(Request $request)
+    {
+        $aboutSectionKeys = [
+            'about_hero',
+            'about_story',
+            'about_mission_vision',
+            'about_leadership',
+            'about_innovation',
+            'about_quality',
+            'about_careers',
+            'about_news',
+            'about_global',
+        ];
+
+        $sections = Section::whereIn('name', $aboutSectionKeys)->get();
+
+        $ordered = collect($aboutSectionKeys)
+            ->map(function ($key) use ($sections) {
+                return $sections->firstWhere('name', $key);
+            })
+            ->filter()
+            ->values();
+
+        return ApiResponse::success($ordered, 'About sections retrieved successfully');
+    }
+
+    public function show($id)
     {
         $section = Section::findOrFail($id);
         return ApiResponse::success($section, 'Section data retrieved successfully');

@@ -22,4 +22,32 @@ class SitemapController extends Controller
         return response($xml, 200)
             ->header('Content-Type', 'application/xml; charset=utf-8');
     }
+
+    /**
+     * Generate dynamic robots.txt with absolute Sitemap URL.
+     */
+    public function robots(Request $request): Response
+    {
+        $baseUrl = rtrim($request->schemeAndHttpHost(), '/');
+        $sitemapUrl = $baseUrl . '/sitemap.xml';
+
+        $content = implode("\n", [
+            'User-agent: *',
+            'Allow: /',
+            'Disallow: /admin/',
+            'Disallow: /api/',
+            'Disallow: /cart',
+            'Disallow: /checkout',
+            'Disallow: /customer/',
+            'Disallow: /clear',
+            'Disallow: /clear-images',
+            'Disallow: /clear-sections',
+            '',
+            'Sitemap: ' . $sitemapUrl,
+            '',
+        ]);
+
+        return response($content, 200)
+            ->header('Content-Type', 'text/plain; charset=utf-8');
+    }
 }

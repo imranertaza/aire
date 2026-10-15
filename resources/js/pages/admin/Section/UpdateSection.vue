@@ -1272,6 +1272,759 @@
                     </div>
                 </div>
 
+                <!-- ==================================================== -->
+                <!-- ABOUT PAGE: about_hero                               -->
+                <!-- ==================================================== -->
+                <div v-else-if="form.key === 'about_hero'">
+                    <div class="card card-primary card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-heading mr-1"></i> About Page Top Header
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Subheading Badge <span class="text-danger">*</span></label>
+                                        <input v-model="form.badge" type="text" class="form-control" placeholder="e.g. OUR STORY" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Main Heading Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.title" type="text" class="form-control" placeholder="e.g. A Cleaner Tomorrow Starts Here" required />
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Lead Paragraph / Subtitle <span class="text-danger">*</span></label>
+                                        <textarea v-model="form.subtitle" rows="3" class="form-control" placeholder="Enter introductory lead text..." required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================================================== -->
+                <!-- ABOUT PAGE: about_story (Journey, Milestones, Impact) -->
+                <!-- ==================================================== -->
+                <div v-else-if="form.key === 'about_story'">
+                    <!-- Section Meta Header -->
+                    <div class="card card-info card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-clock mr-1"></i> Section 1: Our Story Header
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Section #</label>
+                                        <input v-model="form.number" type="number" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Accordion Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.title" type="text" class="form-control" placeholder="e.g. Our Journey" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Accordion Subtitle</label>
+                                        <input v-model="form.subtitle" type="text" class="form-control" placeholder="Brief subtitle..." />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Journey Hero Banner Card -->
+                    <div class="card card-primary card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-image mr-1"></i> Journey Hero Card
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Hero Card Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.hero_title" type="text" class="form-control" placeholder="e.g. Our Journey" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Hero Description</label>
+                                        <textarea v-model="form.hero_desc" rows="4" class="form-control" placeholder="Describe the company journey..."></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-group mb-0">
+                                                <label class="small font-weight-bold">Button Text</label>
+                                                <input v-model="form.button_text" type="text" class="form-control form-control-sm" placeholder="e.g. Explore Our History" />
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-group mb-0">
+                                                <label class="small font-weight-bold">Button Target Link</label>
+                                                <input v-model="form.button_link" type="text" class="form-control form-control-sm" placeholder="e.g. #milestones" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Banner Image Path / URL</label>
+                                        <input v-model="form.hero_image" type="text" class="form-control font-monospace" placeholder="themes/default/assets/img/about/mountains.jpg" />
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Image Badge Overlay Text <small class="text-muted">(Supports line breaks)</small></label>
+                                        <textarea v-model="form.hero_badge" rows="3" class="form-control" placeholder="CLEANER AIR&#10;BRIGHTER SPACES&#10;A HEALTHIER TOMORROW"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Milestones Timeline Manager -->
+                    <div class="card card-purple card-outline shadow-sm mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-history mr-1"></i> Historical Milestones Timeline ({{ form.milestones?.length || 0 }})
+                            </h3>
+                            <div class="card-tools ml-auto">
+                                <button type="button" class="btn btn-sm btn-success" @click="addMilestone">
+                                    <i class="fas fa-plus mr-1"></i> Add Milestone
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div v-for="(m, index) in form.milestones" :key="'milestone-' + index" class="card border mb-3">
+                                <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+                                    <span class="font-weight-bold text-primary">
+                                        <i class="fas fa-flag mr-1"></i> Milestone #{{ index + 1 }} &mdash; <strong>{{ m.year || 'Year' }}</strong>: {{ m.title || 'Untitled' }}
+                                    </span>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" :disabled="index === 0" @click="moveMilestone(index, -1)" title="Move Up">
+                                            <i class="fas fa-arrow-up"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-tool" :disabled="index === form.milestones.length - 1" @click="moveMilestone(index, 1)" title="Move Down">
+                                            <i class="fas fa-arrow-down"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-tool text-danger" :disabled="form.milestones.length <= 1" @click="removeMilestone(index)" title="Remove">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body py-2">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2">
+                                                <label class="small font-weight-bold">Year / Era <span class="text-danger">*</span></label>
+                                                <input v-model="m.year" type="text" class="form-control form-control-sm" placeholder="e.g. 1988 or Today" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="form-group mb-2">
+                                                <label class="small font-weight-bold">Milestone Title <span class="text-danger">*</span></label>
+                                                <input v-model="m.title" type="text" class="form-control form-control-sm" placeholder="e.g. The Beginning" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group mb-1">
+                                                <label class="small font-weight-bold">Description <span class="text-danger">*</span></label>
+                                                <textarea v-model="m.desc" rows="2" class="form-control form-control-sm" placeholder="Describe the milestone event..." required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Impact & Statistics -->
+                    <div class="card card-success card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-chart-line mr-1"></i> Impact Banner & Worldwide Statistics
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Impact Title</label>
+                                        <input v-model="form.impact_title" type="text" class="form-control" placeholder="e.g. A Healthier World Through Cleaner Air" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Impact Description</label>
+                                        <textarea v-model="form.impact_desc" rows="3" class="form-control" placeholder="Describe global impact..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Impact Image</label>
+                                        <input v-model="form.impact_image" type="text" class="form-control font-monospace" placeholder="themes/default/assets/img/apartments.jpg" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Impact Badge Overlay</label>
+                                        <textarea v-model="form.impact_badge" rows="2" class="form-control" placeholder="CLEANER AIR&#10;BRIGHTER SPACES&#10;A HEALTHIER TOMORROW"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="font-weight-bold mb-0">Impact Stat Cards ({{ form.stats?.length || 0 }})</label>
+                                <button type="button" class="btn btn-xs btn-outline-success" @click="addStat">
+                                    <i class="fas fa-plus mr-1"></i> Add Stat Card
+                                </button>
+                            </div>
+                            <div class="row">
+                                <div v-for="(st, idx) in form.stats" :key="'stat-' + idx" class="col-md-6 mb-3">
+                                    <div class="card border p-3 h-100 bg-light">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge badge-success">Stat #{{ idx + 1 }}</span>
+                                            <button type="button" class="btn btn-xs btn-link text-danger p-0" :disabled="form.stats.length <= 1" @click="removeStat(idx)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label class="small font-weight-bold">Icon Class</label>
+                                                <input v-model="st.icon" type="text" class="form-control form-control-sm font-monospace" placeholder="bi bi-globe" />
+                                            </div>
+                                            <div class="col-8">
+                                                <label class="small font-weight-bold">Stat Title</label>
+                                                <input v-model="st.title" type="text" class="form-control form-control-sm" placeholder="e.g. 100+ Countries" />
+                                            </div>
+                                            <div class="col-12 mt-2">
+                                                <label class="small font-weight-bold">Description</label>
+                                                <textarea v-model="st.desc" rows="2" class="form-control form-control-sm" placeholder="Stat description..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Section Quote</label>
+                                        <input v-model="form.quote" type="text" class="form-control" placeholder="e.g. Real change happens when cleaner air becomes a right for everyone..." />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Quote Brand Subtext</label>
+                                        <input v-model="form.quote_brand" type="text" class="form-control" placeholder="CLEANER AIR | BRIGHTER SPACES" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================================================== -->
+                <!-- ABOUT PAGE: about_mission_vision                     -->
+                <!-- ==================================================== -->
+                <div v-else-if="form.key === 'about_mission_vision'">
+                    <div class="card card-success card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-bullseye mr-1"></i> Section 2: Mission & Vision Settings
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Section #</label>
+                                        <input v-model="form.number" type="number" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.title" type="text" class="form-control" placeholder="e.g. Mission & Vision" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Subtitle</label>
+                                        <input v-model="form.subtitle" type="text" class="form-control" placeholder="e.g. Our purpose, values and commitment..." />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <h5 class="font-weight-bold text-dark mb-3"><i class="fas fa-compass text-primary mr-1"></i> Purpose Banner</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Purpose Title</label>
+                                        <input v-model="form.purpose_title" type="text" class="form-control" placeholder="e.g. Our Purpose" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Purpose Description</label>
+                                        <textarea v-model="form.purpose_desc" rows="3" class="form-control" placeholder="Describe the core purpose..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Purpose Image</label>
+                                        <input v-model="form.purpose_image" type="text" class="form-control font-monospace" placeholder="themes/default/assets/img/about/earth_purpose.jpg" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Purpose Badge Overlay</label>
+                                        <textarea v-model="form.purpose_badge" rows="2" class="form-control" placeholder="CLEANER AIR&#10;BRIGHTER SPACES&#10;A HEALTHIER TOMORROW"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <h5 class="font-weight-bold text-dark mb-3"><i class="fas fa-columns text-info mr-1"></i> Mission & Vision Pillars</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="card p-3 border">
+                                        <label class="font-weight-bold text-primary">Mission Title</label>
+                                        <input v-model="form.mission_title" type="text" class="form-control mb-2" placeholder="e.g. Our Mission" />
+                                        <label class="font-weight-bold">Mission Statement</label>
+                                        <textarea v-model="form.mission_desc" rows="3" class="form-control" placeholder="Mission details..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card p-3 border">
+                                        <label class="font-weight-bold text-info">Vision Title</label>
+                                        <input v-model="form.vision_title" type="text" class="form-control mb-2" placeholder="e.g. Our Vision" />
+                                        <label class="font-weight-bold">Vision Statement</label>
+                                        <textarea v-model="form.vision_desc" rows="3" class="form-control" placeholder="Vision details..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="font-weight-bold text-dark mb-0"><i class="fas fa-heart text-danger mr-1"></i> Core Values ({{ form.values?.length || 0 }})</h5>
+                                <button type="button" class="btn btn-xs btn-outline-success" @click="addValue">
+                                    <i class="fas fa-plus mr-1"></i> Add Core Value
+                                </button>
+                            </div>
+                            <div class="row">
+                                <div v-for="(val, idx) in form.values" :key="'val-' + idx" class="col-md-6 mb-3">
+                                    <div class="card border p-3 h-100 bg-light">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge badge-success">Value #{{ idx + 1 }}</span>
+                                            <button type="button" class="btn btn-xs btn-link text-danger p-0" :disabled="form.values.length <= 1" @click="removeValue(idx)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label class="small font-weight-bold">Icon Class</label>
+                                                <input v-model="val.icon" type="text" class="form-control form-control-sm font-monospace" placeholder="bi bi-heart" />
+                                            </div>
+                                            <div class="col-8">
+                                                <label class="small font-weight-bold">Value Title</label>
+                                                <input v-model="val.title" type="text" class="form-control form-control-sm" placeholder="e.g. People First" />
+                                            </div>
+                                            <div class="col-12 mt-2">
+                                                <label class="small font-weight-bold">Description</label>
+                                                <textarea v-model="val.desc" rows="2" class="form-control form-control-sm" placeholder="Value explanation..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Section Quote</label>
+                                        <input v-model="form.quote" type="text" class="form-control" placeholder="e.g. Clean air empowers people, strengthens communities..." />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Quote Brand Subtext</label>
+                                        <input v-model="form.quote_brand" type="text" class="form-control" placeholder="CLEANER AIR | BRIGHTER SPACES" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================================================== -->
+                <!-- ABOUT PAGE: about_leadership                         -->
+                <!-- ==================================================== -->
+                <div v-else-if="form.key === 'about_leadership'">
+                    <div class="card card-teal card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-users mr-1"></i> Section 3: Leadership Team Settings
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Section #</label>
+                                        <input v-model="form.number" type="number" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.title" type="text" class="form-control" placeholder="e.g. Leadership" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Subtitle</label>
+                                        <input v-model="form.subtitle" type="text" class="form-control" placeholder="e.g. Meet the people driving innovation..." />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <h5 class="font-weight-bold text-dark mb-3"><i class="fas fa-id-badge text-teal mr-1"></i> Leadership Banner Showcase</h5>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Banner Badge</label>
+                                        <input v-model="form.banner_badge" type="text" class="form-control" placeholder="e.g. OUR LEADERSHIP" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Banner Title</label>
+                                        <input v-model="form.banner_title" type="text" class="form-control" placeholder="e.g. People with Purpose" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Banner Description</label>
+                                        <textarea v-model="form.banner_desc" rows="3" class="form-control" placeholder="Describe the leadership commitment..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Banner Image Path</label>
+                                        <input v-model="form.banner_image" type="text" class="form-control font-monospace" placeholder="themes/default/assets/img/about/leadership.jpg" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Banner Badge Overlay</label>
+                                        <textarea v-model="form.banner_badge_text" rows="2" class="form-control" placeholder="CLEANER AIR&#10;BRIGHTER SPACES&#10;A HEALTHIER TOMORROW"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Team Grid Heading</label>
+                                        <input v-model="form.team_heading" type="text" class="form-control" placeholder="e.g. Meet Our Leadership Team" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Team Grid Subtitle</label>
+                                        <input v-model="form.team_subheading" type="text" class="form-control" placeholder="A diverse group of visionaries..." />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0"><i class="fas fa-user-tie text-primary mr-1"></i> Executive Members ({{ form.members?.length || 0 }})</h5>
+                                <button type="button" class="btn btn-sm btn-success" @click="addMember">
+                                    <i class="fas fa-plus mr-1"></i> Add Member
+                                </button>
+                            </div>
+
+                            <div class="row">
+                                <div v-for="(mem, idx) in form.members" :key="'member-' + idx" class="col-md-6 mb-3">
+                                    <div class="card border shadow-none h-100">
+                                        <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center">
+                                            <span class="font-weight-bold text-dark">
+                                                <i class="fas fa-user mr-1 text-teal"></i> {{ mem.name || 'Member Name' }} &mdash; <small class="text-muted">{{ mem.role || 'Role' }}</small>
+                                            </span>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-tool" :disabled="idx === 0" @click="moveMember(idx, -1)" title="Move Up">
+                                                    <i class="fas fa-arrow-up"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool" :disabled="idx === form.members.length - 1" @click="moveMember(idx, 1)" title="Move Down">
+                                                    <i class="fas fa-arrow-down"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-tool text-danger" :disabled="form.members.length <= 1" @click="removeMember(idx)" title="Remove">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body py-2">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group mb-2">
+                                                        <label class="small font-weight-bold">Full Name <span class="text-danger">*</span></label>
+                                                        <input v-model="mem.name" type="text" class="form-control form-control-sm" placeholder="e.g. Dr. James Liu" required />
+                                                    </div>
+                                                </div>
+                                                <div class="col-6">
+                                                    <div class="form-group mb-2">
+                                                        <label class="small font-weight-bold">Designation / Role <span class="text-danger">*</span></label>
+                                                        <input v-model="mem.role" type="text" class="form-control form-control-sm" placeholder="e.g. Chief Executive Officer" required />
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-group mb-2">
+                                                        <label class="small font-weight-bold">Short Bio <span class="text-danger">*</span></label>
+                                                        <textarea v-model="mem.bio" rows="2" class="form-control form-control-sm" placeholder="Short biographical sentence..." required></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-group mb-0">
+                                                        <label class="small font-weight-bold">Photo URL / Path <small class="text-muted">(Leave blank for icon placeholder)</small></label>
+                                                        <input v-model="mem.image" type="text" class="form-control form-control-sm font-monospace" placeholder="themes/default/assets/img/team/member1.jpg" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Section Quote</label>
+                                        <input v-model="form.quote" type="text" class="form-control" placeholder="e.g. Great things happen when passionate people work together..." />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-bold">Quote Brand Subtext</label>
+                                        <input v-model="form.quote_brand" type="text" class="form-control" placeholder="CLEANER AIR | BRIGHTER SPACES" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================================================== -->
+                <!-- ABOUT PAGE: about_innovation / quality / global      -->
+                <!-- ==================================================== -->
+                <div v-else-if="['about_innovation', 'about_quality', 'about_global'].includes(form.key)">
+                    <div class="card card-primary card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-layer-group mr-1"></i> {{ form.title || form.key }} Settings
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Section #</label>
+                                        <input v-model="form.number" type="number" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.title" type="text" class="form-control" placeholder="Section Title" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Subtitle</label>
+                                        <input v-model="form.subtitle" type="text" class="form-control" placeholder="Section Subtitle" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="font-weight-bold text-dark mb-0"><i class="fas fa-th-list text-primary mr-1"></i> Feature Cards ({{ form.items?.length || 0 }})</h5>
+                                <button type="button" class="btn btn-sm btn-success" @click="addGenericItem">
+                                    <i class="fas fa-plus mr-1"></i> Add Card
+                                </button>
+                            </div>
+
+                            <div class="row">
+                                <div v-for="(item, idx) in form.items" :key="'item-' + idx" class="col-md-6 mb-3">
+                                    <div class="card border p-3 h-100 bg-light">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge badge-primary">Card #{{ idx + 1 }}</span>
+                                            <button type="button" class="btn btn-xs btn-link text-danger p-0" :disabled="form.items.length <= 1" @click="removeGenericItem(idx)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <label class="small font-weight-bold">Icon Class</label>
+                                                <input v-model="item.icon" type="text" class="form-control form-control-sm font-monospace" placeholder="bi bi-award" />
+                                            </div>
+                                            <div class="col-8">
+                                                <label class="small font-weight-bold">Card Title <span class="text-danger">*</span></label>
+                                                <input v-model="item.title" type="text" class="form-control form-control-sm" placeholder="e.g. ISO 9001 & 14001" required />
+                                            </div>
+                                            <div class="col-12 mt-2">
+                                                <label class="small font-weight-bold">Description <span class="text-danger">*</span></label>
+                                                <textarea v-model="item.desc" rows="2" class="form-control form-control-sm" placeholder="Card description..." required></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================================================== -->
+                <!-- ABOUT PAGE: about_careers                            -->
+                <!-- ==================================================== -->
+                <div v-else-if="form.key === 'about_careers'">
+                    <div class="card card-purple card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-briefcase mr-1"></i> Careers Section Settings
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Section #</label>
+                                        <input v-model="form.number" type="number" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Accordion Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.title" type="text" class="form-control" placeholder="e.g. Careers" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Accordion Subtitle</label>
+                                        <input v-model="form.subtitle" type="text" class="form-control" placeholder="e.g. Join our team and help shape a healthier world." />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Card Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.card_title" type="text" class="form-control" placeholder="e.g. Build the Future of Clean Air" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Card Description <span class="text-danger">*</span></label>
+                                        <textarea v-model="form.card_desc" rows="3" class="form-control" placeholder="Describe the career opportunity..." required></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-0">
+                                                <label class="font-weight-bold">Button Text</label>
+                                                <input v-model="form.button_text" type="text" class="form-control" placeholder="e.g. View Open Positions" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-0">
+                                                <label class="font-weight-bold">Button Target Link</label>
+                                                <input v-model="form.button_link" type="text" class="form-control" placeholder="e.g. /contact-us" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ==================================================== -->
+                <!-- ABOUT PAGE: about_news                               -->
+                <!-- ==================================================== -->
+                <div v-else-if="form.key === 'about_news'">
+                    <div class="card card-danger card-outline shadow-sm mb-4">
+                        <div class="card-header">
+                            <h3 class="card-title font-weight-bold">
+                                <i class="fas fa-newspaper mr-1"></i> News & Media Section Settings
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Section #</label>
+                                        <input v-model="form.number" type="number" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Accordion Title <span class="text-danger">*</span></label>
+                                        <input v-model="form.title" type="text" class="form-control" placeholder="e.g. News & Media" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Accordion Subtitle</label>
+                                        <input v-model="form.subtitle" type="text" class="form-control" placeholder="e.g. Latest news, press releases and media coverage." />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Media Center Banner Title</label>
+                                        <input v-model="form.banner_title" type="text" class="form-control" placeholder="e.g. Official Press & Media Center" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-weight-bold">Media Center Banner Description</label>
+                                        <textarea v-model="form.banner_desc" rows="2" class="form-control" placeholder="Stay informed with our latest announcements..."></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-0">
+                                                <label class="font-weight-bold">Button Text</label>
+                                                <input v-model="form.button_text" type="text" class="form-control" placeholder="e.g. Media Inquiries" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-0">
+                                                <label class="font-weight-bold">Button Target Link</label>
+                                                <input v-model="form.button_link" type="text" class="form-control" placeholder="e.g. /contact-us" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Footer Bar for About Page Sections -->
+                <div v-if="form.key && form.key.startsWith('about_')" class="card bg-white border shadow-sm p-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <router-link :to="{ name: 'AboutSections' }" class="btn btn-outline-secondary px-3">
+                            <i class="fas fa-arrow-left mr-1"></i> Back to About Sections
+                        </router-link>
+                        <div class="d-flex align-items-center">
+                            <button type="button" @click="updateSections" class="btn btn-primary px-4 shadow-sm font-weight-bold" :disabled="saving">
+                                <i class="fas fa-save mr-1"></i> {{ saving ? 'Saving Changes...' : 'Save & Publish Section' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- STANDARD MODE: Other General Sections                -->
                 <!-- ==================================================== -->
                 <div v-else>
@@ -1385,12 +2138,45 @@ const form = reactive({
     key: "",
     content: "",
     home_content: "",
+    number: null,
+    hero_title: "",
+    hero_desc: "",
+    hero_image: "",
+    hero_badge: "",
+    milestones: [],
+    impact_title: "",
+    impact_desc: "",
+    impact_image: "",
+    impact_badge: "",
+    stats: [],
+    purpose_title: "",
+    purpose_desc: "",
+    purpose_image: "",
+    purpose_badge: "",
+    mission_title: "",
+    mission_desc: "",
+    vision_title: "",
+    vision_desc: "",
+    values: [],
+    banner_badge: "",
+    banner_title: "",
+    banner_desc: "",
+    banner_image: "",
+    banner_badge_text: "",
+    team_heading: "",
+    team_subheading: "",
+    members: [],
+    card_title: "",
+    card_desc: "",
+    quote: "",
+    quote_brand: "",
     items: [],
     cards: [],
     badges: [],
     product_ids: [],
     product_id: null,
     button_text: "Buy Now",
+    button_link: "",
     enabled: 1,
     description: "",
     file: "",
@@ -1681,6 +2467,101 @@ const moveBadge = (index, delta) => {
     form.badges.splice(newIndex, 0, item);
 };
 
+// ====================================================
+// About Page Helper Methods
+// ====================================================
+const addMilestone = () => {
+    if (!form.milestones) form.milestones = [];
+    form.milestones.push({
+        year: "",
+        title: "",
+        desc: ""
+    });
+};
+
+const removeMilestone = (index) => {
+    if (form.milestones && form.milestones.length > 1) {
+        form.milestones.splice(index, 1);
+    }
+};
+
+const moveMilestone = (index, delta) => {
+    if (!form.milestones) return;
+    const newIndex = index + delta;
+    if (newIndex < 0 || newIndex >= form.milestones.length) return;
+    const item = form.milestones.splice(index, 1)[0];
+    form.milestones.splice(newIndex, 0, item);
+};
+
+const addStat = () => {
+    if (!form.stats) form.stats = [];
+    form.stats.push({
+        icon: "bi bi-graph-up",
+        title: "",
+        desc: ""
+    });
+};
+
+const removeStat = (index) => {
+    if (form.stats && form.stats.length > 1) {
+        form.stats.splice(index, 1);
+    }
+};
+
+const addValue = () => {
+    if (!form.values) form.values = [];
+    form.values.push({
+        icon: "bi bi-check-circle",
+        title: "",
+        desc: ""
+    });
+};
+
+const removeValue = (index) => {
+    if (form.values && form.values.length > 1) {
+        form.values.splice(index, 1);
+    }
+};
+
+const addMember = () => {
+    if (!form.members) form.members = [];
+    form.members.push({
+        name: "",
+        role: "",
+        bio: "",
+        image: ""
+    });
+};
+
+const removeMember = (index) => {
+    if (form.members && form.members.length > 1) {
+        form.members.splice(index, 1);
+    }
+};
+
+const moveMember = (index, delta) => {
+    if (!form.members) return;
+    const newIndex = index + delta;
+    if (newIndex < 0 || newIndex >= form.members.length) return;
+    const item = form.members.splice(index, 1)[0];
+    form.members.splice(newIndex, 0, item);
+};
+
+const addGenericItem = () => {
+    if (!form.items) form.items = [];
+    form.items.push({
+        icon: "bi bi-star",
+        title: "",
+        desc: ""
+    });
+};
+
+const removeGenericItem = (index) => {
+    if (form.items && form.items.length > 1) {
+        form.items.splice(index, 1);
+    }
+};
+
 // Fetch existing section data
 const fetchSections = async () => {
     try {
@@ -1705,7 +2586,9 @@ const fetchSections = async () => {
         form.subtitle = d.subtitle || "";
         form.content = d.content || "";
         form.home_content = d.home_content || "";
-                if (['home_video', 'video'].includes(form.key)) {
+        form.number = d.number !== undefined ? d.number : null;
+
+        if (['home_video', 'video'].includes(form.key)) {
             form.title = d.title || "AIRE Pro S1 — Engineering Architecture & Air Purification";
             form.video_url = d.video_url || "storage/home/home-video.mp4";
             form.video_file = d.video_file || "";
@@ -1715,6 +2598,7 @@ const fetchSections = async () => {
                 previews.value = [getImageUrl(form.image)];
             }
         }
+
         if (['home_best_selling', 'best_selling', 'home_new_arrival', 'new_arrival', 'home_customer_favorites', 'customer_favorites'].includes(form.key)) {
             const isFav = ['home_customer_favorites', 'customer_favorites'].includes(form.key);
             const isNew = ['home_new_arrival', 'new_arrival'].includes(form.key);
@@ -1729,6 +2613,7 @@ const fetchSections = async () => {
             }
             form.product_ids = Array.isArray(pIds) ? pIds.map(Number).filter(n => !isNaN(n) && n > 0) : [];
         }
+
         if (['home_living_hero', 'living_hero'].includes(form.key)) {
             form.badge = d.badge || "INNOVATION";
             form.title = d.title || "The Future of Pure Living";
@@ -1742,6 +2627,7 @@ const fetchSections = async () => {
                 previews.value = [getImageUrl(form.image)];
             }
         }
+
         if (['home_faq', 'faq'].includes(form.key)) {
             form.badge = d.badge || "SUPPORT";
             form.title = d.title || "Frequently Asked Questions";
@@ -1750,7 +2636,99 @@ const fetchSections = async () => {
                 question: it.question || "",
                 answer: it.answer || "",
             })) : [];
-        } else {
+        }
+
+        // About Sections Specific Parsing
+        if (form.key === 'about_hero') {
+            form.badge = d.badge || "OUR STORY";
+            form.title = d.title || "A Cleaner Tomorrow Starts Here";
+            form.subtitle = d.subtitle || "";
+        }
+
+        if (form.key === 'about_story') {
+            form.hero_title = d.hero_title || "";
+            form.hero_desc = d.hero_desc || "";
+            form.hero_image = d.hero_image || "";
+            form.hero_badge = d.hero_badge || "";
+            form.button_text = d.button_text || "";
+            form.button_link = d.button_link || "";
+            form.milestones = Array.isArray(d.milestones) ? d.milestones.map(m => ({
+                year: m.year || "",
+                title: m.title || "",
+                desc: m.desc || ""
+            })) : [];
+            form.impact_title = d.impact_title || "";
+            form.impact_desc = d.impact_desc || "";
+            form.impact_image = d.impact_image || "";
+            form.impact_badge = d.impact_badge || "";
+            form.stats = Array.isArray(d.stats) ? d.stats.map(s => ({
+                icon: s.icon || "bi bi-globe",
+                title: s.title || "",
+                desc: s.desc || ""
+            })) : [];
+            form.quote = d.quote || "";
+            form.quote_brand = d.quote_brand || "";
+        }
+
+        if (form.key === 'about_mission_vision') {
+            form.purpose_title = d.purpose_title || "";
+            form.purpose_desc = d.purpose_desc || "";
+            form.purpose_image = d.purpose_image || "";
+            form.purpose_badge = d.purpose_badge || "";
+            form.mission_title = d.mission_title || "";
+            form.mission_desc = d.mission_desc || "";
+            form.vision_title = d.vision_title || "";
+            form.vision_desc = d.vision_desc || "";
+            form.values = Array.isArray(d.values) ? d.values.map(v => ({
+                icon: v.icon || "bi bi-heart",
+                title: v.title || "",
+                desc: v.desc || ""
+            })) : [];
+            form.quote = d.quote || "";
+            form.quote_brand = d.quote_brand || "";
+        }
+
+        if (form.key === 'about_leadership') {
+            form.banner_badge = d.banner_badge || "";
+            form.banner_title = d.banner_title || "";
+            form.banner_desc = d.banner_desc || "";
+            form.banner_image = d.banner_image || "";
+            form.banner_badge_text = d.banner_badge_text || "";
+            form.team_heading = d.team_heading || "";
+            form.team_subheading = d.team_subheading || "";
+            form.members = Array.isArray(d.members) ? d.members.map(m => ({
+                name: m.name || "",
+                role: m.role || "",
+                bio: m.bio || "",
+                image: m.image || ""
+            })) : [];
+            form.quote = d.quote || "";
+            form.quote_brand = d.quote_brand || "";
+        }
+
+        if (['about_innovation', 'about_quality', 'about_global'].includes(form.key)) {
+            form.items = Array.isArray(d.items) ? d.items.map(it => ({
+                icon: it.icon || "bi bi-star",
+                title: it.title || "",
+                desc: it.desc || ""
+            })) : [];
+        }
+
+        if (form.key === 'about_careers') {
+            form.card_title = d.card_title || "";
+            form.card_desc = d.card_desc || "";
+            form.button_text = d.button_text || "";
+            form.button_link = d.button_link || "";
+        }
+
+        if (form.key === 'about_news') {
+            form.banner_title = d.banner_title || "";
+            form.banner_desc = d.banner_desc || "";
+            form.button_text = d.button_text || "";
+            form.button_link = d.button_link || "";
+        }
+
+        if (!['home_faq', 'faq', 'about_innovation', 'about_quality', 'about_global'].includes(form.key)) {
             form.items = Array.isArray(d.items) ? d.items.map(it => ({
                 title: it.title || "",
                 description: it.description || "",
@@ -1759,8 +2737,9 @@ const fetchSections = async () => {
                 image: it.image || "",
                 dropzoneFile: null,
                 previews: it.image ? [getImageUrl(it.image)] : []
-            })) : [];
+            })) : form.items || [];
         }
+
         form.cards = Array.isArray(d.cards) ? d.cards.map((c, idx) => ({
             theme: c.theme || "light",
             dots: c.dots || "•••",
@@ -1777,7 +2756,7 @@ const fetchSections = async () => {
         form.image = d.image || "";
         form.status = sectionData.status !== undefined ? String(sectionData.status) : (d.status !== undefined ? String(d.status) : "1");
 
-        if (form.image) {
+        if (form.image && !form.key.startsWith('about_')) {
             previews.value = [getImageUrl(form.image)];
         }
     } catch (err) {
@@ -1898,14 +2877,14 @@ const updateSections = async () => {
                 description: b.description || ""
             }))
         };
-            } else if (form.key === "home_video" || form.key === "video") {
+    } else if (form.key === "home_video" || form.key === "video") {
         data = {
             title: form.title || "AIRE Pro S1 — Engineering Architecture & Air Purification",
             image: form.image || "home/video_thumb.png",
             video_url: form.video_url || "storage/home/home-video.mp4",
             video_file: form.video_file || ""
         };
-} else if (form.key === "home_faq" || form.key === "faq") {
+    } else if (form.key === "home_faq" || form.key === "faq") {
         data = {
             badge: form.badge || "SUPPORT",
             title: form.title || "Frequently Asked Questions",
@@ -1958,6 +2937,113 @@ const updateSections = async () => {
             product_id: form.product_id ? Number(form.product_id) : null,
             image: form.image || "themes/default/assets/img/background-without-product.png",
         };
+    } else if (form.key === "about_hero") {
+        data = {
+            badge: form.badge,
+            title: form.title,
+            subtitle: form.subtitle
+        };
+    } else if (form.key === "about_story") {
+        data = {
+            number: form.number,
+            title: form.title,
+            subtitle: form.subtitle,
+            hero_title: form.hero_title,
+            hero_desc: form.hero_desc,
+            hero_image: form.hero_image,
+            hero_badge: form.hero_badge,
+            button_text: form.button_text,
+            button_link: form.button_link,
+            milestones: form.milestones.map(m => ({
+                year: m.year || "",
+                title: m.title || "",
+                desc: m.desc || ""
+            })),
+            impact_title: form.impact_title,
+            impact_desc: form.impact_desc,
+            impact_image: form.impact_image,
+            impact_badge: form.impact_badge,
+            stats: form.stats.map(s => ({
+                icon: s.icon || "",
+                title: s.title || "",
+                desc: s.desc || ""
+            })),
+            quote: form.quote,
+            quote_brand: form.quote_brand
+        };
+    } else if (form.key === "about_mission_vision") {
+        data = {
+            number: form.number,
+            title: form.title,
+            subtitle: form.subtitle,
+            purpose_title: form.purpose_title,
+            purpose_desc: form.purpose_desc,
+            purpose_image: form.purpose_image,
+            purpose_badge: form.purpose_badge,
+            mission_title: form.mission_title,
+            mission_desc: form.mission_desc,
+            vision_title: form.vision_title,
+            vision_desc: form.vision_desc,
+            values: form.values.map(v => ({
+                icon: v.icon || "",
+                title: v.title || "",
+                desc: v.desc || ""
+            })),
+            quote: form.quote,
+            quote_brand: form.quote_brand
+        };
+    } else if (form.key === "about_leadership") {
+        data = {
+            number: form.number,
+            title: form.title,
+            subtitle: form.subtitle,
+            banner_badge: form.banner_badge,
+            banner_title: form.banner_title,
+            banner_desc: form.banner_desc,
+            banner_image: form.banner_image,
+            banner_badge_text: form.banner_badge_text,
+            team_heading: form.team_heading,
+            team_subheading: form.team_subheading,
+            members: form.members.map(m => ({
+                name: m.name || "",
+                role: m.role || "",
+                bio: m.bio || "",
+                image: m.image || ""
+            })),
+            quote: form.quote,
+            quote_brand: form.quote_brand
+        };
+    } else if (['about_innovation', 'about_quality', 'about_global'].includes(form.key)) {
+        data = {
+            number: form.number,
+            title: form.title,
+            subtitle: form.subtitle,
+            items: form.items.map(it => ({
+                icon: it.icon || "",
+                title: it.title || "",
+                desc: it.desc || ""
+            }))
+        };
+    } else if (form.key === "about_careers") {
+        data = {
+            number: form.number,
+            title: form.title,
+            subtitle: form.subtitle,
+            card_title: form.card_title,
+            card_desc: form.card_desc,
+            button_text: form.button_text,
+            button_link: form.button_link
+        };
+    } else if (form.key === "about_news") {
+        data = {
+            number: form.number,
+            title: form.title,
+            subtitle: form.subtitle,
+            banner_title: form.banner_title,
+            banner_desc: form.banner_desc,
+            button_text: form.button_text,
+            button_link: form.button_link
+        };
     } else {
         data = {
             title: form.title,
@@ -1969,7 +3055,15 @@ const updateSections = async () => {
     }
 
     const payload = new FormData();
-    if (!previews.value[0] && !["why_choose_aire", "trust_badges", "home_benefits", "benefits", "home_lifestyle", "lifestyle", "home_faq", "faq", "home_video", "video", "home_best_selling", "best_selling", "home_new_arrival", "new_arrival", "home_customer_favorites", "customer_favorites", "home_living_hero", "living_hero"].includes(form.key)) {
+    const specialKeys = [
+        "why_choose_aire", "trust_badges", "home_benefits", "benefits",
+        "home_lifestyle", "lifestyle", "home_faq", "faq", "home_video", "video",
+        "home_best_selling", "best_selling", "home_new_arrival", "new_arrival",
+        "home_customer_favorites", "customer_favorites", "home_living_hero", "living_hero",
+        "about_hero", "about_story", "about_mission_vision", "about_leadership",
+        "about_innovation", "about_quality", "about_careers", "about_news", "about_global"
+    ];
+    if (!previews.value[0] && !specialKeys.includes(form.key)) {
         payload.append('remove_image', 1);
     }
     payload.append("data", JSON.stringify(data));
@@ -1999,7 +3093,9 @@ const updateSections = async () => {
             headers: { "Content-Type": "multipart/form-data" },
         });
         toast.success("Section updated successfully");
-        if (window.history.state?.back || window.history.length > 1) {
+        if (form.key.startsWith('about_')) {
+            router.push({ name: "AboutSections" });
+        } else if (window.history.state?.back || window.history.length > 1) {
             router.back();
         } else {
             router.push({

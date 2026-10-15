@@ -72,20 +72,20 @@
               <!-- Conditional fields -->
               <div v-if="editForm.link_type === 'page'" class="form-group">
                 <label for="edit-page">Page</label>
-                <Multiselect v-model="editForm.page_id" :options="pagesOptions" :reduce="option => option.value"
-                  placeholder="Select page" searchable />
+                <Multiselect v-model="editForm.page_id" :options="pagesOptions" :searchable="true"
+                  placeholder="Select page" />
               </div>
 
               <div v-if="editForm.link_type === 'category'" class="form-group">
                 <label for="edit-category">Category</label>
                 <Multiselect v-model="editForm.category_id" :options="categoriesOptions"
-                  :reduce="option => option.value" placeholder="Select category" searchable />
+                  :searchable="true" placeholder="Select category" />
               </div>
 
               <div v-if="editForm.link_type === 'url'" class="form-group">
                 <label for="edit-url">URL</label>
                 <input id="edit-url" v-model="editForm.url" type="text" class="form-control form-control-sm"
-                  placeholder="https://example.com" />
+                  placeholder="https://example.com or /page-path" />
               </div>
 
               <!-- Enabled -->
@@ -178,12 +178,12 @@ const updateName = async (item) => {
   try {
     const payload = {
       name: item.name,
-      icon: item.icon,
-      link_type: item.link_type,
-      page_id: item.page_id || null,
-      category_id: item.category_id || null,
-      url: item.url || null,
-      enabled: item.enabled
+      icon: item.icon || '',
+      link_type: item.link_type || 'url',
+      page_id: item.link_type === 'page' && item.page_id ? Number(item.page_id) : null,
+      category_id: item.link_type === 'category' && item.category_id ? Number(item.category_id) : null,
+      url: item.link_type === 'url' ? (item.url || '') : null,
+      enabled: item.enabled !== false
     }
 
     const { data } = await axios.put(`/api/menu-items/${item.id}`, payload)
@@ -265,24 +265,21 @@ const fetchCategories = async () => {
  * Category options for multiselect
  */
 const categoriesOptions = computed(() => {
-  return [
-    { label: '-- None --', value: '' },
-    ...categories.value.map(cat => ({
-      label: cat.category_name,
-      value: cat.id
-    }))
-  ];
+  return categories.value.map(cat => ({
+    label: cat.category_name,
+    value: Number(cat.id)
+  }));
 });
 
 /**
  * Fetch pages for dropdown
  */
-const fetchPages = async (page = 1, searchTerm = "") => {
+const fetchPages = async () => {
   try {
     const res = await axios.get(`/api/pages?all=1`);
-    pages.value = res.data.data;
+    pages.value = res.data.data || [];
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching pages', error);
   }
 };
 
@@ -290,13 +287,10 @@ const fetchPages = async (page = 1, searchTerm = "") => {
  * Page options for multiselect
  */
 const pagesOptions = computed(() => {
-  return [
-    { label: '-- None --', value: '' },
-    ...pages.value.map(page => ({
-      label: page.page_title,
-      value: page.id
-    }))
-  ];
+  return pages.value.map(page => ({
+    label: page.page_title,
+    value: Number(page.id)
+  }));
 });
 
 /**
@@ -436,10 +430,10 @@ const openEditPanel = (item) => {
   editForm.value = {
     name: item.name || '',
     icon: item.icon || '',
-    link_type: item.link_type || '',
-    url: item.url || '',
-    category_id: item.category_id || '',
-    page_id: item.page_id || '',
+    link_type: item.link_type || 'url',
+    url: item.url || item.link || '',
+    category_id: item.category_id ? Number(item.category_id) : null,
+    page_id: item.page_id ? Number(item.page_id) : null,
     enabled: item.enabled !== false
   }
 }
@@ -461,11 +455,11 @@ const applyEdit = async () => {
   try {
     const payload = {
       name: editForm.value.name,
-      icon: editForm.value.icon,
-      link_type: editForm.value.link_type,
-      page_id: editForm.value.page_id || null,
-      category_id: editForm.value.category_id || null,
-      url: editForm.value.url || null,
+      icon: editForm.value.icon || '',
+      link_type: editForm.value.link_type || 'url',
+      page_id: editForm.value.link_type === 'page' && editForm.value.page_id ? Number(editForm.value.page_id) : null,
+      category_id: editForm.value.link_type === 'category' && editForm.value.category_id ? Number(editForm.value.category_id) : null,
+      url: editForm.value.link_type === 'url' ? (editForm.value.url || '') : null,
       enabled: editForm.value.enabled
     }
     const { data } = await axios.put(`/api/menu-items/${target.id}`, payload)
@@ -480,6 +474,8 @@ const applyEdit = async () => {
 }
 </script>
 <style>
+@import "@vueform/multiselect/themes/default.css";
+
 .menu-item {
   background: #f9f9f9;
   border: 1px solid #dee2e6;

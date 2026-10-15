@@ -17,7 +17,20 @@
         : ($product?->main_image
             ? getImageUrl($product->main_image)
             : theme_asset('img/Air-Purify.png'));
-    $productBuyNowUrl = $product ? route('products.detail', $product->slug ?: $product->id) : 'javascript:void(0);';
+    $productBuyNowUrl = $product ? route('products.detail', $product->slug ?: $product->id) : route('products.index');
+
+    // SEO Meta calculations
+    $seoTitle = $landing?->hero_title
+        ? $landing->hero_title . ' | ' . ($product->name ?? 'AIRE')
+        : ($product->name ?? 'Product Landing') . ' | ' . config('app.name', 'AIRE');
+    $seoDescription = $landingHeroDesc;
+    $seoKeywords = $product?->description?->meta_keyword ?? '';
+    $seoOgImage = $landing?->hero_image
+        ? getImageUrl($landing->hero_image, null, null, ['raw' => true])
+        : ($product?->main_image
+            ? getImageUrl($product->main_image, null, null, ['raw' => true])
+            : theme_asset('img/Air-Purify.png'));
+    $canonicalUrl = $product ? route('products.landing', $product->slug ?: $product->id) : url()->current();
 
     $scienceFeatures = $landing?->science_features ?? [
         [
@@ -80,7 +93,25 @@
     ];
 @endphp
 
-@section('title', 'Aire | ' . $landingHeroTitle . ' - Product Landing')
+@section('title', $seoTitle)
+@section('meta_description', $seoDescription)
+@if (!empty($seoKeywords))
+    @section('meta_keywords', $seoKeywords)
+@endif
+@section('og_image', $seoOgImage)
+@section('og_type', 'product')
+@section('canonical_url', $canonicalUrl)
+
+@if ($product)
+    @include('themes.default.partials.product_schema', [
+        'product' => $product,
+        'canonicalUrl' => $canonicalUrl
+    ])
+@endif
+
+@push('head')
+    <link rel="preload" as="image" href="{{ $landingHeroImage }}" fetchpriority="high">
+@endpush
 
 @push('styles')
     <!-- BEM Product Detail Page CSS -->
@@ -275,7 +306,7 @@
                     <div class="col-lg-5 specs-sticky-col">
                         <div class="specs-exploded-box">
                             <img id="specs-dynamic-image" class="img-fluid"
-                                src="{{ $landing?->specs_image ? getImageUrl($landing->specs_image) : $specGroups[0]['image'] ?? 'https://picsum.photos/500/500?random=1' }}"
+                                src="{{ $landing?->specs_image ? getImageUrl($landing->specs_image) : (!empty($specGroups[0]['image']) ? getImageUrl($specGroups[0]['image']) : 'https://picsum.photos/500/500?random=1') }}"
                                 alt="Exploded 3D View">
                         </div>
                         <div class="text-center mt-3">

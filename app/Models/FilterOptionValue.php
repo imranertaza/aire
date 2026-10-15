@@ -13,10 +13,18 @@ class FilterOptionValue extends Model
     {
         static::saved(function ($optionValue) {
             Cache::forget('all_filter_options');
+            Cache::forget('filter_all_option_values_v1');
+            Cache::forget('filter_budget_option_v1');
+            Cache::forget('filter_active_db_options');
+            Cache::forget('filter_steps_data_v9');
         });
 
         static::deleted(function ($optionValue) {
             Cache::forget('all_filter_options');
+            Cache::forget('filter_all_option_values_v1');
+            Cache::forget('filter_budget_option_v1');
+            Cache::forget('filter_active_db_options');
+            Cache::forget('filter_steps_data_v9');
         });
     }
 

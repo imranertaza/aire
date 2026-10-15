@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Auth;
+namespace App\Services\Admin;
 
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -25,7 +25,9 @@ class AdminAuthService
             if (Auth::guard('web')->attempt($credentials, $request->boolean('remember', false))) {
                 /** @var User $admin */
                 $admin = Auth::guard('web')->user();
-                $request->session()->regenerate();
+                if ($request->hasSession()) {
+                    $request->session()->regenerate();
+                }
 
                 return [
                     'success' => true,
@@ -110,8 +112,10 @@ class AdminAuthService
 
         if ($isHttpOnly) {
             Auth::guard('web')->logout();
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+            if ($request->hasSession()) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
         } else {
             $user = $request->user();
             if ($user && method_exists($user, 'tokens')) {

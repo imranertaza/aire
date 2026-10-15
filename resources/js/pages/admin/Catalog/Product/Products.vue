@@ -96,30 +96,52 @@
                             </table>
                         </div>
 
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <div class="d-flex align-items-center">
-                                <button v-if="authStore.hasPermission('create-products') && selectedProducts.length > 0"
-                                    class="btn btn-sm btn-outline-primary mr-2" @click="copySelected">
-                                    <i class="fas fa-copy"></i> Copy
-                                </button>
-                                <button v-if="authStore.hasPermission('delete-products') && selectedProducts.length > 0"
-                                    class="btn btn-sm btn-outline-danger mr-2" @click="deleteSelected">
-                                    <i class="fas fa-trash-alt"></i> Delete
-                                </button>
-                                <div v-if="authStore.hasPermission('edit-products') && selectedProducts.length > 0"
-                                    class="input-group input-group-sm" style="width: auto;">
-                                    <select v-model="bulkStatus" class="custom-select">
-                                        <option value="" disabled>Update Status</option>
-                                        <option :value="1">Active</option>
-                                        <option :value="0">Inactive</option>
-                                    </select>
-                                    <div class="input-group-append">
-                                        <button class="btn btn-outline-secondary" type="button"
-                                            @click="updateSelectedStatus">Apply</button>
+                        <!-- Table Footer / Bulk Actions & Pagination -->
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-3 border-top" style="gap: 12px;">
+                            <!-- Bulk Actions (visible when items selected) -->
+                            <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                <template v-if="selectedProducts.length > 0">
+                                    <span class="badge badge-light border px-2 py-1 text-muted d-inline-flex align-items-center mr-1" style="font-size: 0.85rem; height: 31px;">
+                                        <strong class="text-primary mr-1">{{ selectedProducts.length }}</strong> selected
+                                    </span>
+
+                                    <button v-if="authStore.hasPermission('create-products')"
+                                        type="button"
+                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center"
+                                        style="white-space: nowrap; height: 31px; font-weight: 500;"
+                                        title="Copy Selected"
+                                        @click="copySelected">
+                                        <i class="fas fa-copy mr-1"></i> Copy
+                                    </button>
+
+                                    <button v-if="authStore.hasPermission('delete-products')"
+                                        type="button"
+                                        class="btn btn-sm btn-outline-danger d-inline-flex align-items-center"
+                                        style="white-space: nowrap; height: 31px; font-weight: 500;"
+                                        title="Delete Selected"
+                                        @click="deleteSelected">
+                                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                                    </button>
+
+                                    <div v-if="authStore.hasPermission('edit-products')"
+                                        class="input-group input-group-sm" style="width: 220px; flex-shrink: 0;">
+                                        <select v-model="bulkStatus" class="custom-select" style="min-width: 140px;">
+                                            <option value="" disabled>Update Status</option>
+                                            <option :value="1">Active</option>
+                                            <option :value="0">Inactive</option>
+                                        </select>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary px-2" type="button"
+                                                @click="updateSelectedStatus">Apply</button>
+                                        </div>
                                     </div>
-                                </div>
+                                </template>
                             </div>
-                            <Pagination :pData="products" @page-change="fetchPage" />
+
+                            <!-- Pagination -->
+                            <div class="ml-auto">
+                                <Pagination :pData="products" @page-change="fetchPage" />
+                            </div>
                         </div>
                     </div>
                 </div>

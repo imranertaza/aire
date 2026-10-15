@@ -3,19 +3,241 @@
 @section('body_class', 'product-filter-page')
 
 @push('styles')
-    <!-- BEM Product Filter Page & Home CSS -->
-    <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
-    <link href="{{ theme_asset('css/home.css') }}" rel="stylesheet">
+    <!-- Critical Hero Section CSS (Instant First Paint with 0 FOUC) -->
+    <style>
+        .home-hero-section {
+            position: relative;
+            width: 100%;
+            margin-top: 27px
+        }
+
+        .home-hero-swiper {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1)
+        }
+
+        .home-hero-slide {
+            position: relative;
+            width: 100%;
+            height: 520px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            text-align: center;
+            padding-bottom: 56px;
+            overflow: hidden
+        }
+
+        .home-hero-swiper:not(.swiper-initialized) .home-hero-slide:not(:first-child) {
+            display: none;
+        }
+
+        .home-hero-slide__bg-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            z-index: 0;
+            pointer-events: none;
+            content-visibility: visible;
+        }
+
+        .home-hero-slide__overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(5, 15, 35, 0) 0%, rgba(5, 15, 35, 0.08) 25%, rgba(3, 12, 30, 0.55) 60%, rgba(2, 9, 23, 0.92) 85%, #020816 100%);
+            z-index: 1;
+            pointer-events: none
+        }
+
+        .home-hero-slide__content {
+            position: relative;
+            z-index: 2;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 24px
+        }
+
+        .home-hero-slide__title {
+            color: #ffffff;
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+            margin-bottom: 10px
+        }
+
+        .home-hero-slide__subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            font-weight: 400;
+            margin-bottom: 24px;
+            line-height: 1.55
+        }
+
+        .home-hero-slide__action {
+            margin-bottom: 10px
+        }
+
+        .home-hero-slide__btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-primary, #0072B2);
+            border: 1px solid var(--color-primary, #0072B2);
+            color: #ffffff !important;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 11px 32px;
+            border-radius: 8px;
+            text-decoration: none
+        }
+
+        @media(max-width:991.98px) {
+            .home-hero-slide {
+                height: 440px;
+                padding-bottom: 48px
+            }
+
+            .home-hero-slide__title {
+                font-size: 2rem
+            }
+        }
+
+        @media(max-width:575.98px) {
+            .home-hero-swiper {
+                border-radius: 14px
+            }
+
+            .home-hero-slide {
+                height: 380px;
+                padding-bottom: 40px
+            }
+
+            .home-hero-slide__title {
+                font-size: 1.6rem
+            }
+
+            .home-hero-slide__subtitle {
+                font-size: 0.875rem
+            }
+
+            .home-hero-slide__btn {
+                padding: 8px 24px;
+                font-size: 0.85rem
+            }
+        }
+
+        /* Swiper Hero Pagination Touch Target (>= 28x28px for WCAG 2.2 SC 2.5.8) */
+        .home-hero-swiper-pagination {
+            position: absolute;
+            bottom: 24px !important;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            z-index: 5
+        }
+
+        .home-hero-swiper-pagination .swiper-pagination-bullet {
+            position: relative;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 28px !important;
+            height: 28px !important;
+            min-width: 28px;
+            min-height: 28px;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 50% !important;
+            opacity: 1 !important;
+            cursor: pointer;
+            box-sizing: border-box !important
+        }
+
+        .home-hero-swiper-pagination .swiper-pagination-bullet::before {
+            content: '';
+            display: block;
+            width: 7px;
+            height: 7px;
+            background-color: #ffffff;
+            opacity: 0.4;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none
+        }
+
+        .home-hero-swiper-pagination .swiper-pagination-bullet:hover::before {
+            opacity: 0.8;
+            transform: scale(1.2)
+        }
+
+        .home-hero-swiper-pagination .swiper-pagination-bullet-active::before {
+            opacity: 1;
+            background-color: #ffffff;
+            transform: scale(1.35)
+        }
+
+        @media(max-width:575.98px) {
+            .home-hero-swiper-pagination {
+                bottom: 14px !important
+            }
+        }
+
+        /* Mobile Lightweight Lifestyle Row Entrance Transition (0 Main-Thread Blocking) */
+        @media(max-width:991.98px) {
+            .home-lifestyle__row {
+                opacity: 0.15;
+                transform: translateY(18px);
+                transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                will-change: opacity, transform;
+            }
+            .home-lifestyle__row.is-revealed {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <!-- Home Page CSS (Preloaded & Non-blocking) -->
+    <link rel="preload" as="style" href="{{ theme_asset('css/home.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/home.min.css') }}" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="{{ theme_asset('css/home.min.css') }}" rel="stylesheet">
+    </noscript>
+
+
+    <!-- Product Filter CSS for filter components -->
+    <link rel="preload" as="style" href="{{ theme_asset('css/product-filter.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/product-filter.min.css') }}" media="print" onload="this.media='all'">
+    <noscript>
+        <link href="{{ theme_asset('css/product-filter.min.css') }}" rel="stylesheet">
+    </noscript>
 @endpush
+
+@include('themes.default.partials.home_schema')
 
 @push('head')
     @php
         $firstHeroSlide = $heroSlides->first() ?? null;
         $firstSlideRaw = is_object($firstHeroSlide) ? $firstHeroSlide->image ?? '' : $firstHeroSlide['image'] ?? '';
-        $firstSlideUrl = !empty($firstSlideRaw) ? getImageUrl($firstSlideRaw) : null;
+        $firstSlideUrl = !empty($firstSlideRaw) ? getImageCacheUrl($firstSlideRaw, 1280, 520, 'webp') : null;
+        $firstSlideSrcset = !empty($firstSlideRaw) ? getImageSrcset($firstSlideRaw, [480, 800, 1280], 0.406, 'webp') : null;
     @endphp
     @if ($firstSlideUrl)
-        <link rel="preload" as="image" href="{{ $firstSlideUrl }}" fetchpriority="high">
+        <link rel="preload" as="image" href="{{ $firstSlideUrl }}"
+            @if ($firstSlideSrcset) imagesrcset="{{ $firstSlideSrcset }}" imagesizes="(max-width: 576px) 100vw, (max-width: 992px) 100vw, 1280px" @endif
+            fetchpriority="high">
     @endif
 @endpush
 
@@ -45,8 +267,20 @@
                                     ? ($slide->link ?:
                                     route('products.filter'))
                                     : $slide['btn_url'] ?? route('products.filter');
+                                $cleanSlideTitle = trim(strip_tags($slideTitle));
+                                $slideBtnAriaLabel =
+                                    $slideBtnText .
+                                    ($cleanSlideTitle ? ' - ' . $cleanSlideTitle : ' - Slide ' . $loop->iteration);
+
+                                $slideImage = !empty($rawImage) ? getImageCacheUrl($rawImage, 1280, 520, 'webp') : getImageUrl($rawImage);
+                                $slideSrcset = !empty($rawImage) ? getImageSrcset($rawImage, [480, 800, 1280], 0.406, 'webp') : '';
                             @endphp
-                            <div class="swiper-slide home-hero-slide" style="background-image: url('{{ $slideImage }}');">
+                            <div class="swiper-slide home-hero-slide @if ($loop->first) swiper-slide-active @endif">
+                                <img src="{{ $slideImage }}"
+                                    @if ($slideSrcset) srcset="{{ $slideSrcset }}" sizes="(max-width: 576px) 100vw, (max-width: 992px) 100vw, 1280px" @endif
+                                    alt="{{ $slideTitle }}" class="home-hero-slide__bg-img"
+                                    width="1280" height="520"
+                                    @if ($loop->first) fetchpriority="high" loading="eager" decoding="async" @else loading="lazy" decoding="async" @endif>
                                 <div class="home-hero-slide__overlay"></div>
                                 <div class="home-hero-slide__content">
                                     <h1 class="home-hero-slide__title">{{ $slideTitle }}</h1>
@@ -55,8 +289,10 @@
                                     @endif
                                     @if (!empty($slideBtnText))
                                         <div class="home-hero-slide__action">
-                                            <a href="{{ $slideBtnUrl }}"
-                                                class="btn home-hero-slide__btn">{{ $slideBtnText }}</a>
+                                            <a href="{{ $slideBtnUrl }}" class="btn home-hero-slide__btn"
+                                                aria-label="{{ $slideBtnAriaLabel }}">{{ $slideBtnText }}<span
+                                                    class="visually-hidden"> -
+                                                    {{ $cleanSlideTitle ?: 'Slide ' . $loop->iteration }}</span></a>
                                         </div>
                                     @endif
                                 </div>
@@ -105,9 +341,9 @@
                     ],
                 ];
 
-            $benefitsBannerImage = getImageUrl(
-                $benefitsSection['image'] ?? 'themes/default/assets/img/benifits-bg.png',
-            );
+            $benefitsRawImage = $benefitsSection['image'] ?? 'themes/default/assets/img/benifits-bg.png';
+            $benefitsBannerImage = getImageCacheUrl($benefitsRawImage, 1200, 400, 'webp');
+            $benefitsSrcset = getImageSrcset($benefitsRawImage, [600, 900, 1200], 0.333, 'webp');
         @endphp
 
         <section class="home-benefits-section py-4 my-3">
@@ -123,7 +359,9 @@
                 <div class="home-benefits__banner">
                     <!-- Parallax Background Image (Dynamic) -->
                     <div class="home-benefits__banner-bg">
-                        <img src="{{ $benefitsBannerImage }}" alt="{{ $benefitTitle }}" class="home-benefits__bg-img"
+                        <img src="{{ $benefitsBannerImage }}"
+                            @if ($benefitsSrcset) srcset="{{ $benefitsSrcset }}" sizes="(max-width: 768px) 100vw, 1200px" @endif
+                            alt="{{ $benefitTitle }}" class="home-benefits__bg-img"
                             width="1200" height="400" loading="lazy" decoding="async">
                     </div>
                     <div class="home-benefits__overlay"></div>
@@ -503,8 +741,9 @@
                     aria-label="{{ $videoTitle }}">
                     <!-- HTML5 Inline Video Player -->
                     <video id="homeMainVideo" class="home-video__player" poster="{{ $videoPoster }}"
-                        preload="metadata" playsinline>
+                        preload="none" playsinline>
                         <source src="{{ $videoUrl }}" type="video/mp4">
+                        <track kind="captions" label="English" srclang="en" src="data:text/vtt,WEBVTT%0A%0A" default>
                         Your browser does not support the video tag.
                     </video>
 
@@ -647,14 +886,14 @@
                                     $isFirst = $loop->first;
                                 @endphp
                                 <div class="accordion-item">
-                                    <h2 class="accordion-header">
+                                    <h3 class="accordion-header">
                                         <button class="accordion-button {{ $isFirst ? '' : 'collapsed' }}" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#{{ $collapseId }}"
                                             aria-expanded="{{ $isFirst ? 'true' : 'false' }}"
                                             aria-controls="{{ $collapseId }}">
                                             {{ $item['question'] ?? '' }}
                                         </button>
-                                    </h2>
+                                    </h3>
                                     <div id="{{ $collapseId }}"
                                         class="accordion-collapse collapse {{ $isFirst ? 'show' : '' }}"
                                         data-bs-parent="#faqAccordion">
@@ -675,97 +914,6 @@
 @endsection
 
 @push('scripts')
-    <!-- Home Hero Swiper Slider Init -->
-    <script defer>
-        document.addEventListener('DOMContentLoaded', function() {
-            function initHomeHeroSwiper() {
-                if (typeof Swiper === 'undefined') {
-                    setTimeout(initHomeHeroSwiper, 50);
-                    return;
-                }
-                const heroSliderEl = document.querySelector('.home-hero-swiper');
-                if (heroSliderEl) {
-                    new Swiper(heroSliderEl, {
-                        loop: true,
-                        speed: 800,
-                        effect: 'fade',
-                        fadeEffect: {
-                            crossFade: true
-                        },
-                        autoplay: {
-                            delay: 5000,
-                            disableOnInteraction: false,
-                            pauseOnMouseEnter: true
-                        },
-                        pagination: {
-                            el: '.home-hero-swiper-pagination',
-                            clickable: true
-                        },
-                        keyboard: {
-                            enabled: true,
-                            onlyInViewport: true
-                        }
-                    });
-                }
-            }
-            initHomeHeroSwiper();
-
-            // Inline Video Player Handler with Pause/Play Button Toggle
-            const videoBox = document.getElementById('homeVideoBox');
-            const mainVideo = document.getElementById('homeMainVideo');
-            const playBtn = document.getElementById('homeVideoPlayBtn');
-
-            if (videoBox && mainVideo) {
-                function togglePlay(e) {
-                    if (e) e.stopPropagation();
-                    if (mainVideo.paused || mainVideo.ended) {
-                        mainVideo.play().catch(function(err) {
-                            console.log('Playback error:', err);
-                        });
-                    } else {
-                        mainVideo.pause();
-                    }
-                }
-
-                // Sync video state to show/hide play button
-                mainVideo.addEventListener('play', function() {
-                    videoBox.classList.add('is-playing');
-                    videoBox.classList.add('has-started');
-                    videoBox.classList.remove('is-paused');
-                    mainVideo.controls = true;
-                });
-
-                mainVideo.addEventListener('pause', function() {
-                    videoBox.classList.remove('is-playing');
-                    videoBox.classList.add('is-paused');
-                });
-
-                mainVideo.addEventListener('ended', function() {
-                    videoBox.classList.remove('is-playing');
-                    videoBox.classList.add('is-paused');
-                });
-
-                if (playBtn) {
-                    playBtn.addEventListener('click', togglePlay);
-                }
-
-                // Clicking on video box toggles play/pause
-                videoBox.addEventListener('click', function(e) {
-                    // If clicking directly on controls bar, allow native control
-                    if (e.target === mainVideo && !mainVideo.paused) {
-                        mainVideo.pause();
-                    } else if (mainVideo.paused) {
-                        togglePlay(e);
-                    }
-                });
-            }
-
-        });
-    </script>
-    <!-- GSAP & ScrollTrigger for Homepage Scroll Animations -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
-    <!-- Custom Product Filter JS -->
-    <script src="{{ theme_asset('js/product-filter.js') }}" defer></script>
+    <!-- AIRE Home Page Controller (Lightweight mobile-first & dynamic desktop engine) -->
     <script src="{{ theme_asset('js/home.js') }}" defer></script>
 @endpush

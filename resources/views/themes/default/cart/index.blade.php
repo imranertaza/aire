@@ -194,9 +194,9 @@
                                 <div class="cart-col-quantity w-100 mt-3 mt-lg-0">
                                     <div
                                         class="qty-action-column d-flex flex-row flex-lg-column align-items-center justify-content-between justify-content-lg-center gap-1">
-                                        <a href="#"
-                                            class="save-for-later-link text-decoration-none btn-save-later mb-1"
-                                            data-product-id="{{ $id }}">Save for later</a>
+                                        <button type="button"
+                                            class="btn p-0 border-0 bg-transparent save-for-later-link text-decoration-none btn-save-later mb-1"
+                                            data-product-id="{{ $id }}">Save for later</button>
                                         <div
                                             class="qty-counter-box border d-inline-flex align-items-center bg-white px-2 py-2 border-slate-300">
                                             <button type="button"

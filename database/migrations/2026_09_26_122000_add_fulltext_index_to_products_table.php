@@ -13,9 +13,11 @@ return new class extends Migration
     public function up(): void
     {
         if (DB::getDriverName() !== 'sqlite') {
-            Schema::table('products', function (Blueprint $table) {
-                $table->fullText(['name', 'model', 'product_code'], 'products_fulltext_idx');
-            });
+            try {
+                Schema::table('products', function (Blueprint $table) {
+                    $table->fullText(['name', 'model', 'product_code'], 'products_fulltext_idx');
+                });
+            } catch (\Throwable $e) {}
         }
     }
 

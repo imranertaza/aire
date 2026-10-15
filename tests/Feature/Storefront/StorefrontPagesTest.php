@@ -92,13 +92,54 @@ class StorefrontPagesTest extends TestCase
         ]);
     }
 
-    public function test_newsletter_subscription_validates_email(): void
+    public function test_contact_form_submission_succeeds(): void
     {
-        $response = $this->postJson(route('newsletter.subscribe'), [
-            'email' => 'invalid-email-address',
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $response = $this->postJson(route('contact.submit'), [
+            'name'    => 'John Doe',
+            'email'   => 'john@example.com',
+            'phone'   => '+1234567890',
+            'subject' => 'Product Consultation',
+            'message' => 'I would like to know more about the AIRE Pro S1 system.',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+            ]);
+    }
+
+    public function test_contact_form_honeypot_traps_bot(): void
+    {
+        \Illuminate\Support\Facades\Mail::fake();
+
+        $response = $this->postJson(route('contact.submit'), [
+            'name'          => 'Spam Bot',
+            'email'         => 'spambot@example.com',
+            'message'       => 'Buy cheap stuff',
+            'b_extra_field' => 'bot-value',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        // Email should NOT be sent to admin
+        \Illuminate\Support\Facades\Mail::assertNothingSent();
+    }
+
+    public function test_contact_form_validates_required_fields(): void
+    {
+        $response = $this->postJson(route('contact.submit'), [
+            'name' => '',
+            'email' => 'not-an-email',
+            'message' => '',
         ]);
 
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['name', 'email', 'message']);
     }
 }
+

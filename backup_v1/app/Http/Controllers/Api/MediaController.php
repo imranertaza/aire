@@ -114,7 +114,7 @@ class MediaController extends Controller
         return response()->json([
             'message'       => 'File uploaded successfully',
             'path'          => $path,
-            'url'           => '/public/' .Storage::url($path),
+            'url'           => Storage::url($path),
             'original_name' => $request->file('file')->getClientOriginalName(),
             'stored_name'   => $newFileName,
             'type'          => $extension

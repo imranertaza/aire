@@ -13,66 +13,281 @@ class SectionSeeder extends Seeder
      */
     public function run(): void
     {
+        // ==========================================
+        // ABOUT US PAGE DYNAMIC SECTIONS
+        // ==========================================
         Section::updateOrCreate(
-            ['name' => 'about_vision'],
+            ['name' => 'about_hero'],
             [
                 'data' => [
-                    'title' => 'Vision',
-                    'image' => 'themes/default/assets/img/Air-Purify.png',
-                    'content' => '<p class="content-text text-dark-emphasis">
-            Through relentless innovation and precision engineering, Aire’s vision is to make pure, safe, and breathable air universally accessible across homes, commercial spaces, and healthcare environments worldwide.
-        </p>'
+                    'badge' => 'OUR STORY',
+                    'title' => 'A Cleaner Tomorrow Starts Here',
+                    'subtitle' => 'From a simple idea to a global mission, our journey has always been about one thing — cleaner air for healthier, happier lives.',
                 ],
             ]
         );
+
+        Section::updateOrCreate(
+            ['name' => 'about_story'],
+            [
+                'data' => [
+                    'number' => 1,
+                    'title' => 'Our Journey',
+                    'subtitle' => 'Discover the key milestones that have shaped AIRE into a global leader in clean air solutions.',
+                    'hero_title' => 'Our Journey',
+                    'hero_desc' => 'Since our founding, AIRE has been at the forefront of clean air innovation. What began as a vision to improve indoor air quality has grown into a global movement, trusted in homes, businesses and public spaces worldwide.',
+                    'hero_image' => 'themes/default/assets/img/about/mountains.jpg',
+                    'hero_badge' => "CLEANER AIR\nBRIGHTER SPACES\nA HEALTHIER TOMORROW",
+                    'button_text' => 'Explore Our History',
+                    'button_link' => '#milestones',
+                    'milestones' => [
+                        [
+                            'year' => '1988',
+                            'title' => 'The Beginning',
+                            'desc' => 'AIRE was founded with a vision to develop advanced air purification technologies for healthier indoor environments.',
+                        ],
+                        [
+                            'year' => '1995',
+                            'title' => 'Research & Development',
+                            'desc' => 'We established our first R&D centre, focusing on innovative air treatment technologies and energy-efficient solutions.',
+                        ],
+                        [
+                            'year' => '2005',
+                            'title' => 'Expanding Globally',
+                            'desc' => 'We expanded our product portfolio and entered international markets across Europe and Asia.',
+                        ],
+                        [
+                            'year' => '2015',
+                            'title' => 'A Broader Impact',
+                            'desc' => 'We introduced commercial and industrial solutions, addressing air quality challenges across multiple industries, from residential to large-scale commercial projects.',
+                        ],
+                        [
+                            'year' => '2020',
+                            'title' => 'Building Healthier Communities',
+                            'desc' => 'Our technologies are trusted in over 100 countries, improving the lives of millions through cleaner, safer air.',
+                        ],
+                        [
+                            'year' => 'Today',
+                            'title' => 'A Cleaner, Brighter Tomorrow',
+                            'desc' => 'We continue to innovate for a healthier planet, with a commitment to sustainability and a future where everyone can breathe better, everywhere.',
+                        ],
+                    ],
+                    'impact_title' => 'A Healthier World Through Cleaner Air',
+                    'impact_desc' => 'Our solutions are creating measurable change — improving health, enhancing productivity and building more sustainable communities across the globe.',
+                    'impact_image' => 'themes/default/assets/img/apartments.jpg',
+                    'impact_badge' => "CLEANER AIR\nBRIGHTER SPACES\nA HEALTHIER TOMORROW",
+                    'stats' => [
+                        [
+                            'icon' => 'bi bi-globe',
+                            'title' => '100+ Countries',
+                            'desc' => 'Our solutions are trusted in over 100 countries worldwide.',
+                        ],
+                        [
+                            'icon' => 'bi bi-house-door',
+                            'title' => 'Millions Healthier Homes',
+                            'desc' => 'Cleaner, safer indoor air for families around the world.',
+                        ],
+                        [
+                            'icon' => 'bi bi-buildings',
+                            'title' => 'Thousands Businesses',
+                            'desc' => 'From offices to factories, we help organisations create healthier workplaces.',
+                        ],
+                        [
+                            'icon' => 'bi bi-tree',
+                            'title' => 'A Cleaner Tomorrow',
+                            'desc' => 'Reducing emissions and supporting a more sustainable planet.',
+                        ],
+                    ],
+                    'quote' => 'Real change happens when cleaner air becomes a right for everyone, not a privilege for a few.',
+                    'quote_brand' => "CLEANER AIR\nBRIGHTER SPACES\nA HEALTHIER TOMORROW",
+                ],
+            ]
+        );
+
         Section::updateOrCreate(
             ['name' => 'about_mission_vision'],
             [
                 'data' => [
-                    'title' => 'Our mission and vision',
-                    'image' => 'themes/default/assets/img/Air-Purify.png',
-                    'content' => '<p class="content-text text-white opacity-75">
-                        The mission & vision of Aire is to engineer cutting-edge indoor air purification and ventilation systems that protect human health, enhance cognitive well-being, and set global benchmarks for air purity.
-                    </p>',
-                    'home_content' => '<p class="content-text text-dark-emphasis">
-                        The mission & vision of Aire is to engineer cutting-edge indoor air purification and ventilation systems that protect human health, enhance cognitive well-being, and set global benchmarks for air purity.
-                    </p>',
+                    'number' => 2,
+                    'title' => 'Mission & Vision',
+                    'subtitle' => 'Our purpose, values and commitment to a better future.',
+                    'purpose_title' => 'Our Purpose',
+                    'purpose_desc' => 'We believe clean air is a fundamental right for everyone. Our mission and vision guide everything we do — from the technologies we develop to the communities we serve.',
+                    'purpose_image' => 'themes/default/assets/img/about/earth_purpose.jpg',
+                    'purpose_badge' => "CLEANER AIR\nBRIGHTER SPACES\nA HEALTHIER TOMORROW",
+                    'mission_title' => 'Our Mission',
+                    'mission_desc' => 'To develop and deliver innovative, reliable and energy-efficient air solutions that create healthier indoor environments for people everywhere.',
+                    'vision_title' => 'Our Vision',
+                    'vision_desc' => 'A world where everyone, everywhere can breathe clean, safe and healthy air — today and for future generations.',
+                    'values' => [
+                        [
+                            'icon' => 'bi bi-heart',
+                            'title' => 'People First',
+                            'desc' => 'We put the health and wellbeing of people at the heart of our work.',
+                        ],
+                        [
+                            'icon' => 'bi bi-lightbulb',
+                            'title' => 'Innovation Always',
+                            'desc' => 'We continuously push the boundaries of clean air technology.',
+                        ],
+                        [
+                            'icon' => 'bi bi-globe-americas',
+                            'title' => 'A Healthier Planet',
+                            'desc' => 'We are committed to a more sustainable and resilient future.',
+                        ],
+                        [
+                            'icon' => 'bi bi-people-fill',
+                            'title' => 'Stronger Together',
+                            'desc' => 'We collaborate with partners and communities to create lasting impact.',
+                        ],
+                    ],
+                    'quote' => 'Clean air empowers people, strengthens communities and builds a brighter tomorrow.',
+                    'quote_brand' => "CLEANER AIR\nBRIGHTER SPACES\nA HEALTHIER TOMORROW",
                 ],
             ]
         );
+
         Section::updateOrCreate(
-            ['name' => 'about_mission'],
+            ['name' => 'about_leadership'],
             [
                 'data' => [
-                    'title' => 'Mission',
-                    'image' => 'themes/default/assets/img/Air-Purify.png',
-                    'content' => '<ul class=" ps-3 ">
-                        <li class="text-dark-emphasis content-text mb-4">Engineering high-efficiency medical-grade HEPA and ULPA filtration systems for critical environments.</li>
-                        <li class="text-dark-emphasis content-text mb-4">Developing smart, real-time IoT air quality monitoring and automated ventilation algorithms.</li>
-                        <li class="text-dark-emphasis content-text mb-4">Fostering sustainable, energy-efficient clean air technologies that minimize environmental impact.</li>
-                        <li class="text-dark-emphasis content-text mb-4">Providing accessible air purification solutions for residential, commercial, and industrial facilities.</li>
-                    </ul>',
+                    'number' => 3,
+                    'title' => 'Leadership',
+                    'subtitle' => 'Meet the people driving innovation and impact.',
+                    'banner_badge' => 'OUR LEADERSHIP',
+                    'banner_title' => 'People with Purpose',
+                    'banner_desc' => 'Our leadership team brings together decades of experience, a passion for cleaner air and a shared commitment to creating healthier spaces for everyone, everywhere.',
+                    'banner_image' => 'themes/default/assets/img/about/leadership.jpg',
+                    'banner_badge_text' => "CLEANER AIR\nBRIGHTER SPACES\nA HEALTHIER TOMORROW",
+                    'team_heading' => 'Meet Our Leadership Team',
+                    'team_subheading' => 'A diverse group of visionaries, innovators and changemakers working together to build a cleaner, healthier future.',
+                    'members' => [
+                        [
+                            'name' => 'Dr. James Liu',
+                            'role' => 'Chief Executive Officer',
+                            'bio' => "Leading AIRE's global vision for cleaner air and healthier lives.",
+                            'image' => '',
+                        ],
+                        [
+                            'name' => 'Sarah Mitchell',
+                            'role' => 'Chief Technology Officer',
+                            'bio' => 'Driving innovation in air purification and sustainable technologies.',
+                            'image' => '',
+                        ],
+                        [
+                            'name' => 'Kenji Tanaka',
+                            'role' => 'Chief Operations Officer',
+                            'bio' => 'Scaling solutions globally with operational excellence and partnerships.',
+                            'image' => '',
+                        ],
+                        [
+                            'name' => 'Elena Rodriguez',
+                            'role' => 'Chief Sustainability Officer',
+                            'bio' => 'Championing a healthier planet through people, partnerships and purpose.',
+                            'image' => '',
+                        ],
+                    ],
+                    'quote' => 'Great things happen when passionate people work together for a cleaner, healthier world.',
+                    'quote_brand' => "CLEANER AIR\nBRIGHTER SPACES\nA HEALTHIER TOMORROW",
                 ],
             ]
         );
+
         Section::updateOrCreate(
-            ['name' => 'history_history'],
+            ['name' => 'about_innovation'],
             [
                 'data' => [
-                    'title' => 'History & Heritage',
-                    'image' => 'themes/default/assets/img/Air-Purify.png',
-                    'content' => ' <p class="content-text text-white opacity-75">Founded with a commitment to pure air engineering, Aire has grown from an experimental aerosol lab into a leading developer of advanced indoor air quality and filtration systems globally.</p>
-                    <ul class=" ps-3 text-white opacity-75 content-tex">
-                        <li class=" t mb-4"><strong>2015: </strong>Aire established its first aerosol research facility, developing proprietary multi-stage filtration technologies.</li>
+                    'number' => 4,
+                    'title' => 'Innovation & Patents',
+                    'subtitle' => 'Pioneering technologies protected worldwide.',
+                    'items' => [
+                        [
+                            'icon' => 'bi bi-patch-check',
+                            'title' => '200+ Global Patents',
+                            'desc' => 'Proprietary innovations in ionization, filtration, and acoustic airflow design.',
+                        ],
+                        [
+                            'icon' => 'bi bi-sliders',
+                            'title' => 'Smart Air Calibration',
+                            'desc' => 'AI-powered sensors that dynamically adjust filtration based on environmental metrics.',
+                        ],
+                    ],
+                ],
+            ]
+        );
 
-                        <li class="mb-4"><strong>2018: </strong>Launched the commercial-grade Aire Pro series, adopted across healthcare clinics and laboratories.</li>
+        Section::updateOrCreate(
+            ['name' => 'about_quality'],
+            [
+                'data' => [
+                    'number' => 5,
+                    'title' => 'Quality & Certifications',
+                    'subtitle' => 'Globally certified for safety, quality and performance.',
+                    'items' => [
+                        [
+                            'icon' => 'bi bi-award',
+                            'title' => 'ISO 9001 & 14001',
+                            'desc' => 'Rigorous international standards for manufacturing and environmental stewardship.',
+                        ],
+                        [
+                            'icon' => 'bi bi-shield-lock',
+                            'title' => 'AHAM CADR Certified',
+                            'desc' => 'Independently lab tested and verified Clean Air Delivery Rates.',
+                        ],
+                    ],
+                ],
+            ]
+        );
 
-                        <li class="mb-4"><strong>2021: </strong>Introduced AIRE IoT Cloud integration with real-time particle sensing and autonomous airflow adjustment.</li>
+        Section::updateOrCreate(
+            ['name' => 'about_careers'],
+            [
+                'data' => [
+                    'number' => 6,
+                    'title' => 'Careers',
+                    'subtitle' => 'Join our team and help shape a healthier world.',
+                    'card_title' => 'Build the Future of Clean Air',
+                    'card_desc' => 'We are always looking for passionate engineers, designers, scientists, and problem-solvers to join our global family.',
+                    'button_text' => 'View Open Positions',
+                    'button_link' => '/contact-us',
+                ],
+            ]
+        );
 
-                        <li class="mb-4"><strong>2024: </strong>Expanded smart residential & commercial product line with next-gen H13 HEPA and active carbon architectures.</li>
+        Section::updateOrCreate(
+            ['name' => 'about_news'],
+            [
+                'data' => [
+                    'number' => 7,
+                    'title' => 'News & Media',
+                    'subtitle' => 'Latest news, press releases and media coverage.',
+                    'banner_title' => 'Official Press & Media Center',
+                    'banner_desc' => 'Stay informed with our latest announcements, product innovations, and global milestones.',
+                    'button_text' => 'Media Inquiries',
+                    'button_link' => '/contact-us',
+                ],
+            ]
+        );
 
-                        <li class="mb-4"><strong>Present: </strong>Continuously pioneering breakthrough indoor air safety, energy-efficient filtration, and clean air living.</li>
-                </ul>',
+        Section::updateOrCreate(
+            ['name' => 'about_global'],
+            [
+                'data' => [
+                    'number' => 8,
+                    'title' => 'Global Presence',
+                    'subtitle' => 'Serving customers in over 100 countries.',
+                    'items' => [
+                        [
+                            'icon' => 'bi bi-geo-alt',
+                            'title' => 'Global Offices',
+                            'desc' => 'Regional hubs in North America, Europe, Asia Pacific, and the Middle East.',
+                        ],
+                        [
+                            'icon' => 'bi bi-truck',
+                            'title' => 'Worldwide Distribution',
+                            'desc' => 'Direct fulfillment and certified maintenance partners across 100+ nations.',
+                        ],
+                    ],
                 ],
             ]
         );

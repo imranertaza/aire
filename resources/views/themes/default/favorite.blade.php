@@ -2,7 +2,9 @@
 @section('title', 'My Favorites | Aire')
 
 @push('styles')
-    <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
+    <!-- BEM Product Filter Page CSS (Preload + Minified) -->
+    <link rel="preload" as="style" href="{{ theme_asset('css/product-filter.min.css') }}">
+    <link href="{{ theme_asset('css/product-filter.min.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
@@ -42,7 +44,10 @@
                             $inCart = isset(session('cart', [])[$product->id]);
                             $firstCat = $product->categories->first();
                             $catName = $firstCat?->category_name;
-                            $catBg = $firstCat?->bg_color ?: '#00c853';
+                            $catBg = $firstCat?->bg_color ?: '#0a7a3b';
+                            if (strcasecmp($catBg, '#00c853') === 0) {
+                                $catBg = '#0a7a3b';
+                            }
                         @endphp
                         <div class="col product-card-col" id="fav-item-{{ $product->id }}">
                             @include('themes.default.partials.product_card', ['isFavoritePage' => true])

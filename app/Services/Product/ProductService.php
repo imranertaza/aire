@@ -15,17 +15,18 @@ class ProductService
      */
     public function getCategoryTree(): Collection
     {
-        return Cache::remember('catalog_categories_tree_v1', 3600, function () {
+        return Cache::remember('catalog_categories_tree_v4', 3600, function () {
             return ProductCategory::active()
                 ->where(function ($q) {
                     $q->whereNull('parent_id')->orWhere('parent_id', 0);
                 })
                 ->with([
                     'icon',
-                    'children' => fn($q) => $q->active(),
-                    'children.children' => fn($q) => $q->active(),
-                    'featuredTopProducts.images',
-                    'featuredBottomProducts.images',
+                    'products' => fn($pq) => $pq->where('products.status', 1)->with(['showcase', 'description', 'brand', 'special', 'categories.parent', 'categories.icon']),
+                    'children' => fn($q) => $q->active()->with([
+                        'icon',
+                        'products' => fn($pq) => $pq->where('products.status', 1)->with(['showcase', 'description', 'brand', 'special', 'categories.parent', 'categories.icon']),
+                    ]),
                 ])
                 ->get();
         });
@@ -36,16 +37,16 @@ class ProductService
      */
     public function getCategoryBySlug(string $slug): ?ProductCategory
     {
-        return Cache::remember("catalog_category_slug_{$slug}", 3600, function () use ($slug) {
+        return Cache::remember("catalog_category_slug_v4_{$slug}", 3600, function () use ($slug) {
             return ProductCategory::active()
                 ->where('slug', $slug)
-                ->orWhere('category_name', 'like', str_replace('-', ' ', $slug))
                 ->with([
                     'icon',
-                    'children' => fn($q) => $q->active(),
-                    'children.children' => fn($q) => $q->active(),
-                    'featuredTopProducts.images',
-                    'featuredBottomProducts.images',
+                    'products' => fn($pq) => $pq->where('products.status', 1)->with(['showcase', 'description', 'brand', 'special', 'categories.parent', 'categories.icon']),
+                    'children' => fn($q) => $q->active()->with([
+                        'icon',
+                        'products' => fn($pq) => $pq->where('products.status', 1)->with(['showcase', 'description', 'brand', 'special', 'categories.parent', 'categories.icon']),
+                    ]),
                 ])
                 ->first();
         });

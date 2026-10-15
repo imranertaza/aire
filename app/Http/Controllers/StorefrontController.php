@@ -3,13 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Storefront\SubscribeNewsletterRequest;
+use App\Mail\ContactInquiryMail;
+use App\Models\Menu;
+use App\Models\News;
+use App\Models\NewsCategory;
 use App\Models\Page;
+use App\Models\Setting;
 use App\Services\Product\ProductService;
 use App\Services\Storefront\StorefrontService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\View as ViewFacade;
@@ -52,8 +60,124 @@ class StorefrontController extends Controller
     public function about(): View
     {
         $aboutAds = $this->storefrontService->getAboutAds();
+        $aboutSections = $this->storefrontService->getAboutSections();
+        $latestNews = Cache::remember('storefront_about_news_v1', 3600, function () {
+            return News::query()
+                ->published()
+                ->with(['categories'])
+                ->latest('publish_date')
+                ->take(6)
+                ->get();
+        });
 
-        return \theme_view('about', compact('aboutAds'));
+        return \theme_view('about', compact('aboutAds', 'aboutSections', 'latestNews'));
+    }
+
+    /**
+     * Display dedicated news & media index/listing page.
+     */
+    public function newsIndex(Request $request): View
+    {
+        $selectedCategory = $request->query('category');
+        $searchQuery = $request->query('q');
+
+        $query = News::query()
+            ->published()
+            ->with(['categories', 'creator'])
+            ->latest('publish_date');
+
+        if (!empty($selectedCategory)) {
+            $query->whereHas('categories', function ($q) use ($selectedCategory) {
+                $q->where('category_name', $selectedCategory)
+                    ->orWhere('id', is_numeric($selectedCategory) ? (int) $selectedCategory : 0);
+            });
+        }
+
+        if (!empty($searchQuery)) {
+            $query->where(function ($q) use ($searchQuery) {
+                $q->where('news_title', 'like', "%{$searchQuery}%")
+                    ->orWhere('short_des', 'like', "%{$searchQuery}%")
+                    ->orWhere('description', 'like', "%{$searchQuery}%");
+            });
+        }
+
+        $newsList = $query->paginate(9)->withQueryString();
+
+        $featuredNews = Cache::remember('storefront_news_featured_v1', 3600, function () {
+            return News::query()
+                ->published()
+                ->where('featured', 1)
+                ->with(['categories'])
+                ->latest('publish_date')
+                ->take(3)
+                ->get();
+        });
+
+        if ($featuredNews->isEmpty()) {
+            $featuredNews = News::query()
+                ->published()
+                ->with(['categories'])
+                ->latest('publish_date')
+                ->take(3)
+                ->get();
+        }
+
+        $newsCategories = Cache::remember('storefront_news_categories_v1', 3600, function () {
+            return NewsCategory::active()
+                ->withCount(['news' => function ($q) {
+                    $q->where('status', 1);
+                }])
+                ->get();
+        });
+
+        return \theme_view('news.index', compact('newsList', 'featuredNews', 'newsCategories', 'selectedCategory', 'searchQuery'));
+    }
+
+    /**
+     * Display single news details page.
+     */
+    public function newsDetails(string $slug): View
+    {
+        $news = Cache::remember("storefront_news_detail_{$slug}", 3600, function () use ($slug) {
+            return News::query()
+                ->where('slug', $slug)
+                ->orWhere('id', is_numeric($slug) ? (int) $slug : 0)
+                ->published()
+                ->with(['categories', 'creator'])
+                ->first();
+        });
+
+        if (!$news) {
+            abort(404);
+        }
+
+        $relatedNews = Cache::remember("storefront_news_related_{$news->id}", 3600, function () use ($news) {
+            $categoryIds = $news->categories->pluck('id')->toArray();
+
+            return News::query()
+                ->where('id', '!=', $news->id)
+                ->published()
+                ->where(function ($q) use ($categoryIds) {
+                    if (!empty($categoryIds)) {
+                        $q->whereHas('categories', function ($cq) use ($categoryIds) {
+                            $cq->whereIn('news_categories.id', $categoryIds);
+                        });
+                    }
+                })
+                ->latest('publish_date')
+                ->take(3)
+                ->get();
+        });
+
+        $newsCategories = Cache::remember('storefront_news_categories_v1', 3600, function () {
+            return NewsCategory::active()
+                ->withCount(['news' => function ($q) {
+                    $q->where('status', 1);
+                }])
+                ->get();
+        });
+
+        return \theme_view('news.show', compact('news', 'relatedNews', 'newsCategories'));
     }
 
     /**
@@ -62,18 +186,6 @@ class StorefrontController extends Controller
     public function docs(): View
     {
         return \theme_view('docs');
-    }
-
-    /** 
-     * Display solutions page.
-     */
-    public function solutions(): View
-    {
-        if (ViewFacade::exists('themes.' . active_theme() . '.solutions')) {
-            return \theme_view('solutions');
-        }
-
-        return \theme_view('solutions__');
     }
 
     /**
@@ -90,6 +202,61 @@ class StorefrontController extends Controller
         ];
 
         return \theme_view('contact', compact('page'));
+    }
+
+    /**
+     * Handle storefront contact form submission with validation, honeypot, and rate limiting.
+     */
+    public function submitContact(Request $request): RedirectResponse|JsonResponse
+    {
+        $successMessage = 'Thank you for reaching out! Your message has been sent successfully. Our team will get back to you shortly.';
+
+        // 1. Honeypot Anti-Spam Check (Silently drop automated spam bots)
+        if (!empty($request->input('b_extra_field'))) {
+            return $request->wantsJson()
+                ? response()->json(['success' => true, 'message' => $successMessage])
+                : Redirect::back()->with('success', $successMessage);
+        }
+
+        // 2. Validate input fields
+        $validated = $request->validate([
+            'name'    => 'required|string|max:255',
+            'email'   => 'required|email|max:255',
+            'phone'   => 'nullable|string|max:50',
+            'subject' => 'nullable|string|max:255',
+            'message' => 'required|string|max:5000',
+        ]);
+
+        // 3. IP-based Rate Limiting (5 submissions per minute)
+        $throttleKey = 'contact_submit:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            $msg = "Too many contact submissions. Please try again in {$seconds} seconds.";
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 429);
+            }
+            return Redirect::back()->withInput()->withErrors(['message' => $msg]);
+        }
+
+        RateLimiter::hit($throttleKey, 60);
+
+        // 4. Send Email Notification to Admin (using cached Setting fallback and Queueable Mailable)
+        try {
+            $adminEmail = Setting::get('email', config('mail.from.address') ?: 'info@aire.test');
+
+            Mail::to($adminEmail)->send(new ContactInquiryMail($validated));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send contact email notification: ' . $e->getMessage());
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $successMessage,
+            ]);
+        }
+
+        return Redirect::back()->with('success', $successMessage);
     }
 
     /**
@@ -183,19 +350,40 @@ class StorefrontController extends Controller
             return $this->about();
         }
 
-        $page = Page::query()
-            ->where('slug', $slug)
-            ->active()
-            ->firstOrFail();
+        $data = Cache::remember("cms_page_{$slug}", 86400, function () use ($slug) {
+            $page = Page::query()
+                ->where('slug', $slug)
+                ->active()
+                ->first();
 
-        // Related or other active pages for quick navigation
-        $otherPages = Page::query()
-            ->where('id', '!=', $page->id)
-            ->active()
-            ->orderBy('id', 'asc')
-            ->limit(6)
-            ->get(['id', 'page_title', 'slug', 'breadcrumb']);
 
-        return \theme_view('page', compact('page', 'otherPages'));
+            if (!$page) {
+                return null;
+            }
+
+            return compact('page');
+        });
+
+        if (!$data) {
+            abort(404);
+        }
+
+        if ($data['page']->temp === 'legal' || $data['page']->temp === 'policy') {
+            $data['legalPages'] = Cache::remember('layout_legal_pages_menu_v1', 86400, function () {
+                return Menu::query()
+                    ->where('name', 'LIKE', '%POLICIES & LEGAL%')
+                    ->where('enabled', 1)
+                    ->with([
+                        'menus' => function ($q) {
+                            $q->where('enabled', 1)->with('page')->orderBy('order', 'asc');
+                        }
+                    ])
+                    ->first();
+            });
+
+            return \theme_view('page', $data);
+        }
+
+        return \theme_view('page', $data);
     }
 }

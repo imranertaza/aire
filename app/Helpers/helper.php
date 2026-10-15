@@ -26,7 +26,7 @@ if (! function_exists('getImageUrl')) {
 
         // 2. Direct fast bypass check for remote URLs, videos (mp4, webm, mov, etc.), audios, SVGs, and documents
         if (ImageService::shouldBypass($path)) {
-            return ImageService::getBypassUrl($path);
+            return ImageService::getBypassUrl($path, $width, $height);
         }
 
         // 3. If dimensions or optimization requested, delegate to ImageService
@@ -199,6 +199,13 @@ if (! function_exists('getImageCacheUrl')) {
     {
         if (empty($filePath)) {
             return ImageService::getFallbackUrl();
+        }
+
+        if (str_contains($filePath, 'images.unsplash.com')) {
+            if (str_contains($filePath, 'w=')) {
+                return preg_replace('/w=\d+/', 'w=' . $width, $filePath);
+            }
+            return $filePath . (str_contains($filePath, '?') ? '&' : '?') . 'w=' . $width;
         }
 
         // Generate and return direct static cached file URL with zero PHP routing overhead

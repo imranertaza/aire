@@ -23,7 +23,7 @@ return [
     |
     */
     'format' => env('IMAGE_CACHE_FORMAT', 'webp'),
-    'quality' => (int) env('IMAGE_CACHE_QUALITY', 85),
+    'quality' => (int) env('IMAGE_CACHE_QUALITY', 72),
     'auto_optimize' => env('IMAGE_CACHE_AUTO_OPTIMIZE', true),
 
     /*
@@ -63,5 +63,5 @@ return [
     | Fallback Placeholder
     |--------------------------------------------------------------------------
     */
-    'fallback' => 'public/assets/images/default.png',
+    'fallback' => 'themes/default/assets/img/photograph.webp',
 ];

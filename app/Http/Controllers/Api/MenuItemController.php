@@ -43,6 +43,7 @@ class MenuItemController extends Controller
                 'id'            => $item->id,
                 'name'          => $item->name,
                 'icon'          => $item->icon,
+                'url'           => $item->getRawOriginal('url') ?? $item->url,
                 'link'          => $item->url,
                 'link_type'     => $item->link_type,
                 'category_id'   => $item->category_id,
@@ -123,13 +124,16 @@ class MenuItemController extends Controller
             'link_type'     => 'sometimes|required|in:page,category,url',
             'page_id'       => 'nullable|required_if:link_type,page|exists:pages,id',
             'category_id'   => 'nullable|required_if:link_type,category|exists:categories,id',
-            'url'           => 'nullable|required_if:link_type,string|string|max:500',
+            'url'           => 'nullable|required_if:link_type,url|string|max:500',
             'enabled'       => 'boolean',
             'parent_id'     => 'nullable|exists:menu_items,id',
             'order'         => 'nullable|integer|min:0',
         ], [
-            'category_id.required' => 'Please select an event category.',
-            'category_id.exists' => 'The selected event category does not exist.'
+            'page_id.required_if' => 'Please select a page.',
+            'page_id.exists' => 'The selected page does not exist.',
+            'category_id.required_if' => 'Please select a category.',
+            'category_id.exists' => 'The selected category does not exist.',
+            'url.required_if' => 'Please provide a URL.'
         ]);
 
         if ($validator->fails()) {
@@ -169,6 +173,8 @@ class MenuItemController extends Controller
                     ]);
             }
         });
+
+        \App\Models\Menu::flushMenuCache();
 
         return ApiResponse::success(null, 'Menu items reordered successfully');
     }

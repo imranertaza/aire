@@ -33,6 +33,18 @@ class AppServiceProvider extends ServiceProvider
         $settings = Setting::allCached();
         View::share('settings', $settings);
 
+        // Non-blocking Vite theme stylesheets for optimal LCP & zero render-blocking CSS
+        \Illuminate\Support\Facades\Vite::useStyleTagAttributes(function ($src = null, $url = null, $chunk = null, $manifest = null) {
+            $isTheme = ($src && is_string($src) && str_contains($src, 'resources/themes/default/')) || ($url && is_string($url) && str_contains($url, 'theme'));
+            if (!app(\Illuminate\Foundation\Vite::class)->isRunningHot() && $isTheme) {
+                return [
+                    'media' => 'print',
+                    'onload' => "this.media='all'",
+                ];
+            }
+            return [];
+        });
+
         // Lazy-load dynamic SMTP configuration ONLY when an email is being sent
         $this->app->resolving('mail.manager', function () {
             $settings = Setting::allCached();

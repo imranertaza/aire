@@ -228,6 +228,13 @@ if (! function_exists('getImageCacheUrl')) {
             return getImageUrl('');
         }
 
+        if (str_contains($filePath, 'images.unsplash.com')) {
+            if (str_contains($filePath, 'w=')) {
+                return preg_replace('/w=\d+/', 'w=' . $width, $filePath);
+            }
+            return $filePath . (str_contains($filePath, '?') ? '&' : '?') . 'w=' . $width;
+        }
+
         // Attempt direct ImageService fit with static file caching
         if (class_exists(ImageService::class)) {
             try {

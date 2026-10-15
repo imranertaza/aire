@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\AdminLoginRequest;
-use App\Services\Auth\AdminAuthService;
+use App\Services\Admin\AdminAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

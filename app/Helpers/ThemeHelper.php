@@ -71,32 +71,37 @@ if (!function_exists('theme_css')) {
         $bundleRelative = "themes/{$theme}/assets/css/theme.bundle.min.css";
         $bundlePath = public_path($bundleRelative);
 
-        // In Local / Debug mode, load individual source files with filemtime for instant hot reload
-        if (app()->isLocal() || config('app.debug')) {
-            $files = [
-                'css/style.css',
-                'css/layout.css',
-                'css/components.css',
-                'css/responsive.css',
-            ];
-            $html = '';
-            foreach ($files as $file) {
-                $filePath = public_path("themes/{$theme}/assets/{$file}");
-                $v = file_exists($filePath) ? filemtime($filePath) : '1.0';
-                $url = theme_asset($file, $theme) . "?v={$v}";
-                $html .= "<link href=\"{$url}\" rel=\"stylesheet\">\n    ";
+        $files = [
+            'css/style.css',
+            'css/layout.css',
+            'css/components.css',
+            'css/responsive.css',
+        ];
+
+        // Track latest modified time of source files
+        $latestMtime = 0;
+        foreach ($files as $file) {
+            $filePath = public_path("themes/{$theme}/assets/{$file}");
+            if (file_exists($filePath)) {
+                $latestMtime = max($latestMtime, filemtime($filePath));
             }
-            return new \Illuminate\Support\HtmlString(trim($html));
         }
 
-        // In Production, ensure bundle exists (auto-generate if missing)
-        if (!file_exists($bundlePath)) {
+        $bundleExists = file_exists($bundlePath);
+        $bundleMtime = $bundleExists ? filemtime($bundlePath) : 0;
+
+        // Auto-rebuild if bundle is missing or if any source file has changed
+        if (!$bundleExists || $latestMtime > $bundleMtime) {
             rebuild_theme_css_bundle($theme);
+            $bundleMtime = file_exists($bundlePath) ? filemtime($bundlePath) : time();
         }
 
-        $version = file_exists($bundlePath) ? filemtime($bundlePath) : '1.0.0';
-        $url = asset($bundleRelative) . "?v={$version}";
-        return new \Illuminate\Support\HtmlString("<link href=\"{$url}\" rel=\"stylesheet\">");
+        $url = asset($bundleRelative) . "?v={$bundleMtime}";
+        return new \Illuminate\Support\HtmlString(
+            "<link rel=\"preload\" as=\"style\" href=\"{$url}\">\n" .
+                "    <link rel=\"stylesheet\" href=\"{$url}\" media=\"print\" onload=\"this.media='all'\">\n" .
+                "    <noscript><link rel=\"stylesheet\" href=\"{$url}\"></noscript>"
+        );
     }
 }
 

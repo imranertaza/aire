@@ -471,6 +471,10 @@ $(document).ready(function () {
         if (!livingHeroSection || !animatedProductImg || !productTargetBox || !livingHeroImgBox) return;
         if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
+        if (typeof window.connectLenisToGsap === 'function') {
+            window.connectLenisToGsap();
+        }
+
         gsap.registerPlugin(ScrollTrigger);
 
         // 1. Clean up previous triggers on living hero section to avoid duplicates
@@ -496,8 +500,10 @@ $(document).ready(function () {
             },
             {
                 y: () => {
-                    const startCenter = livingHeroImgBox.offsetTop + (livingHeroImgBox.offsetHeight / 2);
-                    const targetCenter = productTargetBox.offsetTop + (productTargetBox.offsetHeight / 2);
+                    const boxRect = livingHeroImgBox.getBoundingClientRect();
+                    const targetRect = productTargetBox.getBoundingClientRect();
+                    const startCenter = boxRect.top + (boxRect.height / 2);
+                    const targetCenter = targetRect.top + (targetRect.height / 2);
                     return targetCenter - startCenter;
                 },
                 ease: "none",

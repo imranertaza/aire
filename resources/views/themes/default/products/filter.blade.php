@@ -3,8 +3,9 @@
 @section('body_class', 'product-filter-page')
 
 @push('styles')
-    <!-- BEM Product Filter Page CSS -->
-    <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
+    <!-- BEM Product Filter Page CSS (Preload + Minified) -->
+    <link rel="preload" as="style" href="{{ theme_asset('css/product-filter.min.css') }}">
+    <link href="{{ theme_asset('css/product-filter.min.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')

@@ -555,6 +555,14 @@ const routes = [{
                 },
             },
             {
+                path: "about-sections",
+                name: "AboutSections",
+                component: () => import('@/pages/admin/Section/AboutSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
                 path: "manage-sections",
                 name: "Section",
                 component: () => import('@/pages/admin/Section/Section.vue'),

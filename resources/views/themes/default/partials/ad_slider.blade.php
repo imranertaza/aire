@@ -10,13 +10,15 @@
                             {{ $ad->subtitle ?: ($ad->badge ?: ($index === 0 ? 'Featured Solution' : ($index === 1 ? 'New Arrival' : 'Commercial'))) }}
                         </span>
                         <img src="{{ !empty($ad->image) ? getImageUrl($ad->image) : theme_asset('img/featured/' . (($index % 3) + 1) . '.png') }}"
-                            class="img-fluid w-100" alt="{{ $ad->title ?? 'Featured Ad' }}">
+                            class="img-fluid w-100" alt="{{ $ad->title ?? 'Featured Ad' }}"
+                            width="341" height="512" loading="lazy" decoding="async">
                     </div>
                     <div class="featured-content pb-5">
                         <h3 class="mb-2">{{ $ad->title }}</h3>
                         <p class="text-muted mb-2 lh-base">{{ $ad->description }}</p>
                         <a href="{{ $ad->link ?: route('products.filter') }}"
-                            class="btn btn-primary w-100 fw-bold shadow-sm featured-btn text-decoration-none d-inline-block text-center">
+                            class="btn btn-primary w-100 fw-bold shadow-sm featured-btn text-decoration-none d-inline-block text-center"
+                            aria-label="{{ ($ad->button_text ?? ($index === 0 ? 'VIEW PRODUCTS' : ($index === 1 ? 'LEARN MORE' : 'GET A QUOTE'))) . (!empty($ad->title) ? ' - ' . $ad->title : '') }}">
                             {{ $ad->button_text ?? ($index === 0 ? 'VIEW PRODUCTS' : ($index === 1 ? 'LEARN MORE' : 'GET A QUOTE')) }}
                         </a>
                     </div>

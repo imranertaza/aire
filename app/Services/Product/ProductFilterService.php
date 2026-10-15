@@ -831,7 +831,8 @@ class ProductFilterService
         $firstCategory = $p->categories->first();
         $subCategory = $p->categories->skip(1)->first();
         $categoryName = $firstCategory?->category_name;
-        $categoryBgColor = $firstCategory?->bg_color ?: '#00c853';
+        $catBgRaw = $firstCategory?->bg_color;
+        $categoryBgColor = ($catBgRaw && strcasecmp($catBgRaw, '#00c853') !== 0) ? $catBgRaw : '#0a7a3b';
         $subtitle = $p->description?->tag ?: ($subCategory?->category_name ?: ($firstCategory?->alt_name ?: 'ENTERPRISE FILTRATION'));
 
         $cadr = $p->productAttributes->first(fn($a) => stripos($a->name, 'CADR') !== false)?->details ?? '550 m³/h';

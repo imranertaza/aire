@@ -18,6 +18,9 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Route robots.txt to Front Controller so Sitemap URL dynamically matches current domain
+    RewriteRule ^robots\.txt$ index.php [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
@@ -76,10 +79,11 @@
         \.(?:gif|jpe?g|png|webp|avif|zip|t?gz|7z|rar|mp[34]|ogg|avi|wmv|pdf|woff2)$ no-gzip dont-vary
 </IfModule>
 
-# Browser Caching & Static Asset Performance
+# Browser Caching & Static Asset Performance (1 Year for Media, Images, Fonts; 1 Month for CSS/JS)
 <IfModule mod_expires.c>
     ExpiresActive On
     ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/avif "access plus 1 year"
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/jpg "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
@@ -88,15 +92,31 @@
     ExpiresByType font/woff2 "access plus 1 year"
     ExpiresByType font/woff "access plus 1 year"
     ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType video/mp4 "access plus 1 year"
+    ExpiresByType video/webm "access plus 1 year"
+    ExpiresByType video/ogg "access plus 1 year"
+    ExpiresByType video/quicktime "access plus 1 year"
+    ExpiresByType audio/ogg "access plus 1 year"
+    ExpiresByType audio/mp4 "access plus 1 year"
+    ExpiresByType audio/mpeg "access plus 1 year"
+    ExpiresByType audio/wav "access plus 1 year"
     ExpiresByType text/css "access plus 1 month"
     ExpiresByType application/javascript "access plus 1 month"
 </IfModule>
 
 <IfModule mod_headers.c>
-    <FilesMatch "\.(ico|jpe?g|png|gif|webp|svg|woff2?|ttf|eot)$">
+    # Images & Web Fonts: 1 Year Immutable Cache
+    <FilesMatch "\.(ico|jpe?g|png|gif|webp|avif|svg|woff2?|ttf|otf|eot)$">
         Header set Cache-Control "max-age=31536000, public, immutable"
     </FilesMatch>
+    # Video & Audio Streams: 1 Year Cache
+    <FilesMatch "\.(mp4|m4v|webm|ogv|ogg|mp3|wav|mov|flv)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+    # Stylesheets & Scripts: 1 Month Cache
     <FilesMatch "\.(css|js)$">
         Header set Cache-Control "max-age=2592000, public"
     </FilesMatch>
 </IfModule>
+

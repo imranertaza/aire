@@ -30,11 +30,25 @@ class ProductCategory extends Model
         static::saved(function ($category) {
             Cache::forget('all_categories');
             Cache::forget('catalog_parent_categories_tree');
+            Cache::forget('catalog_categories_tree_v4');
+            Cache::forget('catalog_category_pairs_v1');
+            Cache::forget('filter_active_categories');
+            Cache::forget('filter_steps_data_v9');
+            if (!empty($category->slug)) {
+                Cache::forget("catalog_category_slug_v4_{$category->slug}");
+            }
         });
 
         static::deleted(function ($category) {
             Cache::forget('all_categories');
             Cache::forget('catalog_parent_categories_tree');
+            Cache::forget('catalog_categories_tree_v4');
+            Cache::forget('catalog_category_pairs_v1');
+            Cache::forget('filter_active_categories');
+            Cache::forget('filter_steps_data_v9');
+            if (!empty($category->slug)) {
+                Cache::forget("catalog_category_slug_v4_{$category->slug}");
+            }
         });
     }
 

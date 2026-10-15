@@ -87,7 +87,6 @@ class ProductController extends Controller
             if (!$categories) {
                 abort(404);
             }
-
             return \theme_view('products.category.index', compact('categories', 'allCategories', 'adSliders'));
         }
 

@@ -84,8 +84,8 @@
                                     </div>
                                     <div class="sidebar-compare-info">
                                         <p class="sidebar-compare-name">{{ $p->name }}</p>
-                                        <a href="javascript:void(0);" class="sidebar-compare-remove btn-remove-compare"
-                                            data-product-id="{{ $p->id }}">Remove</a>
+                                        <button type="button" class="btn p-0 border-0 bg-transparent sidebar-compare-remove btn-remove-compare"
+                                            data-product-id="{{ $p->id }}">Remove</button>
                                     </div>
                                 </div>
                             @empty

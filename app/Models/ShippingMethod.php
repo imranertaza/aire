@@ -14,10 +14,12 @@ class ShippingMethod extends Model
     {
         static::saved(function ($method) {
             Cache::forget('all_shipping_methods');
+            Cache::forget('active_shipping_methods');
         });
 
         static::deleted(function ($method) {
             Cache::forget('all_shipping_methods');
+            Cache::forget('active_shipping_methods');
         });
     }
 

@@ -26,7 +26,7 @@ class ImageService
         return static::process($path, 'resize', [
             'width'   => $width,
             'height'  => $height,
-            'quality' => $options['quality'] ?? config('imagecache.quality', 85),
+            'quality' => $options['quality'] ?? config('imagecache.quality', 72),
             'format'  => $options['format'] ?? config('imagecache.format', 'webp'),
             'upsize'  => $options['upsize'] ?? false,
         ]);
@@ -46,7 +46,7 @@ class ImageService
         return static::process($path, 'fit', [
             'width'    => $width,
             'height'   => $height,
-            'quality'  => $options['quality'] ?? config('imagecache.quality', 85),
+            'quality'  => $options['quality'] ?? config('imagecache.quality', 72),
             'format'   => $options['format'] ?? config('imagecache.format', 'webp'),
             'position' => $options['position'] ?? 'center',
         ]);
@@ -63,7 +63,7 @@ class ImageService
     public static function optimize(string $path, array $options = []): string
     {
         return static::process($path, 'optimize', [
-            'quality' => $options['quality'] ?? config('imagecache.quality', 85),
+            'quality' => $options['quality'] ?? config('imagecache.quality', 72),
             'format'  => $options['format'] ?? config('imagecache.format', 'webp'),
         ]);
     }
@@ -95,7 +95,7 @@ class ImageService
     {
         // 1. Check if path should bypass image manipulation (SVG, remote, non-image)
         if (static::shouldBypass($path)) {
-            return static::getBypassUrl($path);
+            return static::getBypassUrl($path, $params['width'] ?? null, $params['height'] ?? null);
         }
 
         // 2. Resolve source file on disk
@@ -115,7 +115,7 @@ class ImageService
         $mtime   = filemtime($sourcePath) ?: 0;
         $size    = filesize($sourcePath) ?: 0;
         $format  = $params['format'] ?? config('imagecache.format', 'webp');
-        $quality = (int) ($params['quality'] ?? config('imagecache.quality', 85));
+        $quality = (int) ($params['quality'] ?? config('imagecache.quality', 72));
         $w       = $params['width'] ?? 0;
         $h       = $params['height'] ?? 0;
 
@@ -235,7 +235,7 @@ class ImageService
     /**
      * Generate URL for bypassed assets.
      */
-    public static function getBypassUrl(string $path): string
+    public static function getBypassUrl(string $path, ?int $width = null, ?int $height = null): string
     {
         if (empty($path)) {
             return static::getFallbackUrl();
@@ -244,6 +244,12 @@ class ImageService
         if (preg_match('/^https?:\/\//i', $path)) {
             if (str_contains($path, 'placehold.co') || str_contains($path, 'placeholder')) {
                 return static::getFallbackUrl();
+            }
+            if (str_contains($path, 'images.unsplash.com') && $width) {
+                if (str_contains($path, 'w=')) {
+                    return preg_replace('/w=\d+/', 'w=' . $width, $path);
+                }
+                return $path . (str_contains($path, '?') ? '&' : '?') . 'w=' . $width;
             }
             return $path;
         }
@@ -314,9 +320,12 @@ class ImageService
      */
     public static function getFallbackUrl(): string
     {
-        $fallback = config('imagecache.fallback', 'themes/default/assets/img/airpro_mask_fb2.png');
+        $fallback = config('imagecache.fallback', 'themes/default/assets/img/photograph.webp');
         if (file_exists(public_path($fallback))) {
             return asset($fallback);
+        }
+        if (file_exists(public_path('themes/default/assets/img/photograph.webp'))) {
+            return asset('themes/default/assets/img/photograph.webp');
         }
         return asset('assets/images/default.png');
     }

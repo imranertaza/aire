@@ -6,6 +6,7 @@ use App\Models\ShippingMethod;
 use App\Models\ShippingSetting;
 use App\Services\Offer\OfferCalculateService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class ShippingCalculatorService
 {
@@ -46,7 +47,11 @@ class ShippingCalculatorService
      */
     public function getAvailableMethods(bool $isFreeDelivery = false, ?string $city = null, ?int $countryId = 223): Collection
     {
-        return ShippingMethod::where('status', 1)->get()->map(function ($method) use ($isFreeDelivery, $city, $countryId) {
+        $methods = Cache::rememberForever('active_shipping_methods', function () {
+            return ShippingMethod::where('status', 1)->get();
+        });
+
+        return $methods->map(function ($method) use ($isFreeDelivery, $city, $countryId) {
             if ($isFreeDelivery) {
                 $method->cost = 0.00;
                 $method->description = 'Free Delivery applied on your order.';

@@ -27,7 +27,7 @@
                     </div>
 
                 </div> --}}
-                <div class="card border-0 shadow-sm p-3 rounded-3 sticky-top" style="top: 90px;">
+                <div class="card border-0 shadow-sm p-3 rounded-3 sticky-top z-1" style="top: 90px;">
                     <h6 class="fw-bold text-uppercase text-muted fs-12 mb-3">Documentation</h6>
                     <nav class="nav flex-column gap-1 fs-14">
                         <a class="nav-link text-primary fw-bold p-1" href="#getting-started">Getting Started</a>

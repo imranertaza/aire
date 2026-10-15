@@ -22,12 +22,16 @@ class Section extends Model
         static::saved(function ($section) {
             Cache::forget("section_{$section->name}");
             Cache::forget('all_sections');
+            Cache::forget('default_home_sections_ensured_v1');
+            Cache::forget('storefront_about_sections_v1');
             Product::clearProductCache();
         });
 
         static::deleted(function ($section) {
             Cache::forget("section_{$section->name}");
             Cache::forget('all_sections');
+            Cache::forget('default_home_sections_ensured_v1');
+            Cache::forget('storefront_about_sections_v1');
             Product::clearProductCache();
         });
     }

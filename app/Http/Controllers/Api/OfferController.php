@@ -57,12 +57,19 @@ class OfferController extends Controller
      */
     public function getZoneData()
     {
-        $geoZones = GeoZone::active()->get();
-        $shippingMethod = ShippingMethod::where('status', 1)->where('code', 'zone_rate')->first();
+        $geoZones = Cache::rememberForever('all_active_geo_zones', function () {
+            return GeoZone::active()->get();
+        });
+
+        $shippingMethods = Cache::rememberForever('active_shipping_methods', function () {
+            return ShippingMethod::where('status', 1)->get();
+        });
+
+        $shippingMethod = $shippingMethods->firstWhere('code', 'zone_rate');
 
         return ApiResponse::success([
-            'geoZones' => $geoZones,
-            'shippingMethod' => $shippingMethod
+            'geoZones'       => $geoZones,
+            'shippingMethod' => $shippingMethod,
         ], 'Zone data retrieved successfully');
     }
 

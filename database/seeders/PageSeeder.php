@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Page;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use App\Models\Page;
-use Faker\Factory as Faker;
 
 class PageSeeder extends Seeder
 {
@@ -14,81 +14,273 @@ class PageSeeder extends Seeder
      */
     public function run(): void
     {
-        $faker = Faker::create();
+        $adminId = User::value('id') ?: 1;
 
-        $adminId = \App\Models\User::value('id') ?: 1;
+        $pages = [
+            // =========================================================================
+            // 1. LEGAL & POLICY PAGES (temp => 'legal', matching Legal & Policy Layout)
+            // =========================================================================
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Cookie Policy',
+                'slug'              => 'cookie-policy',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'We believe in complete transparency. Learn how and why AIRE uses cookies to optimize your browsing and shopping experience.',
+                'page_description'  => '<p>This Cookie Policy explains how AIRE Industries and its subsidiaries utilize cookies, web beacons, and related tracking technologies when you interact with our websites, online services, and mobile applications.</p><p>We prioritize your privacy and provide granular controls allowing you to accept, customize, or disable non-essential tracking at any time.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Cookie Policy | AIRE Industries',
+                'meta_description'  => 'Learn how AIRE uses cookies and similar tracking technologies to ensure secure browsing and personalized air quality experiences.',
+                'meta_keyword'      => 'Cookie Policy, cookie preferences, GDPR compliance, tracking technologies, AIRE privacy',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Privacy Policy',
+                'slug'              => 'privacy-policy',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Your privacy is paramount. Understand how AIRE collects, processes, encrypts, and protects your personal information.',
+                'page_description'  => '<p>AIRE Industries is committed to safeguarding the privacy and autonomy of our customers, partners, and platform visitors. This Privacy Policy details the types of personal data we collect, our lawful basis for processing, third-party disclosures, and the robust encryption standards we implement across all digital touchpoints.</p><p>You have full statutory rights under GDPR, CCPA, and global privacy frameworks to access, rectify, port, or request deletion of your personal data.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Privacy Policy | AIRE Industries Data Protection',
+                'meta_description'  => 'Read AIRE Industries Privacy Policy. Learn about our strict data handling, encryption standards, and your statutory privacy rights.',
+                'meta_keyword'      => 'Privacy Policy, data protection, GDPR, personal data rights, AIRE security',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Terms of Service',
+                'slug'              => 'terms-of-service',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Review the binding terms and conditions governing the purchase, delivery, and usage of AIRE products and services.',
+                'page_description'  => '<p>These Terms of Service constitute a legally binding agreement between you and AIRE Industries regarding your access to our website, purchase of air purification systems and replacement filter kits, and participation in warranty programs.</p><p>By accessing or utilizing any part of the AIRE ecosystem, you agree to be bound by these provisions, including warranty limitations, acceptable usage criteria, and dispute resolution procedures.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Terms of Service | AIRE Industries Agreement',
+                'meta_description'  => 'Review AIRE Terms of Service governing product sales, device warranties, delivery terms, and customer rights.',
+                'meta_keyword'      => 'Terms of Service, user agreement, purchase terms, AIRE warranty rules',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Terms & Conditions',
+                'slug'              => 'terms-and-conditions',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Comprehensive legal terms, commercial warranties, product purchase stipulations, and limitation of liability.',
+                'page_description'  => '<p>These Terms and Conditions apply to all orders placed through the AIRE digital storefront, enterprise quotation portal, and certified distributor networks.</p><p>Please review our stipulations concerning payment processing, delivery schedules, limited hardware warranty, product returns, and regulatory compliance.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Terms & Conditions | AIRE Industries Commercial Terms',
+                'meta_description'  => 'Official Terms and Conditions governing all AIRE customer orders, warranties, and commercial interactions.',
+                'meta_keyword'      => 'Terms and conditions, commercial terms, warranty guidelines, customer rights',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Data Protection & GDPR',
+                'slug'              => 'data-protection',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Comprehensive overview of AIRE’s adherence to global data protection regulations, encryption, and audit standards.',
+                'page_description'  => '<p>AIRE maintains a zero-trust architecture and strict GDPR Article 30 compliance records. All customer transactions, telemetry data from smart air sensors, and personal identifiers are encrypted using AES-256 at rest and TLS 1.3 in transit.</p><p>Our dedicated Data Protection Officer (DPO) oversees continuous privacy impact assessments and handles all subject access requests promptly.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Data Protection & GDPR Compliance | AIRE',
+                'meta_description'  => 'Explore AIRE’s global data protection protocols, AES-256 encryption, and GDPR compliance framework.',
+                'meta_keyword'      => 'Data Protection, GDPR compliance, data privacy, AES-256 encryption, DPO contact',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Modern Slavery Statement',
+                'slug'              => 'modern-slavery-statement',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Our steadfast pledge to eradicate modern slavery, human trafficking, and unethical labor from our supply chain.',
+                'page_description'  => '<p>AIRE Industries maintains an absolute zero-tolerance policy towards modern slavery, forced labor, and human trafficking in all operations and supply chains worldwide.</p><p>We conduct regular third-party audits of tier-1 and tier-2 component manufacturers, ensuring fair wages, safe working environments, and strict compliance with the UK Modern Slavery Act 2015 and international labor standards.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Modern Slavery Statement | Ethical Supply Chain AIRE',
+                'meta_description'  => 'Read AIRE’s annual Modern Slavery Statement detailing supply chain transparency and fair labor standards.',
+                'meta_keyword'      => 'Modern Slavery Statement, ethical supply chain, corporate social responsibility, fair labor',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Modern Slavery Policy',
+                'slug'              => 'modern-slavery',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Corporate modern slavery prevention procedures, supplier vetting protocols, and whistleblowing safeguards.',
+                'page_description'  => '<p>AIRE enforces comprehensive supplier codes of conduct to prevent involuntary servitude, bonded labor, and child labor throughout global manufacturing operations.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Modern Slavery Policy & Due Diligence | AIRE',
+                'meta_description'  => 'Learn about AIRE’s operational protocols and supply chain verification preventing modern slavery.',
+                'meta_keyword'      => 'Modern slavery policy, supply chain ethics, worker protection, AIRE compliance',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Export Compliance',
+                'slug'              => 'export-compliance',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'International trade adherence, customs regulations, and export governance for commercial cleanroom systems.',
+                'page_description'  => '<p>AIRE manufactures precision industrial air filtration systems, aerosol sampling instruments, and specialized HVAC components subject to international trade compliance regulations.</p><p>We strictly comply with EAR, ITAR, and multilateral export control regimes to ensure ethical global trade and non-proliferation of dual-use filtration technologies.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Export Compliance & Trade Governance | AIRE',
+                'meta_description'  => 'Understand AIRE’s international trade adherence and export controls for cleanroom air filtration systems.',
+                'meta_keyword'      => 'Export Compliance, trade regulations, customs compliance, cleanroom export',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Legal Notice',
+                'slug'              => 'legal-notice',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Corporate registration, intellectual property notices, and legal disclaimers for AIRE Industries.',
+                'page_description'  => '<p>AIRE Industries Inc. is a registered corporation operating globally. All patents, trademarks, industrial designs, and aerodynamic filter architectures displayed on this website are protected under international intellectual property law.</p><p>Unauthorized reproduction, reverse engineering, or commercial use without prior written consent is strictly prohibited.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Legal Notice & Intellectual Property | AIRE',
+                'meta_description'  => 'Official corporate identity, patent disclosures, and legal notices for AIRE Industries.',
+                'meta_keyword'      => 'Legal Notice, corporate registration, patents, trademarks, AIRE disclaimer',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Website Terms of Use',
+                'slug'              => 'terms-of-use',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Acceptable usage guidelines, intellectual property rules, and digital security standards for AIRE platforms.',
+                'page_description'  => '<p>By browsing or creating an account on the AIRE website, you agree to comply with our community standards and digital security rules.</p><p>Prohibited activities include automated web scraping, attempting unauthorized server access, submitting malicious code, or interfering with payment gateway operations.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Website Terms of Use | AIRE Platforms',
+                'meta_description'  => 'Guidelines for acceptable usage, copyright compliance, and digital security on AIRE web platforms.',
+                'meta_keyword'      => 'Terms of Use, website rules, acceptable use, platform security',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'legal',
+                'page_title'        => 'Sitemap & Legal Index',
+                'slug'              => 'sitemap',
+                'breadcrumb'        => 'Legal & Compliance',
+                'short_des'         => 'Complete directory of AIRE product categories, information pages, and compliance documentation.',
+                'page_description'  => '<p>Welcome to the AIRE Sitemap & Legal Index. Explore our complete directory of air purifier categories, ductless split units, cleanroom systems, technical documentation, and compliance documentation.</p>',
+                'f_image'           => 'themes/default/assets/img/og-share-banner.jpg',
+                'meta_title'        => 'Sitemap & Legal Index | AIRE Industries',
+                'meta_description'  => 'Navigate all AIRE product categories, editorial articles, and legal documents from a single directory.',
+                'meta_keyword'      => 'Sitemap, website index, AIRE directory, legal index',
+                'status'            => 1,
+            ],
 
-        Page::updateOrCreate(
-            ["slug" => Str::slug('About Us')],
+            // =========================================================================
+            // 2. STANDARD CMS & BRAND PAGES (temp => 'default', standard layout)
+            // =========================================================================
             [
                 'temp'              => 'default',
                 'page_title'        => 'About Aire',
-                'slug'              => Str::slug('About Us'),
+                'slug'              => 'about-us',
                 'breadcrumb'        => 'About Us',
                 'short_des'         => 'Pioneering next-generation indoor air quality solutions and precision cleanroom filtration systems.',
-                'page_description'  => '<p class="content-text mt-5">Aire is an innovative engineering leader dedicated to high-performance indoor air quality solutions, medical-grade HEPA purification, and commercial air ventilation systems. Founded with a vision to protect human health and enhance indoor environmental well-being, Aire combines aerosol physics, advanced IoT filtration sensors, and sustainable aerodynamic design.</p><p class="content-text mt-3">From residential living spaces and modern workspaces to critical healthcare laboratories and industrial cleanrooms, Aire delivers uncompromising air purity, silent efficiency, and intelligent air monitoring worldwide.</p>',
+                'page_description'  => '<p class="content-text mt-4">AIRE is an innovative engineering leader dedicated to high-performance indoor air quality solutions, medical-grade HEPA purification, and commercial air ventilation systems. Founded with a vision to protect human health and enhance indoor environmental well-being, AIRE combines aerosol physics, advanced IoT filtration sensors, and sustainable aerodynamic design.</p><p class="content-text mt-3">From residential living spaces and modern workspaces to critical healthcare laboratories and industrial cleanrooms, AIRE delivers uncompromising air purity, silent efficiency, and intelligent air monitoring worldwide.</p>',
                 'f_image'           => 'themes/default/assets/img/Air-Purify.png',
                 'meta_title'        => 'About Aire | Clean Air Engineering & IAQ Solutions',
                 'meta_description'  => 'Learn about Aire’s mission to deliver cutting-edge air purification systems, HEPA filtration, and smart clean air technologies.',
                 'meta_keyword'      => 'About Aire, indoor air quality, cleanroom technology, HEPA filtration, smart air purifier',
                 'status'            => 1,
-                'createdBy'         => $adminId,
-                'updatedBy'         => $adminId,
-            ]
-        );
-        Page::updateOrCreate(
-            ["slug" => Str::slug('Contact Us')],
+            ],
             [
                 'temp'              => 'default',
-                'page_title'        => 'Contact Aire',
+                'page_title'        => 'Contact Us',
+                'slug'              => 'contact-us',
                 'breadcrumb'        => 'Contact Us',
-                'slug'              => Str::slug('Contact Us'),
-                'short_des'         => 'Get in touch with our air quality specialists and technical support team.',
-                'page_description'  => '<p class="content-text mt-5">Have inquiries regarding commercial HVAC retrofits, cleanroom filtration systems, or residential air purifiers? Our engineering and support team is here to assist you with tailored indoor air quality solutions.</p>',
+                'short_des'         => 'Get in touch with AIRE support specialists, sales engineering consultants, and global regional hubs.',
+                'page_description'  => '<p class="content-text mt-4">Have questions about our multi-zone air purification systems, commercial cleanroom filtration, or replacement HEPA kits? Our certified air quality engineers are available 24/7 to provide technical guidance, system sizing, and quotation support.</p>',
                 'f_image'           => 'themes/default/assets/img/Air-Purify.png',
-                'meta_title'        => 'Contact Aire | Clean Air Specialists & Support',
-                'meta_description'  => 'Reach out to the Aire support team for consultations, technical support, warranty inquiries, and enterprise solutions.',
-                'meta_keyword'      => 'Contact Aire, clean air consultation, air purifier support, commercial filtration inquiries',
+                'meta_title'        => 'Contact AIRE | Customer Support & Sales Engineering',
+                'meta_description'  => 'Contact AIRE technical support, product sizing specialists, and worldwide distribution partners.',
+                'meta_keyword'      => 'Contact AIRE, air purifier support, customer service, HVAC inquiries',
                 'status'            => 1,
-                'createdBy'         => $adminId,
-                'updatedBy'         => $adminId,
-            ]
-        );
-        Page::updateOrCreate(
-            ["slug" => Str::slug('History')],
+            ],
             [
                 'temp'              => 'default',
                 'page_title'        => 'Our Heritage & History',
+                'slug'              => 'history',
                 'breadcrumb'        => 'History',
-                'slug'              => Str::slug('History'),
                 'short_des'         => 'A decade of precision aerosol engineering and groundbreaking air purification milestones.',
-                'page_description'  => '<p class="content-text mt-5">Aire began as a specialized aerosol filtration research lab in 2015, striving to engineer particulate filtration systems capable of capturing sub-micron pathogens without heavy energy draw. Over the past decade, Aire has deployed thousands of clean air systems across hospitals, cleanrooms, enterprise offices, and modern households around the world.</p>',
+                'page_description'  => '<p class="content-text mt-4">AIRE began as a specialized aerosol filtration research lab in 2015, striving to engineer particulate filtration systems capable of capturing sub-micron pathogens without heavy energy draw. Over the past decade, AIRE has deployed thousands of clean air systems across hospitals, cleanrooms, enterprise offices, and modern households around the world.</p>',
                 'f_image'           => 'themes/default/assets/img/Air-Purify.png',
                 'meta_title'        => 'History & Milestones | Aire Indoor Air Quality',
                 'meta_description'  => 'Explore Aire’s journey from an aerosol research laboratory to an international leader in clean air solutions.',
                 'meta_keyword'      => 'Aire history, air purification innovations, clean air engineering milestones',
                 'status'            => 1,
-                'createdBy'         => $adminId,
-                'updatedBy'         => $adminId,
-            ]
-        );
-        Page::updateOrCreate(
-            ["slug" => Str::slug('Technology')],
+            ],
             [
                 'temp'              => 'default',
                 'page_title'        => 'Filtration Technology',
+                'slug'              => 'technology',
                 'breadcrumb'        => 'Technology',
-                'slug'              => Str::slug('Technology'),
                 'short_des'         => 'Discover our proprietary multi-stage H13 HEPA, activated carbon, and UV-C purification architectures.',
-                'page_description'  => '<p class="content-text mt-5">Aire systems incorporate multi-layer medical-grade H13 HEPA media, high-density activated carbon pellets for VOC absorption, and photocatalytic UV-C sterilization chambers designed to eliminate 99.97% of airborne pathogens down to 0.1 microns.</p>',
+                'page_description'  => '<p class="content-text mt-4">AIRE systems incorporate multi-layer medical-grade H13 HEPA media, high-density activated carbon pellets for VOC absorption, and photocatalytic UV-C sterilization chambers designed to eliminate 99.97% of airborne pathogens down to 0.1 microns.</p>',
                 'f_image'           => 'themes/default/assets/img/Air-Purify.png',
                 'meta_title'        => 'Filtration Technology & Innovation | Aire',
                 'meta_description'  => 'Discover Aire’s cutting-edge H13 HEPA filtration and smart indoor air quality sensing technologies.',
                 'meta_keyword'      => 'HEPA technology, air purifier filtration, VOC reduction, clean air engineering',
                 'status'            => 1,
-                'createdBy'         => $adminId,
-                'updatedBy'         => $adminId,
-            ]
-        );
+            ],
+            [
+                'temp'              => 'default',
+                'page_title'        => 'Warranty & Service Policy',
+                'slug'              => 'warranty-policy',
+                'breadcrumb'        => 'Support & Services',
+                'short_des'         => 'Comprehensive manufacturer warranty, guaranteed part replacements, and certified service plans.',
+                'page_description'  => '<p class="content-text mt-4">Every AIRE residential and commercial purifier is backed by our comprehensive manufacturer warranty. We cover all motor assemblies, smart sensor arrays, and circuit components against defects in materials and craftsmanship for up to 5 years.</p><p class="content-text mt-3">Register your device online within 30 days of purchase to activate complimentary priority filter replacement reminders and extended coverage.</p>',
+                'f_image'           => 'themes/default/assets/img/Air-Purify.png',
+                'meta_title'        => 'Warranty & Service Policy | AIRE Air Purifiers',
+                'meta_description'  => 'Learn about AIRE 5-year warranty coverage, genuine filter guarantees, and certified maintenance support.',
+                'meta_keyword'      => 'AIRE warranty, purifier warranty, parts replacement, air purifier service',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'default',
+                'page_title'        => 'Shipping & Delivery Guidelines',
+                'slug'              => 'shipping-policy',
+                'breadcrumb'        => 'Customer Service',
+                'short_des'         => 'Fast, insured nationwide shipping and white-glove commercial delivery for all purification systems.',
+                'page_description'  => '<p class="content-text mt-4">We ensure rapid, temperature-controlled, and insured shipping across all 50 states and international territories. Residential purifier units ship within 24 to 48 business hours with real-time tracking.</p><p class="content-text mt-3">Commercial modular filtration units include freight tracking and scheduled curbside or indoor placement delivery.</p>',
+                'f_image'           => 'themes/default/assets/img/Air-Purify.png',
+                'meta_title'        => 'Shipping & Delivery Guidelines | AIRE',
+                'meta_description'  => 'Read AIRE shipping timeframes, tracking options, international delivery, and insured freight details.',
+                'meta_keyword'      => 'AIRE shipping, delivery policy, air purifier shipping, order tracking',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'default',
+                'page_title'        => 'Returns & Refund Policy',
+                'slug'              => 'returns-refunds',
+                'breadcrumb'        => 'Customer Service',
+                'short_des'         => '30-day clean air satisfaction guarantee with hassle-free returns and prompt refunds.',
+                'page_description'  => '<p class="content-text mt-4">We stand behind the superior performance of AIRE systems with our 30-Day Clean Air Trial. If you are not completely satisfied with your indoor air quality improvement, you may return the unit in its original packaging for a full refund.</p>',
+                'f_image'           => 'themes/default/assets/img/Air-Purify.png',
+                'meta_title'        => 'Returns & Refund Policy | AIRE 30-Day Clean Air Trial',
+                'meta_description'  => 'Discover AIRE 30-day return policy and simple step-by-step clean air refund process.',
+                'meta_keyword'      => 'AIRE returns, refund policy, clean air trial, air purifier return',
+                'status'            => 1,
+            ],
+            [
+                'temp'              => 'default',
+                'page_title'        => 'Frequently Asked Questions',
+                'slug'              => 'faq',
+                'breadcrumb'        => 'Support',
+                'short_des'         => 'Answers to common questions regarding filter lifespan, CADR ratings, maintenance, and IoT app connectivity.',
+                'page_description'  => '<p class="content-text mt-4">Find detailed answers to common inquiries regarding filter replacement intervals, air quality index (AQI) sensor calibration, multi-room coverage sizing, and warranty claims.</p>',
+                'f_image'           => 'themes/default/assets/img/Air-Purify.png',
+                'meta_title'        => 'FAQ & Air Quality Help Center | AIRE',
+                'meta_description'  => 'Find fast answers to frequently asked questions about AIRE filtration systems, filters, and smart features.',
+                'meta_keyword'      => 'AIRE FAQ, air purifier help, filter replacement questions, CADR answers',
+                'status'            => 1,
+            ],
+        ];
+
+        foreach ($pages as $p) {
+            Page::updateOrCreate(
+                ['slug' => $p['slug']],
+                array_merge($p, [
+                    'createdBy' => $adminId,
+                    'updatedBy' => $adminId,
+                ])
+            );
+        }
     }
 }

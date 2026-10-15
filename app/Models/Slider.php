@@ -37,6 +37,9 @@ class Slider extends Model
     public static function clearCache(): void
     {
         Cache::forget('sliders_all_active');
+        Cache::forget('filter_ad_sliders');
+        Cache::forget('storefront_about_ads_v1');
+
         $placements = [
             'banner_section',
             'home_hero',
@@ -51,6 +54,7 @@ class Slider extends Model
         ];
         foreach ($placements as $p) {
             Cache::forget("sliders_placement_{$p}");
+            Cache::forget("sliders_{$p}");
         }
     }
 

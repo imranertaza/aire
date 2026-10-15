@@ -296,7 +296,60 @@
                             </li>
                         </ul>
                     </li>
+<!-- News -->
+                    <li class="nav-item" v-if="authStore.hasPermission('view-news')"
+                        :class="{ 'menu-open': isOpen('news') }">
+                        <a href="#" class="nav-link" @click.prevent="toggle('news')">
+                            <i class="nav-icon fas fa-newspaper"></i>
+                            <p>News <i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview" v-show="isOpen('news')">
+                            <!-- News List -->
+                            <li class="nav-item">
+                                <router-link :to="{ name: 'News' }" class="nav-link"
+                                    :class="{ active: $route.name === 'News' }">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>News List</p>
+                                </router-link>
+                            </li>
 
+                            <!-- Create News -->
+                            <li class="nav-item" v-if="authStore.hasPermission('create-news')">
+                                <router-link :to="{ name: 'CreateNews' }" class="nav-link"
+                                    :class="{ active: $route.name === 'CreateNews' }">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Create News</p>
+                                </router-link>
+                            </li>
+
+                            <!-- Manage News Category (nested inside News) -->
+                            <li class="nav-item" v-if="authStore.hasPermission('view-news-categories')"
+                                :class="{ 'menu-open': isOpen('newsCategories') }">
+                                <a href="#" class="nav-link" @click.prevent="toggle('newsCategories')">
+                                    <i class="nav-icon fas fa-folder"></i>
+                                    <p>News Category <i class="fas fa-angle-left right"></i></p>
+                                </a>
+                                <ul class="nav nav-treeview" v-show="isOpen('newsCategories')">
+                                    <!-- News Category List -->
+                                    <li class="nav-item">
+                                        <router-link :to="{ name: 'NewsCategoryIndex' }" class="nav-link"
+                                            :class="{ active: $route.name === 'NewsCategoryIndex' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Category List</p>
+                                        </router-link>
+                                    </li>
+                                    <!-- Create News Category -->
+                                    <li class="nav-item" v-if="authStore.hasPermission('create-news-categories')">
+                                        <router-link :to="{ name: 'NewsCategoryCreate' }" class="nav-link"
+                                            :class="{ active: $route.name === 'NewsCategoryCreate' }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Create Category</p>
+                                        </router-link>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
                     <!--  Posts -->
                     <!-- <li class="nav-item" v-if="authStore.hasPermission('view-posts')"
                         :class="{ 'menu-open': isOpen('posts') }">
@@ -369,6 +422,13 @@
                                 </router-link>
                             </li>
                             <li class="nav-item" v-if="authStore.hasPermission('view-sections')">
+                                <router-link :to="{ name: 'AboutSections' }" class="nav-link"
+                                    :class="{ active: ['AboutSections'].includes($route.name) }">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>About Page Section</p>
+                                </router-link>
+                            </li>
+                            <li class="nav-item" v-if="authStore.hasPermission('view-sections')">
                                 <router-link :to="{ name: 'TestimonialsSection' }" class="nav-link"
                                     :class="{ active: ['TestimonialsSection'].includes($route.name) }">
                                     <i class="far fa-circle nav-icon"></i>
@@ -379,7 +439,7 @@
                                 <router-link :to="{ name: 'Section' }" class="nav-link"
                                     :class="{ active: ['Section', 'CreateSection', 'UpdateSection', 'ShowSection'].includes($route.name) }">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Sections</p>
+                                    <p>All Sections</p>
                                 </router-link>
                             </li>
                         </ul>
@@ -553,6 +613,8 @@ const openParentMenus = () => {
         'ShowSlider': ['frontend'],
         'UpdateSlider': ['frontend'],
         'HomeSections': ['frontend'],
+        'AboutSections': ['frontend'],
+        'TestimonialsSection': ['frontend'],
         'Section': ['frontend'],
         'CreateSection': ['frontend'],
         'ShowSection': ['frontend'],

@@ -9,4 +9,4 @@ Disallow: /clear
 Disallow: /clear-images
 Disallow: /clear-sections
 
-Sitemap: /sitemap.xml
+Sitemap: https://aire.test/sitemap.xml

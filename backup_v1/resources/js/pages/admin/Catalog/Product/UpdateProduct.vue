@@ -1871,7 +1871,7 @@ onMounted(async () => {
                     if (imgPath.startsWith('http') || imgPath.startsWith('themes/') || imgPath.startsWith('assets/')) {
                         previews = [imgPath.startsWith('http') ? imgPath : `/${imgPath}`];
                     } else {
-                        previews = [getImageCacheUrl(imgPath, 120, 120, 'webp')];
+                        previews = [getImageCacheUrl(imgPath, 420, 420, 'webp')];
                     }
                 }
                 return {
@@ -1890,44 +1890,44 @@ onMounted(async () => {
         };
 
         if (descInfo.description_image) {
-            descImagePreviews.value = [getImageCacheUrl(descInfo.description_image, 120, 120, 'webp')];
+            descImagePreviews.value = [getImageCacheUrl(descInfo.description_image, 420, 420, 'webp')];
         }
         if (p.overview && p.overview.image) {
             overviewImagePreviews.value = [
                 p.overview.image.startsWith('http') || p.overview.image.startsWith('themes/') || p.overview.image.startsWith('assets/')
                     ? (p.overview.image.startsWith('http') ? p.overview.image : `/${p.overview.image}`)
-                    : getImageCacheUrl(p.overview.image, 120, 120, 'webp')
+                    : getImageCacheUrl(p.overview.image, 420, 420, 'webp')
             ];
         }
         if (descInfo.specs_image) {
             specsImagePreviews.value = [
                 descInfo.specs_image.startsWith('http') || descInfo.specs_image.startsWith('themes/') || descInfo.specs_image.startsWith('assets/')
                     ? (descInfo.specs_image.startsWith('http') ? descInfo.specs_image : `/${descInfo.specs_image}`)
-                    : getImageCacheUrl(descInfo.specs_image, 120, 120, 'webp')
+                    : getImageCacheUrl(descInfo.specs_image, 420, 420, 'webp')
             ];
         }
         if (descInfo.features_image) {
             featuresImagePreviews.value = [
                 descInfo.features_image.startsWith('http') || descInfo.features_image.startsWith('themes/') || descInfo.features_image.startsWith('assets/')
                     ? (descInfo.features_image.startsWith('http') ? descInfo.features_image : `/${descInfo.features_image}`)
-                    : getImageCacheUrl(descInfo.features_image, 120, 120, 'webp')
+                    : getImageCacheUrl(descInfo.features_image, 420, 420, 'webp')
             ];
         }
         if (descInfo.technology_image) {
             technologyImagePreviews.value = [
                 descInfo.technology_image.startsWith('http') || descInfo.technology_image.startsWith('themes/') || descInfo.technology_image.startsWith('assets/')
                     ? (descInfo.technology_image.startsWith('http') ? descInfo.technology_image : `/${descInfo.technology_image}`)
-                    : getImageCacheUrl(descInfo.technology_image, 120, 120, 'webp')
+                    : getImageCacheUrl(descInfo.technology_image, 420, 420, 'webp')
             ];
         }
 
         if (p.main_image) {
-            mainImagePreviews.value = [getImageCacheUrl(p.main_image, 120, 120, 'webp')];
+            mainImagePreviews.value = [getImageCacheUrl(p.main_image, 420, 420, 'webp')];
         }
 
         if (p.images && p.images.length > 0) {
             existingGalleryImages.value = p.images;
-            galleryPreviews.value = p.images.map(img => getImageCacheUrl(img.image, 120, 120, 'webp'));
+            galleryPreviews.value = p.images.map(img => getImageCacheUrl(img.image, 420, 420, 'webp'));
         }
 
         if (descInfo.documentation_pdf) {
@@ -1985,19 +1985,19 @@ onMounted(async () => {
             }
 
             if (pl.hero_image) {
-                landingHeroPreviews.value = [pl.hero_image.startsWith('http') ? pl.hero_image : getImageCacheUrl(pl.hero_image, 120, 120, 'webp')];
+                landingHeroPreviews.value = [pl.hero_image.startsWith('http') ? pl.hero_image : getImageCacheUrl(pl.hero_image, 420, 420, 'webp')];
             }
             if (pl.science_image) {
-                landingSciencePreviews.value = [pl.science_image.startsWith('http') ? pl.science_image : getImageCacheUrl(pl.science_image, 120, 120, 'webp')];
+                landingSciencePreviews.value = [pl.science_image.startsWith('http') ? pl.science_image : getImageCacheUrl(pl.science_image, 420, 420, 'webp')];
             }
             if (pl.lifestyle_image) {
-                landingLifestylePreviews.value = [pl.lifestyle_image.startsWith('http') ? pl.lifestyle_image : getImageCacheUrl(pl.lifestyle_image, 120, 120, 'webp')];
+                landingLifestylePreviews.value = [pl.lifestyle_image.startsWith('http') ? pl.lifestyle_image : getImageCacheUrl(pl.lifestyle_image, 420, 420, 'webp')];
             }
             if (pl.filter_tech_image) {
-                landingFilterPreviews.value = [pl.filter_tech_image.startsWith('http') ? pl.filter_tech_image : getImageCacheUrl(pl.filter_tech_image, 120, 120, 'webp')];
+                landingFilterPreviews.value = [pl.filter_tech_image.startsWith('http') ? pl.filter_tech_image : getImageCacheUrl(pl.filter_tech_image, 420, 420, 'webp')];
             }
             if (pl.specs_image) {
-                landingSpecsPreviews.value = [pl.specs_image.startsWith('http') ? pl.specs_image : getImageCacheUrl(pl.specs_image, 120, 120, 'webp')];
+                landingSpecsPreviews.value = [pl.specs_image.startsWith('http') ? pl.specs_image : getImageCacheUrl(pl.specs_image, 420, 420, 'webp')];
             }
         } else {
             form.value.landing_enabled = false;
@@ -2386,11 +2386,11 @@ const submitForm = async () => {
         const updated = response.data?.data;
         if (updated) {
             if (updated.main_image) {
-                mainImagePreviews.value = [getImageCacheUrl(updated.main_image, 120, 120, 'webp')];
+                mainImagePreviews.value = [getImageCacheUrl(updated.main_image, 420, 420, 'webp')];
             }
             if (updated.images) {
                 existingGalleryImages.value = updated.images;
-                galleryPreviews.value = updated.images.map(img => getImageCacheUrl(img.image, 120, 120, 'webp'));
+                galleryPreviews.value = updated.images.map(img => getImageCacheUrl(img.image, 420, 420, 'webp'));
             }
         }
         mainImageFile.value = null;

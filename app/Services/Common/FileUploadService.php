@@ -210,4 +210,83 @@ class FileUploadService
             $this->delete($path, $disk);
         }
     }
+
+    /**
+     * Check if a file or directory exists on disk.
+     *
+     * @param string|null $path
+     * @param string|null $disk
+     * @return bool
+     */
+    public function exists(?string $path, ?string $disk = null): bool
+    {
+        if (empty($path)) {
+            return false;
+        }
+
+        $disk = $disk ?? $this->defaultDisk;
+
+        try {
+            return Storage::disk($disk)->exists($path);
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    /**
+     * Copy an existing file to a target destination directory.
+     *
+     * @param string|null $sourcePath
+     * @param string $destinationDir
+     * @param string $filename
+     * @param string|null $disk
+     * @return string|null
+     */
+    public function copy(?string $sourcePath, string $destinationDir, string $filename, ?string $disk = null): ?string
+    {
+        if (empty($sourcePath)) {
+            return null;
+        }
+
+        $disk = $disk ?? $this->defaultDisk;
+
+        try {
+            if (!Storage::disk($disk)->exists($sourcePath)) {
+                return null;
+            }
+
+            $targetPath = trim($destinationDir, '/') . '/' . ltrim($filename, '/');
+            Storage::disk($disk)->copy($sourcePath, $targetPath);
+
+            return $targetPath;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Delete an entire directory safely from disk.
+     *
+     * @param string $directory
+     * @param string|null $disk
+     * @return bool
+     */
+    public function deleteDirectory(string $directory, ?string $disk = null): bool
+    {
+        if (empty($directory)) {
+            return true;
+        }
+
+        $disk = $disk ?? $this->defaultDisk;
+
+        try {
+            if (Storage::disk($disk)->exists($directory)) {
+                return Storage::disk($disk)->deleteDirectory($directory);
+            }
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return true;
+    }
 }

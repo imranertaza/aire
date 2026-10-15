@@ -108,16 +108,6 @@
                                             v-model="imageFile" v-model:previews="previews" mode="edit"
                                             :allowSelectOnPreview="true" />
                                         <small class="text-muted">Recommended: 1140 × 375px</small>
-
-                                        <!-- Banner Preview -->
-                                        <div v-if="previews && previews.length" class="mt">
-                                            <template v-for="(file, index) in previews" :key="index">
-                                                <video v-if="isVideo(file)" :src="file" controls class="rounded mb-2"
-                                                    height="100"></video>
-                                                <img v-else :src="file" alt="Preview" class="rounded mb-2"
-                                                    height="100" />
-                                            </template>
-                                        </div>
                                     </div>
                                     <!-- Featured Image Upload -->
                                     <div class="form-group">

@@ -1,6 +1,8 @@
 <!-- Auth Modal Popup (Sign In / Sign Up / Forgot Password) -->
 <div class="modal fade auth-modal" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true"
-    data-bs-backdrop="true" data-lenis-prevent>
+    data-bs-backdrop="true" data-lenis-prevent
+    data-sitekey="{{ config('services.sitekey') }}"
+    data-use-recaptcha="{{ config('services.use_recaptcha') ? '1' : '0' }}">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable auth-modal-dialog" data-lenis-prevent>
         <div class="modal-content auth-modal-content border-0" data-lenis-prevent>
             <!-- Close Button -->
@@ -12,7 +14,7 @@
                 <div class="text-center mb-4">
                     <a href="{{ route('home') }}" class="d-inline-block mb-3 text-decoration-none">
                         <img src="{{ theme_asset('img/logo.png') }}" alt="AIRE Logo" class="auth-modal-logo"
-                            style="max-height: 42px;">
+                            width="132" height="42" style="max-height: 42px; width: auto;" loading="lazy" decoding="async">
                     </a>
                     <h2 class="auth-modal-title fs-20 fw-bold text-dark mb-1" id="authModalLabel">Systems Authentication
                     </h2>
@@ -81,9 +83,9 @@
                             <div class="auth-field-group mb-3">
                                 <div class="d-flex align-items-center justify-content-between mb-1">
                                     <label for="modalSigninPassword" class="auth-label mb-0">PASSWORD</label>
-                                    <a href="javascript:void(0)"
-                                        class="auth-forgot-link fs-12 text-decoration-none text-muted"
-                                        onclick="switchAuthTab('forgot')">Forgot Password?</a>
+                                    <button type="button"
+                                        class="auth-forgot-link fs-12 text-decoration-none text-muted btn p-0 border-0 bg-transparent align-baseline"
+                                        onclick="switchAuthTab('forgot')">Forgot Password?</button>
                                 </div>
                                 <div class="auth-input-wrap position-relative">
                                     <input type="password" id="modalSigninPassword" name="password"
@@ -124,8 +126,8 @@
                         <div class="text-center mt-4">
                             <p class="fs-13 text-muted mb-0">
                                 Don't have an account?
-                                <a href="javascript:void(0)" class="text-primary fw-bold text-decoration-none ms-1"
-                                    onclick="switchAuthTab('signup')">Sign Up</a>
+                                <button type="button" class="btn p-0 border-0 bg-transparent text-primary fw-bold text-decoration-none ms-1 align-baseline"
+                                    onclick="switchAuthTab('signup')">Sign Up</button>
                             </p>
                         </div>
                     </div>
@@ -216,8 +218,8 @@
                         <div class="text-center mt-4">
                             <p class="fs-13 text-muted mb-0">
                                 Already have an account?
-                                <a href="javascript:void(0)" class="text-primary fw-bold text-decoration-none ms-1"
-                                    onclick="switchAuthTab('signin')">Sign In</a>
+                                <button type="button" class="btn p-0 border-0 bg-transparent text-primary fw-bold text-decoration-none ms-1 align-baseline"
+                                    onclick="switchAuthTab('signin')">Sign In</button>
                             </p>
                         </div>
                     </div>
@@ -259,8 +261,8 @@
                         <div class="text-center mt-4">
                             <p class="fs-13 text-muted mb-0">
                                 Remembered your password?
-                                <a href="javascript:void(0)" class="text-primary fw-bold text-decoration-none ms-1"
-                                    onclick="switchAuthTab('signin')">Sign In</a>
+                                <button type="button" class="btn p-0 border-0 bg-transparent text-primary fw-bold text-decoration-none ms-1 align-baseline"
+                                    onclick="switchAuthTab('signin')">Sign In</button>
                             </p>
                         </div>
                     </div>
@@ -337,8 +339,8 @@
                         <div class="text-center mt-4">
                             <p class="fs-13 text-muted mb-0">
                                 Remembered your password?
-                                <a href="javascript:void(0)" class="text-primary fw-bold text-decoration-none ms-1"
-                                    onclick="switchAuthTab('signin')">Sign In</a>
+                                <button type="button" class="btn p-0 border-0 bg-transparent text-primary fw-bold text-decoration-none ms-1 align-baseline"
+                                    onclick="switchAuthTab('signin')">Sign In</button>
                             </p>
                         </div>
                     </div>
@@ -361,249 +363,4 @@
     </div>
 </div>
 
-<script>
-    // Helper to toggle password visibility
-    function toggleModalPassword(inputId, btn) {
-        const input = document.getElementById(inputId);
-        const icon = btn.querySelector('i');
-        if (!input || !icon) return;
-
-        if (input.type === 'password') {
-            input.type = 'text';
-            icon.classList.remove('bi-eye-slash');
-            icon.classList.add('bi-eye');
-        } else {
-            input.type = 'password';
-            icon.classList.remove('bi-eye');
-            icon.classList.add('bi-eye-slash');
-        }
-    }
-
-    // Helper to switch between modal tabs (signin / signup / forgot / reset)
-    function switchAuthTab(tab) {
-        const signinTab = document.getElementById('signin-tab');
-        const signupTab = document.getElementById('signup-tab');
-        const signinPane = document.getElementById('signinTabPane');
-        const signupPane = document.getElementById('signupTabPane');
-        const forgotPane = document.getElementById('forgotTabPane');
-        const resetPane = document.getElementById('resetTabPane');
-        const navTabsWrapper = document.getElementById('authNavTabsWrapper');
-        const modalTitle = document.getElementById('authModalLabel');
-        const modalSubtitle = document.getElementById('authModalSubtitle');
-
-        // Clear all active panes
-        [signinPane, signupPane, forgotPane, resetPane].forEach(p => {
-            if (p) {
-                p.classList.remove('show', 'active');
-            }
-        });
-
-        if (tab === 'signup') {
-            if (navTabsWrapper) navTabsWrapper.classList.remove('d-none');
-            if (signinTab) signinTab.classList.remove('active');
-            if (signupTab) signupTab.classList.add('active');
-            if (signupPane) signupPane.classList.add('show', 'active');
-            if (modalTitle) modalTitle.textContent = 'Create an Account';
-            if (modalSubtitle) modalSubtitle.textContent = 'Join Aire environmental architecture network.';
-        } else if (tab === 'forgot') {
-            if (navTabsWrapper) navTabsWrapper.classList.add('d-none');
-            if (signinTab) signinTab.classList.remove('active');
-            if (signupTab) signupTab.classList.remove('active');
-            if (forgotPane) forgotPane.classList.add('show', 'active');
-            if (modalTitle) modalTitle.textContent = 'Recover Access';
-            if (modalSubtitle) modalSubtitle.textContent = 'Enter your email to receive a password reset link.';
-        } else if (tab === 'reset') {
-            if (navTabsWrapper) navTabsWrapper.classList.add('d-none');
-            if (signinTab) signinTab.classList.remove('active');
-            if (signupTab) signupTab.classList.remove('active');
-            if (resetPane) resetPane.classList.add('show', 'active');
-            if (modalTitle) modalTitle.textContent = 'Create New Password';
-            if (modalSubtitle) modalSubtitle.textContent = 'Ensure your new password contains at least 6 characters.';
-        } else {
-            if (navTabsWrapper) navTabsWrapper.classList.remove('d-none');
-            if (signupTab) signupTab.classList.remove('active');
-            if (signinTab) signinTab.classList.add('active');
-            if (signinPane) signinPane.classList.add('show', 'active');
-            if (modalTitle) modalTitle.textContent = 'Systems Authentication';
-            if (modalSubtitle) modalSubtitle.textContent = 'Secure access to environmental control architecture.';
-        }
-    }
-
-    // Initialize Modal AJAX Forms
-    document.addEventListener('DOMContentLoaded', function() {
-        const authModal = document.getElementById('authModal');
-        if (authModal) {
-            authModal.addEventListener('show.bs.modal', function(event) {
-                const triggerBtn = event.relatedTarget;
-                if (triggerBtn && triggerBtn.dataset.authTab) {
-                    switchAuthTab(triggerBtn.dataset.authTab);
-                }
-            });
-        }
-
-        // Auto-open modal if URL has ?auth=signin / signup / forgot / reset or if session status is flashed
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('auth')) {
-            const requestedTab = urlParams.get('auth');
-            if (authModal && typeof bootstrap !== 'undefined') {
-                const modalInstance = new bootstrap.Modal(authModal);
-                modalInstance.show();
-
-                if (requestedTab === 'reset') {
-                    const resetTokenInput = document.getElementById('modalResetToken');
-                    const resetEmailInput = document.getElementById('modalResetEmail');
-                    if (resetTokenInput && urlParams.get('token')) {
-                        resetTokenInput.value = urlParams.get('token');
-                    }
-                    if (resetEmailInput && urlParams.get('email')) {
-                        resetEmailInput.value = urlParams.get('email');
-                    }
-                }
-
-                switchAuthTab(requestedTab);
-            }
-        }
-        @if (session('status'))
-            if (authModal && typeof bootstrap !== 'undefined') {
-                const modalInstance = new bootstrap.Modal(authModal);
-                modalInstance.show();
-                switchAuthTab('signin');
-            }
-        @endif
-
-        // Handle AJAX Form Submissions for all auth modal forms
-        const authForms = document.querySelectorAll('.auth-ajax-form');
-        authForms.forEach(function(form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-
-                const submitBtn = form.querySelector('.btn-auth-modal-submit');
-                const btnText = submitBtn ? submitBtn.querySelector('.btn-text') : null;
-                const spinner = submitBtn ? submitBtn.querySelector('.spinner-border') : null;
-                const alertBox = form.closest('.tab-pane').querySelector('.auth-alert');
-                const noRedirect = form.dataset.noRedirect === 'true';
-
-                // Clear previous errors
-                form.querySelectorAll('.field-error').forEach(el => el.textContent = '');
-                form.querySelectorAll('.auth-modal-input').forEach(el => el.classList.remove(
-                    'is-invalid'));
-                if (alertBox) {
-                    alertBox.classList.add('d-none');
-                    alertBox.textContent = '';
-                }
-
-                // Loading State
-                if (submitBtn) submitBtn.disabled = true;
-                if (btnText) btnText.classList.add('opacity-50');
-                if (spinner) spinner.classList.remove('d-none');
-
-                const performSubmit = function(token) {
-                    const formData = new FormData(form);
-                    if (token) {
-                        formData.set('g-recaptcha-response', token);
-                    }
-
-                    fetch(form.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(async response => {
-                            const data = await response.json();
-                            if (!response.ok) {
-                                throw data;
-                            }
-                            return data;
-                        })
-                        .then(data => {
-                            if (submitBtn) submitBtn.disabled = false;
-                            if (btnText) btnText.classList.remove('opacity-50');
-                            if (spinner) spinner.classList.add('d-none');
-
-                            if (data.status) {
-                                if (alertBox) {
-                                    alertBox.classList.remove('d-none', 'alert-danger');
-                                    alertBox.classList.add('alert-success');
-                                    alertBox.innerHTML =
-                                        '<i class="bi bi-check-circle-fill me-1"></i> ' +
-                                        (data.message || 'Success!');
-                                }
-
-                                if (!noRedirect) {
-                                    setTimeout(function() {
-                                        window.location.href = data.redirect ||
-                                            window.location.href;
-                                    }, 600);
-                                } else {
-                                    form.reset();
-                                }
-                            } else {
-                                throw data;
-                            }
-                        })
-                        .catch(err => {
-                            if (submitBtn) submitBtn.disabled = false;
-                            if (btnText) btnText.classList.remove('opacity-50');
-                            if (spinner) spinner.classList.add('d-none');
-
-                            if (err && err.errors) {
-                                Object.keys(err.errors).forEach(key => {
-                                    const errEl = form.querySelector(
-                                        `.field-error[data-field="${key}"]`);
-                                    const inputEl = form.querySelector(
-                                        `[name="${key}"]`);
-                                    if (errEl) errEl.textContent = err.errors[
-                                        key][0];
-                                    if (inputEl) inputEl.classList.add(
-                                        'is-invalid');
-                                });
-                            }
-
-                            if (alertBox) {
-                                alertBox.classList.remove('d-none', 'alert-success');
-                                alertBox.classList.add('alert-danger');
-                                alertBox.innerHTML =
-                                    '<i class="bi bi-exclamation-triangle-fill me-1"></i> ' +
-                                    (
-                                        err.message ||
-                                        'Action failed. Please check your inputs and try again.'
-                                    );
-                            }
-                        });
-                };
-
-                const siteKey = "{{ config('services.sitekey') }}";
-                const useRecaptcha = {{ config('services.use_recaptcha') ? 'true' : 'false' }};
-
-                if (useRecaptcha && siteKey && typeof grecaptcha !== 'undefined') {
-                    grecaptcha.ready(function() {
-                        grecaptcha.execute(siteKey, {
-                                action: 'auth_submit'
-                            })
-                            .then(function(token) {
-                                performSubmit(token);
-                            })
-                            .catch(function(recaptchaErr) {
-                                console.warn('reCAPTCHA v3 error:', recaptchaErr);
-                                performSubmit('');
-                            });
-                    });
-                } else {
-                    performSubmit('');
-                }
-            });
-        });
-    });
-</script>
-
-@if (config('services.use_recaptcha') && config('services.sitekey'))
-    <style>
-        .grecaptcha-badge {
-            visibility: hidden !important;
-        }
-    </style>
-    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.sitekey') }}" async defer></script>
-@endif
+<script src="{{ theme_asset('js/auth-modal.js') }}" defer></script>

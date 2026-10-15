@@ -16,6 +16,21 @@ class Page extends Model
         'status' => 'integer',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function ($page) {
+            \Illuminate\Support\Facades\Cache::forget("cms_page_{$page->slug}");
+            \Illuminate\Support\Facades\Cache::forget("page_{$page->id}");
+            \Illuminate\Support\Facades\Cache::forget("active_legal_sidebar_pages_v1");
+        });
+
+        static::deleted(function ($page) {
+            \Illuminate\Support\Facades\Cache::forget("cms_page_{$page->slug}");
+            \Illuminate\Support\Facades\Cache::forget("page_{$page->id}");
+            \Illuminate\Support\Facades\Cache::forget("active_legal_sidebar_pages_v1");
+        });
+    }
+
     /**
      * Scope a query to only include active pages.
      */

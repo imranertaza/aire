@@ -177,47 +177,50 @@ $(document).ready(function () {
             $('#shipFname, #shipLname, #shipPhone, #sh_countryName, #sh_stateView, #shipAddr1, #shipZip').removeAttr('required');
         }
         updateLiveShipSummary();
-        // ─── reCAPTCHA v3 Helper ────────────────────────────────────────────────
-        function getRecaptchaToken(action) {
-            return new Promise(function (resolve) {
-                if (typeof window.aireRecaptchaSiteKey !== 'undefined' && window.aireRecaptchaSiteKey && typeof grecaptcha !== 'undefined') {
-                    grecaptcha.ready(function () {
-                        grecaptcha.execute(window.aireRecaptchaSiteKey, { action: action || 'checkout' })
-                            .then(function (token) { resolve(token); })
-                            .catch(function () { resolve(''); });
-                    });
-                } else {
-                    resolve('');
-                }
-            });
-        }
+    });
 
-        // ─── Checkout Form Submit Interceptor for reCAPTCHA v3 ──────────────────
-        $('#checkoutForm').on('submit', function (e) {
-            const $form = $(this);
-            const $tokenInput = $('#checkoutRecaptchaToken');
-
+    // ─── reCAPTCHA v3 Helper ────────────────────────────────────────────────
+    function getRecaptchaToken(action) {
+        return new Promise(function (resolve) {
             if (typeof window.aireRecaptchaSiteKey !== 'undefined' && window.aireRecaptchaSiteKey && typeof grecaptcha !== 'undefined') {
-                if (!$tokenInput.val()) {
-                    e.preventDefault();
-                    const $submitBtn = $form.find('button[type="submit"]');
-                    $submitBtn.prop('disabled', true);
-
-                    grecaptcha.ready(function () {
-                        grecaptcha.execute(window.aireRecaptchaSiteKey, { action: 'checkout_submit' })
-                            .then(function (token) {
-                                $tokenInput.val(token);
-                                $form[0].submit();
-                            })
-                            .catch(function (err) {
-                                console.warn('reCAPTCHA checkout error:', err);
-                                $tokenInput.val('');
-                                $form[0].submit();
-                            });
-                    });
-                }
+                grecaptcha.ready(function () {
+                    grecaptcha.execute(window.aireRecaptchaSiteKey, { action: action || 'checkout' })
+                        .then(function (token) { resolve(token); })
+                        .catch(function () { resolve(''); });
+                });
+            } else {
+                resolve('');
             }
         });
+    }
+
+    // ─── Checkout Form Submit Interceptor for reCAPTCHA v3 ──────────────────
+    $('#checkout-form, #checkoutForm').on('submit', function (e) {
+        const $form = $(this);
+        const $tokenInput = $('#checkoutRecaptchaToken');
+
+        if (typeof window.aireRecaptchaSiteKey !== 'undefined' && window.aireRecaptchaSiteKey && typeof grecaptcha !== 'undefined') {
+            if (!$tokenInput.val()) {
+                e.preventDefault();
+                const $submitBtn = $form.find('button[type="submit"]');
+                $submitBtn.prop('disabled', true);
+
+                grecaptcha.ready(function () {
+                    grecaptcha.execute(window.aireRecaptchaSiteKey, { action: 'checkout_submit' })
+                        .then(function (token) {
+                            $tokenInput.val(token);
+                            $form[0].submit();
+                        })
+                        .catch(function (err) {
+                            console.warn('reCAPTCHA checkout error:', err);
+                            $tokenInput.val('');
+                            $submitBtn.prop('disabled', false);
+                            $form[0].submit();
+                        });
+                });
+            }
+        }
+    });
 
         // ─── Apply Promo Code ─────────────────────────────────────────────────────
         $(document).on('click', '#btnApplyPromo', async function () {
@@ -316,5 +319,5 @@ $(document).ready(function () {
                 }
             });
         });
-    });
 });
+

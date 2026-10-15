@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="{{ theme_asset('css/product.css') }}">
 @endpush
 
+@include('themes.default.partials.category_schema')
+
 @section('content')
     <main class="container main-container">
         <h1 class="d-none">Your Main Page Title</h1>
@@ -120,7 +122,7 @@
                                         <li>Custom Air Handling Solutions</li>
                                         <li>Outdoor Installation</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">VIEW PRODUCT <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto">VIEW PRODUCT <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -149,7 +151,7 @@
                                         <li>Smart Purifiers</li>
                                         <li>Portable Purifiers</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">VIEW PRODUCT <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto">VIEW PRODUCT <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -167,7 +169,7 @@
                                         <li>Ceiling Mounted Purifiers</li>
                                         <li>Multi-Room Solutions</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">VIEW PRODUCT <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto">VIEW PRODUCT <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -185,7 +187,7 @@
                                         <li>Surgical Room Purifiers</li>
                                         <li>Infection Control Solutions</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">VIEW PRODUCT <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto">VIEW PRODUCT <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -215,7 +217,7 @@
                                         <li>VOC Detectors</li>
                                         <li>Temperature &amp; Humidity</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">EXPLORE SENSORS <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto">EXPLORE SENSORS <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -233,7 +235,7 @@
                                         <li>Alert &amp; Notification System</li>
                                         <li>Multi-Site Management</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">EXPLORE PLATFORM <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto">EXPLORE PLATFORM <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -263,7 +265,7 @@
                                         <li>Pre-Filter Panels</li>
                                         <li>Combined Filter Kits</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">SHOP FILTERS <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto">SHOP FILTERS <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -281,7 +283,7 @@
                                         <li>Ionization Modules</li>
                                         <li>Control Boards</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">SHOP PARTS <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto">SHOP PARTS <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -310,7 +312,7 @@
                                         <li>Air Quality Alerts</li>
                                         <li>Energy Usage Reports</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">LEARN MORE <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto" aria-label="Learn more about Smart Home App Integration">LEARN MORE<span class="visually-hidden"> about Smart Home App Integration</span> <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -328,7 +330,7 @@
                                         <li>API &amp; Webhook Access</li>
                                         <li>Custom Automation Rules</li>
                                     </ul>
-                                    <a href="#" class="card-link fs-12 mt-auto">LEARN MORE <i
+                                    <a href="{{ route('products.filter') }}" class="card-link fs-12 mt-auto" aria-label="Learn more about Building Automation Integration">LEARN MORE<span class="visually-hidden"> about Building Automation Integration</span> <i
                                             class="bi bi-arrow-right"></i></a>
                                 </div>
                             </div>

@@ -50,13 +50,22 @@
                         <span v-else-if="section.name === 'trust_badges'" class="badge badge-warning ml-2">Grid Layout</span>
                         <span v-else-if="section.name === 'home_benefits' || section.name === 'benefits'" class="badge badge-info ml-2">Benefits Parallax</span>
                         <span v-else-if="section.name === 'home_faq' || section.name === 'faq'" class="badge badge-success ml-2">FAQ Accordion</span>
-                          <span v-else-if="section.name === 'home_lifestyle' || section.name === 'lifestyle'" class="badge badge-purple ml-2">Lifestyle Showcase</span>
+                        <span v-else-if="section.name === 'home_lifestyle' || section.name === 'lifestyle'" class="badge badge-purple ml-2">Lifestyle Showcase</span>
                         <span v-else-if="section.name === 'home_video' || section.name === 'video'" class="badge badge-danger ml-2">Video Banner</span>
                         <span v-else-if="section.name === 'home_best_selling' || section.name === 'best_selling'" class="badge badge-warning ml-2">Best Selling Products</span>
                         <span v-else-if="section.name === 'home_new_arrival' || section.name === 'new_arrival'" class="badge badge-info ml-2">New Arrivals</span>
                         <span v-else-if="section.name === 'home_customer_favorites' || section.name === 'customer_favorites'" class="badge badge-primary ml-2">Customer Favorites</span>
                         <span v-else-if="section.name === 'home_living_hero' || section.name === 'living_hero'" class="badge badge-teal ml-2">Living Hero</span>
                         <span v-else-if="section.name === 'client_testimonials'" class="badge badge-success ml-2">Testimonials Slider</span>
+                        <span v-else-if="section.name === 'about_hero'" class="badge badge-primary ml-2">About Header</span>
+                        <span v-else-if="section.name === 'about_story'" class="badge badge-info ml-2">About Story & Milestones</span>
+                        <span v-else-if="section.name === 'about_mission_vision'" class="badge badge-success ml-2">About Mission & Vision</span>
+                        <span v-else-if="section.name === 'about_leadership'" class="badge badge-teal ml-2">About Leadership</span>
+                        <span v-else-if="section.name === 'about_innovation'" class="badge badge-indigo ml-2">About Innovation</span>
+                        <span v-else-if="section.name === 'about_quality'" class="badge badge-warning ml-2">About Quality</span>
+                        <span v-else-if="section.name === 'about_careers'" class="badge badge-purple ml-2">About Careers</span>
+                        <span v-else-if="section.name === 'about_news'" class="badge badge-danger ml-2">About Media</span>
+                        <span v-else-if="section.name === 'about_global'" class="badge badge-primary ml-2">About Global</span>
                       </td>
                       <td class="align-middle text-center">
                         <span v-if="section.name === 'why_choose_aire'" class="badge badge-purple">
@@ -92,12 +101,24 @@
                         <span v-else-if="section.name === 'client_testimonials'" class="badge badge-primary">
                           <i class="fas fa-quote-left mr-1"></i> {{ section.data?.items?.length || 4 }} Slides
                         </span>
+                        <span v-else-if="section.name === 'about_story'" class="badge badge-info">
+                          <i class="fas fa-clock mr-1"></i> {{ section.data?.milestones?.length || 6 }} Milestones
+                        </span>
+                        <span v-else-if="section.name === 'about_mission_vision'" class="badge badge-success">
+                          <i class="fas fa-bullseye mr-1"></i> {{ section.data?.values?.length || 4 }} Values
+                        </span>
+                        <span v-else-if="section.name === 'about_leadership'" class="badge badge-teal">
+                          <i class="fas fa-users mr-1"></i> {{ section.data?.members?.length || 4 }} Members
+                        </span>
+                        <span v-else-if="section.name === 'about_innovation' || section.name === 'about_quality' || section.name === 'about_global'" class="badge badge-primary">
+                          <i class="fas fa-layer-group mr-1"></i> {{ section.data?.items?.length || 2 }} Items
+                        </span>
                         <span v-else>
-                          <i :class="section.data?.image ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-muted'"></i>
+                          <i :class="(section.data?.image || section.data?.hero_image || section.data?.purpose_image || section.data?.banner_image) ? 'fas fa-check-circle text-success' : 'fas fa-times-circle text-muted'"></i>
                         </span>
                       </td>
                       <td class="align-middle text-center">
-                        <button v-if="section.data?.image" @click="previewImage(getImageUrl(section.data.image))" class="btn btn-xs btn-outline-primary">
+                        <button v-if="section.data?.image || section.data?.hero_image || section.data?.purpose_image || section.data?.banner_image" @click="previewImage(getImageUrl(section.data?.image || section.data?.hero_image || section.data?.purpose_image || section.data?.banner_image))" class="btn btn-xs btn-outline-primary">
                           <i class="fas fa-image mr-1"></i> Preview
                         </button>
                         <span v-else class="text-muted">—</span>

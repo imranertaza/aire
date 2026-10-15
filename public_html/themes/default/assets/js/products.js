@@ -50,29 +50,80 @@ $(document).ready(function () {
         });
     }
 
-    // 5. Intersection Observer for Scrollspy
-    const sections = document.querySelectorAll('.content-section');
+    // 5. Sidebar & Mobile Category Scrollspy and Click Navigation
+    const sections = document.querySelectorAll('.content-section, .category-showcase-section');
     const menuItems = document.querySelectorAll('.sidebar-menu .menu-item, .mobile-cat-pill');
+    let isClickScrolling = false;
+    let scrollTimeout = null;
 
+    function setActiveCategory(targetId) {
+        if (!targetId) return;
+        const hashId = targetId.startsWith('#') ? targetId : '#' + targetId;
+
+        // Remove active from all hash-based sidebar items and mobile pills
+        document.querySelectorAll('.sidebar-menu .menu-item[href^="#"], .mobile-cat-pill[href^="#"]').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // Add active to matching links
+        const activeLinks = document.querySelectorAll(`.sidebar-menu .menu-item[href="${hashId}"], .mobile-cat-pill[href="${hashId}"]`);
+        activeLinks.forEach(link => {
+            link.classList.add('active');
+            if (link.classList.contains('mobile-cat-pill')) {
+                link.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            }
+        });
+    }
+
+    // Handle Click Navigation with smooth scroll and header offset
+    $(document).on('click', '.sidebar-menu .menu-item[href^="#"], .mobile-cat-pill[href^="#"]', function (e) {
+        const targetId = $(this).attr('href');
+        if (targetId && targetId !== '#' && targetId.length > 1) {
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                e.preventDefault();
+
+                isClickScrolling = true;
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    isClickScrolling = false;
+                }, 800);
+
+                setActiveCategory(targetId);
+
+                const headerOffset = 90;
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+
+                if (history.pushState) {
+                    history.pushState(null, null, targetId);
+                }
+            }
+        }
+    });
+
+    // Intersection Observer for Scrollspy
     if (sections.length && menuItems.length) {
         const observerOptions = {
             root: null,
-            rootMargin: '-20% 0px -80% 0px',
+            rootMargin: '-15% 0px -65% 0px',
             threshold: 0
         };
 
         const observer = new IntersectionObserver((entries) => {
+            if (isClickScrolling) return;
+
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    menuItems.forEach(item => item.classList.remove('active'));
                     const id = entry.target.getAttribute('id');
-                    const activeLinks = document.querySelectorAll(`.sidebar-menu .menu-item[href="#${id}"], .mobile-cat-pill[href="#${id}"]`);
-                    activeLinks.forEach(link => {
-                        link.classList.add('active');
-                        if (link.classList.contains('mobile-cat-pill')) {
-                            link.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-                        }
-                    });
+                    if (id) {
+                        setActiveCategory('#' + id);
+                    }
                 }
             });
         }, observerOptions);

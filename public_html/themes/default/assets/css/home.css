@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 :root {
     --primary-blue: var(--color-primary, #1d4ed8);
     --primary-hover: var(--color-primary-hover, #1e40af);
@@ -39,6 +37,18 @@
     align-items: center;
     text-align: center;
     padding-bottom: 56px;
+    overflow: hidden;
+}
+
+.home-hero-slide__bg-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+    pointer-events: none;
 }
 
 /* Cinematic Dark Gradient Overlay matching Home.png */
@@ -110,7 +120,7 @@
     color: #ffffff !important;
 }
 
-/* Custom Swiper Pagination Dots (Matching Home.png) */
+/* Custom Swiper Pagination Dots (Matching Home.png with Accessible 28px Touch Target) */
 .home-hero-swiper-pagination {
     position: absolute;
     bottom: 24px !important;
@@ -119,25 +129,50 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 4px;
     z-index: 5;
 }
 
 .home-hero-swiper-pagination .swiper-pagination-bullet {
-    width: 7px;
-    height: 7px;
+    position: relative;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px;
+    min-height: 28px;
     margin: 0 !important;
-    background-color: #ffffff;
-    opacity: 0.35;
-    border-radius: 50%;
-    transition: all 0.3s ease;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 50% !important;
+    opacity: 1 !important;
     cursor: pointer;
+    box-sizing: border-box !important;
 }
 
-.home-hero-swiper-pagination .swiper-pagination-bullet-active {
+.home-hero-swiper-pagination .swiper-pagination-bullet::before {
+    content: '';
+    display: block;
+    width: 7px;
+    height: 7px;
+    background-color: #ffffff;
+    opacity: 0.4;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.home-hero-swiper-pagination .swiper-pagination-bullet:hover::before {
+    opacity: 0.8;
+    transform: scale(1.2);
+}
+
+.home-hero-swiper-pagination .swiper-pagination-bullet-active::before {
     opacity: 1;
     background-color: #ffffff;
-    transform: scale(1.2);
+    transform: scale(1.35);
 }
 
 @media (max-width: 991.98px) {
@@ -613,7 +648,8 @@
     gap: 8px;
 }
 
-.home-product-card .product-card__labels a {
+.home-product-card .product-card__labels a,
+.home-product-card .product-card__labels button {
     height: 36px;
     width: 36px;
     display: flex;
@@ -624,26 +660,35 @@
     background: #ffffff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.25s ease;
+    padding: 0;
+    outline: none;
+    cursor: pointer;
 }
 
 .home-product-card .product-card__labels a.active,
-.home-product-card .product-card__labels a:hover {
+.home-product-card .product-card__labels button.active,
+.home-product-card .product-card__labels a:hover,
+.home-product-card .product-card__labels button:hover {
     background-color: var(--color-primary-hover);
     border-color: var(--color-primary-hover);
     transform: scale(1.05);
 }
 
 .home-product-card .product-card__labels a.active svg path,
-.home-product-card .product-card__labels a:hover svg path {
+.home-product-card .product-card__labels button.active svg path,
+.home-product-card .product-card__labels a:hover svg path,
+.home-product-card .product-card__labels button:hover svg path {
     fill: #ffffff !important;
 }
 
-.home-product-card .product-card__labels a.btn-toggle-favorite.active {
+.home-product-card .product-card__labels a.btn-toggle-favorite.active,
+.home-product-card .product-card__labels button.btn-toggle-favorite.active {
     background-color: #dc3545;
     border-color: #dc3545;
 }
 
-.home-product-card .product-card__labels a.btn-toggle-favorite.active svg path {
+.home-product-card .product-card__labels a.btn-toggle-favorite.active svg path,
+.home-product-card .product-card__labels button.btn-toggle-favorite.active svg path {
     fill: #ffffff !important;
 }
 
@@ -718,7 +763,7 @@
     font-size: 0.725rem;
     font-weight: 600;
     letter-spacing: 0.5px;
-    color: #94a3b8;
+    color: #475569;
     text-transform: uppercase;
     margin-bottom: 22px;
     display: block;
@@ -840,7 +885,7 @@
 
 .home-lifestyle__subtitle {
     font-size: 0.95rem;
-    color: #64748b;
+    color: #475569;
     max-width: 680px;
     margin: 0 auto;
     line-height: 1.6;
@@ -1041,7 +1086,7 @@ h2.living-hero__title,
 .why-choose-stacked__subtitle {
     font-size: 13px;
     font-weight: 500;
-    color: var(--color-muted-mid);
+    color: #475569;
 }
 
 /* ==========================================================================
@@ -1189,28 +1234,33 @@ h2.living-hero__title,
     box-shadow: 0 0 0 14px rgba(0, 102, 204, 0.25), 0 12px 35px rgba(0, 102, 204, 0.7);
 }
 
-/* Pulsing radar ripple */
+/* Pulsing radar ripple (GPU-composited with transform and opacity) */
 .home-video__play-pulse {
     position: absolute;
     width: 72px;
     height: 72px;
     border-radius: 50%;
+    border: 3px solid rgba(0, 102, 204, 0.7);
     pointer-events: none;
     z-index: 10;
-    animation: homeVideoPulse 2.4s infinite;
+    will-change: transform, opacity;
+    animation: homeVideoPulse 2.4s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
 }
 
 @keyframes homeVideoPulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(0, 102, 204, 0.65);
+        transform: scale(1);
+        opacity: 0.8;
     }
 
     70% {
-        box-shadow: 0 0 0 28px rgba(0, 102, 204, 0);
+        transform: scale(1.6);
+        opacity: 0;
     }
 
     100% {
-        box-shadow: 0 0 0 0 rgba(0, 102, 204, 0);
+        transform: scale(1.6);
+        opacity: 0;
     }
 }
 

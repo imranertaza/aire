@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class CustomerDashboardController extends Controller
 {
@@ -51,7 +52,9 @@ class CustomerDashboardController extends Controller
         ];
 
         $orders = $this->profileService->getCustomerOrders($customer, $filters, 10);
-        $orderStatuses = OrderStatus::all();
+        $orderStatuses = Cache::rememberForever('all_order_statuses', function () {
+            return OrderStatus::all();
+        });
 
         return \theme_view('customer.orders', compact('customer', 'orders', 'orderStatuses', 'filters'));
     }
@@ -127,7 +130,9 @@ class CustomerDashboardController extends Controller
             ->latest('id')
             ->paginate(15);
 
-        $paymentMethods = PaymentMethod::active()->get();
+        $paymentMethods = Cache::rememberForever('all_active_payment_methods', function () {
+            return PaymentMethod::active()->orderBy('id')->get();
+        });
 
         return \theme_view('customer.wallet', compact('customer', 'fundRequests', 'paymentMethods'));
     }

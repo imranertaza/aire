@@ -11,11 +11,19 @@
                     <a href="{{ route('home') }}"
                         class="brand-logo text-decoration-none mb-4 d-flex align-items-center justify-content-end text-end ms-auto">
                         @if (!empty($settings['footer_logo']) && !str_contains($settings['footer_logo'], 'placehold.co'))
-                            <img src="{{ getImageUrl($settings['footer_logo']) }}"
-                                alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-footer-img">
+                            @php
+                                $ftrLogo1x = getImageCacheUrl($settings['footer_logo'], 120, 36, 'webp');
+                                $ftrLogo2x = getImageCacheUrl($settings['footer_logo'], 240, 72, 'webp');
+                            @endphp
+                            <img src="{{ $ftrLogo1x }}"
+                                srcset="{{ $ftrLogo1x }} 1x, {{ $ftrLogo2x }} 2x"
+                                width="120" height="36"
+                                alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-footer-img"
+                                style="max-height: 34px; width: auto; height: auto;">
                         @else
-                            <img src="{{ theme_asset('img/aire-industries-logo-white.png') }}"
-                                alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-footer-img">
+                            <img src="{{ theme_asset('img/aire-industries-logo-white.png') }}" width="120" height="36"
+                                alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-footer-img"
+                                style="max-height: 34px; width: auto; height: auto;">
                         @endif
                     </a>
                     <p class="fs-14 lh-lg text-muted-50 text-end mb-0">
@@ -29,7 +37,9 @@
                             class="footer-heading-sm text-uppercase fw-bold text-white mb-2">SUBSCRIBE TO OUR
                             NEWSLETTER</label>
                         <form id="footerNewsletterForm" action="{{ route('newsletter.subscribe') }}" method="POST"
-                            class="newsletter-form position-relative">
+                            class="newsletter-form position-relative"
+                            data-sitekey="{{ config('services.sitekey') }}"
+                            data-use-recaptcha="{{ config('services.use_recaptcha') ? '1' : '0' }}">
                             <div style="display:none !important; position:absolute; left:-9999px;"><input type="text"
                                     name="b_extra_field" tabindex="-1" autocomplete="off"></div>
                             @csrf
@@ -47,51 +57,36 @@
                     </div>
                     <div id="newsletterFeedback" class="fs-13 mb-3 fw-medium" style="display: none;"></div>
                     <!-- Dynamic Social Pill Buttons -->
-                    <div class="d-flex  align-items-center gap-2 justify-content-md-end">
-                        @if (!empty($settings['linkedin_url']))
-                            <a href="{{ $settings['linkedin_url'] }}" target="_blank" class="footer-social-pill"
+                    <div class="d-flex align-items-center gap-2 justify-content-md-end">
+                        @if (!empty($settings['linkedin_url']) && $settings['linkedin_url'] !== '#')
+                            <a href="{{ $settings['linkedin_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
                                 aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
-                        @else
-                            <a href="#" class="footer-social-pill" aria-label="LinkedIn"><i
-                                    class="bi bi-linkedin"></i></a>
                         @endif
 
-                        @if (!empty($settings['youtube_url']))
-                            <a href="{{ $settings['youtube_url'] }}" target="_blank" class="footer-social-pill"
+                        @if (!empty($settings['youtube_url']) && $settings['youtube_url'] !== '#')
+                            <a href="{{ $settings['youtube_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
                                 aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-                        @else
-                            <a href="#" class="footer-social-pill" aria-label="YouTube"><i
-                                    class="bi bi-youtube"></i></a>
                         @endif
 
-                        @if (!empty($settings['twitter_url']))
-                            <a href="{{ $settings['twitter_url'] }}" target="_blank" class="footer-social-pill"
+                        @if (!empty($settings['twitter_url']) && $settings['twitter_url'] !== '#')
+                            <a href="{{ $settings['twitter_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
                                 aria-label="X / Twitter"><i class="bi bi-twitter-x"></i></a>
-                        @else
-                            <a href="#" class="footer-social-pill" aria-label="X / Twitter"><i
-                                    class="bi bi-twitter-x"></i></a>
                         @endif
 
-                        @if (!empty($settings['instagram_url']))
-                            <a href="{{ $settings['instagram_url'] }}" target="_blank" class="footer-social-pill"
+                        @if (!empty($settings['instagram_url']) && $settings['instagram_url'] !== '#')
+                            <a href="{{ $settings['instagram_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
                                 aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                        @else
-                            <a href="#" class="footer-social-pill" aria-label="Instagram"><i
-                                    class="bi bi-instagram"></i></a>
                         @endif
 
-                        @if (!empty($settings['fb_url']))
-                            <a href="{{ $settings['fb_url'] }}" target="_blank" class="footer-social-pill"
+                        @if (!empty($settings['fb_url']) && $settings['fb_url'] !== '#')
+                            <a href="{{ $settings['fb_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
                                 aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                        @else
-                            <a href="#" class="footer-social-pill" aria-label="Facebook"><i
-                                    class="bi bi-facebook"></i></a>
                         @endif
                     </div>
                 </div>
                 <!-- Contact Section -->
                 <div class="footer-contact-block w-100 text-end">
-                    <h4 class="footer-heading-sm text-uppercase fw-bold text-white text-lg-end">CONTACT</h4>
+                    <h3 class="footer-heading-sm text-uppercase fw-bold text-white text-lg-end">CONTACT</h3>
                     @if (!empty($settings['address']))
                         <div class="d-flex justify-content-end mb-2 fs-13 text-muted-50 text-end">
                             <div class="d-inline-flex align-items-start gap-2 text-end">
@@ -136,16 +131,19 @@
                         $settings['show_app_download_links'] === true;
                     $googlePlayUrl = $settings['google_play_url'] ?? ($settings['play_store_url'] ?? '#');
                     $appStoreUrl = $settings['app_store_url'] ?? ($settings['apple_store_url'] ?? '#');
-                    $googlePlayImg = !empty($settings['google_play_image'])
-                        ? getImageUrl($settings['google_play_image'])
-                        : (!empty($settings['play_store_image'])
-                            ? getImageUrl($settings['play_store_image'])
-                            : theme_asset('img/play-store.png'));
-                    $appStoreImg = !empty($settings['app_store_image'])
-                        ? getImageUrl($settings['app_store_image'])
-                        : (!empty($settings['apple_store_image'])
-                            ? getImageUrl($settings['apple_store_image'])
-                            : theme_asset('img/apopel-store.png'));
+                    $rawGooglePlay = !empty($settings['google_play_image'])
+                        ? $settings['google_play_image']
+                        : (!empty($settings['play_store_image']) ? $settings['play_store_image'] : null);
+                    $googlePlayImg = !empty($rawGooglePlay)
+                        ? getImageCacheUrl($rawGooglePlay, 110, 35, 'webp')
+                        : theme_asset('img/play-store.png');
+
+                    $rawAppStore = !empty($settings['app_store_image'])
+                        ? $settings['app_store_image']
+                        : (!empty($settings['apple_store_image']) ? $settings['apple_store_image'] : null);
+                    $appStoreImg = !empty($rawAppStore)
+                        ? getImageCacheUrl($rawAppStore, 110, 35, 'webp')
+                        : theme_asset('img/apopel-store.png');
                 @endphp
             </div>
 
@@ -159,13 +157,13 @@
                     <div class="row g-4 row-cols-2 row-cols-sm-3 row-cols-lg-5">
                         @forelse ($footerMenus as $fMenu)
                             <div class="">
-                                <h4 class="footer-heading-sm text-uppercase fw-bold text-white mb-3">
+                                <h3 class="footer-heading-sm text-uppercase fw-bold text-white mb-3">
                                     {{ $fMenu->name }}
-                                </h4>
+                                </h3>
                                 <ul class="footer-links list-unstyled mb-0">
                                     @foreach ($fMenu->menus as $mItem)
                                         <li class="{{ $loop->last ? 'mb-0' : 'mb-2' }}">
-                                            <a href="{{ $mItem->url ?? '#' }}">{{ $mItem->name }}</a>
+                                            <a href="{{ !empty($mItem->url) && $mItem->url !== '#' ? $mItem->url : url('/') }}">{{ $mItem->name }}</a>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -177,8 +175,8 @@
 
                 <!-- Payment & Bank Badges -->
                 <div class="payment-badges-wrap">
-                    <img src="{{ theme_asset('img/paymentWeSupport.png') }}" alt="Payment methods we support"
-                        class="img-fluid">
+                    <img src="{{ theme_asset('img/paymentWeSupport.png') }}" width="4096" height="480"
+                        alt="Payment methods we support" class="img-fluid" loading="lazy" decoding="async">
                 </div>
 
 
@@ -189,34 +187,44 @@
                     @if ($legalMenu && $legalMenu->menus->count() > 0)
                         <div class="d-flex align-items-center gap-4 flex-wrap text-muted-50 fs-13">
                             @foreach ($legalMenu->menus as $lItem)
-                                <a href="{{ $lItem->url ?? '#' }}"
+                                <a href="{{ !empty($lItem->url) && $lItem->url !== '#' ? $lItem->url : url('/') }}"
                                     class="footer-legal-link text-decoration-none">{{ $lItem->name }}</a>
                             @endforeach
                         </div>
                     @else
+                        <div class="d-flex align-items-center gap-4 flex-wrap text-muted-50 fs-13">
+                            <a href="{{ route('page.show', 'cookie-policy') }}" class="footer-legal-link text-decoration-none">Cookie Policy</a>
+                            <a href="{{ route('page.show', 'privacy-policy') }}" class="footer-legal-link text-decoration-none">Privacy Policy</a>
+                            <a href="{{ route('page.show', 'terms-of-service') }}" class="footer-legal-link text-decoration-none">Terms of Service</a>
+                            <a href="{{ route('page.show', 'data-protection') }}" class="footer-legal-link text-decoration-none">Data Protection</a>
+                        </div>
                     @endif
                     @if ($showAppLinks)
                         <div class="d-flex align-items-center gap-2 app-link-container">
                             @if (!empty($googlePlayUrl) && $googlePlayUrl !== '#')
                                 <a href="{{ $googlePlayUrl }}" target="_blank" rel="noopener noreferrer"
                                     aria-label="Google Play">
-                                    <img src="{{ $googlePlayImg }}" alt="Google Play">
+                                    <img src="{{ $googlePlayImg }}" width="110" height="35"
+                                        alt="Google Play" loading="lazy" decoding="async">
                                 </a>
                             @else
-                                <a href="{{ $googlePlayUrl ?: '#' }}" aria-label="Google Play">
-                                    <img src="{{ $googlePlayImg }}" alt="Google Play">
-                                </a>
+                                <span class="d-inline-block" aria-label="Google Play">
+                                    <img src="{{ $googlePlayImg }}" width="110" height="35"
+                                        alt="Google Play" loading="lazy" decoding="async">
+                                </span>
                             @endif
 
                             @if (!empty($appStoreUrl) && $appStoreUrl !== '#')
                                 <a href="{{ $appStoreUrl }}" target="_blank" rel="noopener noreferrer"
                                     aria-label="App Store">
-                                    <img src="{{ $appStoreImg }}" alt="App Store">
+                                    <img src="{{ $appStoreImg }}" width="110" height="35"
+                                        alt="App Store" loading="lazy" decoding="async">
                                 </a>
                             @else
-                                <a href="{{ $appStoreUrl ?: '#' }}" aria-label="App Store">
-                                    <img src="{{ $appStoreImg }}" alt="App Store">
-                                </a>
+                                <span class="d-inline-block" aria-label="App Store">
+                                    <img src="{{ $appStoreImg }}" width="110" height="35"
+                                        alt="App Store" loading="lazy" decoding="async">
+                                </span>
                             @endif
                         </div>
                     @endif
@@ -232,116 +240,6 @@
 </footer>
 
 
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('footerNewsletterForm');
-            if (!form) return;
-
-            const emailInput = document.getElementById('newsletterEmailInput');
-            const submitBtn = document.getElementById('btnNewsletterSubmit');
-            const iconNormal = submitBtn ? submitBtn.querySelector('.btn-icon-normal') : null;
-            const spinner = submitBtn ? submitBtn.querySelector('.btn-spinner') : null;
-            const feedback = document.getElementById('newsletterFeedback');
-
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const email = (emailInput.value || '').trim();
-                if (!email) return;
-
-                // UI: Loading State
-                if (submitBtn) submitBtn.disabled = true;
-                if (iconNormal) iconNormal.classList.add('d-none');
-                if (spinner) spinner.classList.remove('d-none');
-                if (feedback) {
-                    feedback.style.display = 'none';
-                    feedback.className = 'fs-13 mb-3 fw-medium';
-                }
-
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-                    form.querySelector('input[name="_token"]')?.value;
-
-                const submitNewsletter = function(recaptchaToken) {
-                    fetch(form.action, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                                'X-CSRF-TOKEN': csrfToken,
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            body: JSON.stringify({
-                                email: email,
-                                'g-recaptcha-response': recaptchaToken || ''
-                            })
-                        })
-                        .then(res => res.json().then(data => ({
-                            status: res.status,
-                            body: data
-                        })))
-                        .then(({
-                            status,
-                            body
-                        }) => {
-                            if (status >= 200 && status < 300 && body.success) {
-                                if (feedback) {
-                                    feedback.textContent = body.message || 'Thank you for subscribing!';
-                                    feedback.classList.add('text-success');
-                                    feedback.style.display = 'block';
-                                }
-                                emailInput.value = '';
-                                if (typeof window.showNewsletterToast === 'function') {
-                                    window.showNewsletterToast(body.message || 'Thank you for subscribing!',
-                                        true);
-                                }
-                            } else {
-                                if (feedback) {
-                                    feedback.textContent = body.message ||
-                                        'Could not subscribe. Please try again.';
-                                    feedback.classList.add('text-danger');
-                                    feedback.style.display = 'block';
-                                }
-                                if (typeof window.showNewsletterToast === 'function') {
-                                    window.showNewsletterToast(body.message || 'Could not subscribe.',
-                                        false);
-                                }
-                            }
-                        })
-                        .catch(err => {
-                            if (feedback) {
-                                feedback.textContent = 'A network error occurred. Please try again later.';
-                                feedback.classList.add('text-danger');
-                                feedback.style.display = 'block';
-                            }
-                        })
-                        .finally(() => {
-                            if (submitBtn) submitBtn.disabled = false;
-                            if (iconNormal) iconNormal.classList.remove('d-none');
-                            if (spinner) spinner.classList.add('d-none');
-                        });
-                };
-
-                const siteKey = "{{ config('services.sitekey') }}";
-                const useRecaptcha = {{ config('services.use_recaptcha') ? 'true' : 'false' }};
-
-                if (useRecaptcha && siteKey && typeof grecaptcha !== 'undefined') {
-                    grecaptcha.ready(function() {
-                        grecaptcha.execute(siteKey, { action: 'newsletter_subscribe' })
-                            .then(function(token) {
-                                submitNewsletter(token);
-                            })
-                            .catch(function(err) {
-                                console.warn('Newsletter reCAPTCHA error:', err);
-                                submitNewsletter('');
-                            });
-                    });
-                } else {
-                    submitNewsletter('');
-                }
-            });
-        });
-    </script>
-@endpush
 
 @if (config('services.use_recaptcha') && config('services.sitekey'))
     <style>
@@ -349,5 +247,71 @@
             visibility: hidden !important;
         }
     </style>
-    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.sitekey') }}" async defer></script>
+    <script>
+        (function() {
+            var recaptchaLoaded = false;
+            var callbacks = [];
+
+            window.loadRecaptcha = function(callback) {
+                if (typeof callback === 'function') {
+                    callbacks.push(callback);
+                }
+
+                if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
+                    while (callbacks.length) {
+                        try { callbacks.shift()(); } catch(e) { console.error(e); }
+                    }
+                    return;
+                }
+
+                if (recaptchaLoaded) return;
+                recaptchaLoaded = true;
+
+                var s = document.createElement('script');
+                s.src = 'https://www.google.com/recaptcha/api.js?render={{ config("services.sitekey") }}';
+                s.async = true;
+                s.defer = true;
+                s.onload = function() {
+                    if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
+                        window.grecaptcha.ready(function() {
+                            while (callbacks.length) {
+                                try { callbacks.shift()(); } catch(e) { console.error(e); }
+                            }
+                        });
+                    }
+                };
+                document.head.appendChild(s);
+            };
+
+            // Trigger on real user engagement with newsletter form
+            var emailInput = document.getElementById('newsletterEmailInput');
+            if (emailInput) {
+                ['focus', 'input', 'pointerdown'].forEach(function(evt) {
+                    emailInput.addEventListener(evt, function() { window.loadRecaptcha(); }, { once: true, passive: true });
+                });
+            }
+
+            var nForm = document.getElementById('footerNewsletterForm');
+            if (nForm) {
+                ['submit', 'pointerenter'].forEach(function(evt) {
+                    nForm.addEventListener(evt, function() { window.loadRecaptcha(); }, { once: true, passive: true });
+                });
+            }
+
+            // Trigger on Auth modal interactions
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('[data-bs-target="#authModal"], [data-bs-toggle="modal"][data-bs-target="#authModal"], .open-auth-modal, .btn-login');
+                if (btn) {
+                    window.loadRecaptcha();
+                }
+            }, { passive: true });
+
+            var authModal = document.getElementById('authModal');
+            if (authModal) {
+                authModal.addEventListener('show.bs.modal', function() {
+                    window.loadRecaptcha();
+                }, { once: true, passive: true });
+            }
+        })();
+    </script>
 @endif

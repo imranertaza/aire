@@ -13,10 +13,12 @@ class PaymentMethod extends Model
     {
         static::saved(function ($method) {
             Cache::forget('all_payment_methods');
+            Cache::forget('all_active_payment_methods');
         });
 
         static::deleted(function ($method) {
             Cache::forget('all_payment_methods');
+            Cache::forget('all_active_payment_methods');
         });
     }
 

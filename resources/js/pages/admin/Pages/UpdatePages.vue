@@ -65,8 +65,7 @@
                                         <label>Select Template</label>
                                         <select v-model="form.temp" class="custom-select" required>
                                             <option class="text-capitalize" v-for="template in templates"
-                                                :key="template" :selected="form.temp === template" :value="template">{{
-                                                    template }}</option>
+                                                :key="template" :value="template">{{ template }}</option>
                                         </select>
                                     </div>
 
@@ -107,7 +106,7 @@ const toast = useToast();
 const previews = ref([]);
 const route = useRoute();
 const router = useRouter();
-const templates = ref([])
+const templates = ref(['default', 'legal']);
 
 const form = reactive({
     page_title: '',
@@ -172,9 +171,11 @@ onMounted(async () => {
     fetchPage();
     try {
         const response = await axios.get('/api/templates');
-        templates.value = response.data;
+        if (Array.isArray(response.data) && response.data.length > 0) {
+            templates.value = response.data;
+        }
     } catch (error) {
-        toast.error('Failed to load templates.');
+        console.warn('Could not load dynamic templates, using defaults.');
     }
 });
 

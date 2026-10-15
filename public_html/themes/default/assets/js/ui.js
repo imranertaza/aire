@@ -1,12 +1,22 @@
 $(document).ready(function () {
-    // 1. Sticky Header Effect
-    $(window).scroll(function () {
-        if ($(this).scrollTop() > 50) {
-            $('.top-header').addClass('scrolled');
-        } else {
-            $('.top-header').removeClass('scrolled');
+    // 1. Sticky Header Effect (Passive & rAF Throttled for 60fps scrolling)
+    var headerTicking = false;
+    var topHeaderEl = document.querySelector('.top-header');
+    window.addEventListener('scroll', function () {
+        if (!headerTicking) {
+            window.requestAnimationFrame(function () {
+                if (topHeaderEl) {
+                    if (window.scrollY > 50) {
+                        topHeaderEl.classList.add('scrolled');
+                    } else {
+                        topHeaderEl.classList.remove('scrolled');
+                    }
+                }
+                headerTicking = false;
+            });
+            headerTicking = true;
         }
-    });
+    }, { passive: true });
 
     // 2. Subtle scale effect for search inputs on focus
     $('.hero-search input, .error-search-box input').on('focus', function () {

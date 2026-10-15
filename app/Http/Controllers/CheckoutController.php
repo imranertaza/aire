@@ -18,6 +18,7 @@ use App\Services\Shipping\ShippingCalculatorService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
@@ -49,8 +50,13 @@ class CheckoutController extends Controller
         $defaultShippingCost = $shippingMethods->first()?->cost ?? 0.00;
         $discount = $this->couponService->calculateDiscount($subtotal, $defaultShippingCost);
 
-        $paymentMethods = PaymentMethod::active()->orderBy('id')->get();
-        $countries = Country::active()->orderBy('name')->get();
+        $paymentMethods = Cache::rememberForever('all_active_payment_methods', function () {
+            return PaymentMethod::active()->orderBy('id')->get();
+        });
+
+        $countries = Cache::rememberForever('all_active_countries', function () {
+            return Country::active()->orderBy('name')->get();
+        });
 
         return \theme_view('checkout.index', compact(
             'customer',

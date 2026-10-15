@@ -8,6 +8,17 @@ class MenuItem extends Model
 {
     protected $guarded = ['id'];
 
+    protected static function booted()
+    {
+        static::saved(function () {
+            Menu::flushMenuCache();
+        });
+
+        static::deleted(function () {
+            Menu::flushMenuCache();
+        });
+    }
+
     public function menu()
     {
         return $this->belongsTo(Menu::class, 'menu_id');

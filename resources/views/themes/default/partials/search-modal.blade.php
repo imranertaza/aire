@@ -197,7 +197,7 @@
                 @endphp
 
                 <div class="aire-popular-section">
-                    <h5 class="aire-popular-title">Popular Searches</h5>
+                    <h4 class="aire-popular-title">Popular Searches</h4>
                     <div class="aire-popular-chips-wrap">
                         @foreach ($popularSearches as $chip)
                             <button type="button" class="aire-search-chip" data-keyword="{{ $chip['keyword'] }}">

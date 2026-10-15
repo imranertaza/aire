@@ -4,34 +4,33 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\ApiResponse;
 use App\Http\Controllers\Controller;
-use App\Models\Product;
-use App\Models\ProductAttribute;
-use App\Models\ProductOption;
-use App\Models\ProductDescription;
+use App\Http\Requests\Product\Advanced\BulkUpdateAttributesRequest;
+use App\Http\Requests\Product\Advanced\BulkUpdateCategoriesRequest;
+use App\Http\Requests\Product\Advanced\BulkUpdateFilterOptionsRequest;
+use App\Http\Requests\Product\Advanced\BulkUpdateOptionsRequest;
+use App\Http\Requests\Product\Advanced\BulkUpdateStatusRequest;
+use App\Http\Requests\Product\Advanced\UpdateProductDescriptionRequest;
+use App\Http\Requests\Product\Advanced\UpdateProductFieldRequest;
+use App\Http\Requests\Product\Advanced\UpdateProductRowRequest;
+use App\Services\Admin\AdvancedProductService;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AdvancedProductController extends Controller
 {
+    public function __construct(
+        protected AdvancedProductService $advancedProductService
+    ) {}
+
     /**
      * Get products with pagination and filters for bulk edit view.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        $query = Product::with(['brand', 'categories', 'productOptions', 'productAttributes', 'description'])->latest('id');
-
-        if ($request->filled('search')) {
-            $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('model', 'like', "%{$search}%");
-            });
-        }
-
-        $perPage = $request->input('per_page', 10);
-        $products = $query->paginate($perPage);
+        $perPage = (int) $request->input('per_page', 10);
+        $products = $this->advancedProductService->listProducts($request->all(), $perPage);
 
         return ApiResponse::success($products, 'Products retrieved successfully');
     }
@@ -39,99 +38,57 @@ class AdvancedProductController extends Controller
     /**
      * Update a single field (like status, featured) for one product.
      */
-    public function updateField(Request $request)
+    public function updateField(UpdateProductFieldRequest $request): JsonResponse
     {
-        $request->validate([
-            'id'    => 'required|integer|exists:products,id',
-            'field' => 'required|string|in:status,featured',
-            'value' => 'required'
-        ]);
+        $product = $this->advancedProductService->updateField(
+            (int) $request->input('id'),
+            $request->input('field'),
+            $request->input('value')
+        );
 
-        $product = Product::findOrFail($request->id);
-        $field = $request->field;
-        $product->$field = filter_var($request->value, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
-        $product->updatedBy = Auth::id();
-        $product->save();
-
-        return ApiResponse::success($product->load(['category', 'brand', 'categories']), 'Product field updated successfully');
+        return ApiResponse::success($product, 'Product field updated successfully');
     }
 
     /**
      * Update basic details (name, model, price, quantity) for a single product inline.
      */
-    public function updateRow(Request $request)
+    public function updateRow(UpdateProductRowRequest $request): JsonResponse
     {
-        $request->validate([
-            'id'       => 'required|integer|exists:products,id',
-            'name'     => 'required|string|max:255',
-            'model'    => 'required|string|max:255',
-            'price'    => 'required|numeric',
-            'quantity' => 'required|integer',
-        ]);
+        $product = $this->advancedProductService->updateRow(
+            (int) $request->input('id'),
+            $request->validated()
+        );
 
-        $product = Product::findOrFail($request->id);
-        $product->update([
-            'name'      => $request->name,
-            'model'     => $request->model,
-            'price'     => $request->price,
-            'quantity'  => $request->quantity,
-            'alt_name'  => $request->name,
-            'updatedBy' => Auth::id(),
-        ]);
-
-        return ApiResponse::success($product->load(['category', 'brand', 'categories', 'description']), 'Product updated successfully');
+        return ApiResponse::success($product, 'Product updated successfully');
     }
 
     /**
      * Update product description SEO details inline.
      */
-    public function updateDescription(Request $request)
+    public function updateDescription(UpdateProductDescriptionRequest $request): JsonResponse
     {
-        $request->validate([
-            'product_id'       => 'required|integer|exists:products,id',
-            'meta_title'       => 'nullable|string|max:255',
-            'meta_description' => 'nullable|string|max:255',
-            'meta_keyword'     => 'nullable|string|max:255',
-        ]);
-
-        $description = ProductDescription::updateOrCreate(
-            ['product_id' => $request->product_id],
-            [
-                'meta_title'       => $request->meta_title,
-                'meta_description' => $request->meta_description,
-                'meta_keyword'     => $request->meta_keyword,
-            ]
+        $product = $this->advancedProductService->updateDescription(
+            (int) $request->input('product_id'),
+            $request->validated()
         );
 
-        $product = Product::with(['category', 'brand', 'categories', 'description'])->findOrFail($request->product_id);
         return ApiResponse::success($product, 'Product SEO details updated successfully');
     }
 
     /**
-     * Apply a category to multiple selected products.
+     * Apply categories to multiple selected products.
      */
-    public function bulkUpdateCategories(Request $request)
+    public function bulkUpdateCategories(BulkUpdateCategoriesRequest $request): JsonResponse
     {
-        $request->validate([
-            'product_ids'   => 'required|array',
-            'product_ids.*' => 'integer|exists:products,id',
-            'category_ids'  => 'required|array',
-            'category_ids.*' => 'integer|exists:product_categories,id',
-        ]);
-
         try {
-            DB::beginTransaction();
+            $this->advancedProductService->bulkUpdateCategories(
+                $request->input('product_ids'),
+                $request->input('category_ids')
+            );
 
-            $categoryIds = $request->category_ids;
-            foreach ($request->product_ids as $pid) {
-                $product = Product::findOrFail($pid);
-                $product->categories()->sync($categoryIds);
-            }
-
-            DB::commit();
             return ApiResponse::success(null, 'Bulk categories updated successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (Exception $e) {
+            Log::error('Bulk Categories Update Failed: ' . $e->getMessage());
             return ApiResponse::error('Failed to update bulk categories', 500, [$e->getMessage()]);
         }
     }
@@ -139,41 +96,17 @@ class AdvancedProductController extends Controller
     /**
      * Apply options to multiple selected products.
      */
-    public function bulkUpdateOptions(Request $request)
+    public function bulkUpdateOptions(BulkUpdateOptionsRequest $request): JsonResponse
     {
-        $request->validate([
-            'product_ids'   => 'required|array',
-            'product_ids.*' => 'integer|exists:products,id',
-            'options'       => 'required|array',
-        ]);
-
         try {
-            DB::beginTransaction();
+            $this->advancedProductService->bulkUpdateOptions(
+                $request->input('product_ids'),
+                $request->input('options')
+            );
 
-            foreach ($request->product_ids as $pid) {
-                // Delete old options
-                ProductOption::where('product_id', $pid)->delete();
-
-                // Insert new options
-                $optionData = [];
-                foreach ($request->options as $opt) {
-                    $optionData[] = [
-                        'product_id'      => $pid,
-                        'option_id'       => $opt['option_id'],
-                        'option_value_id' => $opt['option_value_id'],
-                        'quantity'        => $opt['quantity'] ?? 0,
-                        'subtract'        => filter_var($opt['subtract'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
-                        'price'           => $opt['price'] ?? null,
-                        'price_prefix'    => $opt['price_prefix'] ?? '+',
-                    ];
-                }
-                ProductOption::insert($optionData);
-            }
-
-            DB::commit();
             return ApiResponse::success(null, 'Bulk options updated successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (Exception $e) {
+            Log::error('Bulk Options Update Failed: ' . $e->getMessage());
             return ApiResponse::error('Failed to update bulk options', 500, [$e->getMessage()]);
         }
     }
@@ -181,37 +114,17 @@ class AdvancedProductController extends Controller
     /**
      * Apply filter options to multiple selected products.
      */
-    public function bulkUpdateFilterOptions(Request $request)
+    public function bulkUpdateFilterOptions(BulkUpdateFilterOptionsRequest $request): JsonResponse
     {
-        $request->validate([
-            'product_ids'   => 'required|array',
-            'product_ids.*' => 'integer|exists:products,id',
-            'filter_options' => 'required|array',
-        ]);
-
         try {
-            DB::beginTransaction();
+            $this->advancedProductService->bulkUpdateFilterOptions(
+                $request->input('product_ids'),
+                $request->input('filter_options')
+            );
 
-            foreach ($request->product_ids as $pid) {
-                // Delete old filter options
-                \App\Models\ProductFilterOption::where('product_id', $pid)->delete();
-
-                // Insert new filter options
-                $filterOptionData = [];
-                foreach ($request->filter_options as $opt) {
-                    $filterOptionData[] = [
-                        'product_id'             => $pid,
-                        'filter_option_id'       => $opt['filter_option_id'],
-                        'filter_option_value_id' => $opt['filter_option_value_id'],
-                    ];
-                }
-                \App\Models\ProductFilterOption::insert($filterOptionData);
-            }
-
-            DB::commit();
             return ApiResponse::success(null, 'Bulk filter options updated successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (Exception $e) {
+            Log::error('Bulk Filter Options Update Failed: ' . $e->getMessage());
             return ApiResponse::error('Failed to update bulk filter options', 500, [$e->getMessage()]);
         }
     }
@@ -219,58 +132,17 @@ class AdvancedProductController extends Controller
     /**
      * Apply attributes to multiple selected products.
      */
-    public function bulkUpdateAttributes(Request $request)
+    public function bulkUpdateAttributes(BulkUpdateAttributesRequest $request): JsonResponse
     {
-        // 1. Validate the structure
-        $request->validate([
-            'product_ids'   => 'required|array',
-            'product_ids.*' => 'integer|exists:products,id',
-            'attributes'    => 'required|array',
-        ]);
-
         try {
-            DB::beginTransaction();
+            $this->advancedProductService->bulkUpdateAttributes(
+                $request->input('product_ids'),
+                $request->input('attributes')
+            );
 
-            foreach ($request->product_ids as $pid) {
-                // Delete old attributes
-                $gg = ProductAttribute::where('product_id', $pid)->delete();
-
-                // Prepare new attributes
-                $attrData = [];
-                $attributes = $request->input('attributes');
-                // dd($request->attributes, $attributes);
-
-                foreach ($attributes as $attr) {
-
-                    if (!is_array($attr)) {
-                        continue;
-                    }
-                    $attrData[] = [
-                        'product_id'         => $pid,
-                        'attribute_group_id' => $attr['attribute_group_id'] ?? null,
-                        'name'               => $attr['name'] ?? 'General',
-                        'details'            => $attr['details'] ?? null,
-                        'sort_order'         => $attr['sort_order'] ?? 0,
-                        'createdBy'          => Auth::id(),
-                        'updatedBy'          => Auth::id(),
-                        // Added manual timestamps for bulk insert
-                        'created_at'         => now(),
-                        'updated_at'         => now(),
-                    ];
-                }
-
-                // Only insert if there is data
-                if (!empty($attrData)) {
-                    ProductAttribute::insert($attrData);
-                }
-            }
-
-            DB::commit();
             return ApiResponse::success(null, 'Bulk attributes updated successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // Log the actual error for debugging
-            Log::error('Bulk Update Failed: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Bulk Attributes Update Failed: ' . $e->getMessage());
             return ApiResponse::error('Failed to update bulk attributes', 500, [$e->getMessage()]);
         }
     }
@@ -278,30 +150,18 @@ class AdvancedProductController extends Controller
     /**
      * Toggle status or featured flags for selected products in bulk.
      */
-    public function bulkUpdateStatus(Request $request)
+    public function bulkUpdateStatus(BulkUpdateStatusRequest $request): JsonResponse
     {
-        $request->validate([
-            'product_ids'   => 'required|array',
-            'product_ids.*' => 'integer|exists:products,id',
-            'field'         => 'required|string|in:status,featured',
-            'value'         => 'required'
-        ]);
-
         try {
-            DB::beginTransaction();
+            $this->advancedProductService->bulkUpdateStatus(
+                $request->input('product_ids'),
+                $request->input('field'),
+                $request->input('value')
+            );
 
-            $field = $request->field;
-            $val = filter_var($request->value, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
-
-            Product::whereIn('id', $request->product_ids)->update([
-                $field      => $val,
-                'updatedBy' => Auth::id(),
-            ]);
-
-            DB::commit();
             return ApiResponse::success(null, 'Bulk status updated successfully');
-        } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (Exception $e) {
+            Log::error('Bulk Status Update Failed: ' . $e->getMessage());
             return ApiResponse::error('Failed to update bulk status', 500, [$e->getMessage()]);
         }
     }

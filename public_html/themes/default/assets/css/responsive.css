@@ -8,10 +8,7 @@
    LARGE DESKTOP+ (max-width: 1399px)
    ---------------------------------------------------------------- */
 @media (max-width: 1399px) {
-    .main-container {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
+
 
     .pt-130 {
         padding-top: 80px !important;
@@ -454,6 +451,10 @@
     transition: all 0.2s ease;
     min-width: 58px;
     position: relative;
+    background: transparent;
+    border: none;
+    outline: none;
+    cursor: pointer;
 }
 
 .mobile-dock-item:hover,

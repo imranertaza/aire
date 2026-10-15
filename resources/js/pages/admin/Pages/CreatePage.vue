@@ -110,7 +110,7 @@ import { generateSlug } from '../../../layouts/helpers/helpers';
 
 const toast = useToast();
 const imageFile = ref(null);
-const templates = ref([])
+const templates = ref(['default', 'legal']);
 const form = reactive({
     page_title: '',
     slug: '',
@@ -153,9 +153,11 @@ const submitPage = async () => {
 onMounted(async () => {
     try {
         const response = await axios.get('/api/templates');
-        templates.value = response.data;
+        if (Array.isArray(response.data) && response.data.length > 0) {
+            templates.value = response.data;
+        }
     } catch (error) {
-        toast.error('Failed to load templates.');
+        console.warn('Could not load dynamic templates, using defaults.');
     }
 });
 </script>

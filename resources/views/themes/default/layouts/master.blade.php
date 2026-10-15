@@ -16,12 +16,13 @@
     <link rel="icon" href="{{ getImageUrl($settings['store_icon'] ?? theme_asset('img/favicon.png')) }}"
         type="image/png">
 
-    <!-- Preconnect Fonts & CDNs -->
+    {{-- Early Preload Stack (e.g. Hero LCP images) --}}
+    @stack('head')
+
+    <!-- Preconnect Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 
     <!-- Non-blocking Google Fonts (Inter + Playfair Display) -->
     <link rel="preload" as="style"
@@ -33,21 +34,200 @@
         <link rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap">
     </noscript>
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Non-blocking Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-        media="print" onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    </noscript>
-    <!-- Swiper CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 
-    <!-- Theme Custom CSS (Auto-switches to individual files with auto-reload in local mode, and minified bundle in production) -->
-    {!! theme_css() !!}
+    <!-- Critical Layout & Base Styles (Zero FOUC for Above-the-fold) -->
+    <style>
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: local('Roboto'), local('Roboto-Regular'),
+                 url('https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBHMdazQ.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        :root {
+            --color-primary: #0072B2;
+            --color-primary-hover: #005a8f;
+            --color-dark: #0f172a;
+            --color-bg: #f8fafc;
+            --color-border: #e2e8f0;
+            --primary-color: var(--color-primary);
+            --fs-body: 14px;
+        }
+
+        *,
+        ::after,
+        ::before {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            -webkit-text-size-adjust: 100%;
+            background-color: var(--color-bg, #f8fafc);
+            color: var(--color-dark, #0f172a);
+            overflow-x: clip;
+        }
+
+        .container,
+        .container-fluid,
+        .main-container {
+            width: 100%;
+            padding-right: 15px;
+            padding-left: 15px;
+            margin-right: auto;
+            margin-left: auto;
+            max-width: 1280px;
+        }
+
+        .d-flex {
+            display: flex !important;
+        }
+
+        .align-items-center {
+            align-items: center !important;
+        }
+
+        .justify-content-between {
+            justify-content: space-between !important;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            z-index: 1020;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .main-nav {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .main-nav .nav-link {
+            color: #0f172a;
+            font-weight: 500;
+            font-size: 14px;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .main-nav .nav-link.active {
+            color: var(--color-primary, #0072B2);
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary, #0072B2) !important;
+            border-color: var(--color-primary, #0072B2) !important;
+            color: #ffffff !important;
+        }
+
+        .text-primary {
+            color: var(--color-primary, #0072B2) !important;
+        }
+
+        .product-card__badge-pill[style*="#00c853"],
+        .product-card__badge-pill[style*="#00C853"] {
+            background-color: #0a7a3b !important;
+        }
+
+        .product-card__category,
+        .home-product-card__category,
+        .why-choose-stacked__subtitle,
+        .home-lifestyle__subtitle,
+        .testimonials-section__subtitle {
+            color: #475569 !important;
+        }
+
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+
+        .swiper-pagination-bullet {
+            position: relative;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 28px !important;
+            height: 28px !important;
+            min-width: 28px;
+            min-height: 28px;
+            background: transparent !important;
+            border: none !important;
+            border-radius: 50% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            opacity: 1 !important;
+            cursor: pointer;
+            box-sizing: border-box !important;
+        }
+
+        .swiper-pagination-bullet::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #cbd5e1;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .swiper-pagination-bullet-active::before {
+            background-color: var(--primary-color, #0072B2);
+        }
+    </style>
+
+    <!-- Bootstrap 5 (Local Preload + Non-blocking Stylesheet) -->
+    <link rel="preload" as="style" href="{{ theme_asset('css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.min.css') }}" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.min.css') }}">
+    </noscript>
+
+    <!-- Non-blocking Local Bootstrap Icons (with font-display: swap) -->
+    <link rel="preload" as="style" href="{{ theme_asset('css/bootstrap-icons.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/bootstrap-icons.min.css') }}" media="print"
+        onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="{{ theme_asset('css/bootstrap-icons.min.css') }}">
+    </noscript>
+
+    <!-- Non-blocking Local Swiper CSS -->
+    <link rel="preload" as="style" href="{{ theme_asset('css/swiper-bundle.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/swiper-bundle.min.css') }}" media="print"
+        onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="{{ theme_asset('css/swiper-bundle.min.css') }}">
+    </noscript>
+
+    <!-- Theme Custom CSS (Powered by Vite with HMR in dev & non-blocking production bundle) -->
+    @vite(['resources/themes/default/css/theme.css'])
+    <noscript>
+        <link rel="stylesheet" href="{{ \Illuminate\Support\Facades\Vite::asset('resources/themes/default/css/theme.css') }}">
+    </noscript>
     @stack('styles')
-    @stack('head')
 </head>
 
 <body class="d-flex flex-column min-vh-100 @yield('body_class')">
@@ -62,14 +242,14 @@
     @endguest
     @include('themes.default.partials.search-modal')
 
-    <!-- Core Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js" defer></script>
+    <!-- Core Scripts (Local & Deferred) -->
+    <script src="{{ theme_asset('js/bootstrap.bundle.min.js') }}" defer></script>
+    <script src="{{ theme_asset('js/swiper-bundle.min.js') }}" defer></script>
+    <script src="{{ theme_asset('js/jquery.min.js') }}" defer></script>
     <!-- Theme Custom JS -->
     <script src="{{ theme_asset('js/main.js') }}" defer></script>
     <script src="{{ theme_asset('js/ui.js') }}" defer></script>
-    <script src="{{ theme_asset('js/products.js') }}" defer></script>
+    <script src="{{ theme_asset('js/products.min.js') }}" defer></script>
     @stack('scripts')
 </body>
 

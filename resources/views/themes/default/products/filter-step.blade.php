@@ -3,11 +3,19 @@
 @section('title', 'Aire | Precision Selection - Find Your Perfect Air Solution')
 
 @push('styles')
-    <!-- Google Fonts Plus Jakarta Sans -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <!-- BEM Product Filter Page CSS -->
-    <link href="{{ theme_asset('css/product-filter.css') }}" rel="stylesheet">
+    <!-- Google Fonts Plus Jakarta Sans (Non-blocking) -->
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
+    </noscript>
+    <!-- BEM Product Filter Page CSS (Preload + Minified) -->
+    <link rel="preload" as="style" href="{{ theme_asset('css/product-filter.min.css') }}">
+    <link href="{{ theme_asset('css/product-filter.min.css') }}" rel="stylesheet">
 @endpush
 
 @section('content')
@@ -108,7 +116,8 @@
                                                 <h3 class="mb-2">{{ $ad->title }}</h3>
                                                 <p class="text-muted mb-3 lh-base">{{ $ad->description }}</p>
                                                 <a href="{{ $ad->link ?: route('products.filter') }}"
-                                                    class="btn btn-primary w-100 fw-bold shadow-sm featured-btn text-decoration-none d-inline-block text-center">
+                                                    class="btn btn-primary w-100 fw-bold shadow-sm featured-btn text-decoration-none d-inline-block text-center"
+                                                    aria-label="{{ ($ad->button_text ?? ($index === 0 ? 'VIEW PRODUCTS' : ($index === 1 ? 'LEARN MORE' : 'GET A QUOTE'))) . (!empty($ad->title) ? ' - ' . $ad->title : '') }}">
                                                     {{ $ad->button_text ?? ($index === 0 ? 'VIEW PRODUCTS' : ($index === 1 ? 'LEARN MORE' : 'GET A QUOTE')) }}
                                                 </a>
                                             </div>

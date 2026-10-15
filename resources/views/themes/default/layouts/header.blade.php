@@ -11,18 +11,27 @@
             <div class="col-12 col-lg-3 d-flex align-items-center justify-content-between py-2 py-lg-0">
                 <a href="{{ route('home') }}" class="brand-logo d-flex align-items-center text-decoration-none text-dark">
                     @if (!empty($settings['store_logo']) && !str_contains($settings['store_logo'], 'placehold.co'))
-                        <img src="{{ getImageUrl($settings['store_logo']) }}" height="28"
+                        @php
+                            $hdrLogo1x = getImageCacheUrl($settings['store_logo'], 112, 36, 'webp');
+                            $hdrLogo2x = getImageCacheUrl($settings['store_logo'], 224, 72, 'webp');
+                        @endphp
+                        <img src="{{ $hdrLogo1x }}"
+                            srcset="{{ $hdrLogo1x }} 1x, {{ $hdrLogo2x }} 2x"
+                            width="112" height="36"
                             alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-header-img"
-                            style="max-height: 36px;">
+                            style="max-height: 36px; width: auto; height: auto;">
                     @else
-                        <img src="{{ theme_asset('img/logo.png') }}" height="28"
-                            alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-header-img">
+                        <img src="{{ theme_asset('img/logo.png') }}" width="112" height="36"
+                            alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-header-img"
+                            style="max-height: 36px; width: auto; height: auto;">
                     @endif
                 </a>
                 <!-- Mobile Menu Toggle -->
                 <button class="btn border-0 shadow-none d-lg-none p-1 text-dark" type="button"
-                    data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu">
-                    <i class="bi bi-list fs-32"></i>
+                    data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" aria-controls="mobileMenu"
+                    aria-label="Open mobile navigation menu">
+                    <i class="bi bi-list fs-32" aria-hidden="true"></i>
+                    <span class="visually-hidden">Open mobile navigation menu</span>
                 </button>
             </div>
 
@@ -116,26 +125,29 @@
                                 </span>
                             </a>
                             <!-- Search trigger -->
-                            <a href="#" class="text-dark text-decoration-none" aria-label="Search"
-                                data-search-toggle>
+                            <button type="button"
+                                class="btn p-0 border-0 bg-transparent text-dark text-decoration-none shadow-none"
+                                aria-label="Search" data-search-toggle>
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M18.031 16.617L22.314 20.899L20.899 22.314L16.617 18.031C15.0237 19.3082 13.042 20.0029 11 20C6.032 20 2 15.968 2 11C2 6.032 6.032 2 11 2C15.968 2 20 6.032 20 11C20.0029 13.042 19.3082 15.0237 18.031 16.617ZM16.025 15.875C17.2938 14.5697 18.0025 12.8204 18 11C18 7.133 14.867 4 11 4C7.133 4 4 7.133 4 11C4 14.867 7.133 18 11 18C12.8204 18.0025 14.5697 17.2938 15.875 16.025L16.025 15.875Z"
                                         fill="#64748B" />
                                 </svg>
-                            </a>
+                            </button>
                         </div>
                         <div class="ms-md-2 d-flex align-items-center gap-3">
                             @if (\Illuminate\Support\Facades\Auth::guard('customer')->check())
                                 @php
                                     $headerCustomer = \Illuminate\Support\Facades\Auth::guard('customer')->user();
-                                    $headerCustomerName = $headerCustomer?->full_name ?: ($headerCustomer?->firstname ?? 'Customer');
+                                    $headerCustomerName =
+                                        $headerCustomer?->full_name ?: $headerCustomer?->firstname ?? 'Customer';
                                 @endphp
                                 <div class="dropdown">
-                                    <a href="#"
-                                        class="d-flex align-items-center text-decoration-none dropdown-toggle-nocaret"
-                                        id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button type="button"
+                                        class="d-flex align-items-center text-decoration-none dropdown-toggle-nocaret border-0 bg-transparent p-0 shadow-none"
+                                        id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                        aria-label="User account menu">
                                         @if ($headerCustomer?->pic)
                                             <img src="{{ getImageUrl($headerCustomer->pic) }}"
                                                 class="rounded-circle border" alt="User"
@@ -146,7 +158,7 @@
                                                 {{ strtoupper(substr($headerCustomerName, 0, 1)) }}
                                             </div>
                                         @endif
-                                    </a>
+                                    </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border border-light-subtle rounded-3 py-2 mt-2"
                                         aria-labelledby="userMenuDropdown"
                                         style="min-width: 200px; box-shadow: 0 10px 30px rgba(0,0,0,0.075) !important;">
@@ -160,7 +172,8 @@
                                                     class="bi bi-speedometer2 me-2 text-secondary"></i> My
                                                 Dashboard</a>
                                         </li>
-                                        <li><a class="dropdown-item fs-13 py-2" href="{{ route('customer.orders') }}"><i
+                                        <li><a class="dropdown-item fs-13 py-2"
+                                                href="{{ route('customer.orders') }}"><i
                                                     class="bi bi-box-seam me-2 text-secondary"></i> My Orders</a></li>
                                         <li><a class="dropdown-item fs-13 py-2" href="{{ route('favorite') }}"><i
                                                     class="bi bi-heart me-2 text-secondary"></i> My Wishlist</a></li>
@@ -202,12 +215,20 @@
     <div class="offcanvas-header border-bottom">
         <a href="{{ route('home') }}" class="brand-logo d-flex align-items-center text-decoration-none">
             @if (!empty($settings['store_logo']) && !str_contains($settings['store_logo'], 'placehold.co'))
-                <img src="{{ getImageUrl($settings['store_logo']) }}"
-                    alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="logo-header-img"
-                    style="max-height: 32px;">
+                @php
+                    $mobileLogo1x = getImageCacheUrl($settings['store_logo'], 100, 32, 'webp');
+                    $mobileLogo2x = getImageCacheUrl($settings['store_logo'], 200, 64, 'webp');
+                @endphp
+                <img src="{{ $mobileLogo1x }}"
+                    srcset="{{ $mobileLogo1x }} 1x, {{ $mobileLogo2x }} 2x"
+                    width="100" height="32"
+                    alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-header-img"
+                    style="max-height: 32px; width: auto; height: auto;">
             @else
-                <img src="{{ theme_asset('img/logo.png') }}" alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo"
-                    class="logo-header-img">
+                <img src="{{ theme_asset('img/logo.png') }}" width="100" height="32"
+                    alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo"
+                    class="img-fluid logo-header-img"
+                    style="max-height: 32px; width: auto; height: auto;">
             @endif
         </a>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -324,7 +345,7 @@
                 <a href="{{ route('products.filter') }}"
                     class="mobile-nav-special {{ request()->routeIs('products.filter') ? 'active' : '' }}">
                     <span class="special-icon">
-                        <img src="{{ theme_asset('img/products-icon.png') }}" alt="">
+                        <img src="{{ theme_asset('img/products-icon.png') }}" width="24" height="24" alt="Products" loading="lazy" decoding="async">
                     </span>
                     <span class="mobile-special-pill__text">All products</span>
                     <i class="bi bi-chevron-right chevron"></i>
@@ -350,13 +371,12 @@
             @if (\Illuminate\Support\Facades\Auth::guard('customer')->check())
                 @php
                     $mobileCustomer = \Illuminate\Support\Facades\Auth::guard('customer')->user();
-                    $mobileCustomerName = $mobileCustomer?->full_name ?: ($mobileCustomer?->firstname ?? 'Customer');
+                    $mobileCustomerName = $mobileCustomer?->full_name ?: $mobileCustomer?->firstname ?? 'Customer';
                 @endphp
                 <div class="d-flex align-items-center gap-2 mb-3">
                     @if ($mobileCustomer?->pic)
-                        <img src="{{ getImageUrl($mobileCustomer->pic) }}"
-                            class="rounded-circle border" alt="User"
-                            style="width: 36px; height: 36px; object-fit: cover;">
+                        <img src="{{ getImageUrl($mobileCustomer->pic) }}" class="rounded-circle border"
+                            alt="User" style="width: 36px; height: 36px; object-fit: cover;">
                     @else
                         <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold fs-13"
                             style="width: 36px; height: 36px;">
@@ -461,7 +481,7 @@
         </a>
 
         <!-- Search trigger -->
-        <a href="javascript:void(0);" class="mobile-dock-item" aria-label="Search" data-search-toggle>
+        <button type="button" class="mobile-dock-item border-0 bg-transparent p-0" aria-label="Search" data-search-toggle>
             <div class="mobile-dock-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
@@ -471,6 +491,6 @@
                 </svg>
             </div>
             <span class="mobile-dock-label">Search</span>
-        </a>
+        </button>
     </div>
 </div>

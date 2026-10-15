@@ -861,16 +861,46 @@ header.site-header,
     transform: translateY(-1px);
 }
 
-/* Swiper Custom Pagination */
+/* Swiper Custom Pagination with Accessible Touch Target Size (>= 28x28px for WCAG 2.2 Target Size) */
 .swiper-pagination-bullet {
-    width: 8px;
-    height: 8px;
-    background-color: #cbd5e1;
-    opacity: 1;
+    position: relative;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px;
+    min-height: 28px;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 50% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    opacity: 1 !important;
+    box-sizing: border-box !important;
+    cursor: pointer;
+    vertical-align: middle;
 }
 
-.swiper-pagination-bullet-active {
-    background-color: var(--primary-color);
+.swiper-pagination-bullet::before {
+    content: '';
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #cbd5e1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.swiper-pagination-bullet:hover::before {
+    background-color: var(--color-primary-hover, #005a8f);
+    transform: scale(1.15);
+}
+
+.swiper-pagination-bullet-active::before {
+    background-color: var(--primary-color, #0072B2);
+    transform: scale(1.2);
 }
 
 /* Footer Component - 3-Column Architectural Design */
@@ -2333,4 +2363,19 @@ body:has(.offcanvas.show) .sidebar-menu {
 
 .auth-password-toggle:hover {
     color: #0f172a !important;
+}
+
+/* Accessibility Color Contrast Enforcements (WCAG AA Compliant) */
+.product-card__badge-pill[style*="#00c853"],
+.product-card__badge-pill[style*="#00C853"] {
+    background-color: #0a7a3b !important;
+    color: #ffffff !important;
+}
+
+.product-card__category,
+.home-product-card__category,
+.why-choose-stacked__subtitle,
+.home-lifestyle__subtitle,
+.testimonials-section__subtitle {
+    color: #475569 !important;
 }

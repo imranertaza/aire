@@ -17,6 +17,7 @@ use App\Models\OrderStatus;
 use App\Services\Mail\OrderMailService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -32,13 +33,17 @@ class OrderController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
+            $concat = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+                ? "payment_firstname || ' ' || payment_lastname"
+                : "CONCAT(payment_firstname, ' ', payment_lastname)";
+
+            $query->where(function ($q) use ($search, $concat) {
                 $q->where('id', 'like', "%{$search}%")
                     ->orWhere('payment_firstname', 'like', "%{$search}%")
                     ->orWhere('payment_lastname', 'like', "%{$search}%")
                     ->orWhere('shipping_firstname', 'like', "%{$search}%")
                     ->orWhere('shipping_lastname', 'like', "%{$search}%")
-                    ->orWhereRaw("CONCAT(payment_firstname, ' ', payment_lastname) like ?", ["%{$search}%"])
+                    ->orWhereRaw("{$concat} like ?", ["%{$search}%"])
                     ->orWhere('payment_email', 'like', "%{$search}%")
                     ->orWhere('payment_phone', 'like', "%{$search}%");
             });
@@ -65,7 +70,9 @@ class OrderController extends Controller
             'customer'
         ])->findOrFail($id);
 
-        $statuses = OrderStatus::all();
+        $statuses = Cache::rememberForever('all_order_statuses', function () {
+            return OrderStatus::all();
+        });
 
         return ApiResponse::success([
             'order' => $order,

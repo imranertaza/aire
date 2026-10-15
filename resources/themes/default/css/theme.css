@@ -1,0 +1,9 @@
+/* ============================================================
+   AIRE INDUSTRIES — THEME MASTER CSS (VITE ENTRY POINT)
+   Combines design tokens, global layout, components, and responsive rules.
+   ============================================================ */
+
+@import "../../../../public_html/themes/default/assets/css/style.css";
+@import "../../../../public_html/themes/default/assets/css/layout.css";
+@import "../../../../public_html/themes/default/assets/css/components.css";
+@import "../../../../public_html/themes/default/assets/css/responsive.css";

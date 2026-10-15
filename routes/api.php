@@ -108,6 +108,7 @@ Route::middleware('auth:user')->prefix('pages')->controller(PageController::clas
 Route::prefix('sections')->middleware(['auth:user', 'permission:manage-frontend'])->controller(SectionController::class)->group(function () {
     Route::get('/', 'index');
     Route::get('home-sections', 'homeSections')->name('sections.home-sections');
+    Route::get('about-sections', 'aboutSections')->name('sections.about-sections');
     Route::get('by-name/{name}', 'getByName')->name('sections.by-name');
     Route::post('by-name/{name}', 'updateByName')->name('sections.update-by-name');
     Route::put('by-name/{name}', 'updateByName');
@@ -408,16 +409,16 @@ Route::prefix('filter-options')->middleware(['auth:user'])->controller(\App\Http
 
 /* Products */
 Route::prefix('products')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductController::class)->group(function () {
-    Route::get('all-dropdown', 'dropdownList')->name('products.dropdown');
-    Route::get('/', 'index')->name('products.index')->middleware('permission:view-products');
-    Route::post('/', 'store')->name('products.store')->middleware('permission:create-products');
-    Route::post('/copy', 'copy')->name('products.copy')->middleware('permission:create-products');
-    Route::post('/bulk-status', 'bulkStatus')->name('products.bulk-status')->middleware('permission:edit-products');
-    Route::delete('/bulk-delete', 'bulkDelete')->name('products.bulk-delete')->middleware('permission:delete-products');
-    Route::get('{id}', 'show')->name('products.show')->middleware('permission:view-products');
-    Route::post('{id}', 'update')->name('products.update')->middleware('permission:edit-products'); // using POST because of multipart/form-data for files
-    Route::patch('{id}/toggle-status', 'toggleStatus')->name('products.toggle')->middleware('permission:edit-products');
-    Route::delete('{id}', 'destroy')->name('products.destroy')->middleware('permission:delete-products');
+    Route::get('all-dropdown', 'dropdownList')->name('api.products.dropdown');
+    Route::get('/', 'index')->name('api.products.index')->middleware('permission:view-products');
+    Route::post('/', 'store')->name('api.products.store')->middleware('permission:create-products');
+    Route::post('/copy', 'copy')->name('api.products.copy')->middleware('permission:create-products');
+    Route::post('/bulk-status', 'bulkStatus')->name('api.products.bulk-status')->middleware('permission:edit-products');
+    Route::delete('/bulk-delete', 'bulkDelete')->name('api.products.bulk-delete')->middleware('permission:delete-products');
+    Route::get('{id}', 'show')->name('api.products.show')->middleware('permission:view-products');
+    Route::post('{id}', 'update')->name('api.products.update')->middleware('permission:edit-products'); // using POST because of multipart/form-data for files
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('api.products.toggle')->middleware('permission:edit-products');
+    Route::delete('{id}', 'destroy')->name('api.products.destroy')->middleware('permission:delete-products');
 });
 
 /* Advanced Products (Bulk Product Editing) */
@@ -487,21 +488,43 @@ Route::prefix('modules')->middleware(['auth:user'])->controller(\App\Http\Contro
     Route::patch('{id}/status', 'updateStatus')->middleware('permission:edit-modules');
 });
 
-/* Utility: List available frontend template files */
+/* Utility: List available theme template files for page builder */
 Route::middleware(['auth:user'])->get('templates', function () {
-    $path  = resource_path('views/layouts/frontend');
-    $files = [];
+    $activeTheme = function_exists('active_theme') ? active_theme() : 'default';
 
-    if (File::exists($path)) {
-        $files = collect(File::files($path))
-            ->filter(fn($file) => Str::endsWith($file->getFilename(), '.blade.php'))
-            ->map(fn($file) => Str::replaceLast('.blade', '', pathinfo($file->getFilename(), PATHINFO_FILENAME)))
-            ->values()
-            ->toArray();
+    // Scan paths in order: active theme templates, default theme templates
+    $searchPaths = [
+        resource_path("views/themes/{$activeTheme}/pages/templates"),
+        resource_path("views/themes/default/pages/templates"),
+    ];
+
+    $templateNames = collect();
+
+    foreach ($searchPaths as $path) {
+        if (File::isDirectory($path)) {
+            $found = collect(File::files($path))
+                ->filter(fn($file) => Str::endsWith($file->getFilename(), '.blade.php'))
+                ->map(fn($file) => Str::replaceLast('.blade', '', pathinfo($file->getFilename(), PATHINFO_FILENAME)));
+
+            $templateNames = $templateNames->merge($found);
+        }
     }
 
-    return response()->json($files);
+    $templates = $templateNames->unique()->values()->toArray();
+
+    // Ensure default and legal templates are always present
+    if (empty($templates)) {
+        $templates = ['default', 'legal'];
+    } else {
+        if (!in_array('default', $templates)) {
+            array_unshift($templates, 'default');
+        }
+        if (!in_array('legal', $templates)) {
+            $templates[] = 'legal';
+        }
+    }
+
+    return response()->json(array_values(array_unique($templates)));
 });
 
 Route::match(['get', 'post'], 'filter-wizard/query', [\App\Http\Controllers\ProductController::class, 'filterStepApi']);
-

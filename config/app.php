@@ -125,6 +125,7 @@ return [
 
     'aliases'         => [
         'Image' => Intervention\Image\Facades\Image::class,
+        'Vite'  => Illuminate\Support\Facades\Vite::class,
     ],
 
 ];

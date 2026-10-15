@@ -19,15 +19,19 @@ class ProductFeedbackController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
+            $concat = \Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite'
+                ? "firstname || ' ' || lastname"
+                : "CONCAT(firstname, ' ', lastname)";
+
+            $query->where(function ($q) use ($search, $concat) {
                 $q->where('feedback_text', 'like', "%{$search}%")
                     ->orWhereHas('product', function ($pq) use ($search) {
                         $pq->where('name', 'like', "%{$search}%");
                     })
-                    ->orWhereHas('customer', function ($cq) use ($search) {
+                    ->orWhereHas('customer', function ($cq) use ($search, $concat) {
                         $cq->where('firstname', 'like', "%{$search}%")
                             ->orWhere('lastname', 'like', "%{$search}%")
-                            ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$search}%"]);
+                            ->orWhereRaw("{$concat} like ?", ["%{$search}%"]);
                     });
             });
         }

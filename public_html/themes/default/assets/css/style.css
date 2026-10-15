@@ -1,14 +1,14 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-
 /* ============================================================
    AIRE INDUSTRIES — DESIGN TOKENS (CSS CUSTOM PROPERTIES)
    Single source of truth for all colors, typography & spacing.
    ============================================================ */
 :root {
     /* ── Brand / Primary ─────────────────────────────────── */
-    --color-primary: #0095DA;
-    --color-primary-hover: #0876a8;
+    --color-primary: #0072B2;
+    --color-primary-hover: #005a8f;
     --color-primary-light: #2563eb;
+    --bs-primary: #0072B2;
+    --bs-primary-rgb: 0, 114, 178;
     --color-primary-bg: #eff6ff;
     /* active bg */
     --color-primary-icon: #dbeafe;
@@ -396,4 +396,17 @@ small,
 
 .border-primary {
     border-color: var(--color-primary) !important;
+}
+
+/* ── Accessibility Utilities ─────────────────────────────── */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }

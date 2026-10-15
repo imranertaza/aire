@@ -340,10 +340,12 @@ $(document).ready(function () {
                     }
                     if (isRemove) {
                         btn.removeClass('active');
+                        btn.find('svg path').attr('fill', '#0066CC');
                         btn.attr('title', 'Add to cart').attr('data-bs-original-title', 'Add to cart');
                         window.showCartToast('Product removed from cart.', true);
                     } else {
                         btn.addClass('active');
+                        btn.find('svg path').attr('fill', '#ffffff');
                         btn.attr('title', 'In cart').attr('data-bs-original-title', 'In cart');
                         window.showCartToast('Product added to cart.', false);
                     }
@@ -612,8 +614,16 @@ $(document).ready(function () {
             infinite: false,
         });
 
-        // Synchronize Lenis with GSAP Ticker & ScrollTrigger
-        if (typeof gsap !== 'undefined') {
+        // Function to dynamically sync Lenis with GSAP Ticker & ScrollTrigger
+        function connectLenisToGsap() {
+            if (window._lenisGsapSynced || typeof gsap === 'undefined' || !window.lenisInstance) return;
+            window._lenisGsapSynced = true;
+
+            if (window._lenisRafId) {
+                cancelAnimationFrame(window._lenisRafId);
+                window._lenisRafId = null;
+            }
+
             window.lenisInstance.on('scroll', () => {
                 if (typeof ScrollTrigger !== 'undefined') {
                     ScrollTrigger.update();
@@ -623,18 +633,22 @@ $(document).ready(function () {
                 window.lenisInstance.raf(time * 1000);
             });
             gsap.ticker.lagSmoothing(0);
+        }
+        window.connectLenisToGsap = connectLenisToGsap;
+
+        // Synchronize Lenis with GSAP Ticker & ScrollTrigger
+        if (typeof gsap !== 'undefined') {
+            connectLenisToGsap();
         } else {
             function raf(time) {
+                if (window._lenisGsapSynced) return;
                 window.lenisInstance.raf(time);
-                requestAnimationFrame(raf);
+                window._lenisRafId = requestAnimationFrame(raf);
             }
-            requestAnimationFrame(raf);
+            window._lenisRafId = requestAnimationFrame(raf);
 
-            document.addEventListener('DOMContentLoaded', function () {
-                if (typeof ScrollTrigger !== 'undefined' && window.lenisInstance) {
-                    window.lenisInstance.on('scroll', () => ScrollTrigger.update());
-                }
-            });
+            document.addEventListener('DOMContentLoaded', connectLenisToGsap);
+            window.addEventListener('load', connectLenisToGsap);
         }
 
         if (typeof $ !== 'undefined') {
@@ -786,10 +800,15 @@ $(document).ready(function () {
         }
     }
 
-    if (typeof Lenis === 'undefined') {
-        loadScript('https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js', initLenisScroll);
-    } else {
-        initLenisScroll();
+    // Only load & initialize Lenis smooth momentum scroll on Desktop (>= 992px) with pointer: fine (mouse)
+    // Mobile and touch screens have native GPU-accelerated momentum scrolling; disabling JS scroll interception saves massive main-thread CPU
+    var isTouchOrMobile = (window.matchMedia ? window.matchMedia('(max-width: 991.98px)').matches : window.innerWidth < 992) || ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (!isTouchOrMobile) {
+        if (typeof Lenis === 'undefined') {
+            loadScript('https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js', initLenisScroll);
+        } else {
+            initLenisScroll();
+        }
     }
 
     // Global GSAP ScrollTrigger Lifecycle & Back/Forward Cache (bfcache) Recovery
@@ -809,7 +828,7 @@ $(document).ready(function () {
         });
 
         function recoverScrollAndTriggers(isBackForward) {
-            // 1. Synchronize Lenis smooth scroll engine with DOM height
+            // 1. Synchronize Lenis smooth scroll engine with DOM height (desktop only)
             if (window.lenisInstance) {
                 window.lenisInstance.resize();
             }
@@ -829,24 +848,12 @@ $(document).ready(function () {
                 } catch (err) { }
             }
 
-            // 3. Re-initialize dynamic components & recalculate all ScrollTrigger boundaries
-            if (typeof ScrollTrigger !== 'undefined') {
-                if (typeof window.initWhyChooseScrollTrigger === 'function') {
-                    window.initWhyChooseScrollTrigger();
-                }
-                if (typeof window.initLivingHeroScrollTrigger === 'function') {
-                    window.initLivingHeroScrollTrigger();
-                }
-                if (typeof window.initLifestyleParallax === 'function') {
-                    window.initLifestyleParallax();
-                }
-                if (typeof window.initBenefitsParallax === 'function') {
-                    window.initBenefitsParallax();
-                }
-
+            // 3. Recalculate ScrollTrigger boundaries safely on desktop without synchronous reflow storms
+            var isDesktop = window.matchMedia ? window.matchMedia('(min-width: 992px)').matches : window.innerWidth >= 992;
+            if (typeof ScrollTrigger !== 'undefined' && isDesktop) {
                 ScrollTrigger.clearScrollMemory();
                 ScrollTrigger.sort();
-                ScrollTrigger.refresh(true);
+                ScrollTrigger.refresh();
             }
         }
 
@@ -905,5 +912,115 @@ $(document).ready(function () {
 
     $(document).on('show.bs.offcanvas', function () {
         syncMobileMenuActiveItem();
+    });
+
+    // ── Footer Newsletter Form AJAX Handler ──────────
+    document.addEventListener('DOMContentLoaded', function () {
+        var form = document.getElementById('footerNewsletterForm');
+        if (!form) return;
+
+        var emailInput = document.getElementById('newsletterEmailInput');
+        var submitBtn = document.getElementById('btnNewsletterSubmit');
+        var iconNormal = submitBtn ? submitBtn.querySelector('.btn-icon-normal') : null;
+        var spinner = submitBtn ? submitBtn.querySelector('.btn-spinner') : null;
+        var feedback = document.getElementById('newsletterFeedback');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var email = (emailInput ? emailInput.value : '').trim();
+            if (!email) return;
+
+            if (submitBtn) submitBtn.disabled = true;
+            if (iconNormal) iconNormal.classList.add('d-none');
+            if (spinner) spinner.classList.remove('d-none');
+            if (feedback) {
+                feedback.style.display = 'none';
+                feedback.className = 'fs-13 mb-3 fw-medium';
+            }
+
+            var csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            var csrfInput = form.querySelector('input[name="_token"]');
+            var csrfToken = (csrfMeta ? csrfMeta.getAttribute('content') : '') || (csrfInput ? csrfInput.value : '');
+
+            var submitNewsletter = function (recaptchaToken) {
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        'g-recaptcha-response': recaptchaToken || ''
+                    })
+                })
+                    .then(function (res) {
+                        return res.json().then(function (data) { return { status: res.status, body: data }; });
+                    })
+                    .then(function (resObj) {
+                        var status = resObj.status;
+                        var body = resObj.body;
+                        if (status >= 200 && status < 300 && body.success) {
+                            if (feedback) {
+                                feedback.textContent = body.message || 'Thank you for subscribing!';
+                                feedback.classList.add('text-success');
+                                feedback.style.display = 'block';
+                            }
+                            if (emailInput) emailInput.value = '';
+                            if (typeof window.showNewsletterToast === 'function') {
+                                window.showNewsletterToast(body.message || 'Thank you for subscribing!', true);
+                            }
+                        } else {
+                            if (feedback) {
+                                feedback.textContent = body.message || 'Could not subscribe. Please try again.';
+                                feedback.classList.add('text-danger');
+                                feedback.style.display = 'block';
+                            }
+                        }
+                    })
+                    .catch(function () {
+                        if (feedback) {
+                            feedback.textContent = 'A network error occurred. Please try again later.';
+                            feedback.classList.add('text-danger');
+                            feedback.style.display = 'block';
+                        }
+                    })
+                    .finally(function () {
+                        if (submitBtn) submitBtn.disabled = false;
+                        if (iconNormal) iconNormal.classList.remove('d-none');
+                        if (spinner) spinner.classList.add('d-none');
+                    });
+            };
+
+            var siteKey = form.dataset.sitekey || '';
+            var useRecaptcha = form.dataset.useRecaptcha === '1';
+
+            if (useRecaptcha && siteKey) {
+                var executeRecaptcha = function () {
+                    if (typeof grecaptcha !== 'undefined' && grecaptcha.execute) {
+                        grecaptcha.ready(function () {
+                            grecaptcha.execute(siteKey, { action: 'newsletter_subscribe' })
+                                .then(submitNewsletter)
+                                .catch(function (err) {
+                                    console.warn('Newsletter reCAPTCHA error:', err);
+                                    submitNewsletter('');
+                                });
+                        });
+                    } else {
+                        submitNewsletter('');
+                    }
+                };
+
+                if (typeof grecaptcha === 'undefined' && typeof window.loadRecaptcha === 'function') {
+                    window.loadRecaptcha(executeRecaptcha);
+                } else {
+                    executeRecaptcha();
+                }
+            } else {
+                submitNewsletter('');
+            }
+        });
     });
 })();

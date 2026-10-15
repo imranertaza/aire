@@ -308,7 +308,7 @@
         <div class="error-quick-links">
             <div class="error-quick-links-title">Quick Portals</div>
             <div>
-                <a href="{{ route('solutions') }}" class="quick-pill">
+                <a href="{{ route('about') }}" class="quick-pill">
                     <i class="bi bi-shield-check text-primary"></i> Enterprise Solutions
                 </a>
                 <a href="{{ route('products.filter') }}?industry=residential" class="quick-pill">

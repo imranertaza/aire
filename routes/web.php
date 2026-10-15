@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\FrontendController;
 use App\Services\ImageService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
@@ -134,9 +133,16 @@ Route::middleware([EnsureAdminOrSecretKey::class, 'throttle:30,1'])->group(funct
     // Production Cache & Optimize
     Route::get('/optimize', function () {
         Artisan::call('optimize');
+        Artisan::call('view:cache');
+
         return response()->json([
             'status'  => true,
-            'message' => 'Application config, routes, and views compiled & optimized successfully!',
+            'message' => 'Application config, routes, events, and Blade views compiled & optimized successfully!',
+            'cached'  => [
+                'config_cached' => true,
+                'routes_cached' => true,
+                'views_cached'  => true,
+            ],
         ]);
     });
 });
@@ -144,12 +150,16 @@ Route::middleware([EnsureAdminOrSecretKey::class, 'throttle:30,1'])->group(funct
 /* Storefront Multi-Theme Routes */
 Route::controller(\App\Http\Controllers\StorefrontController::class)->group(function () {
     Route::get('/', 'index')->name('home');
-    Route::get('/solutions', 'solutions')->name('solutions');
     Route::get('/about', 'about')->name('about');
     Route::get('/docs', 'docs')->name('docs');
     Route::get('/contact', 'contact')->name('contact');
+    Route::post('/contact', 'submitContact')->name('contact.submit');
     Route::get('/page/{slug}', 'pageDetails')->name('page.show');
     Route::get('/pages/{slug}', 'pageDetails')->name('page.details');
+    Route::get('/news', 'newsIndex')->name('news.index');
+    Route::get('/news-and-updates', 'newsIndex')->name('news-and-updates');
+    Route::get('/news/{slug}', 'newsDetails')->name('news.show');
+    Route::get('/news-and-updates/{slug}', 'newsDetails')->name('news-and-updates-details');
     Route::post('/newsletter/subscribe', 'subscribeNewsletter')->name('newsletter.subscribe');
     Route::match(['get', 'post'], '/newsletter/unsubscribe/{token}', 'unsubscribe')->name('newsletter.unsubscribe');
     Route::post('/newsletter/resubscribe/{token}', 'resubscribe')->name('newsletter.resubscribe');
@@ -229,68 +239,39 @@ Route::middleware('customer.auth')->group(function () {
     });
 });
 
-/* Legacy / Secondary Frontend Routes */
-Route::controller(FrontendController::class)->group(function () {
-    Route::get('match-fixtures', 'matchFixtures')->name('match-fixtures');
-    Route::get('notice-board', 'noticeBoard')->name('notice-board');
-    Route::get('/photo-gallery', 'gallery')->name('gallery');
-    Route::get('gallery-details/{id}', 'galleryDetails')->name('gallery-details');
-    Route::get('news-and-updates', 'newsAndUpdates')->name('news-and-updates');
-    Route::get('spotlights', 'spotlightNews')->name('spotlight-news');
-    Route::get('news-and-updates/{slug}', 'newsAndUpdatesDetails')->name('news-and-updates-details');
-    Route::get('blogs', 'blogs')->name('blogs');
-    Route::get('blogs/{slug}', 'blogsDetails')->name('blogs-details');
-    // Route::get('players', 'players')->name('player.index');
-    Route::get('players/{slug}', 'playerDetails')->name('player.details');
-    Route::get('post-categories/{slug}', 'postCategoryDetails')->name('post-categories');
-    Route::get('sports/{slug}', 'postDetails')->name('sports-details');
+// Dynamic XML Sitemap & Robots.txt for Search Engines (Google, Bing)
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
 
-    Route::get('running-events', 'runningEvents')->name('running-events');
-    // Route::get('upcoming-events', 'upcomingEvents')->name('upcoming-events');
-    Route::get('events/{slug}', 'runningEventsDetails')->name('event-details');
-    // Route::get('executive-committee', 'committeeMembers')->name('committee-members');
-    Route::get('executive-committee/{slug}', 'committeeMembersDetails')->name('committee-members-details');
-    Route::post('contact-us', 'contactSubmit')->name('contact.submit');
+/* Dynamic image resize & cache route (returns file directly) */
+Route::get('/image/{width}/{height}/{format}/{path}', function ($width, $height, $format, $path) {
+    $fullPath = $path;
+    $url = ImageService::resizeAndCache($fullPath, (int) $width, (int) $height, $format);
 
-    // Dynamic XML Sitemap for Search Engines (Google, Bing)
-    Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+    // Safely extract relative path regardless of scheme/domain
+    $relative = ltrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
+    $filePath = public_path($relative);
 
-    /* Static pages */
-    Route::prefix('pages')->name('page.')->group(function () {
-        Route::get('/', 'pages')->name('index');
-        Route::get('/{slug}', 'pageDetails')->name('details');
-    });
-
-    /* Dynamic image resize & cache route (returns file directly) */
-    Route::get('/image/{width}/{height}/{format}/{path}', function ($width, $height, $format, $path) {
-        $fullPath = $path;
-        $url = ImageService::resizeAndCache($fullPath, (int) $width, (int) $height, $format);
-
-        // Safely extract relative path regardless of scheme/domain
-        $relative = ltrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
-        $filePath = public_path($relative);
-
-        if (file_exists($filePath) && is_file($filePath)) {
-            // Return raw file with correct headers
-            return Response::file($filePath, [
-                'Content-Type'  => 'image/' . ($format === 'svg' ? 'svg+xml' : $format),
-                'Cache-Control' => 'public, max-age=604800, immutable'
-            ]);
-        }
-
-        return redirect($url, 301);
-    })->where('path', '.*');
-
-    /* Image resize redirect route (legacy support) */
-    Route::get('/image_url/{width}/{height}/{format}/{path}', function ($width, $height, $format, $path) {
-        $fullPath = $path;
-        $url = ImageService::resizeAndCache($fullPath, (int) $width, (int) $height, $format);
-
-        return redirect($url, 301, [
+    if (file_exists($filePath) && is_file($filePath)) {
+        // Return raw file with correct headers
+        return Response::file($filePath, [
+            'Content-Type'  => 'image/' . ($format === 'svg' ? 'svg+xml' : $format),
             'Cache-Control' => 'public, max-age=604800, immutable'
         ]);
-    })->where('path', '.*');
-});
+    }
+
+    return redirect($url, 301);
+})->where('path', '.*');
+
+/* Image resize redirect route (legacy support) */
+Route::get('/image_url/{width}/{height}/{format}/{path}', function ($width, $height, $format, $path) {
+    $fullPath = $path;
+    $url = ImageService::resizeAndCache($fullPath, (int) $width, (int) $height, $format);
+
+    return redirect($url, 301, [
+        'Cache-Control' => 'public, max-age=604800, immutable'
+    ]);
+})->where('path', '.*');
 
 /* Admin panel routes */
 

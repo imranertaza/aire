@@ -63,7 +63,9 @@ class ProductCategoryController extends Controller
     private function getCategoryAndDescendantIds($categoryId, $allCategories = null)
     {
         if ($allCategories === null) {
-            $allCategories = ProductCategory::select('id', 'parent_id')->get();
+            $allCategories = Cache::rememberForever('catalog_category_pairs_v1', function () {
+                return ProductCategory::select('id', 'parent_id')->get();
+            });
         }
 
         $ids = [(int) $categoryId];
