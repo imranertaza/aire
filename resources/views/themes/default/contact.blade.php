@@ -11,8 +11,8 @@
 
 @section('content')
     <!-- =========================================================================
-        | Atmospheric Hero Banner (Matching AIRE Theme)
-        | ========================================================================= -->
+                                        | Atmospheric Hero Banner (Matching AIRE Theme)
+                                        | ========================================================================= -->
     <section class="contact-hero">
         <div class="container main-container position-relative z-1">
             <div class="row align-items-center">
@@ -43,8 +43,8 @@
     </section>
 
     <!-- =========================================================================
-        | Breadcrumbs & Quick Toolbar
-        | ========================================================================= -->
+                                        | Breadcrumbs & Quick Toolbar
+                                        | ========================================================================= -->
     <section class="contact-toolbar-bar">
         <div class="container main-container">
             <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
@@ -77,13 +77,13 @@
     </section>
 
     <!-- =========================================================================
-        | Main Content: Contact Details & Interactive Inquiry Form
-        | ========================================================================= -->
+                                        | Main Content: Contact Details & Interactive Inquiry Form
+                                        | ========================================================================= -->
     <main class="container main-container py-5">
         <div class="row g-4 g-lg-5 align-items-stretch">
 
             <!-- Left Column: Information & Topic Cards -->
-            <div class="col-lg-5">
+            <div class="col-lg-4">
                 <div class="d-flex flex-column gap-4 h-100 justify-content-between">
 
                     <!-- Primary Info Card -->
@@ -203,8 +203,8 @@
             </div>
 
             <!-- Right Column: Message Form -->
-            <div class="col-lg-7">
-                <div class="contact-form-card h-100">
+            <div class="col-lg-8">
+                <div class="contact-form-card ">
                     <h3 class="contact-form-title">Send Us a Message</h3>
                     <p class="contact-form-subtitle">Fill out the inquiry form below and our air specialists will reply
                         within 24 hours.</p>

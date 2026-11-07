@@ -23,18 +23,18 @@ class Slider extends Model
     protected static function booted()
     {
         static::saved(function ($slider) {
-            static::clearCache();
+            static::clearCache($slider);
         });
 
         static::deleted(function ($slider) {
-            static::clearCache();
+            static::clearCache($slider);
         });
     }
 
     /**
      * Clear all slider cache keys.
      */
-    public static function clearCache(): void
+    public static function clearCache(?Slider $slider = null): void
     {
         Cache::forget('sliders_all_active');
         Cache::forget('filter_ad_sliders');
@@ -52,7 +52,18 @@ class Slider extends Model
             'compare',
             'favorite',
         ];
-        foreach ($placements as $p) {
+
+        if ($slider && !empty($slider->key)) {
+            $keys = explode(',', $slider->key);
+            foreach ($keys as $k) {
+                $k = trim($k);
+                if ($k) {
+                    $placements[] = $k;
+                }
+            }
+        }
+
+        foreach (array_unique($placements) as $p) {
             Cache::forget("sliders_placement_{$p}");
             Cache::forget("sliders_{$p}");
         }

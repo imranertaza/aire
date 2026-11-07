@@ -1,9 +1,15 @@
 <template>
-  <div v-if="pData?.last_page > 1" class="w-100 d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+  <div
+    v-if="pData?.last_page > 1"
+    :class="[
+      'd-flex align-items-center flex-wrap gap-2',
+      showInfo ? 'w-100 justify-content-between mt-3' : 'justify-content-end'
+    ]"
+  >
     <!-- Showing info -->
-    <div>
-      <small>
-        Showing {{ pData.from }} to {{ pData.to }} of {{ pData.total }} results
+    <div v-if="showInfo">
+      <small class="text-muted">
+        Showing {{ pData.from || 0 }} to {{ pData.to || 0 }} of {{ pData.total }} results
       </small>
     </div>
 
@@ -19,7 +25,7 @@
           <a
             class="page-link"
             href="#"
-                v-html="index === 0 ? '&laquo;' : (index === pData.links.length - 1 ? '&raquo;' : link.label)"
+            v-html="index === 0 ? '&laquo;' : (index === pData.links.length - 1 ? '&raquo;' : link.label)"
             @click.prevent="handleClick(link)"
           ></a>
         </li>
@@ -33,11 +39,16 @@
  * Props:
  * pData: Pagination data object (typically from Laravel's LengthAwarePaginator)
  *        Expected structure: { current_page, data, links: [{ url, label, active }, ...], ... }
+ * showInfo: Whether to display "Showing X to Y of Z results" text (default: true)
  */
 const props = defineProps({
   pData: {
     type: Object,
     required: true
+  },
+  showInfo: {
+    type: Boolean,
+    default: true
   }
 })
 

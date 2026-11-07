@@ -12,27 +12,9 @@
     $canonicalUrl = route('page.show', $page->slug ?? 'page');
     $currentSlug = $page->slug ?? '';
 
-    // Determine whether this page should use the Legal/Policy layout
-    $legalSlugs = [
-        'cookie-policy',
-        'privacy-policy',
-        'terms-of-service',
-        'terms-and-conditions',
-        'modern-slavery-statement',
-        'modern-slavery',
-        'data-protection',
-        'export-compliance',
-        'legal-notice',
-        'terms-of-use',
-        'sitemap',
-    ];
 
-    $template = strtolower($page->temp ?? 'default');
-    $isLegal =
-        $template === 'legal' ||
-        $template === 'policy' ||
-        in_array($currentSlug, $legalSlugs) ||
-        \Illuminate\Support\Str::contains(strtolower($page->breadcrumb ?? ''), ['legal', 'policy', 'compliance']);
+    $template = strtolower(trim($page->temp ?? 'default'));
+    $templateNormalized = str_replace(['_', ' '], '-', $template);
 @endphp
 
 @section('title', $pageTitle)
@@ -44,8 +26,8 @@
 @section('canonical_url', $canonicalUrl)
 
 @section('content')
-    @if ($isLegal)
-        @include('themes.' . active_theme() . '.pages.templates.legal')
+    @if (!empty($templateNormalized) && $templateNormalized !== 'default' && view()->exists('themes.' . active_theme() . '.pages.templates.' . $templateNormalized))
+        @include('themes.' . active_theme() . '.pages.templates.' . $templateNormalized)
     @else
         @include('themes.' . active_theme() . '.pages.templates.default')
     @endif

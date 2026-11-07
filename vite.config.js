@@ -8,8 +8,6 @@ export default defineConfig({
             input: [
                 "resources/js/app.js",
                 "resources/css/app.css",
-                "resources/themes/default/css/theme.css",
-                "resources/themes/default/css/home.css",
                 "resources/js/assets/plugins/fontawesome-free/css/all.min.css",
                 "resources/js/assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css",
                 "resources/js/assets/dist/css/adminlte.min.css",

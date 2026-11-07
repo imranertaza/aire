@@ -21,7 +21,10 @@ class GzipEncodeResponse
         $response = $next($request);
 
         // Skip binary file responses, streams, HEAD requests, or if zlib/gzencode unavailable
+        // Also skip in development / debug mode to prevent breaking Laravel Debugbar and devtools
         if (
+            config('app.debug') ||
+            !app()->isProduction() ||
             $response instanceof BinaryFileResponse ||
             $response instanceof StreamedResponse ||
             $request->isMethod('HEAD') ||

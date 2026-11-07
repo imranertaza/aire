@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Setting;
 use App\Models\Menu;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -84,17 +86,81 @@ class AppServiceProvider extends ServiceProvider
             'themes.default.layouts.header',
             'layouts.header',
         ], function ($view) {
-            $mainHeaderMenu = Cache::remember('layout_main_header_menu_v1', 86400, function () {
-                return Menu::where(function ($q) {
+            $mainHeaderMenu = Cache::remember('layout_main_header_menu_v2', 86400, function () {
+                $menu = Menu::where(function ($q) {
                     $q->where('position', 'header')->orWhere('position', 'Header')->orWhere('name', 'Main Header');
                 })->where('enabled', 1)->with([
                     'menus' => function ($q) {
-                        $q->where('enabled', 1)->orderBy('order', 'asc');
+                        $q->where('enabled', 1)
+                            ->orderBy('order', 'asc')
+                            ->orderBy('id', 'asc')
+                            ->with([
+                                'page',
+                                'category',
+                                'productCategory' => function ($pcq) {
+                                    $pcq->where('status', 1)->with([
+                                        'children' => function ($cq) {
+                                            $cq->where('status', 1)
+                                                ->orderBy('sort_order', 'asc');
+                                        }
+                                    ]);
+                                }
+                            ]);
                     },
                 ])->first();
+
+                if ($menu && $menu->menus) {
+                    foreach ($menu->menus as $item) {
+                        if (!empty($item->has_quick_view) && $item->productCategory && $item->productCategory->children) {
+                            foreach ($item->productCategory->children as $child) {
+                                $descendantIds = ProductCategory::getCategoryAndDescendantIds($child->id);
+                                $prods = Product::whereHas('categories', function ($q) use ($descendantIds) {
+                                    $q->whereIn('product_categories.id', $descendantIds);
+                                })->where('status', 1)
+                                  ->orderBy('featured', 'desc')
+                                  ->orderBy('sort_order', 'asc')
+                                  ->take(4)
+                                  ->get(['id', 'name', 'slug', 'price', 'main_image', 'quickview_image', 'brand_id']);
+                                $child->setRelation('quick_products', $prods);
+                            }
+                        }
+                    }
+                }
+
+                return $menu;
             });
 
-            $view->with('mainHeaderMenu', $mainHeaderMenu);
+            $headerMegaMenuCategories = Cache::remember('layout_header_megamenu_categories_v2', 86400, function () {
+                $parentCategories = ProductCategory::where(function ($q) {
+                    $q->whereNull('parent_id')->orWhere('parent_id', 0);
+                })->where('status', 1)->with([
+                    'children' => function ($cq) {
+                        $cq->where('status', 1)->orderBy('sort_order', 'asc');
+                    }
+                ])->get();
+
+                foreach ($parentCategories as $cat) {
+                    foreach ($cat->children as $child) {
+                        $descendantIds = ProductCategory::getCategoryAndDescendantIds($child->id);
+                        $products = Product::whereHas('categories', function ($q) use ($descendantIds) {
+                            $q->whereIn('product_categories.id', $descendantIds);
+                        })->where('status', 1)
+                          ->orderBy('featured', 'desc')
+                          ->orderBy('sort_order', 'asc')
+                          ->take(4)
+                          ->get(['id', 'name', 'slug', 'price', 'main_image', 'quickview_image', 'brand_id']);
+
+                        $child->setRelation('quick_products', $products);
+                    }
+                }
+
+                return $parentCategories->keyBy('slug');
+            });
+
+            $view->with([
+                'mainHeaderMenu'           => $mainHeaderMenu,
+                'headerMegaMenuCategories' => $headerMegaMenuCategories,
+            ]);
         });
 
         View::composer([
@@ -109,7 +175,7 @@ class AppServiceProvider extends ServiceProvider
                     ->where('enabled', 1)
                     ->with([
                         'menus' => function ($q) {
-                            $q->where('enabled', 1)->orderBy('order', 'asc');
+                            $q->where('enabled', 1)->orderBy('order', 'asc')->orderBy('id', 'asc');
                         },
                     ])
                     ->get();
@@ -125,7 +191,7 @@ class AppServiceProvider extends ServiceProvider
                     ->where('enabled', 1)
                     ->with([
                         'menus' => function ($q) {
-                            $q->where('enabled', 1)->orderBy('order', 'asc');
+                            $q->where('enabled', 1)->orderBy('order', 'asc')->orderBy('id', 'asc');
                         },
                     ])
                     ->first();

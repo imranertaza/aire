@@ -317,17 +317,25 @@ class ProductFilterService
         // 3. Dynamic Option-based Filters
         $dbOptions = $this->getActiveFilterOptions();
         $paramKeyMap = [
-            'building type'    => 'building_type',
-            'room / area type' => 'room_type',
-            'room type'        => 'room_type',
-            'area range (m²)'  => 'area_range',
-            'area range'       => 'area_range',
-            'occupancy'        => 'occupancy',
-            'health concern'   => 'health_concern',
-            'problem'          => 'problem',
-            'solution needed'  => 'solution_needed',
-            'budget range'     => 'budget',
-            'budget'           => 'budget',
+            'application / environment' => 'application',
+            'application'               => 'application',
+            'building type'             => 'building_type',
+            'room / area type'          => 'room_type',
+            'room type'                 => 'room_type',
+            'area range (coverage)'     => 'area_range',
+            'area range (m²)'           => 'area_range',
+            'area range'                => 'area_range',
+            'airflow requirement'       => 'airflow',
+            'airflow'                   => 'airflow',
+            'occupancy'                 => 'occupancy',
+            'health concern'            => 'health_concern',
+            'problem'                   => 'problem',
+            'solution needed'           => 'solution_needed',
+            'solution'                  => 'solution_needed',
+            'installation requirements' => 'installation',
+            'installation'              => 'installation',
+            'budget range'              => 'budget',
+            'budget'                    => 'budget',
         ];
 
         foreach ($dbOptions as $opt) {
@@ -400,17 +408,25 @@ class ProductFilterService
         $search = trim((string) $request->input('search', ''));
 
         $paramKeyMap = [
-            'building type'    => 'building_type',
-            'room / area type' => 'room_type',
-            'room type'        => 'room_type',
-            'area range (m²)'  => 'area_range',
-            'area range'       => 'area_range',
-            'occupancy'        => 'occupancy',
-            'health concern'   => 'health_concern',
-            'problem'          => 'problem',
-            'solution needed'  => 'solution_needed',
-            'budget range'     => 'budget',
-            'budget'           => 'budget',
+            'application / environment' => 'application',
+            'application'               => 'application',
+            'building type'             => 'building_type',
+            'room / area type'          => 'room_type',
+            'room type'                 => 'room_type',
+            'area range (coverage)'     => 'area_range',
+            'area range (m²)'           => 'area_range',
+            'area range'                => 'area_range',
+            'airflow requirement'       => 'airflow',
+            'airflow'                   => 'airflow',
+            'occupancy'                 => 'occupancy',
+            'health concern'            => 'health_concern',
+            'problem'                   => 'problem',
+            'solution needed'           => 'solution_needed',
+            'solution'                  => 'solution_needed',
+            'installation requirements' => 'installation',
+            'installation'              => 'installation',
+            'budget range'              => 'budget',
+            'budget'                    => 'budget',
         ];
 
         // 1. Determine available categories based on search / active products
@@ -627,112 +643,283 @@ class ProductFilterService
      */
     public function getFilterStepsData(): array
     {
-        return Cache::remember('filter_steps_data_v9', 86400, function () {
+        return Cache::remember('filter_steps_data_v10', 86400, function () {
             $data = [];
             $stepNum = 1;
 
-            // 1. Categories
-            $filterCategories = ProductCategory::active()
-                ->where('show_in_filter', 1)
-                ->orderBy('sort_order')
-                ->get();
-
-            if ($filterCategories->count() > 0) {
-                $options = [];
-                foreach ($filterCategories as $cat) {
-                    $catSlug = $cat->slug ?: Str::slug($cat->category_name, '_');
-                    $catNameLower = strtolower($cat->category_name);
-
-                    $icon = 'bi-grid';
-                    if (str_contains($catNameLower, 'solution')) $icon = 'bi-box-seam';
-                    elseif (str_contains($catNameLower, 'industry')) $icon = 'bi-building';
-                    elseif (str_contains($catNameLower, 'tech')) $icon = 'bi-cpu';
-                    elseif (str_contains($catNameLower, 'commercial')) $icon = 'bi-buildings';
-                    elseif (str_contains($catNameLower, 'residential')) $icon = 'bi-house';
-
-                    $options[] = [
-                        'label' => $cat->category_name,
-                        'icon'  => $icon,
-                        'val'   => $catSlug,
-                    ];
-                }
-                $options[] = ['label' => 'Any', 'icon' => 'bi-grid', 'val' => 'any'];
-
-                $data[] = [
-                    'stepNum'   => $stepNum,
-                    'stepId'    => 'category',
-                    'type'      => 'radio',
-                    'stepType'  => 'radio',
-                    'stepName'  => $stepNum . '. CATEGORIES',
-                    'stepTitle' => 'Select Category',
-                    'stepTag'   => 'CATEGORY SELECTION',
-                    'options'   => $options,
-                ];
-                $stepNum++;
-            }
-
-            // 2. Dynamic DB Filter Options
-            $dbOptions = FilterOption::with(['optionValues' => function ($q) {
+            // Check if any Guided Finder options are configured
+            $guidedOptions = FilterOption::with(['optionValues' => function ($q) {
                 $q->where('status', 1)->orderBy('sort_order');
             }])
                 ->where('status', 1)
-                ->where('show_in_filter', 1)
-                ->whereNotIn('name', ['Color', 'Size', 'Material'])
+                ->where('show_in_guided_finder', 1)
+                ->orderByRaw('COALESCE(guided_step_number, 999) ASC')
                 ->orderBy('sort_order')
                 ->get();
 
-            foreach ($dbOptions as $opt) {
-                $options = [];
-                $defaultIcon = $opt->icon ?: 'bi-check-circle';
+            if ($guidedOptions->isNotEmpty()) {
+                foreach ($guidedOptions as $opt) {
+                    $options = [];
+                    $defaultIcon = $opt->icon ?: 'bi-check-circle';
 
-                if (!$opt->icon) {
-                    $optNameLower = strtolower($opt->name);
-                    if (str_contains($optNameLower, 'industry') || str_contains($optNameLower, 'building')) $defaultIcon = 'bi-building';
-                    elseif (str_contains($optNameLower, 'room') || str_contains($optNameLower, 'area type')) $defaultIcon = 'bi-door-closed';
-                    elseif (str_contains($optNameLower, 'area range')) $defaultIcon = 'bi-aspect-ratio';
-                    elseif (str_contains($optNameLower, 'occupancy')) $defaultIcon = 'bi-people';
-                    elseif (str_contains($optNameLower, 'health')) $defaultIcon = 'bi-shield-check';
-                    elseif (str_contains($optNameLower, 'problem')) $defaultIcon = 'bi-exclamation-triangle';
-                    elseif (str_contains($optNameLower, 'solution')) $defaultIcon = 'bi-box-seam';
-                    elseif (str_contains($optNameLower, 'budget')) $defaultIcon = 'bi-cash-stack';
-                }
-
-                if ($opt->optionValues && $opt->optionValues->count() > 0) {
-                    foreach ($opt->optionValues as $ov) {
-                        if (strtolower($ov->name) === 'any') continue;
-
-                        $valSlug = Str::slug($ov->name, '_');
-                        $label = $ov->name;
+                    if (!$opt->icon) {
                         $optNameLower = strtolower($opt->name);
+                        if (str_contains($optNameLower, 'industry') || str_contains($optNameLower, 'building')) $defaultIcon = 'bi-building';
+                        elseif (str_contains($optNameLower, 'room') || str_contains($optNameLower, 'area type')) $defaultIcon = 'bi-door-closed';
+                        elseif (str_contains($optNameLower, 'area range') || str_contains($optNameLower, 'space size')) $defaultIcon = 'bi-aspect-ratio';
+                        elseif (str_contains($optNameLower, 'airflow')) $defaultIcon = 'bi-fan';
+                        elseif (str_contains($optNameLower, 'occupancy')) $defaultIcon = 'bi-people';
+                        elseif (str_contains($optNameLower, 'health') || str_contains($optNameLower, 'needs')) $defaultIcon = 'bi-shield-check';
+                        elseif (str_contains($optNameLower, 'problem')) $defaultIcon = 'bi-exclamation-triangle';
+                        elseif (str_contains($optNameLower, 'solution') || str_contains($optNameLower, 'family')) $defaultIcon = 'bi-box-seam';
+                        elseif (str_contains($optNameLower, 'budget')) $defaultIcon = 'bi-cash-stack';
+                        elseif (str_contains($optNameLower, 'requirement')) $defaultIcon = 'bi-tools';
+                    }
 
-                        if (str_contains($optNameLower, 'area range') && !str_contains(strtolower($ov->name), 'm²') && !str_contains(strtolower($ov->name), 'm2') && !str_contains(strtolower($ov->name), 'sq')) {
-                            $label .= ' m²';
-                        }
-                        if (str_contains($optNameLower, 'occupancy') && !str_contains(strtolower($ov->name), 'person')) {
-                            $label .= ($ov->name === '1' ? ' Person' : ' Persons');
-                        }
+                    if ($opt->optionValues && $opt->optionValues->count() > 0) {
+                        foreach ($opt->optionValues as $ov) {
+                            if (strtolower($ov->name) === 'any') continue;
 
+                            $valSlug = Str::slug($ov->name, '_');
+                            $label = $ov->name;
+
+                            $options[] = [
+                                'label'       => $label,
+                                'icon'        => $ov->icon ?: $defaultIcon,
+                                'val'         => $valSlug,
+                                'explanation' => $ov->explanation ?: '',
+                            ];
+                        }
+                    }
+
+                    if ($opt->has_unknown_option) {
                         $options[] = [
-                            'label' => $label,
-                            'icon'  => $ov->icon ?: $defaultIcon,
-                            'val'   => $valSlug,
+                            'label'       => $opt->unknown_option_label ?: "I don't know / Not sure",
+                            'icon'        => 'bi-question-circle',
+                            'val'         => 'any',
+                            'explanation' => 'Unsure / No specific constraint specified.',
                         ];
                     }
+
+                    $stepNumVal = (int) ($opt->guided_step_number ?: $stepNum);
+                    $sidebarName = match ($stepNumVal) {
+                        1 => 'APPLICATION',
+                        2 => 'PRODUCT FAMILY',
+                        3 => 'SPACE SIZE',
+                        4 => 'AIRFLOW',
+                        5 => 'AIR QUALITY NEEDS',
+                        6 => 'REQUIREMENTS',
+                        7 => 'BUDGET',
+                        8 => 'MATCHED SOLUTIONS',
+                        9 => 'PRODUCT RESULT',
+                        10 => 'MATCH SUMMARY',
+                        default => strtoupper($opt->name),
+                    };
+
+                    $stepTitle = $opt->guided_subtitle ?: ('Select ' . $opt->name);
+                    $guidedQuestion = $opt->guided_question ?: ($stepNumVal . '. ' . strtoupper($opt->name));
+
+                    $data[] = [
+                        'stepNum'              => $stepNumVal,
+                        'stepId'               => Str::slug($opt->name, '_'),
+                        'type'                 => $opt->type ?: 'radio',
+                        'stepType'             => $opt->type ?: 'radio',
+                        'stepName'             => $sidebarName,
+                        'sidebar_name'         => $sidebarName,
+                        'stepTitle'            => $stepTitle,
+                        'stepTag'              => $sidebarName,
+                        'guided_question'      => $guidedQuestion,
+                        'guided_subtitle'      => $opt->guided_subtitle,
+                        'has_unknown_option'   => (bool) $opt->has_unknown_option,
+                        'unknown_option_label' => $opt->unknown_option_label,
+                        'options'              => $options,
+                    ];
+
+                    $stepNum++;
                 }
-                $options[] = ['label' => 'Any', 'icon' => 'bi-grid', 'val' => 'any'];
 
-                $data[] = [
-                    'stepNum'   => $stepNum,
-                    'stepId'    => Str::slug($opt->name, '_'),
-                    'type'      => $opt->type ?: 'radio',
-                    'stepType'  => $opt->type ?: 'radio',
-                    'stepName'  => $stepNum . '. ' . strtoupper($opt->name),
-                    'stepTitle' => 'Select ' . $opt->name,
-                    'stepTag'   => strtoupper($opt->name),
-                    'options'   => $options,
-                ];
+                $existingStepNums = collect($data)->pluck('stepNum')->toArray();
 
-                $stepNum++;
+                // Step 8: Matched Solutions (Mockup Page 8)
+                if (!in_array(8, $existingStepNums)) {
+                    $data[] = [
+                        'stepNum'              => 8,
+                        'stepId'               => 'matched_solutions',
+                        'type'                 => 'radio',
+                        'stepType'             => 'radio',
+                        'stepName'             => 'MATCHED SOLUTIONS',
+                        'sidebar_name'         => 'MATCHED SOLUTIONS',
+                        'stepTitle'            => 'YOUR MATCHED SOLUTIONS',
+                        'stepTag'              => 'MATCHED PRODUCT',
+                        'guided_question'      => '08 YOUR MATCHED SOLUTIONS',
+                        'guided_subtitle'      => 'MATCHED PRODUCT',
+                        'has_unknown_option'   => false,
+                        'options'              => [
+                            ['label' => 'BROAD FE6 AirPro Fresh', 'icon' => 'bi-box-seam', 'val' => 'broad_fe6_airpro_fresh', 'explanation' => 'Target Product matched to your exact room and ventilation profile.'],
+                            ['label' => 'Compare Products', 'icon' => 'bi-arrow-left-right', 'val' => 'compare_products', 'explanation' => 'Side-by-side technical specification comparison.'],
+                            ['label' => 'View Full Specifications', 'icon' => 'bi-file-earmark-text', 'val' => 'view_full_specifications', 'explanation' => 'CADR, power consumption, sound level, and dimensions.'],
+                            ['label' => 'Check Coverage & Airflow', 'icon' => 'bi-aspect-ratio', 'val' => 'check_coverage_airflow', 'explanation' => 'Verify m³/h ratings against your space dimensions.'],
+                            ['label' => 'View Features / Filters', 'icon' => 'bi-shield-check', 'val' => 'view_features_filters', 'explanation' => 'HEPA H13, electrostatic cleanable filter, and heat recovery core.'],
+                            ['label' => 'Price & Availability', 'icon' => 'bi-tag', 'val' => 'price_availability', 'explanation' => 'Direct pricing, stock status, and shipping information.'],
+                        ],
+                    ];
+                }
+
+                // Step 9: Product Result (Mockup Page 9)
+                if (!in_array(9, $existingStepNums)) {
+                    $data[] = [
+                        'stepNum'              => 9,
+                        'stepId'               => 'product_result',
+                        'type'                 => 'radio',
+                        'stepType'             => 'radio',
+                        'stepName'             => 'PRODUCT RESULT',
+                        'sidebar_name'         => 'PRODUCT RESULT',
+                        'stepTitle'            => 'BROAD FE6 AIRPRO FRESH',
+                        'stepTag'              => 'PRODUCT RESULT / REVIEW',
+                        'guided_question'      => '09 BROAD FE6 AIRPRO FRESH',
+                        'guided_subtitle'      => 'PRODUCT RESULT / REVIEW',
+                        'has_unknown_option'   => false,
+                        'options'              => [
+                            ['label' => 'View Product Details', 'icon' => 'bi-eye', 'val' => 'view_product_details', 'explanation' => 'Open complete product datasheet and overview.'],
+                            ['label' => 'Compare Selected Products', 'icon' => 'bi-columns', 'val' => 'compare_selected_products', 'explanation' => 'Review alternatives and related accessories.'],
+                            ['label' => 'Buy Now', 'icon' => 'bi-bag-check', 'val' => 'buy_now', 'explanation' => 'Proceed directly to checkout.'],
+                            ['label' => 'Request a Quote', 'icon' => 'bi-chat-left-dots', 'val' => 'request_quote', 'explanation' => 'Get a specialized quotation for your project.'],
+                            ['label' => 'Talk to an Expert', 'icon' => 'bi-headset', 'val' => 'talk_expert', 'explanation' => 'Consult with our HVAC air quality engineers.'],
+                            ['label' => 'Change My Answers', 'icon' => 'bi-arrow-counterclockwise', 'val' => 'change_answers', 'explanation' => 'Return to earlier steps to refine criteria.'],
+                        ],
+                    ];
+                }
+
+                // Step 10: Match Summary (Mockup Page 10)
+                if (!in_array(10, $existingStepNums)) {
+                    $data[] = [
+                        'stepNum'              => 10,
+                        'stepId'               => 'match_summary',
+                        'type'                 => 'radio',
+                        'stepType'             => 'radio',
+                        'stepName'             => 'MATCH SUMMARY',
+                        'sidebar_name'         => 'MATCH SUMMARY',
+                        'stepTitle'            => 'WHY FE6 MATCHED',
+                        'stepTag'              => 'MATCH SUMMARY',
+                        'guided_question'      => '10 WHY FE6 MATCHED',
+                        'guided_subtitle'      => 'MATCH SUMMARY',
+                        'has_unknown_option'   => false,
+                        'options'              => [
+                            ['label' => 'Application: Single Room', 'icon' => 'bi-door-closed', 'val' => 'app_single_room', 'explanation' => 'Ideal fit for single room and apartment environments.'],
+                            ['label' => 'Family: Fresh Air & Ventilation', 'icon' => 'bi-arrow-left-right', 'val' => 'fam_fresh_air', 'explanation' => 'Continuous outdoor fresh air intake with energy recovery.'],
+                            ['label' => 'Area: Not specified', 'icon' => 'bi-aspect-ratio', 'val' => 'area_not_specified', 'explanation' => 'Coverage matches broad residential space applications.'],
+                            ['label' => 'Airflow: Not specified', 'icon' => 'bi-fan', 'val' => 'airflow_not_specified', 'explanation' => 'Flexible multi-speed fan control accommodates diverse loads.'],
+                            ['label' => 'Needs: Fresh outdoor air + PM2.5', 'icon' => 'bi-shield-check', 'val' => 'needs_fresh_air_pm25', 'explanation' => 'Dual electrostatic and HEPA filtration with high PM2.5 efficiency.'],
+                            ['label' => 'Next: Verify specifications', 'icon' => 'bi-check2-circle', 'val' => 'next_verify_specs', 'explanation' => 'Confirm voltage, duct dimensions, and installation accessories.'],
+                        ],
+                    ];
+                }
+            } else {
+                // 1. Categories fallback
+                $filterCategories = ProductCategory::active()
+                    ->where('show_in_filter', 1)
+                    ->orderBy('sort_order')
+                    ->get();
+
+                if ($filterCategories->count() > 0) {
+                    $options = [];
+                    foreach ($filterCategories as $cat) {
+                        $catSlug = $cat->slug ?: Str::slug($cat->category_name, '_');
+                        $catNameLower = strtolower($cat->category_name);
+
+                        $icon = 'bi-grid';
+                        if (str_contains($catNameLower, 'solution')) $icon = 'bi-box-seam';
+                        elseif (str_contains($catNameLower, 'industry')) $icon = 'bi-building';
+                        elseif (str_contains($catNameLower, 'tech')) $icon = 'bi-cpu';
+                        elseif (str_contains($catNameLower, 'commercial')) $icon = 'bi-buildings';
+                        elseif (str_contains($catNameLower, 'residential')) $icon = 'bi-house';
+
+                        $options[] = [
+                            'label'       => $cat->category_name,
+                            'icon'        => $icon,
+                            'val'         => $catSlug,
+                            'explanation' => 'Targeting category: ' . $cat->category_name,
+                        ];
+                    }
+                    $options[] = ['label' => 'Any', 'icon' => 'bi-grid', 'val' => 'any', 'explanation' => 'Any category'];
+
+                    $data[] = [
+                        'stepNum'   => $stepNum,
+                        'stepId'    => 'category',
+                        'type'      => 'radio',
+                        'stepType'  => 'radio',
+                        'stepName'  => $stepNum . '. CATEGORIES',
+                        'stepTitle' => 'Select Category',
+                        'stepTag'   => 'CATEGORY SELECTION',
+                        'options'   => $options,
+                    ];
+                    $stepNum++;
+                }
+
+                // 2. Dynamic DB Filter Options
+                $dbOptions = FilterOption::with(['optionValues' => function ($q) {
+                    $q->where('status', 1)->orderBy('sort_order');
+                }])
+                    ->where('status', 1)
+                    ->where('show_in_filter', 1)
+                    ->whereNotIn('name', ['Color', 'Size', 'Material'])
+                    ->orderBy('sort_order')
+                    ->get();
+
+                foreach ($dbOptions as $opt) {
+                    $options = [];
+                    $defaultIcon = $opt->icon ?: 'bi-check-circle';
+
+                    if (!$opt->icon) {
+                        $optNameLower = strtolower($opt->name);
+                        if (str_contains($optNameLower, 'industry') || str_contains($optNameLower, 'building')) $defaultIcon = 'bi-building';
+                        elseif (str_contains($optNameLower, 'room') || str_contains($optNameLower, 'area type')) $defaultIcon = 'bi-door-closed';
+                        elseif (str_contains($optNameLower, 'area range')) $defaultIcon = 'bi-aspect-ratio';
+                        elseif (str_contains($optNameLower, 'occupancy')) $defaultIcon = 'bi-people';
+                        elseif (str_contains($optNameLower, 'health')) $defaultIcon = 'bi-shield-check';
+                        elseif (str_contains($optNameLower, 'problem')) $defaultIcon = 'bi-exclamation-triangle';
+                        elseif (str_contains($optNameLower, 'solution')) $defaultIcon = 'bi-box-seam';
+                        elseif (str_contains($optNameLower, 'budget')) $defaultIcon = 'bi-cash-stack';
+                    }
+
+                    if ($opt->optionValues && $opt->optionValues->count() > 0) {
+                        foreach ($opt->optionValues as $ov) {
+                            if (strtolower($ov->name) === 'any') continue;
+
+                            $valSlug = Str::slug($ov->name, '_');
+                            $label = $ov->name;
+                            $optNameLower = strtolower($opt->name);
+
+                            if (str_contains($optNameLower, 'area range') && !str_contains(strtolower($ov->name), 'm²') && !str_contains(strtolower($ov->name), 'm2') && !str_contains(strtolower($ov->name), 'sq')) {
+                                $label .= ' m²';
+                            }
+                            if (str_contains($optNameLower, 'occupancy') && !str_contains(strtolower($ov->name), 'person')) {
+                                $label .= ($ov->name === '1' ? ' Person' : ' Persons');
+                            }
+
+                            $options[] = [
+                                'label'       => $label,
+                                'icon'        => $ov->icon ?: $defaultIcon,
+                                'val'         => $valSlug,
+                                'explanation' => $ov->explanation ?: '',
+                            ];
+                        }
+                    }
+                    $options[] = ['label' => 'Any', 'icon' => 'bi-grid', 'val' => 'any', 'explanation' => 'Any'];
+
+                    $data[] = [
+                        'stepNum'   => $stepNum,
+                        'stepId'    => Str::slug($opt->name, '_'),
+                        'type'      => $opt->type ?: 'radio',
+                        'stepType'  => $opt->type ?: 'radio',
+                        'stepName'  => $stepNum . '. ' . strtoupper($opt->name),
+                        'stepTitle' => 'Select ' . $opt->name,
+                        'stepTag'   => strtoupper($opt->name),
+                        'options'   => $options,
+                    ];
+
+                    $stepNum++;
+                }
             }
 
             $totalSteps = max(count($data), 1);
@@ -839,6 +1026,13 @@ class ProductFilterService
         $grade = $p->productAttributes->first(fn($a) => stripos($a->name, 'Grade') !== false || stripos($a->name, 'Filter') !== false)?->details ?? 'HEPA H13';
         $desc = function_exists('getLimitedText') ? \getLimitedText(strip_tags($p->description?->description ?? ''), 140) : '';
 
+        $filterOptionValues = $p->productFilterOptions?->map(function ($pfo) {
+            return [
+                'option_name' => $pfo->filterOption?->name,
+                'value_name'  => $pfo->filterOptionValue?->name,
+            ];
+        })->values()->toArray() ?? [];
+
         return [
             'id'                => $p->id,
             'name'              => $p->name,
@@ -856,6 +1050,7 @@ class ProductFilterService
             'cadr'              => $cadr,
             'filter_grade'      => $grade,
             'quantity'          => (int) ($p->quantity ?? 0),
+            'filter_options'    => $filterOptionValues,
         ];
     }
 
@@ -939,6 +1134,8 @@ class ProductFilterService
             }])
                 ->where('status', 1)
                 ->where('show_in_filter', 1)
+                ->where('show_in_catalog', 1)
+                ->where('show_in_guided_finder', 0)
                 ->whereNotIn('name', ['Color', 'Size', 'Material'])
                 ->orderBy('sort_order')
                 ->get();
@@ -953,10 +1150,33 @@ class ProductFilterService
     public function getActiveFilterCategories(): Collection
     {
         return Cache::remember('filter_active_categories', 3600, function () {
-            return ProductCategory::active()
+            $categories = ProductCategory::active()
                 ->where('show_in_filter', 1)
                 ->orderBy('sort_order')
                 ->get();
+
+            // Fallback: If no categories have show_in_filter explicitly set to 1,
+            // fallback to active subcategories under main 'products' category, or active root categories
+            if ($categories->isEmpty()) {
+                $productsParent = ProductCategory::where('slug', 'products')->first();
+                if ($productsParent) {
+                    $categories = ProductCategory::active()
+                        ->where('parent_id', $productsParent->id)
+                        ->orderBy('sort_order')
+                        ->get();
+                }
+
+                if ($categories->isEmpty()) {
+                    $categories = ProductCategory::active()
+                        ->where(function ($q) {
+                            $q->whereNull('parent_id')->orWhere('parent_id', 0);
+                        })
+                        ->orderBy('sort_order')
+                        ->get();
+                }
+            }
+
+            return $categories;
         });
     }
 

@@ -4,7 +4,7 @@
     $wordCount = str_word_count($plainText);
     $readTimeMinutes = max(1, (int) ceil($wordCount / 200));
     $lastUpdatedIso = $page->updated_at ? $page->updated_at->toIso8601String() : now()->toIso8601String();
-    $lastUpdatedFormatted = $page->updated_at ? $page->updated_at->format('M d, Y') : now()->format('M d, Y');
+    $lastUpdatedFormatted = $page->updated_at ? $page->updated_at->format('F Y') : now()->format('F Y');
     $otherPages =
         isset($otherPages) && $otherPages->isNotEmpty()
             ? $otherPages
@@ -22,188 +22,203 @@
     'categoryName' => $page->breadcrumb ?? 'Information Page',
 ])
 
+@pushOnce('styles')
+    <link href="{{ theme_asset('css/legal.css') }}" rel="stylesheet">
+@endpushOnce
+
 <!-- =========================================================================
-| Standard Editorial CMS Page Layout
+| Standard Editorial CMS Page Hero Banner
 | ========================================================================= -->
-<section class="page-hero-banner position-relative overflow-hidden py-5"
-    style="background: linear-gradient(135deg, #071916 0%, #0c332e 50%, #00786E 100%); color: #ffffff;">
-    <div class="position-absolute top-0 end-0 w-50 h-100 opacity-10 pointer-events-none"
-        style="background: radial-gradient(circle at 70% 30%, #48cfad 0%, transparent 60%);"></div>
-
-    <div class="container main-container position-relative z-1 py-3 py-md-4">
-        <nav aria-label="breadcrumb" class="mb-3">
-            <ol class="breadcrumb mb-0 align-items-center" style="--bs-breadcrumb-divider: '›';">
-                <li class="breadcrumb-item">
-                    <a href="{{ route('home') }}" class="text-white-50 text-decoration-none hover-white fs-14">
-                        <i class="bi bi-house-door me-1"></i> Home
-                    </a>
-                </li>
-                @if (!empty($page->breadcrumb))
-                    <li class="breadcrumb-item text-white-50 fs-14">{{ $page->breadcrumb }}</li>
-                @endif
-                <li class="breadcrumb-item active text-white fw-semibold fs-14" aria-current="page">
-                    {{ $page->page_title }}</li>
-            </ol>
-        </nav>
-
+<section class="legal-hero">
+    <div class="container main-container position-relative z-1">
         <div class="row align-items-center">
             <div class="col-lg-9">
-                <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-                    <span
-                        class="badge bg-white bg-opacity-15 text-white px-3 py-2 rounded-pill fw-medium fs-13 d-inline-flex align-items-center">
-                        <i class="bi bi-file-earmark-text me-2"></i> {{ $page->breadcrumb ?? 'Information Page' }}
-                    </span>
-                    <span
-                        class="badge bg-white bg-opacity-15 text-white px-3 py-2 rounded-pill fs-12 d-inline-flex align-items-center">
-                        <i class="bi bi-clock me-1"></i> {{ $readTimeMinutes }} min read
-                    </span>
+                <div class="legal-hero-badge">
+                    <i class="bi bi-file-earmark-richtext"></i>
+                    <span>{{ !empty($page->breadcrumb) ? strtoupper($page->breadcrumb) . ' • AIRE' : 'EDITORIAL &bull; AIRE PUBLICATIONS' }}</span>
                 </div>
-                <h1 class="display-5 fw-bold text-white mb-3">{{ $page->page_title }}</h1>
-                @if (!empty($page->short_des))
-                    <p class="lead text-white-50 mb-0 fs-18" style="max-width: 820px; line-height: 1.6;">
+                <h1 class="legal-hero-title">{{ $page->page_title }}</h1>
+                <p class="legal-hero-lead">
+                    @if (!empty($page->short_des))
                         {{ $page->short_des }}
-                    </p>
-                @endif
+                    @else
+                        Discover comprehensive documentation, architectural overviews, and detailed resources by AIRE Industries.
+                    @endif
+                </p>
             </div>
-            <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
-                <span class="badge bg-dark bg-opacity-40 text-white-50 px-3 py-2 rounded-pill fs-12">
-                    <i class="bi bi-shield-check text-success me-1"></i> Verified IAQ Content
+            <div class="col-lg-3 text-lg-end mt-4 mt-lg-0">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill"
+                    style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);">
+                    <i class="bi bi-patch-check-fill text-info fs-5"></i>
+                    <div class="text-start">
+                        <small class="d-block text-white-50 fs-11 text-uppercase fw-bold"
+                            style="letter-spacing: 0.5px;">Document Status</small>
+                        <span
+                            class="text-white fw-bold fs-13">{{ $page->status ?? 1 ? 'Verified IAQ Content' : 'Draft / Inactive' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- =========================================================================
+| Breadcrumbs & Action Toolbar Strip
+| ========================================================================= -->
+<section class="legal-toolbar-bar">
+    <div class="container main-container">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb legal-breadcrumb align-items-center mb-0" style="--bs-breadcrumb-divider: '›';">
+                    <li class="breadcrumb-item">
+                        <a href="{{ route('home') }}">
+                            <i class="bi bi-house-door me-1"></i> Home
+                        </a>
+                    </li>
+                    @if (!empty($page->breadcrumb))
+                        <li class="breadcrumb-item">
+                            <span class="text-muted">{{ $page->breadcrumb }}</span>
+                        </li>
+                    @endif
+                    <li class="breadcrumb-item active" aria-current="page">{{ $page->page_title }}</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <span class="text-muted fs-13 d-flex align-items-center gap-1">
+                    <i class="bi bi-clock-history"></i> Last updated:
+                    <time datetime="{{ $lastUpdatedIso }}"
+                        class="fw-semibold text-dark">{{ $lastUpdatedFormatted }}</time>
+                </span>
+                <span
+                    class="badge bg-light text-secondary border px-2 py-1 fs-12 fw-normal d-inline-flex align-items-center gap-1">
+                    <i class="bi bi-book"></i> ~{{ $readTimeMinutes }} min read
                 </span>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Standard Body & Sidebar -->
-<main class="container main-container py-5">
+<!-- =========================================================================
+| Main Content & Sidebar Layout
+| ========================================================================= -->
+<main class="container main-container legal-layout-wrap">
     <div class="row g-4 g-lg-5">
 
-        <!-- Left: Page Body & Media -->
-        <div class="col-lg-8">
-            <article class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <!-- Left Column: Page Body & Media -->
+        <div class="col-lg-8 col-xl-8">
+            <article class="legal-content-card">
 
+                <!-- Featured Image (if uploaded) -->
                 @if (!empty($page->f_image))
-                    <div class="page-featured-media mb-4 rounded-4 overflow-hidden position-relative shadow-sm"
-                        style="background-color: #f8fafc;">
-                        <img src="{{ getImageUrl($page->f_image, 900, 480, ['fit' => true]) }}"
-                            alt="{{ $page->page_title }}" class="img-fluid w-100 object-fit-cover"
-                            style="max-height: 440px; min-height: 240px; aspect-ratio: 16/9;" width="900"
-                            height="480" loading="eager" fetchpriority="high">
+                    <div class="mb-4 rounded-4 overflow-hidden position-relative shadow-sm"
+                        style="max-height: 420px; background-color: #f1f5f9;">
+                        <img src="{{ getImageUrl($page->f_image) }}" alt="{{ $page->page_title }}"
+                            class="img-fluid w-100 h-100 object-fit-cover" width="1200" height="420"
+                            decoding="async" fetchpriority="high">
                     </div>
                 @endif
 
-                <div class="aire-page-prose text-dark">
-                    @if (!empty($page->page_description))
+                <!-- In Summary Box -->
+                @if (!empty($page->short_des))
+                    <div class="legal-summary-box">
+                        <h4><i class="bi bi-info-circle-fill text-primary"></i> In Summary</h4>
+                        <p>{{ $page->short_des }}</p>
+                    </div>
+                @endif
+
+                <!-- CMS Dynamic HTML Content -->
+                @if (!empty($page->page_description) && trim(strip_tags($page->page_description)) !== '')
+                    <div class="aire-page-prose mb-5">
                         {!! $page->page_description !!}
-                    @else
-                        <div class="alert alert-light border rounded-3 p-4 text-center text-muted">
-                            <i class="bi bi-info-circle fs-3 d-block mb-2 text-primary"></i>
-                            <p class="mb-0">Page content is being updated by our editorial team. Please check back
-                                soon.</p>
-                        </div>
-                    @endif
-                </div>
+                    </div>
+                @else
+                    <div class="alert alert-light border rounded-3 p-4 text-center text-muted mb-5">
+                        <i class="bi bi-info-circle fs-3 d-block mb-2 text-primary"></i>
+                        <p class="mb-0">Page content is being updated by our editorial team. Please check back soon.</p>
+                    </div>
+                @endif
 
+                <!-- Footer / Share & Export Bar -->
                 <hr class="my-5 border-secondary border-opacity-10">
-
                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
                     @include('themes.default.partials.share_buttons', [
                         'shareUrl' => $canonicalUrl,
                         'shareTitle' => $page->page_title,
-                        'shareLabel' => 'Share:',
+                        'shareLabel' => 'Share Page:',
                     ])
 
-                    <time datetime="{{ $lastUpdatedIso }}" class="text-muted fs-13 d-inline-flex align-items-center">
-                        <i class="bi bi-clock-history me-1"></i> Last updated: {{ $lastUpdatedFormatted }}
-                    </time>
+                    <div class="text-muted fs-13">
+                        <i class="bi bi-shield-check me-1"></i> Official AIRE Industries Publication
+                    </div>
                 </div>
 
             </article>
         </div>
 
-        <!-- Right: Standard Sidebar Navigation & Support Widgets -->
-        <aside class="col-lg-4">
-            <div class="d-flex flex-column gap-4 sticky-top" style="top: 100px; z-index: 10;">
+        <!-- Right Column: Contextual Navigation & Support Widgets -->
+        <aside class="col-lg-4 col-xl-4">
+            <div class="legal-sidebar-sticky" data-lenis-prevent>
 
                 @if (isset($otherPages) && $otherPages->isNotEmpty())
-                    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <div class="rounded-3 bg-primary bg-opacity-10 p-2 text-primary d-inline-flex">
-                                <i class="bi bi-collection fs-5"></i>
-                            </div>
-                            <h5 class="fw-bold mb-0 fs-16 text-dark">Related Information</h5>
+                    <!-- Related Pages Navigation Box -->
+                    <nav class="legal-nav-box" aria-label="Related Pages Navigation">
+                        <div class="legal-nav-header">
+                            <i class="bi bi-collection"></i> Related Resources
                         </div>
-
-                        <div class="list-group list-group-flush border-0">
+                        <ul class="legal-menu-list">
                             @foreach ($otherPages as $item)
-                                <a href="{{ route('page.show', $item->slug) }}"
-                                    class="list-group-item list-group-item-action px-0 py-2 border-0 d-flex align-items-center justify-content-between text-secondary hover-primary transition-all {{ $item->slug === $page->slug ? 'fw-bold text-primary active-link' : '' }}">
-                                    <span class="d-flex align-items-center gap-2">
-                                        <i
-                                            class="bi bi-chevron-right fs-12 {{ $item->slug === $page->slug ? 'text-primary' : 'text-muted' }}"></i>
-                                        {{ $item->page_title }}
-                                    </span>
-                                    @if (!empty($item->breadcrumb))
-                                        <span
-                                            class="badge bg-light text-muted fs-11 fw-normal">{{ $item->breadcrumb }}</span>
-                                    @endif
-                                </a>
+                                @php
+                                    $isActive = $item->slug === ($page->slug ?? '');
+                                @endphp
+                                <li>
+                                    <a href="{{ route('page.show', $item->slug) }}"
+                                        class="legal-menu-item {{ $isActive ? 'active' : '' }}">
+                                        <i class="bi bi-file-earmark-text menu-icon"></i>
+                                        <span>{{ $item->page_title }}</span>
+                                        <i class="bi bi-chevron-right chevron"></i>
+                                    </a>
+                                </li>
                             @endforeach
-                        </div>
-                    </div>
+                        </ul>
+                    </nav>
                 @endif
 
-                <div class="card border-0 shadow-sm rounded-4 p-4 text-white overflow-hidden position-relative"
-                    style="background: linear-gradient(135deg, #09201c 0%, #00786E 100%);">
-                    <div class="position-relative z-1">
-                        <span
-                            class="badge bg-white bg-opacity-20 text-white px-3 py-1 rounded-pill fs-12 mb-3 fw-medium">
-                            <i class="bi bi-headset me-1"></i> Direct Assistance
-                        </span>
-                        <h5 class="fw-bold mb-2">Need Expert Clean Air Advice?</h5>
-                        <p class="text-white-50 fs-14 mb-4">
-                            Our team of HVAC & certified air filtration engineers is available to help design your
-                            residential or commercial IAQ setup.
-                        </p>
-
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('contact') }}"
-                                class="btn btn-light fw-bold text-dark rounded-pill py-2 shadow-sm">
-                                <i class="bi bi-envelope-fill me-1 text-primary"></i> Contact Specialist
-                            </a>
-                            <a href="{{ route('products.index') }}" class="btn btn-outline-light rounded-pill py-2">
-                                <i class="bi bi-grid-fill me-1"></i> Explore Solutions
-                            </a>
-                        </div>
+                <!-- Direct Support Card -->
+                <div class="legal-support-card mb-4">
+                    <div class="legal-support-icon">
+                        <i class="bi bi-headset"></i>
                     </div>
+                    <h5>Need Expert Assistance?</h5>
+                    <p>Have questions about clean room air purification, smart building HVAC integration, or custom installations?</p>
+                    <a href="{{ route('contact') }}" class="legal-support-btn">
+                        <i class="bi bi-envelope-fill"></i> Speak With a Specialist
+                    </a>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                    <h6 class="fw-bold text-dark fs-14 text-uppercase mb-3" style="letter-spacing: 0.5px;">The Aire
-                        Commitment</h6>
-                    <div class="d-flex flex-column gap-3 fs-14 text-secondary">
+                <!-- AIRE Quality Promise Card -->
+                <div class="card border border-light-subtle rounded-4 p-4 bg-white shadow-sm">
+                    <h6 class="fw-bold text-dark fs-13 text-uppercase mb-3" style="letter-spacing: 0.8px;">The AIRE Quality Promise</h6>
+                    <div class="d-flex flex-column gap-3 fs-13 text-secondary">
                         <div class="d-flex align-items-start gap-3">
-                            <i class="bi bi-patch-check-fill text-success fs-5"></i>
+                            <i class="bi bi-patch-check-fill text-success fs-5 mt-1"></i>
                             <div>
-                                <strong class="d-block text-dark">Medical-Grade HEPA</strong>
-                                <span class="fs-13 text-muted">99.97% particulate capture efficiency down to 0.1
-                                    microns.</span>
+                                <strong class="d-block text-dark fw-semibold">Medical-Grade Standard</strong>
+                                <span class="text-muted fs-12">99.97% particulate capture efficiency down to 0.1 microns.</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
-                            <i class="bi bi-truck text-primary fs-5"></i>
+                            <i class="bi bi-shield-lock-fill text-primary fs-5 mt-1"></i>
                             <div>
-                                <strong class="d-block text-dark">Fast Nationwide Delivery</strong>
-                                <span class="fs-13 text-muted">Direct insured doorstep shipping for all units and
-                                    filter kits.</span>
+                                <strong class="d-block text-dark fw-semibold">Verified IAQ Performance</strong>
+                                <span class="text-muted fs-12">Certified lab tested and continuous sensor calibration.</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
-                            <i class="bi bi-shield-lock-fill text-info fs-5"></i>
+                            <i class="bi bi-award-fill text-warning fs-5 mt-1"></i>
                             <div>
-                                <strong class="d-block text-dark">Official Warranty</strong>
-                                <span class="fs-13 text-muted">Full manufacturer replacement and maintenance
-                                    coverage.</span>
+                                <strong class="d-block text-dark fw-semibold">Full Manufacturer Coverage</strong>
+                                <span class="text-muted fs-12">Complete warranty protection and direct engineering support.</span>
                             </div>
                         </div>
                     </div>

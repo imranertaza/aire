@@ -63,6 +63,7 @@
                 <label for="edit-link-type">Link Type</label>
                 <select id="edit-link-type" v-model="editForm.link_type" class="form-control form-control-sm">
                   <option value="">-- Select Type --</option>
+                  <option value="product_category">Product Category</option>
                   <option value="page">Page</option>
                   <option value="category">Post Category</option>
                   <option value="url">URL</option>
@@ -70,6 +71,21 @@
               </div>
 
               <!-- Conditional fields -->
+              <div v-if="editForm.link_type === 'product_category'" class="form-group">
+                <label for="edit-product-category">Product Category</label>
+                <Multiselect v-model="editForm.product_category_id" :options="productCategoriesOptions"
+                  :reduce="option => option.value" placeholder="Select product category" searchable />
+
+                <!-- Quick View Checkbox -->
+                <div class="icheck-primary mt-2">
+                  <input id="edit-has-quick-view" v-model="editForm.has_quick_view" type="checkbox" class="form-check-input" />
+                  <label for="edit-has-quick-view" class="form-check-label font-weight-bold">Quick View</label>
+                  <small class="form-text text-muted d-block">
+                    When checked, hovering on this menu item will display its child categories and products in a Quick View MegaMenu.
+                  </small>
+                </div>
+              </div>
+
               <div v-if="editForm.link_type === 'page'" class="form-group">
                 <label for="edit-page">Page</label>
                 <Multiselect v-model="editForm.page_id" :options="pagesOptions" :reduce="option => option.value"
@@ -180,6 +196,8 @@ const updateName = async (item) => {
       name: item.name,
       icon: item.icon,
       link_type: item.link_type,
+      product_category_id: item.link_type === 'product_category' && item.product_category_id ? Number(item.product_category_id) : null,
+      has_quick_view: item.link_type === 'product_category' ? Boolean(item.has_quick_view) : false,
       page_id: item.page_id || null,
       category_id: item.category_id || null,
       url: item.url || null,
@@ -252,6 +270,34 @@ const onReorder = async () => {
 /**
  * Fetch categories for dropdown
  */
+// Product Categories for link_type = product_category
+const productCategories = ref([]);
+
+/**
+ * Fetch product categories for dropdown
+ */
+const fetchProductCategories = async () => {
+  try {
+    const res = await axios.get('/api/product-categories/all');
+    productCategories.value = res.data.data || [];
+  } catch (error) {
+    console.error('Failed to load product categories', error);
+  }
+};
+
+/**
+ * Product Category options for multiselect
+ */
+const productCategoriesOptions = computed(() => {
+  return [
+    { label: '-- None --', value: '' },
+    ...productCategories.value.map(cat => ({
+      label: cat.category_name,
+      value: cat.id
+    }))
+  ];
+});
+
 const fetchCategories = async () => {
   try {
     const res = await axios.get('/api/categories?all=1');
@@ -304,6 +350,7 @@ const pagesOptions = computed(() => {
  */
 onMounted(async () => {
   menuItems.value = await fetchMenuItems(menuId)
+  fetchProductCategories()
   fetchCategories()
   fetchPages()
 })
@@ -315,6 +362,8 @@ const editForm = ref({
   icon: '',
   url: '',
   link_type: '',
+  product_category_id: '',
+  has_quick_view: false,
   page_id: '',
   category_id: '',
   enabled: true
@@ -438,6 +487,8 @@ const openEditPanel = (item) => {
     icon: item.icon || '',
     link_type: item.link_type || '',
     url: item.url || '',
+    product_category_id: item.product_category_id || '',
+    has_quick_view: Boolean(item.has_quick_view),
     category_id: item.category_id || '',
     page_id: item.page_id || '',
     enabled: item.enabled !== false
@@ -463,6 +514,8 @@ const applyEdit = async () => {
       name: editForm.value.name,
       icon: editForm.value.icon,
       link_type: editForm.value.link_type,
+      product_category_id: editForm.value.link_type === 'product_category' && editForm.value.product_category_id ? Number(editForm.value.product_category_id) : null,
+      has_quick_view: editForm.value.link_type === 'product_category' ? Boolean(editForm.value.has_quick_view) : false,
       page_id: editForm.value.page_id || null,
       category_id: editForm.value.category_id || null,
       url: editForm.value.url || null,

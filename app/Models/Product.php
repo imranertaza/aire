@@ -50,10 +50,16 @@ class Product extends Model
         });
 
         static::saved(function ($product) {
+            ProductCategory::clearCategoryCache();
             static::clearProductCache($product);
         });
 
+        static::deleting(function ($product) {
+            ProductCategory::clearCategoryCache();
+        });
+
         static::deleted(function ($product) {
+            ProductCategory::clearCategoryCache();
             static::clearProductCache($product);
         });
     }
@@ -63,12 +69,23 @@ class Product extends Model
      */
     public static function clearProductCache(?Product $product = null): void
     {
+        // Bust all category caches via ProductCategory helper
+        ProductCategory::clearCategoryCache();
+
         // 1. Homepage consolidated & fallback sections
         Cache::forget(self::HOME_SECTIONS_CACHE_KEY);
         Cache::forget('site_default_featured_products');
         Cache::forget('total_active_products_count');
         Cache::forget('filter_steps_data_v9');
+        Cache::forget('filter_all_option_values_v1');
+        Cache::forget('filter_active_db_options');
         Cache::forget(\App\Services\Admin\AdminDashboardService::CACHE_KEY);
+
+        // 2. Catalog & Category trees
+        Cache::forget('catalog_categories_tree_v4');
+        Cache::forget('catalog_category_pairs_v1');
+        Cache::forget('catalog_parent_categories_tree');
+        Cache::forget('filter_active_categories');
 
         // Legacy individual section keys for backward compatibility
         Cache::forget('home_best_selling_products');
@@ -78,19 +95,62 @@ class Product extends Model
         Cache::forget('home_bottom_featured_product');
         Cache::forget('home_living_hero_product');
 
-        // 2. Specific product item caches
+        // Always forget the root 'products' category page showcase cache
+        Cache::forget('catalog_category_slug_v4_products');
+
+        // 3. Specific product item caches
         if ($product) {
             if (!empty($product->slug)) {
                 Cache::forget("product_detail_{$product->slug}");
                 Cache::forget("product_landing_{$product->slug}");
             }
+            if ($product->isDirty('slug') && $product->getOriginal('slug')) {
+                Cache::forget("product_detail_{$product->getOriginal('slug')}");
+                Cache::forget("product_landing_{$product->getOriginal('slug')}");
+            }
             if (!empty($product->id)) {
                 Cache::forget("product_detail_{$product->id}");
                 Cache::forget("product_landing_{$product->id}");
                 Cache::forget("product_related_{$product->id}");
+
+                // Invalidate specific categories linked to this product and all their ancestor categories
+                try {
+                    $slugsToClear = collect(['products']);
+                    $categories = $product->categories()->with('parent')->get();
+
+                    foreach ($categories as $cat) {
+                        $curr = $cat;
+                        while ($curr) {
+                            if (!empty($curr->slug)) {
+                                $slugsToClear->push($curr->slug);
+                            }
+                            if (!empty($curr->id)) {
+                                $slugsToClear->push((string) $curr->id);
+                            }
+                            $curr = $curr->parent ?? ($curr->parent_id ? ProductCategory::find($curr->parent_id) : null);
+                        }
+                    }
+
+                    foreach ($slugsToClear->unique() as $catSlug) {
+                        Cache::forget("catalog_category_slug_v4_{$catSlug}");
+                    }
+                } catch (\Throwable $e) {
+                    // Ignore during table creation / migrations
+                }
+            }
+        } else {
+            // When no specific product is passed (bulk update/sync), clear all category slug caches
+            try {
+                $categorySlugs = ProductCategory::pluck('slug')->filter();
+                foreach ($categorySlugs as $catSlug) {
+                    Cache::forget("catalog_category_slug_v4_{$catSlug}");
+                }
+            } catch (\Throwable $e) {
+                // Ignore during table creation / migrations
             }
         }
     }
+    
 
     public function getRouteKeyName()
     {
@@ -200,7 +260,7 @@ class Product extends Model
 
     public function images()
     {
-        return $this->hasMany(ProductImage::class)->orderBy('sort_order');
+        return $this->hasMany(ProductImage::class)->orderBy('sort_order', 'asc')->orderBy('id', 'asc');
     }
 
     public function productLanding()
@@ -424,6 +484,12 @@ class Product extends Model
     public function getMainImageUrlAttribute(): string
     {
         $raw = !empty($this->main_image) ? $this->main_image : (!empty($this->image) ? $this->image : null);
+        return getImageUrl($raw);
+    }
+
+    public function getQuickviewImageUrlAttribute(): string
+    {
+        $raw = !empty($this->quickview_image) ? $this->quickview_image : (!empty($this->main_image) ? $this->main_image : (!empty($this->image) ? $this->image : null));
         return getImageUrl($raw);
     }
 

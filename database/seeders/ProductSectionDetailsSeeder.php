@@ -12,14 +12,14 @@ class ProductSectionDetailsSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         if (\Illuminate\Support\Facades\Schema::hasTable('product_applications')) {
             DB::table('product_applications')->truncate();
         }
         if (\Illuminate\Support\Facades\Schema::hasTable('product_faqs')) {
             DB::table('product_faqs')->truncate();
         }
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         $products = Product::all();
         echo "Seeding full section details for " . $products->count() . " products...\n";

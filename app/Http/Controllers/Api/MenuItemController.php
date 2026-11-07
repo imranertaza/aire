@@ -36,7 +36,7 @@ class MenuItemController extends Controller
 
         $query->whereNull('parent_id');
 
-        $items = $query->orderBy('order')->get();
+        $items = $query->orderBy('order', 'asc')->orderBy('id', 'asc')->get();
 
         $transform = function ($item) use (&$transform) {
             return [
@@ -45,9 +45,11 @@ class MenuItemController extends Controller
                 'icon'          => $item->icon,
                 'url'           => $item->getRawOriginal('url') ?? $item->url,
                 'link'          => $item->url,
-                'link_type'     => $item->link_type,
-                'category_id'   => $item->category_id,
-                'page_id'       => $item->page_id,
+                'link_type'           => $item->link_type,
+                'category_id'         => $item->category_id,
+                'product_category_id' => $item->product_category_id,
+                'has_quick_view'      => (bool) $item->has_quick_view,
+                'page_id'             => $item->page_id,
                 'order'         => $item->order,
                 'enabled'       => (bool) $item->enabled,
                 '_newChildName' => '', // Helper for frontend (e.g., adding new child inline)
@@ -69,19 +71,23 @@ class MenuItemController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'menu_id'       => 'required|exists:menus,id',
-            'name'          => 'required|string|max:255',
-            'icon'          => 'nullable|string|max:255',
-            'link_type'     => 'required|in:page,category,url',
-            'page_id'       => 'nullable|required_if:link_type,page|exists:pages,id',
-            'category_id'   => 'nullable|required_if:link_type,category|exists:categories,id',
-            'url'           => 'nullable|required_if:link_type,url|string|max:500',
-            'enabled'       => 'boolean',
-            'parent_id'     => 'nullable|exists:menu_items,id',
-            'order'         => 'nullable|integer|min:0',
+            'menu_id'             => 'required|exists:menus,id',
+            'name'                => 'required|string|max:255',
+            'icon'                => 'nullable|string|max:255',
+            'link_type'           => 'required|in:product_category,page,category,url',
+            'product_category_id' => 'nullable|required_if:link_type,product_category|exists:product_categories,id',
+            'has_quick_view'      => 'nullable|boolean',
+            'page_id'             => 'nullable|required_if:link_type,page|exists:pages,id',
+            'category_id'         => 'nullable|required_if:link_type,category|exists:categories,id',
+            'url'                 => 'nullable|required_if:link_type,url|string|max:500',
+            'enabled'             => 'boolean',
+            'parent_id'           => 'nullable|exists:menu_items,id',
+            'order'               => 'nullable|integer|min:0',
         ], [
-            'category_id.required' => 'Please select an event category.',
-            'category_id.exists' => 'The selected event category does not exist.'
+            'product_category_id.required_if' => 'Please select a product category.',
+            'product_category_id.exists'      => 'The selected product category does not exist.',
+            'category_id.required'            => 'Please select an event category.',
+            'category_id.exists'              => 'The selected event category does not exist.'
         ]);
 
         if ($validator->fails()) {
@@ -90,6 +96,7 @@ class MenuItemController extends Controller
 
         $validated = $validator->validated();
         $validated['enabled'] = $validated['enabled'] ? 1 : 0;
+        $validated['has_quick_view'] = !empty($validated['has_quick_view']) ? 1 : 0;
 
         $item = MenuItem::create($validated);
 
@@ -119,28 +126,37 @@ class MenuItemController extends Controller
     public function update(Request $request, MenuItem $menuItem)
     {
         $validator = Validator::make($request->all(), [
-            'name'          => 'sometimes|required|string|max:255',
-            'icon'          => 'nullable|string|max:255',
-            'link_type'     => 'sometimes|required|in:page,category,url',
-            'page_id'       => 'nullable|required_if:link_type,page|exists:pages,id',
-            'category_id'   => 'nullable|required_if:link_type,category|exists:categories,id',
-            'url'           => 'nullable|required_if:link_type,url|string|max:500',
-            'enabled'       => 'boolean',
-            'parent_id'     => 'nullable|exists:menu_items,id',
-            'order'         => 'nullable|integer|min:0',
+            'name'                => 'sometimes|required|string|max:255',
+            'icon'                => 'nullable|string|max:255',
+            'link_type'           => 'sometimes|required|in:product_category,page,category,url',
+            'product_category_id' => 'nullable|required_if:link_type,product_category|exists:product_categories,id',
+            'has_quick_view'      => 'nullable|boolean',
+            'page_id'             => 'nullable|required_if:link_type,page|exists:pages,id',
+            'category_id'         => 'nullable|required_if:link_type,category|exists:categories,id',
+            'url'                 => 'nullable|required_if:link_type,url|string|max:500',
+            'enabled'             => 'boolean',
+            'parent_id'           => 'nullable|exists:menu_items,id',
+            'order'               => 'nullable|integer|min:0',
         ], [
-            'page_id.required_if' => 'Please select a page.',
-            'page_id.exists' => 'The selected page does not exist.',
-            'category_id.required_if' => 'Please select a category.',
-            'category_id.exists' => 'The selected category does not exist.',
-            'url.required_if' => 'Please provide a URL.'
+            'product_category_id.required_if' => 'Please select a product category.',
+            'product_category_id.exists'      => 'The selected product category does not exist.',
+            'page_id.required_if'             => 'Please select a page.',
+            'page_id.exists'                  => 'The selected page does not exist.',
+            'category_id.required_if'         => 'Please select a category.',
+            'category_id.exists'              => 'The selected category does not exist.',
+            'url.required_if'                 => 'Please provide a URL.'
         ]);
 
         if ($validator->fails()) {
             return ApiResponse::error('Validation failed', 422, $validator->errors());
         }
 
-        $menuItem->update($validator->validated());
+        $validated = $validator->validated();
+        if (array_key_exists('has_quick_view', $validated)) {
+            $validated['has_quick_view'] = !empty($validated['has_quick_view']) ? 1 : 0;
+        }
+
+        $menuItem->update($validated);
 
         return ApiResponse::success($menuItem, 'Menu item updated successfully');
     }

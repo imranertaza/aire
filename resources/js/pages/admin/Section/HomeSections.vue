@@ -396,6 +396,13 @@ const previewUrl = ref(null);
  * Metadata definitions for homepage sections
  */
 const metaRegistry = {
+  'home_category_grid': {
+    title: 'Category Showcase & Solutions Grid',
+    badge: 'Category Showcase',
+    color: 'primary',
+    icon: 'fas fa-th-large',
+    description: 'Bento grid displaying 4 product categories and 2 full-width solutions banners with action buttons.'
+  },
   'home_benefits': {
     title: 'Pure Air, Healthy Living',
     badge: 'Benefits Showcase',
@@ -474,6 +481,7 @@ const getMeta = (name) => {
 const getSectionCategory = (name) => {
   const map = {
     'slider_section': 'Hero Banner',
+    'home_category_grid': 'Category Showcase',
     'home_benefits': 'Benefits Showcase',
     'home_best_selling': 'Product Showcase',
     'home_lifestyle': 'Lifestyle Showcase',
@@ -499,6 +507,9 @@ const getSectionBadgeClass = (name) => {
 
 const getItemSummary = (sec) => {
   const d = sec.data || {};
+  if (['home_category_grid'].includes(sec.name)) {
+    return '4 Categories & 2 Solutions Banners';
+  }
   if (['home_best_selling', 'best_selling', 'home_new_arrival', 'new_arrival', 'home_customer_favorites', 'customer_favorites'].includes(sec.name)) {
     const pCount = Array.isArray(d.product_ids) ? d.product_ids.length : 0;
     return `${pCount} Products Selected`;

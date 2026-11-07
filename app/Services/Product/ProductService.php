@@ -64,7 +64,7 @@ class ProductService
                         ->orWhere('id', is_numeric($slug) ? (int) $slug : 0);
                 })
                 ->with([
-                    'categories',
+                    'categories.parent',
                     'brand',
                     'images',
                     'description',
@@ -95,7 +95,7 @@ class ProductService
                 $catId = $product->categories->first()?->id;
                 $query = Product::where('status', 1)
                     ->where('id', '!=', $product->id)
-                    ->with(['categories', 'images', 'special']);
+                    ->with(['categories', 'images', 'special', 'freeDelivery']);
 
                 if ($catId) {
                     $query->whereHas('categories', fn($q) => $q->where('product_categories.id', $catId));
@@ -106,7 +106,7 @@ class ProductService
                 if ($related->isEmpty()) {
                     $related = Product::where('status', 1)
                         ->where('id', '!=', $product->id)
-                        ->with(['categories', 'images', 'special'])
+                        ->with(['categories', 'images', 'special', 'freeDelivery'])
                         ->take(6)
                         ->get();
                 }

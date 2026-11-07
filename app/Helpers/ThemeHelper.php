@@ -98,9 +98,7 @@ if (!function_exists('theme_css')) {
 
         $url = asset($bundleRelative) . "?v={$bundleMtime}";
         return new \Illuminate\Support\HtmlString(
-            "<link rel=\"preload\" as=\"style\" href=\"{$url}\">\n" .
-                "    <link rel=\"stylesheet\" href=\"{$url}\" media=\"print\" onload=\"this.media='all'\">\n" .
-                "    <noscript><link rel=\"stylesheet\" href=\"{$url}\"></noscript>"
+            "<link rel=\"stylesheet\" href=\"{$url}\">"
         );
     }
 }

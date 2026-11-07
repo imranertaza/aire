@@ -151,7 +151,9 @@ Route::middleware([EnsureAdminOrSecretKey::class, 'throttle:30,1'])->group(funct
 Route::controller(\App\Http\Controllers\StorefrontController::class)->group(function () {
     Route::get('/', 'index')->name('home');
     Route::get('/about', 'about')->name('about');
-    Route::get('/docs', 'docs')->name('docs');
+    Route::get('/resources', 'resources')->name('resources');
+    Route::get('/resources/category/{slug}', 'resourceCategory')->name('resources.category');
+    Route::get('/resources/download/{id}', 'downloadResource')->name('resources.download');
     Route::get('/contact', 'contact')->name('contact');
     Route::post('/contact', 'submitContact')->name('contact.submit');
     Route::get('/page/{slug}', 'pageDetails')->name('page.show');
@@ -168,11 +170,14 @@ Route::controller(\App\Http\Controllers\StorefrontController::class)->group(func
 Route::controller(\App\Http\Controllers\ProductController::class)->group(function () {
     Route::get('/categories', 'categories')->name('categories');
     Route::get('/products', 'categories')->name('products.index');
+    Route::get('/category/{slug}/all', 'categoriesDetails')->name('category.all');
     Route::get('/category/{slug?}', 'categories')->name('category.show');
     Route::get('/category/details/{sub_category_slug}', 'categoriesDetails')->name('category.detail');
     Route::get('/products-filter/{sub_category_slug?}', 'productFilter')->name('products.filter');
     Route::get('/product-landing/{slug?}', 'productLanding')->name('products.landing');
     Route::get('/filter', 'filter')->name('products.filter-step');
+    Route::get('/product-finder', 'filter')->name('products.finder');
+    Route::get('/finder', 'filter')->name('products.finder-short');
     Route::match(['get', 'post'], '/api/filter-wizard/query', 'filterStepApi')->name('api.filter-step.query');
     Route::get('/products/{slug}', 'productDetail')->name('products.detail');
     Route::get('/favorite', 'favorite')->name('favorite');
@@ -243,24 +248,14 @@ Route::middleware('customer.auth')->group(function () {
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
 
-/* Dynamic image resize & cache route (returns file directly) */
+/* Dynamic image resize & cache route (returns 301 immutable redirect to static file) */
 Route::get('/image/{width}/{height}/{format}/{path}', function ($width, $height, $format, $path) {
     $fullPath = $path;
     $url = ImageService::resizeAndCache($fullPath, (int) $width, (int) $height, $format);
 
-    // Safely extract relative path regardless of scheme/domain
-    $relative = ltrim(parse_url($url, PHP_URL_PATH) ?? '', '/');
-    $filePath = public_path($relative);
-
-    if (file_exists($filePath) && is_file($filePath)) {
-        // Return raw file with correct headers
-        return Response::file($filePath, [
-            'Content-Type'  => 'image/' . ($format === 'svg' ? 'svg+xml' : $format),
-            'Cache-Control' => 'public, max-age=604800, immutable'
-        ]);
-    }
-
-    return redirect($url, 301);
+    return redirect($url, 301, [
+        'Cache-Control' => 'public, max-age=31536000, immutable'
+    ]);
 })->where('path', '.*');
 
 /* Image resize redirect route (legacy support) */

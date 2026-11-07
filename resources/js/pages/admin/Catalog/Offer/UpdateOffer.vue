@@ -273,6 +273,7 @@ import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import { useToast } from '@/composables/useToast';
 import Multiselect from '@vueform/multiselect';
 import '@vueform/multiselect/themes/default.css';
+import { generateSlug } from '@/layouts/helpers/helpers';
 
 const toast = useToast();
 const router = useRouter();
@@ -312,7 +313,7 @@ const form = reactive({
 });
 
 const autoSlug = () => {
-    form.slug = form.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+    form.slug = generateSlug(form.name || '');
 };
 
 onMounted(async () => {

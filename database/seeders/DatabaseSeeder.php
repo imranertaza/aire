@@ -27,16 +27,17 @@ class DatabaseSeeder extends Seeder
         if (\Illuminate\Support\Facades\File::exists(base_path('aire_main.json'))) {
             $this->call(JsonDatabaseSeeder::class);
             $this->call(AdminSeeder::class);
+            $this->call(MenuSeeder::class);
             $this->call(PageSeeder::class);
+            $this->call(MenuItemSeeder::class);
             $this->call(NewsCategorySeeder::class);
             $this->call(NewsSeeder::class);
             $this->call(NewsCategoryMapSeeder::class);
             $this->call(BlogSeeder::class);
-            $this->call(MenuSeeder::class);
-            $this->call(MenuItemSeeder::class);
             $this->call(SliderSeeder::class);
             $this->call(SettingsSeeder::class);
             $this->call(SectionSeeder::class);
+            $this->call(ResourceSeeder::class);
             if (DB::getDriverName() === 'mysql') {
                 DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             }
@@ -48,7 +49,9 @@ class DatabaseSeeder extends Seeder
         // 1. Core & System Configuration Seeders
         $this->call(AdminSeeder::class);
         $this->call(RolePermissionSeeder::class);
+        $this->call(MenuSeeder::class);
         $this->call(PageSeeder::class);
+        $this->call(MenuItemSeeder::class);
         $this->call(SettingsSeeder::class);
         $this->call(StoreSeeder::class);
         $this->call(ModuleSeeder::class);
@@ -62,8 +65,6 @@ class DatabaseSeeder extends Seeder
         $this->call(NewsSeeder::class);
         $this->call(NewsCategoryMapSeeder::class);
         $this->call(BlogSeeder::class);
-        $this->call(MenuSeeder::class);
-        $this->call(MenuItemSeeder::class);
         $this->call(EventCategorySeeder::class);
         $this->call(EventSeeder::class);
         $this->call(GallerySeeder::class);
@@ -105,6 +106,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ProductFilterOptionSeeder::class);
         $this->call(ProductLandingSeeder::class);
         $this->call(ProductShowcaseSeeder::class);
+        $this->call(ResourceSeeder::class);
 
         // 5. Coupons & Offers
         $this->call(CuponSeeder::class);

@@ -8,6 +8,8 @@ use App\Models\Menu;
 use App\Models\News;
 use App\Models\NewsCategory;
 use App\Models\Page;
+use App\Models\Resource;
+use App\Models\ResourceCategory;
 use App\Models\Setting;
 use App\Services\Product\ProductService;
 use App\Services\Storefront\StorefrontService;
@@ -20,8 +22,12 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View as ViewFacade;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StorefrontController extends Controller
 {
@@ -181,11 +187,95 @@ class StorefrontController extends Controller
     }
 
     /**
-     * Display docs page.
+     * Display resources page.
      */
-    public function docs(): View
+    public function resources(): View
     {
-        return \theme_view('docs');
+        $resourceCategories = Cache::remember(ResourceCategory::CACHE_KEY, 86400, function () {
+            return ResourceCategory::query()
+                ->active()
+                ->with(['activeResources'])
+                ->get();
+        });
+
+        return \theme_view('resources', compact('resourceCategories'));
+    }
+
+    /**
+     * Display dedicated resource category page with pagination and search.
+     */
+    public function resourceCategory(Request $request, string $slug): View
+    {
+        $category = ResourceCategory::query()
+            ->active()
+            ->where('slug', $slug)
+            ->firstOrFail();
+
+        $allCategories = Cache::remember(ResourceCategory::CACHE_KEY . '_list', 86400, function () {
+            return ResourceCategory::query()
+                ->active()
+                ->withCount('activeResources')
+                ->get();
+        });
+
+        $query = $category->activeResources();
+
+        if ($search = trim((string) $request->query('search', ''))) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $resources = $query->paginate(12)->withQueryString();
+
+        return \theme_view('resource_category', compact('category', 'allCategories', 'resources', 'search'));
+    }
+
+    /**
+     * Download or redirect to the requested resource file.
+     */
+    public function downloadResource(int $id): BinaryFileResponse|StreamedResponse|RedirectResponse
+    {
+        $resource = Resource::query()->active()->findOrFail($id);
+
+        // 1. External URL (e.g. external link, CDN, Google Drive)
+        if (!empty($resource->external_url) && filter_var($resource->external_url, FILTER_VALIDATE_URL)) {
+            return redirect()->away($resource->external_url);
+        }
+
+        // 2. Direct remote URL stored in file_path
+        if (!empty($resource->file_path) && filter_var($resource->file_path, FILTER_VALIDATE_URL)) {
+            return redirect()->away($resource->file_path);
+        }
+
+        // 3. Local file stored in public storage or public_html
+        if (!empty($resource->file_path)) {
+            $cleanPath = ltrim($resource->file_path, '/\\');
+            $cleanPath = preg_replace('#^(public/)?storage/#i', '', $cleanPath);
+
+            $extension = pathinfo($cleanPath, PATHINFO_EXTENSION) ?: ($resource->file_type ?: 'pdf');
+            $downloadFilename = Str::slug($resource->title) . '.' . strtolower($extension);
+
+            // Check Storage public disk (storage/app/public)
+            if (Storage::disk('public')->exists($cleanPath)) {
+                return Storage::disk('public')->download($cleanPath, $downloadFilename);
+            }
+
+            // Check absolute storage path
+            $storageAbsolutePath = storage_path('app/public/' . $cleanPath);
+            if (file_exists($storageAbsolutePath) && is_file($storageAbsolutePath)) {
+                return response()->download($storageAbsolutePath, $downloadFilename);
+            }
+
+            // Check public_html path
+            $publicPath = public_path($resource->file_path);
+            if (file_exists($publicPath) && is_file($publicPath)) {
+                return response()->download($publicPath, $downloadFilename);
+            }
+        }
+
+        return redirect()->back()->with('error', 'The requested resource file is currently unavailable for download.');
     }
 
     /**
@@ -340,50 +430,93 @@ class StorefrontController extends Controller
     /**
      * Display a dynamic CMS page.
      */
-    public function pageDetails(string $slug): View
+    public function pageDetails(string $slug): View|RedirectResponse
     {
-        if ($slug === 'contact-us' || $slug === 'contact') {
-            return $this->contact();
+        $normalizedSlug = strtolower(trim($slug));
+
+        // 301 Canonical Redirect to lowercase for SEO and avoiding duplicate case-sensitive caches
+        if ($slug !== $normalizedSlug) {
+            $currentUri = request()->getRequestUri();
+            $targetUri = str_replace($slug, $normalizedSlug, $currentUri);
+            return redirect($targetUri, 301);
         }
 
-        if ($slug === 'about-us' || $slug === 'about') {
-            return $this->about();
-        }
+        $cacheKey = "cms_page_{$normalizedSlug}";
+        $data = Cache::get($cacheKey);
 
-        $data = Cache::remember("cms_page_{$slug}", 86400, function () use ($slug) {
+        if (!$data) {
             $page = Page::query()
-                ->where('slug', $slug)
+                ->where('slug', $normalizedSlug)
                 ->active()
                 ->first();
 
-
-            if (!$page) {
-                return null;
+            if ($page) {
+                $data = compact('page');
+                Cache::put($cacheKey, $data, 86400);
             }
-
-            return compact('page');
-        });
+        }
 
         if (!$data) {
+            // Built-in fallback views if no active CMS page is in the database
+            if ($normalizedSlug === 'contact-us' || $normalizedSlug === 'contact') {
+                return $this->contact();
+            }
+
+            if ($normalizedSlug === 'about-us' || $normalizedSlug === 'about') {
+                return $this->about();
+            }
+
             abort(404);
         }
 
-        if ($data['page']->temp === 'legal' || $data['page']->temp === 'policy') {
-            $data['legalPages'] = Cache::remember('layout_legal_pages_menu_v1', 86400, function () {
+        $rawTemp = strtolower(trim($data['page']->temp ?? ''));
+        $normalizedTemp = str_replace(['_', ' '], '-', $rawTemp);
+
+        // If the page has an associated menu, load it dynamically
+        if (!empty($data['page']->menu_id)) {
+            $associatedMenu = Cache::remember("page_associated_menu_{$data['page']->menu_id}", 86400, function () use ($data) {
                 return Menu::query()
-                    ->where('name', 'LIKE', '%POLICIES & LEGAL%')
+                    ->where('id', $data['page']->menu_id)
                     ->where('enabled', 1)
                     ->with([
                         'menus' => function ($q) {
-                            $q->where('enabled', 1)->with('page')->orderBy('order', 'asc');
+                            $q->where('enabled', 1)
+                                ->whereNull('parent_id')
+                                ->with('page')
+                                ->orderBy('order', 'asc')
+                                ->orderBy('id', 'asc');
                         }
                     ])
                     ->first();
             });
 
-            return \theme_view('page', $data);
+            if ($associatedMenu) {
+                $data['sidebarMenu'] = $associatedMenu;
+                $data['legalPages'] = $associatedMenu;
+            }
         }
 
+        if ($normalizedTemp === 'legal') {
+            if (!isset($data['legalPages'])) {
+                $data['legalPages'] = Cache::remember('layout_legal_pages_menu_v1', 86400, function () {
+                    return Menu::query()
+                        ->where('name', 'LIKE', '%POLICIES & LEGAL%')
+                        ->where('enabled', 1)
+                        ->with([
+                            'menus' => function ($q) {
+                                $q->where('enabled', 1)
+                                    ->whereNull('parent_id')
+                                    ->with('page')
+                                    ->orderBy('order', 'asc')
+                                    ->orderBy('id', 'asc');
+                            }
+                        ])
+                        ->first();
+                });
+            }
+
+            return \theme_view('page', $data);
+        }
         return \theme_view('page', $data);
     }
 }

@@ -904,6 +904,50 @@ const routes = [{
                 },
             },
             {
+                path: "manage-resource-categories",
+                name: "ResourceCategories",
+                component: () => import('@/pages/admin/ResourceCategory/ResourceCategory.vue'),
+            },
+            {
+                path: "resource-categories/:id",
+                name: "ShowResourceCategory",
+                component: () => import('@/pages/admin/ResourceCategory/ShowResourceCategory.vue'),
+                props: true,
+            },
+            {
+                path: "edit-resource-categories/:id",
+                name: "UpdateResourceCategory",
+                component: () => import('@/pages/admin/ResourceCategory/UpdateResourceCategory.vue'),
+                props: true,
+            },
+            {
+                path: "create-resource-categories",
+                name: "CreateResourceCategory",
+                component: () => import('@/pages/admin/ResourceCategory/CreateResourceCategory.vue'),
+            },
+            {
+                path: "manage-resources",
+                name: "Resources",
+                component: () => import('@/pages/admin/Resource/Resource.vue'),
+            },
+            {
+                path: "resources/:id",
+                name: "ShowResource",
+                component: () => import('@/pages/admin/Resource/ShowResource.vue'),
+                props: true,
+            },
+            {
+                path: "edit-resources/:id",
+                name: "UpdateResource",
+                component: () => import('@/pages/admin/Resource/UpdateResource.vue'),
+                props: true,
+            },
+            {
+                path: "create-resources",
+                name: "CreateResource",
+                component: () => import('@/pages/admin/Resource/CreateResource.vue'),
+            },
+            {
                 path: "manage-attribute-groups",
                 name: "AttributeGroups",
                 component: () => import('@/pages/admin/Catalog/AttributeGroup/AttributeGroups.vue'),

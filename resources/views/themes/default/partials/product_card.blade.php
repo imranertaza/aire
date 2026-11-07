@@ -119,7 +119,7 @@
     <div class="product-card__image-wrapper">
         <a href="{{ $targetUrl }}" aria-label="{{ $product->name }}">
             <img src="{{ !empty($product->main_image) ? getImageCacheUrl($product->main_image, 400, 400, 'webp') : theme_asset('img/Air-Purify.png') }}"
-                @if (!empty($product->main_image)) srcset="{{ getImageSrcset($product->main_image, [280, 400, 600], 1.0) }}"
+                @if (!empty($product->main_image)) srcset="{{ getImageSrcset($product->main_image, [280, 400], 1.0) }}"
                     sizes="(max-width: 576px) 50vw, (max-width: 992px) 33vw, 300px" @endif
                 alt="{{ $product->name ?? 'Product' }}" width="400" height="400" class="product-card__image"
                 loading="lazy" decoding="async">

@@ -8,6 +8,7 @@ use App\Http\Requests\Product\BulkProductActionRequest;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Services\Admin\ProductManagementService;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -39,7 +40,8 @@ class ProductController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->input('per_page', 10);
-        $products = $this->productService->listProducts($request->only('search'), $perPage);
+        $filters = $request->only('search', 'level1_id', 'level2_id', 'level3_id', 'category_id');
+        $products = $this->productService->listProducts($filters, $perPage);
 
         return ApiResponse::success($products, 'Products retrieved successfully');
     }
@@ -140,7 +142,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $this->productService->deleteProduct($product);
-
+        ProductCategory::clearCategoryCache();
         return ApiResponse::success(null, 'Product deleted successfully');
     }
 }

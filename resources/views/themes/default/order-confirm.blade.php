@@ -14,7 +14,7 @@
                 <div class="col-lg-3 border-right1px pt-4 pe-lg-4">
 
                     <!-- Breadcrumb -->
-                    <div class="breadcrumb-container pb-3 mb-4 border-bottom border-light-subtle">
+                    <div class="breadcrumb-container pb-3 mb-2 border-bottom border-light-subtle">
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb mb-0 fs-14 fw-medium">
                                 <li class="breadcrumb-item"><a href="{{ route('home') }}"
@@ -24,75 +24,91 @@
                             </ol>
                         </nav>
                     </div>
+                    <div class="sticky-sidebar">
+                        <div class="confirm-summary-card">
+                            <h2 class="confirm-summary-title">Order Summary</h2>
 
-                    <div class="confirm-summary-card">
-                        <h2 class="confirm-summary-title">Order Summary</h2>
-
-                        <!-- Product Items List -->
-                        <div class="confirm-product-list">
-                            @if ($order && $order->items)
-                                @foreach ($order->items as $item)
+                            <!-- Product Items List -->
+                            <div class="confirm-product-list">
+                                @if ($order && $order->items)
+                                    @foreach ($order->items as $item)
+                                        <div class="confirm-product-row">
+                                            <img src="{{ getImageCacheUrl($item->product->main_image, 200, 200, 'webp') ?? theme_asset('img/Air-Purify.png') }}"
+                                                alt="{{ $item->product->name ?? 'AIRE Pro S1' }}"
+                                                class="confirm-product-thumb" style="object-fit: contain;">
+                                            <div>
+                                                <h3 class="confirm-product-name">
+                                                    {{ getLimitedText($item->product->name, 50) }}
+                                                </h3>
+                                                <p class="confirm-product-sub">{{ $item->product->model }}
+                                                </p>
+                                                <span class="confirm-qty-pill">Qty: {{ $item->quantity }}</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @else
                                     <div class="confirm-product-row">
-                                        <img src="{{ getImageCacheUrl($item->product->main_image, 200, 200, 'webp') ?? theme_asset('img/Air-Purify.png') }}"
-                                            alt="{{ $item->product->name ?? 'AIRE Pro S1' }}" class="confirm-product-thumb"
-                                            style="object-fit: contain;">
+                                        <img src="{{ theme_asset('img/Air-Purify.png') }}" alt="AIRE Pro S1"
+                                            class="confirm-product-thumb">
                                         <div>
-                                            <h3 class="confirm-product-name">{{ getLimitedText($item->product->name, 50) }}
-                                            </h3>
-                                            <p class="confirm-product-sub">{{ $item->product->model }}
-                                            </p>
-                                            <span class="confirm-qty-pill">Qty: {{ $item->quantity }}</span>
+                                            <h3 class="confirm-product-name">AIRE Pro S1</h3>
+                                            <p class="confirm-product-sub">Technical Air Purifier</p>
+                                            <span class="confirm-qty-pill">Qty: 1</span>
                                         </div>
                                     </div>
-                                @endforeach
-                            @else
-                                <div class="confirm-product-row">
-                                    <img src="{{ theme_asset('img/Air-Purify.png') }}" alt="AIRE Pro S1"
-                                        class="confirm-product-thumb">
-                                    <div>
-                                        <h3 class="confirm-product-name">AIRE Pro S1</h3>
-                                        <p class="confirm-product-sub">Technical Air Purifier</p>
-                                        <span class="confirm-qty-pill">Qty: 1</span>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="confirm-summary-divider-light"></div>
-
-                        <!-- Breakdown Totals -->
-                        <div class="confirm-row-item">
-                            <span>Subtotal</span>
-                            <span class="confirm-row-val">${{ number_format($order ? $order->total : 1299.0, 2) }}</span>
-                        </div>
-                        <div class="confirm-row-item">
-                            <span>Shipping</span>
-                            <span class="confirm-row-val">
-                                @if ($order && $order->shipping_charge > 0)
-                                    ${{ number_format($order->shipping_charge, 2) }}
-                                @else
-                                    Free
                                 @endif
-                            </span>
-                        </div>
-                        <div class="confirm-row-item">
-                            <span>Estimated Tax</span>
-                            <span class="confirm-row-val">—</span>
-                        </div>
+                            </div>
 
-                        <div class="confirm-summary-divider-dark"></div>
+                            <div class="confirm-summary-divider-light"></div>
 
-                        <!-- Grand Total -->
-                        <div class="confirm-row-item total">
-                            <span>Total</span>
-                            <span
-                                class="confirm-row-val">${{ number_format($order ? $order->final_amount : 1299.0, 2) }}</span>
+                            <!-- Breakdown Totals -->
+                            <div class="confirm-row-item">
+                                <span>Subtotal</span>
+                                <span
+                                    class="confirm-row-val">${{ number_format($order ? $order->total : 1299.0, 2) }}</span>
+                            </div>
+                            <div class="confirm-row-item">
+                                <span>Shipping</span>
+                                <span class="confirm-row-val">
+                                    @if ($order && $order->shipping_charge > 0)
+                                        ${{ number_format($order->shipping_charge, 2) }}
+                                    @else
+                                        Free
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="confirm-row-item">
+                                <span>Estimated Tax</span>
+                                <span class="confirm-row-val">—</span>
+                            </div>
+
+                            <div class="confirm-summary-divider-dark"></div>
+
+                            <!-- Grand Total -->
+                            <div class="confirm-row-item total">
+                                <span>Total</span>
+                                <span
+                                    class="confirm-row-val">${{ number_format($order ? $order->final_amount : 1299.0, 2) }}</span>
+                            </div>
+                        </div>
+                        <div class="confirm-delivery-card">
+                            <div class="confirm-delivery-header">
+                                <i class="bi bi-clock confirm-delivery-icon"></i>
+                                <h3 class="confirm-delivery-title">Estimated Delivery</h3>
+                            </div>
+                            <div class="confirm-delivery-date">
+                                {{ $order ? $order->created_at->addDays(3)->format('M d') : 'In 3 days' }} –
+                                {{ $order ? $order->created_at->addDays(5)->format('M d, Y') : 'In 5 days' }}
+                            </div>
+                            <p class="confirm-delivery-text">You will receive a tracking link via email as soon as your
+                                order ships.</p>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- CENTER COLUMN: Order Confirmation Hero & Details (col-lg-6) -->
-                <div class="col-lg-6 pt-4 px-lg-4">
+                <div class="col-lg-9 pt-4 px-lg-4">
 
                     <!-- Hero Success Card -->
                     <div class="confirm-hero-card">
@@ -124,9 +140,11 @@
                                 <div class="confirm-timeline-icon">
                                     <i class="bi bi-check-lg"></i>
                                 </div>
-                                <span class="confirm-timeline-label">Confirmed</span>
-                                <span
-                                    class="confirm-timeline-sub">{{ $order ? $order->created_at->format('M d, Y') : 'Today' }}</span>
+                                <div class="confirm-timeline-content">
+                                    <span class="confirm-timeline-label">Confirmed</span>
+                                    <span
+                                        class="confirm-timeline-sub">{{ $order ? $order->created_at->format('M d, Y') : 'Today' }}</span>
+                                </div>
                             </div>
 
                             <!-- Step 2: Processing -->
@@ -134,8 +152,10 @@
                                 <div class="confirm-timeline-icon">
                                     <i class="bi bi-gear"></i>
                                 </div>
-                                <span class="confirm-timeline-label">Processing</span>
-                                <span class="confirm-timeline-sub">In Progress</span>
+                                <div class="confirm-timeline-content">
+                                    <span class="confirm-timeline-label">Processing</span>
+                                    <span class="confirm-timeline-sub">In Progress</span>
+                                </div>
                             </div>
 
                             <!-- Step 3: Shipping -->
@@ -143,8 +163,10 @@
                                 <div class="confirm-timeline-icon">
                                     <i class="bi bi-truck"></i>
                                 </div>
-                                <span class="confirm-timeline-label">Shipping</span>
-                                <span class="confirm-timeline-sub">Pending</span>
+                                <div class="confirm-timeline-content">
+                                    <span class="confirm-timeline-label">Shipping</span>
+                                    <span class="confirm-timeline-sub">Pending</span>
+                                </div>
                             </div>
 
                             <!-- Step 4: Delivered -->
@@ -152,8 +174,10 @@
                                 <div class="confirm-timeline-icon">
                                     <i class="bi bi-box-seam"></i>
                                 </div>
-                                <span class="confirm-timeline-label">Delivered</span>
-                                <span class="confirm-timeline-sub">Pending</span>
+                                <div class="confirm-timeline-content">
+                                    <span class="confirm-timeline-label">Delivered</span>
+                                    <span class="confirm-timeline-sub">Pending</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -222,22 +246,6 @@
                         </div>
                     </div>
 
-                </div>
-
-                <!-- RIGHT COLUMN: Estimated Delivery Card (col-lg-3) -->
-                <div class="col-lg-3 border-left1px pt-4 ps-lg-4">
-                    <div class="confirm-delivery-card">
-                        <div class="confirm-delivery-header">
-                            <i class="bi bi-clock confirm-delivery-icon"></i>
-                            <h3 class="confirm-delivery-title">Estimated Delivery</h3>
-                        </div>
-                        <div class="confirm-delivery-date">
-                            {{ $order ? $order->created_at->addDays(3)->format('M d') : 'In 3 days' }} –
-                            {{ $order ? $order->created_at->addDays(5)->format('M d, Y') : 'In 5 days' }}
-                        </div>
-                        <p class="confirm-delivery-text">You will receive a tracking link via email as soon as your
-                            order ships.</p>
-                    </div>
                 </div>
 
             </div>

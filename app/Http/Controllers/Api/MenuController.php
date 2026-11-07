@@ -20,8 +20,19 @@ class MenuController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->has('all') || $request->boolean('all')) {
+            $menus = Menu::query()
+                ->when($request->has('enabled'), function ($q) use ($request) {
+                    $q->where('enabled', $request->boolean('enabled'));
+                })
+                ->orderBy('name')
+                ->get();
+
+            return ApiResponse::success($menus, 'All menus fetched successfully');
+        }
+
         $menus = Menu::latest()->paginate(10);
 
         return ApiResponse::success($menus, 'Menus fetched successfully');

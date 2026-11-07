@@ -257,15 +257,15 @@
                         </router-link>
                     </li>
 
-                    <!-- Reviews (Module & Permission Togglable) -->
-                    <li class="nav-item"
+                    <!-- Reviews (Module & Permission Togglable) - Hidden -->
+                    <!-- <li class="nav-item"
                         v-if="authStore.hasPermission('view-reviews') && authStore.isModuleEnabled('review')">
                         <router-link :to="{ name: 'Reviews' }" class="nav-link"
                             :class="{ active: $route.name === 'Reviews' }">
                             <i class="nav-icon fas fa-star"></i>
                             <p>Product Reviews</p>
                         </router-link>
-                    </li>
+                    </li> -->
 
                     <!-- ========================================== -->
                     <!-- 4. CONTENT & MARKETING                     -->
@@ -296,7 +296,57 @@
                             </li>
                         </ul>
                     </li>
-<!-- News -->
+
+                    <!-- Resources -->
+                    <li class="nav-item" :class="{ 'menu-open': isOpen('resources') }">
+                        <a href="#" class="nav-link" @click.prevent="toggle('resources')">
+                            <i class="nav-icon fas fa-folder-open"></i>
+                            <p>Resources <i class="fas fa-angle-left right"></i></p>
+                        </a>
+                        <ul class="nav nav-treeview" v-show="isOpen('resources')">
+                            <li class="nav-item">
+                                <router-link :to="{ name: 'Resources' }" class="nav-link"
+                                    :class="{ active: ['Resources', 'UpdateResource', 'ShowResource'].includes($route.name) }">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Resource List</p>
+                                </router-link>
+                            </li>
+                            <li class="nav-item">
+                                <router-link :to="{ name: 'CreateResource' }" class="nav-link"
+                                    :class="{ active: $route.name === 'CreateResource' }">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Add Resource</p>
+                                </router-link>
+                            </li>
+                            <!-- Manage Resource Category (nested folder inside Resources) -->
+                            <li class="nav-item" :class="{ 'menu-open': isOpen('resourceCategories') }">
+                                <a href="#" class="nav-link" @click.prevent="toggle('resourceCategories')">
+                                    <i class="nav-icon fas fa-folder"></i>
+                                    <p>Resource Category <i class="fas fa-angle-left right"></i></p>
+                                </a>
+                                <ul class="nav nav-treeview" v-show="isOpen('resourceCategories')">
+                                    <!-- Category List -->
+                                    <li class="nav-item">
+                                        <router-link :to="{ name: 'ResourceCategories' }" class="nav-link"
+                                            :class="{ active: ['ResourceCategories', 'ShowResourceCategory'].includes($route.name) }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Category List</p>
+                                        </router-link>
+                                    </li>
+                                    <!-- Create Category -->
+                                    <li class="nav-item">
+                                        <router-link :to="{ name: 'CreateResourceCategory' }" class="nav-link"
+                                            :class="{ active: ['CreateResourceCategory', 'UpdateResourceCategory'].includes($route.name) }">
+                                            <i class="far fa-dot-circle nav-icon"></i>
+                                            <p>Add Category</p>
+                                        </router-link>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- News -->
                     <li class="nav-item" v-if="authStore.hasPermission('view-news')"
                         :class="{ 'menu-open': isOpen('news') }">
                         <a href="#" class="nav-link" @click.prevent="toggle('news')">
@@ -564,6 +614,18 @@ const openParentMenus = () => {
         'CreateProductCategory': ['product-categories'],
         'UpdateProductCategory': ['product-categories'],
         'ShowProductCategory': ['product-categories'],
+
+        // Resource Categories (nested inside Resources)
+        'ResourceCategories': ['resources', 'resourceCategories'],
+        'CreateResourceCategory': ['resources', 'resourceCategories'],
+        'UpdateResourceCategory': ['resources', 'resourceCategories'],
+        'ShowResourceCategory': ['resources', 'resourceCategories'],
+
+        // Resources
+        'Resources': ['resources'],
+        'CreateResource': ['resources'],
+        'UpdateResource': ['resources'],
+        'ShowResource': ['resources'],
 
         // Brands
         'Brands': ['brands'],

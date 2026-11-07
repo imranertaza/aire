@@ -50,6 +50,10 @@
                                     role="tab" aria-controls="custom-tabs-technology" aria-selected="false">Technology</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" id="tab-in-the-box" data-toggle="pill" href="#custom-tabs-in-the-box"
+                                    role="tab" aria-controls="custom-tabs-in-the-box" aria-selected="false">In The Box</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" id="tab-applications" data-toggle="pill" href="#custom-tabs-applications"
                                     role="tab" aria-controls="custom-tabs-applications" aria-selected="false">Applications</a>
                             </li>
@@ -201,10 +205,106 @@
                                             <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, clean/transparent background for interactive zoom)</small>
                                         </div>
                                         <div class="col-md-8 form-group">
-                                            <label>Multiple Gallery Images</label>
-                                            <Vue3Dropzone v-model="galleryImageFiles" :multiple="true"
-                                                :allowSelectOnPreview="true" selectFileStrategy="merge" :maxFileSize="10" />
-                                            <small class="text-muted d-block mt-1">Recommended: 800 × 800px or 1000 × 1000px (1:1 Square, matching main image)</small>
+                                            <label>Multiple Gallery Media (Images & Videos)</label>
+                                            <Vue3Dropzone v-model="galleryImageFiles" v-model:previews="galleryPreviews" :multiple="true"
+                                                acceptedFiles="image/*,video/mp4,video/webm,video/quicktime,video/ogg"
+                                                :allowSelectOnPreview="true" selectFileStrategy="merge" :maxFileSize="50"
+                                                @previewRemoved="handlePreviewRemoved" />
+                                            <small class="text-muted d-block mt-1">Recommended: Images (800 × 800px / 1:1 Square) or Videos (MP4/WebM, max 50MB)</small>
+
+                                            <!-- Add Video Link Bar (YouTube, Vimeo, MP4) -->
+                                            <div class="card p-2 bg-white border mt-2 mb-2 shadow-none rounded">
+                                                <div class="row align-items-center g-2">
+                                                    <div class="col-md-9 col-sm-8">
+                                                        <div class="input-group input-group-sm">
+                                                            <div class="input-group-prepend">
+                                                                <span class="input-group-text bg-light text-dark font-weight-bold" style="font-size: 11px;">
+                                                                    <i class="fab fa-youtube text-danger mr-1"></i>
+                                                                    <i class="fab fa-vimeo-v text-info mr-1"></i>
+                                                                    <i class="fas fa-link text-secondary mr-1"></i>
+                                                                    Video URL
+                                                                </span>
+                                                            </div>
+                                                            <input type="url" 
+                                                                   v-model="videoUrlInput" 
+                                                                   @keydown.enter.prevent="addVideoUrl"
+                                                                   class="form-control" 
+                                                                   placeholder="Paste YouTube, Vimeo, or direct MP4/WebM video link (e.g. https://youtu.be/...)" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3 col-sm-4 text-right">
+                                                        <button type="button" class="btn btn-sm btn-primary btn-block" @click="addVideoUrl" style="font-size: 11px; font-weight: 600;">
+                                                            <i class="fas fa-plus-circle mr-1"></i> Add Video Link
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <small class="text-muted mt-1 d-block" style="font-size: 10.5px;">
+                                                    <i class="fas fa-magic text-warning mr-1"></i> Auto-detects YouTube (Watch, Shorts, Embed), Vimeo, or direct MP4 links with instant thumbnail preview.
+                                                </small>
+                                            </div>
+
+                                            <!-- Gallery Media Sequence & Sorting Preview -->
+                                            <div v-if="galleryMediaList.length > 0" class="mt-3 p-3 bg-light border rounded">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <span class="font-weight-bold text-dark">
+                                                        <i class="fas fa-layer-group mr-1 text-primary"></i> Gallery Media Sequence & Sorting ({{ galleryMediaList.length }})
+                                                    </span>
+                                                    <small class="text-muted"><i class="fas fa-info-circle mr-1"></i> Click any card to play video or view large</small>
+                                                </div>
+                                                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-2">
+                                                    <div v-for="(item, idx) in galleryMediaList" :key="item.id || idx" class="col mb-2">
+                                                        <div class="card h-100 shadow-sm border mb-0">
+                                                            <div class="position-relative text-center bg-dark rounded-top overflow-hidden d-flex align-items-center justify-content-center gallery-media-box" 
+                                                                 style="height: 105px; cursor: pointer;"
+                                                                 @click="previewGalleryMedia(idx)"
+                                                                 :title="item.isVideo ? 'Click to Play Video' : 'Click to View Large Image'">
+                                                                <video v-if="item.isVideo && !item.isEmbed && item.previewUrl && !item.previewUrl.startsWith('http')" :src="item.previewUrl" class="w-100 h-100" style="object-fit: cover;" muted playsinline></video>
+                                                                <img v-else :src="item.previewUrl || '/themes/default/assets/img/photograph.webp'" class="w-100 h-100" style="object-fit: cover;" />
+                                                                
+                                                                <!-- Badges -->
+                                                                <span v-if="item.videoType === 'youtube'" class="badge badge-danger position-absolute" style="top: 5px; left: 5px; font-size: 10px; z-index: 2;">
+                                                                    <i class="fab fa-youtube mr-1"></i> YOUTUBE
+                                                                </span>
+                                                                <span v-else-if="item.videoType === 'vimeo'" class="badge badge-info position-absolute" style="top: 5px; left: 5px; font-size: 10px; z-index: 2;">
+                                                                    <i class="fab fa-vimeo-v mr-1"></i> VIMEO
+                                                                </span>
+                                                                <span v-else-if="item.isVideo" class="badge badge-warning text-dark position-absolute" style="top: 5px; left: 5px; font-size: 10px; z-index: 2;">
+                                                                    <i class="fas fa-video mr-1"></i> VIDEO
+                                                                </span>
+                                                                <span v-else class="badge badge-info position-absolute" style="top: 5px; left: 5px; font-size: 10px; z-index: 2;">
+                                                                    <i class="fas fa-image mr-1"></i> IMAGE
+                                                                </span>
+
+                                                                <!-- Center Play / Zoom Overlay Icon -->
+                                                                <div class="gallery-play-overlay position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="top: 0; left: 0;">
+                                                                    <span v-if="item.isVideo" class="play-pulse-btn shadow">
+                                                                        <i class="fas fa-play" style="margin-left: 2px;"></i>
+                                                                    </span>
+                                                                    <span v-else class="zoom-hover-btn shadow">
+                                                                        <i class="fas fa-search-plus"></i>
+                                                                    </span>
+                                                                </div>
+
+                                                                <!-- Delete Action Button (Top Right) -->
+                                                                <button type="button" @click.stop="removeGalleryFile(idx)" class="btn btn-danger btn-xs position-absolute shadow-sm" style="top: 5px; right: 5px; border-radius: 50%; width: 22px; height: 22px; padding: 0; z-index: 3;" title="Remove">
+                                                                    <i class="fas fa-times" style="font-size: 11px;"></i>
+                                                                </button>
+                                                            </div>
+                                                            <div class="card-body p-2 bg-white rounded-bottom">
+                                                                <div class="text-truncate small font-weight-bold mb-1" :title="item.name" style="font-size: 11px;">
+                                                                    {{ item.name }}
+                                                                </div>
+                                                                <div class="input-group input-group-sm">
+                                                                    <div class="input-group-prepend">
+                                                                        <span class="input-group-text px-1 py-0 font-weight-bold" style="font-size: 10px;">Sort Order</span>
+                                                                    </div>
+                                                                    <input type="number" min="0" v-model.number="item.sort_order" class="form-control form-control-sm px-1 py-0 text-center font-weight-bold" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -337,28 +437,58 @@
                                 <div class="tab-pane fade" id="custom-tabs-filter-options" role="tabpanel"
                                     aria-labelledby="tab-filter-options">
                                     <div class="row mb-3">
-                                        <div class="col-md-4">
-                                            <label>Add Filter Option</label>
-                                            <select class="form-control" v-model="selectedFilterOptionToAdd"
-                                                @change="addFilterOptionRow">
-                                                <option value="">-- Select Filter Option to Add --</option>
-                                                <option v-for="opt in availableFilterOptions" :key="opt.id" :value="opt">{{
-                                                    opt.name }}</option>
+                                        <!-- 1. Storefront Catalog Filter Dropdown -->
+                                        <div class="col-md-6 mb-2">
+                                            <label class="font-weight-bold text-primary">
+                                                <i class="fas fa-filter mr-1"></i> Add Storefront Catalog Filter
+                                            </label>
+                                            <select class="form-control" v-model="selectedCatalogFilterOptionToAdd"
+                                                @change="addCatalogFilterOptionRow">
+                                                <option value="">-- Select Catalog Filter Option --</option>
+                                                <option v-for="opt in catalogFilterOptions" :key="opt.id" :value="opt">
+                                                    {{ opt.name }}
+                                                </option>
                                             </select>
+                                            <small class="text-muted">Shown in storefront sidebar on /products-filter</small>
+                                        </div>
+
+                                        <!-- 2. Guided Product Finder Dropdown -->
+                                        <div class="col-md-6 mb-2">
+                                            <label class="font-weight-bold text-info">
+                                                <i class="fas fa-magic mr-1"></i> Add Guided Product Finder Option
+                                            </label>
+                                            <select class="form-control" v-model="selectedGuidedFilterOptionToAdd"
+                                                @change="addGuidedFilterOptionRow">
+                                                <option value="">-- Select Guided Finder Step --</option>
+                                                <option v-for="opt in guidedFilterOptions" :key="opt.id" :value="opt">
+                                                    Step {{ opt.guided_step_number || '•' }}: {{ opt.name }}
+                                                </option>
+                                            </select>
+                                            <small class="text-muted">Shown in 10-step wizard journey on /product-finder</small>
                                         </div>
                                     </div>
                                     <div class="table-responsive" v-if="form.filter_options.length > 0">
                                         <table class="table table-bordered">
                                             <thead class="bg-light">
                                                 <tr>
-                                                    <th>Filter Option</th>
-                                                    <th>Filter Option Value</th>
-                                                    <th>Action</th>
+                                                    <th style="width: 35%;">Filter Option</th>
+                                                    <th style="width: 50%;">Filter Option Value</th>
+                                                    <th style="width: 15%;" class="text-center">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr v-for="(fOpt, index) in form.filter_options" :key="index">
-                                                    <td>{{ fOpt.filter_option_name }}</td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <span v-if="isGuidedOption(fOpt)" class="badge badge-info text-uppercase mr-2 px-2 py-1">
+                                                                <i class="fas fa-magic mr-1"></i> Step {{ getGuidedStepNum(fOpt) || '•' }}
+                                                            </span>
+                                                            <span v-else class="badge badge-primary text-uppercase mr-2 px-2 py-1">
+                                                                <i class="fas fa-filter mr-1"></i> Catalog
+                                                            </span>
+                                                            <span class="font-weight-bold">{{ fOpt.filter_option_name }}</span>
+                                                        </div>
+                                                    </td>
                                                     <td>
                                                         <select class="form-control" v-model="fOpt.filter_option_value_id"
                                                             required>
@@ -988,6 +1118,87 @@
                                                             placeholder="The structural chassis is crafted from..."></textarea>
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- In The Box Tab -->
+                                <div class="tab-pane fade" id="custom-tabs-in-the-box" role="tabpanel"
+                                    aria-labelledby="tab-in-the-box">
+                                    <div class="card card-outline card-primary mb-3">
+                                        <div class="card-header py-2">
+                                            <h6 class="card-title font-weight-bold mb-0">In The Box - Header Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4 form-group">
+                                                    <label>Badge / Tag</label>
+                                                    <input type="text" class="form-control" v-model="form.in_the_box_badge"
+                                                        placeholder="e.g. PACKAGE CONTENTS" />
+                                                </div>
+                                                <div class="col-md-8 form-group">
+                                                    <label>Main Title</label>
+                                                    <input type="text" class="form-control" v-model="form.in_the_box_title"
+                                                        placeholder="e.g. What's in the Box" />
+                                                </div>
+                                                <div class="col-md-12 form-group">
+                                                    <label>Main Description</label>
+                                                    <textarea class="form-control" rows="2" v-model="form.in_the_box_description"
+                                                        placeholder="e.g. Everything you need for rapid deployment and continuous fresh air right out of the package."></textarea>
+                                                </div>
+                                                <div class="col-md-12 form-group mb-0">
+                                                    <label>In The Box Banner Background Image</label>
+                                                    <Vue3Dropzone v-model="inTheBoxImageFile" :allowSelectOnPreview="true" />
+                                                    <small class="text-muted d-block mt-1">Recommended: 1400 × 700px or wide landscape banner. If omitted, product image is used automatically.</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card card-outline card-secondary mb-3">
+                                        <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                                            <h6 class="card-title font-weight-bold mb-0">Dynamic Box Items</h6>
+                                            <button type="button" class="btn btn-primary btn-sm" @click="addBoxItem">
+                                                <i class="fas fa-plus mr-1"></i> Add Box Item
+                                            </button>
+                                        </div>
+                                        <div class="card-body">
+                                            <div v-if="!form.in_the_box_items || form.in_the_box_items.length === 0" class="alert alert-light border text-center py-4 mb-0">
+                                                <i class="fas fa-box-open fa-2x text-muted mb-2 d-block"></i>
+                                                <p class="text-muted mb-0">No package items added yet. Click <strong>"Add Box Item"</strong> above to add package contents.</p>
+                                            </div>
+                                            <div v-else class="table-responsive">
+                                                <table class="table table-bordered table-striped align-middle mb-0">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <th style="width: 8%;" class="text-center">#</th>
+                                                            <th style="width: 35%;">Item Title</th>
+                                                            <th style="width: 47%;">Description</th>
+                                                            <th style="width: 10%;" class="text-center">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(item, index) in form.in_the_box_items" :key="index">
+                                                            <td class="text-center font-weight-bold text-primary align-middle" style="font-size: 1.1rem;">
+                                                                {{ String(index + 1).padStart(2, '0') }}
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" v-model="item.title"
+                                                                    placeholder="e.g. Main Ventilator Unit" />
+                                                            </td>
+                                                            <td>
+                                                                <textarea class="form-control" rows="2" v-model="item.description"
+                                                                    placeholder="e.g. Factory-calibrated chassis with pre-fitted acoustic dampening."></textarea>
+                                                            </td>
+                                                            <td class="text-center align-middle">
+                                                                <button type="button" class="btn btn-danger btn-sm" @click="removeBoxItem(index)" title="Remove Item">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
@@ -1874,13 +2085,31 @@
             </div>
         </div>
     </section>
+
+    <!-- Reusable Media Gallery Lightbox & Video Player Modal -->
+    <MediaGalleryModal
+      v-model="isMediaModalOpen"
+      :items="activeMediaList"
+      :initial-index="activeMediaIndex"
+      @close="closeMediaPreview"
+    />
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import axios from 'axios';
 import DashboardHeader from '@/components/DashboardHeader.vue';
 import RichTextEditor from '@/components/RichTextEditor.vue';
+import MediaGalleryModal from '@/components/MediaGalleryModal.vue';
+import {
+    extractYouTubeId,
+    extractVimeoId,
+    isYouTubeMedia,
+    isVimeoMedia,
+    getYouTubeThumb,
+    getVimeoThumb,
+    detectVideoSource
+} from '@/helpers/mediaGalleryHelper';
 import { useRouter } from 'vue-router';
 import { useToast } from '@/composables/useToast';
 import { generateSlug, getImageCacheUrl, getImagePath } from '@/layouts/helpers/helpers';
@@ -1901,6 +2130,32 @@ const allProducts = ref([]);
 
 const selectedOptionToAdd = ref("");
 const selectedFilterOptionToAdd = ref("");
+const selectedCatalogFilterOptionToAdd = ref("");
+const selectedGuidedFilterOptionToAdd = ref("");
+
+const catalogFilterOptions = computed(() => {
+    return (availableFilterOptions.value || [])
+        .filter(o => !o.show_in_guided_finder || o.show_in_catalog == 1)
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+});
+
+const guidedFilterOptions = computed(() => {
+    return (availableFilterOptions.value || [])
+        .filter(o => o.show_in_guided_finder == 1 && (!o.guided_step_number || o.guided_step_number <= 7))
+        .sort((a, b) => (a.guided_step_number || 99) - (b.guided_step_number || 99));
+});
+
+const isGuidedOption = (fOpt) => {
+    const fOptId = fOpt.filter_option_id;
+    const opt = (availableFilterOptions.value || []).find(o => Number(o.id) === Number(fOptId));
+    return Boolean(opt && opt.show_in_guided_finder == 1);
+};
+
+const getGuidedStepNum = (fOpt) => {
+    const fOptId = fOpt.filter_option_id;
+    const opt = (availableFilterOptions.value || []).find(o => Number(o.id) === Number(fOptId));
+    return opt ? opt.guided_step_number : null;
+};
 
 const form = ref({
     name: '',
@@ -1975,6 +2230,11 @@ const form = ref({
     tech_feature2_desc: '',
     tech_feature3_title: '',
     tech_feature3_desc: '',
+
+    in_the_box_badge: 'PACKAGE CONTENTS',
+    in_the_box_title: "What's in the Box",
+    in_the_box_description: 'Everything you need for rapid deployment and continuous fresh air right out of the package.',
+    in_the_box_items: [],
 
     // Overview Section Fields (Section 1)
     overview_title: '',
@@ -2051,6 +2311,157 @@ const form = ref({
 
 const mainImageFile = ref(null);
 const galleryImageFiles = ref([]);
+const galleryPreviews = ref([]);
+const galleryMediaList = ref([]);
+const videoUrlInput = ref('');
+
+// Media Preview Modal State & Methods (Encapsulated in MediaGalleryModal)
+const isMediaModalOpen = ref(false);
+const activeMediaIndex = ref(-1);
+const activeMediaList = ref([]);
+
+const openMediaPreview = (media, index = -1, list = []) => {
+    activeMediaList.value = list && list.length ? list : (media ? [media] : []);
+    activeMediaIndex.value = index >= 0 ? index : 0;
+    isMediaModalOpen.value = true;
+};
+
+const closeMediaPreview = () => {
+    isMediaModalOpen.value = false;
+    activeMediaIndex.value = -1;
+    activeMediaList.value = [];
+};
+
+const addVideoUrl = () => {
+    if (!videoUrlInput.value || !videoUrlInput.value.trim()) {
+        toast.error("Please paste a video URL.");
+        return;
+    }
+    const detected = detectVideoSource(videoUrlInput.value);
+    if (!detected) {
+        toast.error("Could not recognize video URL. Please provide a valid YouTube, Vimeo, or MP4 link.");
+        return;
+    }
+
+    const nextOrder = galleryMediaList.value.length;
+    galleryMediaList.value.push({
+        id: `video-${Date.now()}-${nextOrder}`,
+        file: null,
+        isUrl: true,
+        isEmbed: detected.type === 'youtube' || detected.type === 'vimeo',
+        videoType: detected.type,
+        file_type: detected.type,
+        isVideo: true,
+        url: videoUrlInput.value.trim(),
+        rawUrl: videoUrlInput.value.trim(),
+        videoUrl: detected.embedUrl,
+        previewUrl: detected.previewUrl,
+        name: detected.title,
+        sort_order: nextOrder
+    });
+
+    if (detected.previewUrl && Array.isArray(galleryPreviews.value) && !galleryPreviews.value.includes(detected.previewUrl)) {
+        galleryPreviews.value.push(detected.previewUrl);
+    }
+
+    videoUrlInput.value = '';
+    toast.success(`${detected.type.toUpperCase()} video added to gallery!`);
+};
+
+const previewGalleryMedia = (index) => {
+    const list = galleryMediaList.value.map((item, idx) => ({
+        id: item.id,
+        url: item.videoUrl || item.url || item.previewUrl,
+        videoUrl: item.videoUrl || item.url,
+        embedUrl: item.videoUrl || item.embedUrl || '',
+        rawUrl: item.rawUrl || item.url,
+        previewUrl: item.previewUrl,
+        isVideo: item.isVideo,
+        isEmbed: item.isEmbed || item.videoType === 'youtube' || item.videoType === 'vimeo',
+        file_type: item.file_type || item.videoType,
+        videoType: item.videoType || (item.isVideo ? 'video' : null),
+        title: item.name || `Gallery Media #${idx + 1}`
+    }));
+    if (list[index]) {
+        openMediaPreview(list[index], index, list);
+    }
+};
+
+watch(galleryImageFiles, (newFiles) => {
+    // Preserve any external video items
+    const urlItems = galleryMediaList.value.filter(m => m.isUrl);
+
+    if (!newFiles || !newFiles.length) {
+        galleryMediaList.value = urlItems;
+        return;
+    }
+
+    const updated = [];
+    newFiles.forEach((item, index) => {
+        const rawFile = (item instanceof File) ? item : (item?.file instanceof File ? item.file : null);
+        if (!rawFile) return;
+
+        const existing = galleryMediaList.value.find(m => m.file === rawFile || (m.name === rawFile.name && m.size === rawFile.size));
+        if (existing) {
+            updated.push(existing);
+        } else {
+            const isVideo = (rawFile.type && rawFile.type.startsWith('video/')) || /\.(mp4|webm|mov|ogg|mkv)$/i.test(rawFile.name || '');
+            updated.push({
+                id: `new-${Date.now()}-${index}`,
+                file: rawFile,
+                isUrl: false,
+                isEmbed: false,
+                videoType: isVideo ? 'video' : null,
+                name: rawFile.name || `Media ${index + 1}`,
+                size: rawFile.size || 0,
+                isVideo: isVideo,
+                file_type: isVideo ? 'video' : 'image',
+                previewUrl: URL.createObjectURL(rawFile),
+                sort_order: urlItems.length + index
+            });
+        }
+    });
+    galleryMediaList.value = [...urlItems, ...updated];
+}, { deep: true });
+
+const removeGalleryFile = (index) => {
+    if (index >= 0 && index < galleryMediaList.value.length) {
+        const target = galleryMediaList.value[index];
+        galleryMediaList.value.splice(index, 1);
+        if (target.file && Array.isArray(galleryImageFiles.value)) {
+            galleryImageFiles.value = galleryImageFiles.value.filter(item => {
+                const raw = (item instanceof File) ? item : item?.file;
+                return raw !== target.file;
+            });
+        }
+        if (target.previewUrl && Array.isArray(galleryPreviews.value)) {
+            const pIdx = galleryPreviews.value.indexOf(target.previewUrl);
+            if (pIdx !== -1) {
+                galleryPreviews.value.splice(pIdx, 1);
+            }
+        }
+    }
+};
+
+const handlePreviewRemoved = (preview) => {
+    if (!preview) return;
+    const rawSrc = preview.src || (typeof preview === 'string' ? preview : '');
+    const cleanSrc = decodeURIComponent(rawSrc.split('?')[0]);
+
+    const idx = galleryMediaList.value.findIndex(item => {
+        if (item.previewUrl && cleanSrc.includes(item.previewUrl)) return true;
+        if (item.url && cleanSrc.includes(item.url)) return true;
+        const ytId = extractYouTubeId(item.url || item.rawUrl);
+        if (ytId && cleanSrc.includes(ytId)) return true;
+        const vmId = extractVimeoId(item.url || item.rawUrl);
+        if (vmId && cleanSrc.includes(vmId)) return true;
+        return false;
+    });
+
+    if (idx !== -1) {
+        galleryMediaList.value.splice(idx, 1);
+    }
+};
 const docPdfFile = ref(null);
 const safetyPdfFile = ref(null);
 const instPdfFile = ref(null);
@@ -2059,6 +2470,7 @@ const overviewImageFile = ref(null);
 const specsImageFile = ref(null);
 const featuresImageFile = ref(null);
 const technologyImageFile = ref(null);
+const inTheBoxImageFile = ref(null);
 
 const showcaseHeroImageFile = ref(null);
 const showcaseHeroPreviews = ref([]);
@@ -2186,6 +2598,30 @@ const removeOptionRow = (index) => {
     form.value.options.splice(index, 1);
 };
 
+const addCatalogFilterOptionRow = () => {
+    if (!selectedCatalogFilterOptionToAdd.value) return;
+    const opt = selectedCatalogFilterOptionToAdd.value;
+    form.value.filter_options.push({
+        filter_option_id: Number(opt.id),
+        filter_option_name: opt.name,
+        filter_option_value_id: '',
+        available_values: opt.option_values || opt.optionValues || []
+    });
+    selectedCatalogFilterOptionToAdd.value = "";
+};
+
+const addGuidedFilterOptionRow = () => {
+    if (!selectedGuidedFilterOptionToAdd.value) return;
+    const opt = selectedGuidedFilterOptionToAdd.value;
+    form.value.filter_options.push({
+        filter_option_id: Number(opt.id),
+        filter_option_name: opt.name,
+        filter_option_value_id: '',
+        available_values: opt.option_values || opt.optionValues || []
+    });
+    selectedGuidedFilterOptionToAdd.value = "";
+};
+
 const addFilterOptionRow = () => {
     if (!selectedFilterOptionToAdd.value) return;
 
@@ -2234,6 +2670,20 @@ const addApplication = () => {
 
 const removeApplication = (index) => {
     form.value.applications.splice(index, 1);
+};
+
+const addBoxItem = () => {
+    if (!form.value.in_the_box_items) form.value.in_the_box_items = [];
+    form.value.in_the_box_items.push({
+        title: '',
+        description: ''
+    });
+};
+
+const removeBoxItem = (index) => {
+    if (form.value.in_the_box_items) {
+        form.value.in_the_box_items.splice(index, 1);
+    }
 };
 
 const addFaq = () => {
@@ -2372,7 +2822,7 @@ const submitForm = async () => {
     Object.keys(form.value).forEach(key => {
         if (key.startsWith('showcase_')) {
             // Handled separately below
-        } else if (['options', 'filter_options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids'].includes(key)) {
+        } else if (['options', 'filter_options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids', 'in_the_box_items'].includes(key)) {
             formData.append(key, JSON.stringify(form.value[key]));
         } else if (['faqs', 'applications'].includes(key)) {
             // Handled separately below
@@ -2458,12 +2908,36 @@ const submitForm = async () => {
         formData.append('main_image', mainFileToUpload);
     }
 
-    if (galleryImageFiles.value?.length) {
+    if (galleryMediaList.value?.length) {
+        const sortedMedia = [...galleryMediaList.value].sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
+        let fileUploadIndex = 0;
+        const videoItemsToSave = [];
+
+        sortedMedia.forEach((item, index) => {
+            const currentSort = item.sort_order !== undefined && item.sort_order !== null ? item.sort_order : index;
+            if (item.file) {
+                formData.append(`gallery_images[${fileUploadIndex}]`, item.file);
+                formData.append(`gallery_sort_orders[${fileUploadIndex}]`, currentSort);
+                fileUploadIndex++;
+            } else if (item.isUrl || item.videoUrl || item.rawUrl) {
+                videoItemsToSave.push({
+                    url: item.rawUrl || item.url || item.videoUrl,
+                    file_type: item.videoType || item.file_type || 'youtube',
+                    sort_order: currentSort
+                });
+            }
+        });
+
+        if (videoItemsToSave.length > 0) {
+            formData.append('gallery_videos', JSON.stringify(videoItemsToSave));
+        }
+    } else if (galleryImageFiles.value?.length) {
         let gIdx = 0;
         galleryImageFiles.value.forEach((item) => {
             const rawFile = (item instanceof File) ? item : (item?.file instanceof File ? item.file : null);
             if (rawFile) {
                 formData.append(`gallery_images[${gIdx}]`, rawFile);
+                formData.append(`gallery_sort_orders[${gIdx}]`, gIdx);
                 gIdx++;
             }
         });
@@ -2477,7 +2951,8 @@ const submitForm = async () => {
         overview_image: overviewImageFile.value,
         specs_image: specsImageFile.value,
         features_image: featuresImageFile.value,
-        technology_image: technologyImageFile.value
+        technology_image: technologyImageFile.value,
+        in_the_box_image: inTheBoxImageFile.value
     };
 
     Object.entries(additionalFiles).forEach(([field, fileVal]) => {
@@ -2887,7 +3362,7 @@ const submitForm = async () => {
 }
 
 .ductless-buy-btn {
-    background: linear-gradient(135deg, #0070f3 0%, #0056c6 100%);
+    background: var(--color-primary);
     color: #ffffff !important;
     font-size: 15px;
     font-weight: 700;
@@ -3423,7 +3898,7 @@ const submitForm = async () => {
     justify-content: space-between;
     border-top: 1px solid #e5e7eb;
     border-bottom: 1px solid #e5e7eb;
-    marin-bottom: 12px;
+    margin-bottom: 12px;
     padding: 6px 0;
     text-align: center;
 }
@@ -3550,5 +4025,57 @@ const submitForm = async () => {
     padding: 5px 14px;
     font-size: 11px;
     font-weight: 600;
+}
+
+/* Gallery Media Card Hover & Play Styles */
+.gallery-media-box {
+    transition: all 0.2s ease;
+}
+.gallery-media-box:hover img,
+.gallery-media-box:hover video {
+    transform: scale(1.05);
+    transition: transform 0.25s ease;
+}
+.gallery-play-overlay {
+    background: rgba(0, 0, 0, 0.25);
+    transition: background 0.2s ease;
+    pointer-events: none;
+}
+.gallery-media-box:hover .gallery-play-overlay {
+    background: rgba(0, 0, 0, 0.45);
+}
+.play-pulse-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #e11d48;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.gallery-media-box:hover .play-pulse-btn {
+    transform: scale(1.15);
+    box-shadow: 0 0 15px rgba(225, 29, 72, 0.7);
+}
+.zoom-hover-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    opacity: 0.65;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.gallery-media-box:hover .zoom-hover-btn {
+    opacity: 1;
+    transform: scale(1.15);
+    background: #ffffff;
 }
 </style>

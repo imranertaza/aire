@@ -20,11 +20,84 @@
     </DashboardHeader>
 
     <section>
+        <!-- Compact 3-Level Category Filter Bar -->
+        <div class="card shadow-sm border-0 mb-3 bg-light">
+            <div class="card-body py-2 px-3">
+                <div class="form-row align-items-center">
+                    <div class="col-auto d-flex align-items-center text-muted py-1">
+                        <i class="fas fa-filter text-primary mr-2"></i>
+                        <span class="small font-weight-bold">Filter:</span>
+                    </div>
+
+                    <!-- Level 1: Parent Category -->
+                    <div class="col-md col-sm-6 py-1">
+                        <select v-model="selectedLevel1" @change="onLevel1Change" class="custom-select custom-select-sm">
+                            <option value="">All Parent Categories</option>
+                            <option v-for="cat in level1Categories" :key="cat.id" :value="cat.id">
+                                {{ cat.category_name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Level 2: Sub Category -->
+                    <div class="col-md col-sm-6 py-1">
+                        <select v-model="selectedLevel2" @change="onLevel2Change" class="custom-select custom-select-sm"
+                            :disabled="!selectedLevel1 || level2Categories.length === 0">
+                            <option value="">
+                                {{ !selectedLevel1 ? 'Select Parent First' : (level2Categories.length ? 'All Sub Categories' : 'No Sub Categories') }}
+                            </option>
+                            <option v-for="cat in level2Categories" :key="cat.id" :value="cat.id">
+                                {{ cat.category_name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Level 3: That Sub / Child Category -->
+                    <div class="col-md col-sm-6 py-1">
+                        <select v-model="selectedLevel3" @change="onLevel3Change" class="custom-select custom-select-sm"
+                            :disabled="!selectedLevel2 || level3Categories.length === 0">
+                            <option value="">
+                                {{ !selectedLevel2 ? 'Select Sub First' : (level3Categories.length ? 'All Child Categories' : 'No Child Categories') }}
+                            </option>
+                            <option v-for="cat in level3Categories" :key="cat.id" :value="cat.id">
+                                {{ cat.category_name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Reset Filter Button -->
+                    <div class="col-auto py-1" v-if="selectedLevel1 || selectedLevel2 || selectedLevel3">
+                        <button @click="resetCategoryFilters" class="btn btn-sm btn-outline-danger text-nowrap" title="Clear All Category Filters">
+                            <i class="fas fa-times mr-1"></i> Clear
+                        </button>
+                    </div>
+
+                    <!-- Result Count Badge (Single Row Inline Placement) -->
+                    <div class="col-auto ml-auto py-1 text-right text-nowrap" v-if="products?.total !== undefined">
+                        <span class="badge badge-light border text-dark px-2 py-1 shadow-sm" style="font-size: 12px; line-height: 1.5;">
+                            <i class="fas fa-layer-group text-primary mr-1"></i>
+                            <span v-if="selectedLevel1 || selectedLevel2 || selectedLevel3 || currentSearchTerm">
+                                Found: <strong class="text-primary">{{ products.total }}</strong> {{ products.total === 1 ? 'Product' : 'Products' }}
+                            </span>
+                            <span v-else>
+                                Total: <strong class="text-primary">{{ products.total }}</strong> {{ products.total === 1 ? 'Product' : 'Products' }}
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
-                        <div v-if="products?.data?.length === 0" class="alert alert-info">No products found.</div>
+                        <div v-if="products?.data?.length === 0" class="alert alert-info">
+                            No products found.
+                            <span v-if="selectedLevel1 || selectedLevel2 || selectedLevel3">
+                                Try <a href="javascript:void(0)" @click="resetCategoryFilters" class="font-weight-bold alert-link">resetting your category filter</a>.
+                            </span>
+                        </div>
                         <div v-else class="table-responsive">
                             <table class="table table-bordered table-hover">
                                 <thead class="thead-light">
@@ -52,7 +125,14 @@
                                                 style="width: 60px; height: 60px; object-fit: cover;"
                                                 alt="Product Image" />
                                         </td>
-                                        <td class="align-middle">{{ product.name }}</td>
+                                        <td class="align-middle">
+                                            <div class="font-weight-bold">{{ product.name }}</div>
+                                            <div v-if="product.categories && product.categories.length" class="mt-1">
+                                                <span v-for="cat in product.categories" :key="cat.id" class="badge badge-light border text-muted mr-1" style="font-size: 11px;">
+                                                    <i class="fas fa-folder text-warning mr-1"></i>{{ cat.category_name }}
+                                                </span>
+                                            </div>
+                                        </td>
                                         <td class="align-middle">{{ product.model }}</td>
                                         <td class="align-middle">{{ product.price }}</td>
                                         <td class="align-middle">
@@ -100,7 +180,10 @@
                         <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-3 border-top" style="gap: 12px;">
                             <!-- Bulk Actions (visible when items selected) -->
                             <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
-                                <template v-if="selectedProducts.length > 0">
+                                <span v-if="selectedProducts.length === 0 && products?.total !== undefined" class="text-muted small">
+                                    Showing {{ products.from || 0 }} to {{ products.to || 0 }} of <strong>{{ products.total }}</strong> products
+                                </span>
+                                <template v-else-if="selectedProducts.length > 0">
                                     <span class="badge badge-light border px-2 py-1 text-muted d-inline-flex align-items-center mr-1" style="font-size: 0.85rem; height: 31px;">
                                         <strong class="text-primary mr-1">{{ selectedProducts.length }}</strong> selected
                                     </span>
@@ -140,7 +223,7 @@
 
                             <!-- Pagination -->
                             <div class="ml-auto">
-                                <Pagination :pData="products" @page-change="fetchPage" />
+                                <Pagination :pData="products" :show-info="false" @page-change="fetchPage" />
                             </div>
                         </div>
                     </div>
@@ -153,7 +236,7 @@
 <script setup>
 import axios from 'axios';
 import DashboardHeader from '@/components/DashboardHeader.vue';
-import { inject, onMounted, ref } from 'vue';
+import { computed, inject, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Pagination from '@/components/Paginations/Pagination.vue';
 import { useToast } from '@/composables/useToast';
@@ -173,6 +256,60 @@ const selectedProducts = ref([]);
 const allSelected = ref(false);
 const bulkStatus = ref("");
 
+// 3-Level Category Filter state
+const allCategoryList = ref([]);
+const selectedLevel1 = ref('');
+const selectedLevel2 = ref('');
+const selectedLevel3 = ref('');
+
+// Computed category lists for each level
+const level1Categories = computed(() => {
+    return allCategoryList.value.filter(c => !c.parent_id || c.parent_id == 0);
+});
+
+const level2Categories = computed(() => {
+    if (!selectedLevel1.value) return [];
+    return allCategoryList.value.filter(c => c.parent_id == selectedLevel1.value);
+});
+
+const level3Categories = computed(() => {
+    if (!selectedLevel2.value) return [];
+    return allCategoryList.value.filter(c => c.parent_id == selectedLevel2.value);
+});
+
+// Load full category list for dropdown hierarchy
+const fetchAllCategories = async () => {
+    try {
+        const res = await axios.get('/api/product-categories/all');
+        allCategoryList.value = res.data.data || [];
+    } catch (error) {
+        console.error('Failed to load all categories for filter:', error);
+    }
+};
+
+// Filter change handlers
+const onLevel1Change = () => {
+    selectedLevel2.value = '';
+    selectedLevel3.value = '';
+    fetchPage(1);
+};
+
+const onLevel2Change = () => {
+    selectedLevel3.value = '';
+    fetchPage(1);
+};
+
+const onLevel3Change = () => {
+    fetchPage(1);
+};
+
+const resetCategoryFilters = () => {
+    selectedLevel1.value = '';
+    selectedLevel2.value = '';
+    selectedLevel3.value = '';
+    fetchPage(1);
+};
+
 const selectAll = () => {
     if (allSelected.value) {
         selectedProducts.value = products.value.data.map(p => p.id);
@@ -183,7 +320,16 @@ const selectAll = () => {
 
 const fetchPage = async (page = 1, term = "") => {
     try {
-        const res = await axios.get(`/api/products?page=${page}&search=${currentSearchTerm.value}&per_page=${perPage.value}`);
+        let url = `/api/products?page=${page}&search=${encodeURIComponent(currentSearchTerm.value)}&per_page=${perPage.value}`;
+        if (selectedLevel3.value) {
+            url += `&level3_id=${selectedLevel3.value}`;
+        } else if (selectedLevel2.value) {
+            url += `&level2_id=${selectedLevel2.value}`;
+        } else if (selectedLevel1.value) {
+            url += `&level1_id=${selectedLevel1.value}`;
+        }
+
+        const res = await axios.get(url);
         const pData = res.data.data;
         if (pData && pData.data) {
             pData.data.forEach(p => {
@@ -201,7 +347,7 @@ const fetchPage = async (page = 1, term = "") => {
 
 const onSearch = async (term) => {
     currentSearchTerm.value = term;
-    fetchPage();
+    fetchPage(1);
 };
 
 const onPerPageChange = () => {
@@ -209,7 +355,8 @@ const onPerPageChange = () => {
 };
 
 onMounted(() => {
-    fetchPage();
+    fetchAllCategories();
+    fetchPage(1);
     if (route.query.toast) {
         toast.success(route.query.toast);
         setTimeout(() => {

@@ -60,6 +60,7 @@ export function getImageUrl(path) {
  * Generate URL-friendly slug from title
  */
 export const generateSlug = (title) => {
+    if (!title || typeof title !== 'string') return '';
     return title
         .toLowerCase()
         .trim()

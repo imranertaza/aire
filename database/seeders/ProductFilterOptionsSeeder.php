@@ -22,7 +22,7 @@ class ProductFilterOptionsSeeder extends Seeder
     {
         $products = Product::with(['description', 'categories', 'productAttributes'])->get();
         if ($products->isEmpty()) {
-            $this->command->error('No products found to seed options for!');
+            $this->command?->error('No products found to seed options for!');
             return;
         }
         // 1. Ensure Attribute Group exists

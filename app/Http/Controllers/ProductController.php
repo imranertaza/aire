@@ -6,6 +6,7 @@ use App\Http\Requests\Product\DropdownSearchRequest;
 use App\Http\Requests\Product\ProductActionRequest;
 use App\Http\Requests\Product\WizardFilterRequest;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Services\Product\ProductFilterService;
 use App\Services\Product\ProductCompareService;
 use App\Services\Product\ProductSearchService;
@@ -27,7 +28,7 @@ class ProductController extends Controller
     ) {}
 
     /**
-     * Display product catalog listing by category.
+     * Display product catalog listing by category (Dedicated View All).
      */
     public function categoriesDetails(Request $request, ?string $slug_or_id = null): mixed
     {
@@ -35,41 +36,39 @@ class ProductController extends Controller
         $search = trim((string) $request->input('search', ''));
 
         $currentCategory = $this->filterService->resolveCategory($catParam);
-        $featured = $this->filterService->resolveCategoryFeatured($currentCategory);
-        $topFeaturedProduct = $featured['top'];
-        $middleFeaturedProduct = $featured['middle'];
-        $bottomFeaturedProduct = $featured['bottom'];
 
-        $catIds = $currentCategory
-            ? $this->filterService->getCategoryWithDescendantIds([$currentCategory->id])
-            : [];
+        if (!$currentCategory) {
+            abort(404);
+        }
+
+        $allCategories = $this->productService->getCategoryTree();
+        $adSliders = $this->filterService->getSidebarAdSliders();
+
+        $catIds = $this->filterService->getCategoryWithDescendantIds([$currentCategory->id]);
 
         $products = Product::active()
             ->withCatalogRelations()
             ->inCategories($catIds)
             ->search($search)
-            ->latest()
-            ->paginate(50)
+            ->orderBy('sort_order', 'asc')
+            ->orderBy('id', 'desc')
+            ->paginate(10)
             ->withQueryString();
-
-        $adSliders = $this->filterService->getSidebarAdSliders();
 
         if ($request->ajax() || $request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest' || $request->input('ajax') == '1') {
             return response()->json([
                 'status' => true,
                 'total'  => $products->total(),
-                'html'   => \theme_view('products.partials.product_grid', compact('products', 'topFeaturedProduct', 'search', 'currentCategory', 'adSliders'))->render(),
+                'html'   => \theme_view('products.partials.product_grid', compact('products', 'search', 'currentCategory', 'adSliders'))->render(),
             ]);
         }
 
-        return \theme_view('products.category.category', compact(
+        return \theme_view('products.category.view_all', compact(
             'products',
             'currentCategory',
-            'topFeaturedProduct',
-            'middleFeaturedProduct',
-            'bottomFeaturedProduct',
-            'search',
-            'adSliders'
+            'allCategories',
+            'adSliders',
+            'search'
         ));
     }
 
@@ -119,7 +118,7 @@ class ProductController extends Controller
     /**
      * Display product landing page.
      */
-    public function productLanding(?string $slug = null): View
+    public function productLanding(?string $slug = null, ?Request $request = null): View
     {
         if (!$slug) {
             abort(404);
@@ -130,6 +129,77 @@ class ProductController extends Controller
         if (!$data) {
             abort(404);
         }
+
+        $product = $data['product'];
+        $previousUrl = url()->previous();
+        $prevPath = parse_url($previousUrl, PHP_URL_PATH) ?? '';
+
+        $catSlug = null;
+        if (preg_match('~/category(?:/details)?/([^/]+)~i', $prevPath, $matches)) {
+            $catSlug = trim($matches[1]);
+        } elseif (request()->query('cat') || request()->query('category')) {
+            $catSlug = trim((string) (request()->query('cat') ?: request()->query('category')));
+        }
+
+        $breadcrumbName = null;
+        $breadcrumbUrl = null;
+        $matched = null;
+        $fallbackCat = null;
+
+        if ($catSlug) {
+            $matched = $product->categories?->first(function ($c) use ($catSlug) {
+                return (string) ($c->slug ?? '') === (string) $catSlug || (string) ($c->id ?? '') === (string) $catSlug;
+            });
+
+            if (!$matched) {
+                $matched = ProductCategory::where('slug', $catSlug)
+                    ->orWhere('id', is_numeric($catSlug) ? (int) $catSlug : 0)
+                    ->first();
+            }
+
+            if ($matched) {
+                $breadcrumbName = $matched->category_name;
+                $breadcrumbUrl = route('category.show', $matched->slug ?? $matched->id);
+            } else {
+                $breadcrumbName = ucwords(str_replace(['-', '_'], ' ', $catSlug));
+                $breadcrumbUrl = $previousUrl ?: url('/category/' . $catSlug);
+            }
+
+            // Remember in session so reloading (F5) preserves this category for the current product
+            session([
+                'landing_ref_product_id' => $product->id,
+                'landing_ref_cat_name'   => $breadcrumbName,
+                'landing_ref_cat_url'    => $breadcrumbUrl,
+            ]);
+        } elseif ($previousUrl && str_contains($previousUrl, '/products')) {
+            $breadcrumbName = 'Products';
+            $breadcrumbUrl = route('products.filter');
+            session([
+                'landing_ref_product_id' => $product->id,
+                'landing_ref_cat_name'   => $breadcrumbName,
+                'landing_ref_cat_url'    => $breadcrumbUrl,
+            ]);
+        } elseif (session('landing_ref_product_id') === $product->id && session()->has('landing_ref_cat_name')) {
+            // Preserved across page reloads (F5)
+            $breadcrumbName = session('landing_ref_cat_name');
+            $breadcrumbUrl  = session('landing_ref_cat_url');
+        } else {
+            // Direct / SEO Fallback
+            $fallbackCat = $product->categories?->first();
+            if ($fallbackCat) {
+                $breadcrumbName = $fallbackCat->category_name;
+                $breadcrumbUrl = route('category.show', $fallbackCat->slug ?? $fallbackCat->id);
+            } else {
+                $breadcrumbName = 'Products';
+                $breadcrumbUrl = route('products.index');
+            }
+        }
+
+        $data['breadcrumb'] = [
+            'name' => $breadcrumbName,
+            'url'  => $breadcrumbUrl,
+        ];
+        $data['category'] = $matched ?? ($fallbackCat ?? $product->categories?->first());
 
         return \theme_view('products.landing', $data);
     }
@@ -168,25 +238,31 @@ class ProductController extends Controller
         $middleFeaturedProduct = $featured['middle'];
         $bottomFeaturedProduct = $featured['bottom'];
 
-        $filterParams = [
+        $filterParams = array_merge($request->query(), [
             'search'          => $search,
             'category'        => $cleanCategories,
             'currentCategory' => $currentCategory,
+            'application'     => $request->input('application') ?: $request->input('application_environment'),
             'building_type'   => $request->input('building_type') ?: $request->input('building'),
             'room_type'       => $request->input('room_type') ?: $request->input('room'),
             'area_range'      => $request->input('area_range') ?: $request->input('coverage'),
+            'airflow'         => $request->input('airflow') ?: $request->input('airflow_requirement'),
             'occupancy'       => $request->input('occupancy'),
             'health_concern'  => $request->input('health_concern') ?: $request->input('health', []),
             'problem'         => $request->input('problem', []),
             'solution_needed' => $request->input('solution_needed') ?: $request->input('solution', []),
+            'installation'    => $request->input('installation') ?: $request->input('installation_requirements'),
             'budget'          => $request->input('budget'),
-        ];
+        ]);
 
         $query = Product::with([
-            'categories:id,category_name,slug',
+            'categories',
             'description:product_id,description,meta_title,tag',
             'images',
             'brand:id,name',
+            'special',
+            'freeDelivery',
+            'productLanding:id,product_id,status',
         ])->where('status', 1);
 
         $query = $this->filterService->applyFilters($query, $filterParams);
@@ -291,7 +367,7 @@ class ProductController extends Controller
         ];
 
         $query = Product::where('status', 1)
-            ->with(['categories', 'images', 'brand', 'productAttributes', 'description']);
+            ->with(['categories', 'images', 'brand', 'productAttributes', 'description', 'productFilterOptions.filterOption', 'productFilterOptions.filterOptionValue']);
 
         $query = $this->filterService->applyWizardFilters($query, $params);
 
@@ -306,7 +382,7 @@ class ProductController extends Controller
         $otherMatchedProducts = $matchedProducts->slice(1);
 
         if ($bestProduct) {
-            $bestProduct->loadMissing(['categories', 'images', 'brand', 'productAttributes', 'description']);
+            $bestProduct->loadMissing(['categories', 'images', 'brand', 'productAttributes', 'description', 'productFilterOptions.filterOption', 'productFilterOptions.filterOptionValue']);
         }
 
         $bestProductData = $bestProduct ? $this->filterService->formatWizardProduct($bestProduct) : null;

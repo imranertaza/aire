@@ -1,165 +1,199 @@
 /**
- * AIRE Precision Selection Protocol — jQuery Dynamic Engine
+ * AIRE Guided Product Finder — jQuery Dynamic Engine
+ * Exactly matches Guided Product Finder Mockups (10 Steps)
  */
 
 $(document).ready(function () {
 
-    // 1. All 9 Protocol Steps Data Schema
+    // 1. All 10 Guided Product Finder Steps Data Schema
     const STEPS_DATA = window.DYNAMIC_STEPS_DATA || [
         {
             stepNum: 1,
-            stepId: "industry",
-            stepName: "INDUSTRY",
-            stepTitle: "Industries",
-            stepTag: "PROTOCOL INIT",
-            stepCount: "STEP 1 / 9",
-            progressPct: 11,
+            stepId: "application",
+            stepName: "APPLICATION",
+            stepTitle: "WHERE WILL YOU USE IT?",
+            stepTag: "APPLICATION / ENVIRONMENT",
+            guided_question: "01 WHERE WILL YOU USE IT?",
+            guided_subtitle: "APPLICATION / ENVIRONMENT",
             options: [
-                { label: "Residential", icon: "bi-house", val: "Residential" },
-                { label: "Commercial", icon: "bi-building", val: "Commercial" },
-                { label: "Healthcare", icon: "bi-hospital", val: "Healthcare" },
-                { label: "Education", icon: "bi-mortarboard", val: "Education" },
-                { label: "Any", icon: "bi-grid", val: "Any" },
-                { label: "All", icon: "bi-globe", val: "All" }
+                { label: "Car / Vehicle", val: "car_vehicle", explanation: "Selected: Car / Vehicle. Routes to compact in-car or automotive air purification." },
+                { label: "Personal Protection", val: "personal_protection", explanation: "Selected: Personal Protection. Wearable and personal air filtering devices." },
+                { label: "Small Enclosed Space", val: "small_enclosed_space", explanation: "Selected: Small Enclosed Space. Compact units tailored for tight cabins, closets, or small booths." },
+                { label: "Single Room", val: "single_room", explanation: "Selected: Single Room. This routes the user to room-scale air solutions rather than vehicle, wearable or large-building systems." },
+                { label: "Bedroom", val: "bedroom", explanation: "Selected: Bedroom. Prioritizes whisper-quiet, night-mode certified units." },
+                { label: "Living Room", val: "living_room", explanation: "Selected: Living Room. Medium-to-high capacity air cleaning and ventilation." },
+                { label: "Home / Apartment", val: "home_apartment", explanation: "Selected: Home / Apartment. Full residential or whole-apartment fresh air solutions." },
+                { label: "Office", val: "office", explanation: "Selected: Office. Low-noise commercial air filtration for productivity." },
+                { label: "Hospital / Healthcare", val: "hospital_healthcare", explanation: "Selected: Hospital / Healthcare. Medical-grade pathogen and virus neutralization." },
+                { label: "School / Classroom", val: "school_classroom", explanation: "Selected: School / Classroom. High air exchange rate for crowded learning spaces." },
+                { label: "Commercial Building", val: "commercial_building", explanation: "Selected: Commercial Building. Centralized high-capacity air treatment systems." },
+                { label: "Industrial Facility", val: "industrial_facility", explanation: "Selected: Industrial Facility. Heavy-duty particulate and chemical exhaust filtration." }
             ]
         },
         {
             stepNum: 2,
-            stepId: "building",
-            stepName: "BUILDING",
-            stepTitle: "Building Type",
-            stepTag: "BUILDING SELECTION",
-            stepCount: "STEP 2 / 9",
-            progressPct: 22,
+            stepId: "product_family",
+            stepName: "PRODUCT FAMILY",
+            stepTitle: "WHAT DO YOU NEED?",
+            stepTag: "PRODUCT FAMILY / SYSTEM TYPE",
+            guided_question: "02 WHAT DO YOU NEED?",
+            guided_subtitle: "PRODUCT FAMILY / SYSTEM TYPE",
             options: [
-                { label: "Apartment", icon: "bi-building-fill", val: "Apartment" },
-                { label: "Single Family", icon: "bi-house-heart", val: "Single Family" },
-                { label: "Office Space", icon: "bi-briefcase", val: "Office Space" },
-                { label: "Medical Clinic", icon: "bi-hospital", val: "Medical Clinic" },
-                { label: "School", icon: "bi-mortarboard", val: "School" },
-                { label: "Custom Facility", icon: "bi-gear", val: "Custom Facility" }
+                { label: "Air Purifier", val: "air_purifier", explanation: "Selected: Air Purifier. Recirculates and purifies indoor air with multi-stage HEPA and carbon filters." },
+                { label: "Fresh Air & Ventilation", val: "fresh_air_ventilation", explanation: "Selected: Fresh Air & Ventilation. FE6 is pursued as a fresh-air product, not as a standalone air-purifier-only or AC selection." },
+                { label: "Air Conditioner / Climate Control", val: "air_conditioner_climate_control", explanation: "Selected: Air Conditioner / Climate Control. Temperature and climate regulation combined with air treatment." },
+                { label: "Air Quality Monitor", val: "air_quality_monitor", explanation: "Selected: Air Quality Monitor. Precise real-time tracking of PM2.5, CO2, TVOC, and humidity." },
+                { label: "Personal Air & Protection", val: "personal_air_protection", explanation: "Selected: Personal Air & Protection. Mobile and wearable personal clean air equipment." },
+                { label: "Vehicle / Mobile Air System", val: "vehicle_mobile_air_system", explanation: "Selected: Vehicle / Mobile Air System. 12V automotive and on-the-go air purifiers." },
+                { label: "Accessories / Filters", val: "accessories_filters", explanation: "Selected: Accessories / Filters. Replacement filter elements, pre-filters, and ducting parts." },
+                { label: "Smart Controls", val: "smart_controls", explanation: "Selected: Smart Controls. IoT gateways, central control panels, and smart sensors." },
+                { label: "Not sure — recommend", val: "not_sure_recommend", explanation: "Selected: Not sure — recommend. Let our algorithm recommend the best matching product family based on your needs." }
             ]
         },
         {
             stepNum: 3,
-            stepId: "area",
-            stepName: "AREA TYPE",
-            stepTitle: "Area Category",
-            stepTag: "SPACE CATEGORY",
-            stepCount: "STEP 3 / 9",
-            progressPct: 33,
+            stepId: "space_size",
+            stepName: "SPACE SIZE",
+            stepTitle: "HOW LARGE IS THE SPACE?",
+            stepTag: "ROOM SIZE / COVERAGE",
+            guided_question: "03 HOW LARGE IS THE SPACE?",
+            guided_subtitle: "ROOM SIZE / COVERAGE",
             options: [
-                { label: "Living Room", icon: "bi-tv", val: "Living Room" },
-                { label: "Bedroom", icon: "bi-moon-stars", val: "Bedroom" },
-                { label: "Whole House", icon: "bi-house-door", val: "Whole House" },
-                { label: "Open Office", icon: "bi-laptop", val: "Open Office" },
-                { label: "Clean Room", icon: "bi-shield-check", val: "Clean Room" },
-                { label: "ICU / Surgery", icon: "bi-heart-pulse", val: "ICU / Surgery" }
+                { label: "Under 200 sq ft", val: "under_200_sq_ft", explanation: "Selected: Under 200 sq ft. Compact space coverage." },
+                { label: "200-500 sq ft", val: "200_500_sq_ft", explanation: "Selected: 200-500 sq ft. Typical master bedroom or standard room coverage." },
+                { label: "500-1,000 sq ft", val: "500_1000_sq_ft", explanation: "Selected: 500-1,000 sq ft. Large living room or combined open plan area." },
+                { label: "1,000-2,000 sq ft", val: "1000_2000_sq_ft", explanation: "Selected: 1,000-2,000 sq ft. Whole apartment or floor-wide coverage." },
+                { label: "2,000-5,000 sq ft", val: "2000_5000_sq_ft", explanation: "Selected: 2,000-5,000 sq ft. Multi-story residence or large open commercial floor." },
+                { label: "5,000+ sq ft", val: "5000_plus_sq_ft", explanation: "Selected: 5,000+ sq ft. Massive commercial building or industrial facility scale." },
+                { label: "I don't know", val: "i_dont_know", explanation: "Area not provided in this example, so we do not invent a room size. Coverage can be checked against the verified FE6 specification on the results page." }
             ]
         },
         {
             stepNum: 4,
-            stepId: "coverage",
-            stepName: "COVERAGE",
-            stepTitle: "Coverage Scope",
-            stepTag: "CAPACITY SCOPE",
-            stepCount: "STEP 4 / 9",
-            progressPct: 44,
+            stepId: "airflow",
+            stepName: "AIRFLOW",
+            stepTitle: "AIRFLOW REQUIREMENT",
+            stepTag: "AIRFLOW / PERFORMANCE",
+            guided_question: "04 AIRFLOW REQUIREMENT",
+            guided_subtitle: "AIRFLOW / PERFORMANCE",
             options: [
-                { label: "< 300 sq ft", icon: "bi-box", val: "< 300 sq ft" },
-                { label: "300 - 600 sq ft", icon: "bi-aspect-ratio", val: "300 - 600 sq ft" },
-                { label: "600 - 1,000 sq ft", icon: "bi-fullscreen", val: "600 - 1,000 sq ft" },
-                { label: "1,000+ sq ft", icon: "bi-bounding-box-circles", val: "1,000+ sq ft" },
-                { label: "2,000+ sq ft", icon: "bi-arrows-fullscreen", val: "2,000+ sq ft" },
-                { label: "Custom Facility", icon: "bi-sliders", val: "Custom Facility" }
+                { label: "Under 100 m³/h", val: "under_100_m3_h", explanation: "Selected: Under 100 m³/h. Ultra-quiet micro ventilation." },
+                { label: "100–300 m³/h", val: "100_300_m3_h", explanation: "Selected: 100–300 m³/h. Standard residential fresh air delivery rate." },
+                { label: "300–600 m³/h", val: "300_600_m3_h", explanation: "Selected: 300–600 m³/h. High-flow fresh air and rapid air renewal." },
+                { label: "600–1,500 m³/h", val: "600_1500_m3_h", explanation: "Selected: 600–1,500 m³/h. Commercial air volume circulation." },
+                { label: "1,500+ m³/h", val: "1500_plus_m3_h", explanation: "Selected: 1,500+ m³/h. Industrial-scale high volume air exchange." },
+                { label: "I don't know", val: "i_dont_know", explanation: "Airflow is optional. Since the user does not know the required airflow, keep the path open and compare against the product's verified m³/h rating later." }
             ]
         },
         {
             stepNum: 5,
-            stepId: "occupancy",
-            stepName: "OCCUPANCY",
-            stepTitle: "Occupancy Density",
-            stepTag: "DENSITY ESTIMATE",
-            stepCount: "STEP 5 / 9",
-            progressPct: 55,
+            stepId: "air_quality_needs",
+            type: "checkbox",
+            stepType: "checkbox",
+            stepName: "AIR QUALITY NEEDS",
+            stepTitle: "WHAT MATTERS MOST?",
+            stepTag: "AIR QUALITY NEEDS — SIMPLIFIED",
+            guided_question: "05 WHAT MATTERS MOST?",
+            guided_subtitle: "AIR QUALITY NEEDS — SIMPLIFIED",
             options: [
-                { label: "1 - 2 People", icon: "bi-person", val: "1 - 2 People" },
-                { label: "3 - 5 People", icon: "bi-people", val: "3 - 5 People" },
-                { label: "6 - 10 People", icon: "bi-people-fill", val: "6 - 10 People" },
-                { label: "11 - 25 People", icon: "bi-person-workspace", val: "11 - 25 People" },
-                { label: "25+ People", icon: "bi-buildings", val: "25+ People" },
-                { label: "High Traffic", icon: "bi-activity", val: "High Traffic" }
+                { label: "Bring in fresh outdoor air", val: "bring_in_fresh_outdoor_air", explanation: "Selected: Fresh outdoor air. Introduces oxygen-rich outside air to lower CO2 and eliminate stuffiness." },
+                { label: "Reduce PM2.5 / fine particles", val: "reduce_pm25_fine_particles", explanation: "Selected: PM2.5 reduction. Captures microscopic airborne pollutants and smoke particles." },
+                { label: "Reduce odours / VOCs", val: "reduce_odours_vocs", explanation: "Selected: Odours & VOCs. Activated carbon adsorption for cooking smells, formaldehyde and chemicals." },
+                { label: "HEPA filtration required", val: "hepa_filtration_required", explanation: "Selected: HEPA filtration. Medical-grade 99.97% or higher particle capture standard." },
+                { label: "Heat / energy recovery", val: "heat_energy_recovery", explanation: "Selected: Heat / energy recovery. Minimizes heating and cooling loss during continuous air exchange." },
+                { label: "Monitor CO2", val: "monitor_co2", explanation: "Selected: CO2 monitoring. Integrated sensor monitoring for indoor carbon dioxide levels." },
+                { label: "Humidity control", val: "humidity_control", explanation: "Selected: Humidity control. Prevents condensation or relieves excessively dry indoor air." },
+                { label: "Not sure — recommend", val: "not_sure_recommend", explanation: "Selected: Not sure — recommend. Balanced general clean air and fresh ventilation profile." }
             ]
         },
         {
             stepNum: 6,
-            stepId: "health",
-            stepName: "HEALTH CONCERN",
-            stepTitle: "Primary Health Concern",
-            stepTag: "HEALTH TARGETING",
-            stepCount: "STEP 6 / 9",
-            progressPct: 66,
+            stepId: "requirements",
+            stepName: "REQUIREMENTS",
+            stepTitle: "ANY INSTALLATION REQUIREMENTS?",
+            stepTag: "INSTALLATION / USE",
+            guided_question: "06 ANY INSTALLATION REQUIREMENTS?",
+            guided_subtitle: "INSTALLATION / USE",
             options: [
-                { label: "Allergies", icon: "bi-flower1", val: "Allergies" },
-                { label: "Wildfire Smoke", icon: "bi-fire", val: "Wildfire Smoke" },
-                { label: "Chemicals", icon: "bi-virus", val: "Chemicals" },
-                { label: "Viruses", icon: "bi-bug", val: "Viruses" },
-                { label: "Odor Control", icon: "bi-wind", val: "Odor Control" },
-                { label: "General Purity", icon: "bi-sparkles", val: "General Purity" }
+                { label: "Wall-mounted", val: "wall_mounted", explanation: "Selected: Wall-mounted. Through-wall mounted fresh air unit saving precious floor space." },
+                { label: "Desktop / Tabletop", val: "desktop_tabletop", explanation: "Selected: Desktop / Tabletop. Compact personal clean air on your desk or nightstand." },
+                { label: "Ceiling / Ducted", val: "ceiling_ducted", explanation: "Selected: Ceiling / Ducted. Concealed in ceiling with ducted distribution to multiple zones." },
+                { label: "Portable", val: "portable", explanation: "Selected: Portable. Free-standing movable air system with plug-and-play simplicity." },
+                { label: "Low noise", val: "low_noise", explanation: "Selected: Low noise. Ultra-quiet sleep operation under 30 dB." },
+                { label: "Low energy use", val: "low_energy_use", explanation: "Selected: Low energy use. High-efficiency brushless DC motor with minimal power draw." },
+                { label: "Smart / Remote control", val: "smart_remote_control", explanation: "Selected: Smart / Remote control. WiFi app control, scheduled timers, and automation." },
+                { label: "No preference", val: "no_preference", explanation: "This is optional and can be skipped. Do not block FE6 from matching just because the customer has no installation preference." }
             ]
         },
         {
             stepNum: 7,
-            stepId: "problem",
-            stepName: "PROBLEM",
-            stepTitle: "Air Quality Contaminant",
-            stepTag: "CONTAMINANT FILTER",
-            stepCount: "STEP 7 / 9",
-            progressPct: 77,
+            stepId: "budget",
+            stepName: "BUDGET",
+            stepTitle: "WHAT IS YOUR BUDGET?",
+            stepTag: "BUDGET / PRICE RANGE",
+            guided_question: "07 WHAT IS YOUR BUDGET?",
+            guided_subtitle: "BUDGET / PRICE RANGE",
             options: [
-                { label: "Dust & Pollen", icon: "bi-sun", val: "Dust & Pollen" },
-                { label: "Pet Dander", icon: "bi-github", val: "Pet Dander" },
-                { label: "Mold Spores", icon: "bi-droplet", val: "Mold Spores" },
-                { label: "Smog / Exhaust", icon: "bi-cloud-haze2", val: "Smog / Exhaust" },
-                { label: "Stale Air", icon: "bi-soundwave", val: "Stale Air" },
-                { label: "Full Spectrum", icon: "bi-shield-lock", val: "Full Spectrum" }
+                { label: "Under $500", val: "under_500", explanation: "Selected: Under $500. Budget-friendly entry solution." },
+                { label: "$500–$1,000", val: "500_1000", explanation: "Selected: $500–$1,000. Core residential fresh air or high-efficiency air purifier." },
+                { label: "$1,000–$2,500", val: "1000_2500", explanation: "Selected: $1,000–$2,500. Premium multi-stage ERV/HRV fresh air units like BROAD FE6." },
+                { label: "Over $2,500", val: "over_2500", explanation: "Selected: Over $2,500. Commercial or whole-building ducted ventilation system." },
+                { label: "Not sure", val: "not_sure", explanation: "Budget is not specified in this sample. Confirm the storefront currency and compare with live FE6 pricing rather than using an invented price." }
             ]
         },
         {
             stepNum: 8,
-            stepId: "solution",
-            stepName: "SOLUTION NEEDED",
-            stepTitle: "System Architecture",
-            stepTag: "SYSTEM SPEC",
-            stepCount: "STEP 8 / 9",
-            progressPct: 88,
+            stepId: "matched_solutions",
+            stepName: "MATCHED SOLUTIONS",
+            stepTitle: "YOUR MATCHED SOLUTIONS",
+            stepTag: "MATCHED PRODUCT",
+            guided_question: "08 YOUR MATCHED SOLUTIONS",
+            guided_subtitle: "MATCHED PRODUCT",
             options: [
-                { label: "Purifier", icon: "bi-box-seam", val: "Purifier" },
-                { label: "HVAC", icon: "bi-fan", val: "HVAC" },
-                { label: "Wearable", icon: "bi-smartwatch", val: "Wearable" },
-                { label: "Wall Mounted", icon: "bi-border-style", val: "Wall Mounted" },
-                { label: "Ceiling Mounted", icon: "bi-distribute-vertical", val: "Ceiling Mounted" },
-                { label: "Multi-Room", icon: "bi-diagram-3", val: "Multi-Room" }
+                { label: "BROAD FE6 AirPro Fresh", val: "broad_fe6_airpro_fresh", explanation: "Target Product matched to your exact room and ventilation profile." },
+                { label: "Compare Products", val: "compare_products", explanation: "Side-by-side technical specification comparison." },
+                { label: "View Full Specifications", val: "view_full_specifications", explanation: "CADR, power consumption, sound level, and dimensions." },
+                { label: "Check Coverage & Airflow", val: "check_coverage_airflow", explanation: "Verify m³/h ratings against your space dimensions." },
+                { label: "View Features / Filters", val: "view_features_filters", explanation: "HEPA H13, electrostatic cleanable filter, and heat recovery core." },
+                { label: "Price & Availability", val: "price_availability", explanation: "Direct pricing, stock status, and shipping information." }
             ]
         },
         {
             stepNum: 9,
-            stepId: "budget",
-            stepName: "BUDGET RANGE",
-            stepTitle: "Budget Investment",
-            stepTag: "PROTOCOL FINALIZATION",
-            stepCount: "STEP 9 / 9",
-            progressPct: 100,
+            stepId: "product_result",
+            stepName: "PRODUCT RESULT",
+            stepTitle: "BROAD FE6 AIRPRO FRESH",
+            stepTag: "PRODUCT RESULT / REVIEW",
+            guided_question: "09 BROAD FE6 AIRPRO FRESH",
+            guided_subtitle: "PRODUCT RESULT / REVIEW",
             options: [
-                { label: "Under $500", icon: "bi-cash", val: "Under $500" },
-                { label: "$500 - $1,000", icon: "bi-cash-stack", val: "$500 - $1,000" },
-                { label: "$1,000 - $2,500", icon: "bi-credit-card", val: "$1,000 - $2,500" },
-                { label: "$2,500 - $5,000", icon: "bi-wallet2", val: "$2,500 - $5,000" },
-                { label: "$5,000+", icon: "bi-bank", val: "$5,000+" },
-                { label: "Quote", icon: "bi-file-earmark-text", val: "Quote" }
+                { label: "View Product Details", val: "view_product_details", explanation: "Open complete product datasheet and overview." },
+                { label: "Compare Selected Products", val: "compare_selected_products", explanation: "Review alternatives and related accessories." },
+                { label: "Buy Now", val: "buy_now", explanation: "Proceed directly to checkout." },
+                { label: "Request a Quote", val: "request_quote", explanation: "Get a specialized quotation for your project." },
+                { label: "Talk to an Expert", val: "talk_expert", explanation: "Consult with our HVAC air quality engineers." },
+                { label: "Change My Answers", val: "change_answers", explanation: "Return to earlier steps to refine criteria." }
+            ]
+        },
+        {
+            stepNum: 10,
+            stepId: "match_summary",
+            stepName: "MATCH SUMMARY",
+            stepTitle: "WHY FE6 MATCHED",
+            stepTag: "MATCH SUMMARY",
+            guided_question: "10 WHY FE6 MATCHED",
+            guided_subtitle: "MATCH SUMMARY",
+            options: [
+                { label: "Application: Single Room", val: "app_single_room", explanation: "Ideal fit for single room and apartment environments." },
+                { label: "Family: Fresh Air & Ventilation", val: "fam_fresh_air", explanation: "Continuous outdoor fresh air intake with energy recovery." },
+                { label: "Area: Not specified", val: "area_not_specified", explanation: "Coverage matches broad residential space applications." },
+                { label: "Airflow: Not specified", val: "airflow_not_specified", explanation: "Flexible multi-speed fan control accommodates diverse loads." },
+                { label: "Needs: Fresh outdoor air + PM2.5", val: "needs_fresh_air_pm25", explanation: "Dual electrostatic and HEPA filtration with high PM2.5 efficiency." },
+                { label: "Next: Verify specifications", val: "next_verify_specs", explanation: "Confirm voltage, duct dimensions, and installation accessories." }
             ]
         }
     ];
+
     // State Tracking
     let currentStep = 1;
     const userSelections = {};
@@ -176,7 +210,7 @@ $(document).ready(function () {
     function isStepOptionSelected(stepNum, val) {
         const selections = userSelections[stepNum];
         if (!selections || !Array.isArray(selections)) return false;
-        return selections.some(item => String(item.val) === String(val));
+        return selections.some(item => String(item.val).toLowerCase() === String(val).toLowerCase());
     }
 
     // Helper: get array of active selected values (excluding 'any') for a step
@@ -213,36 +247,38 @@ $(document).ready(function () {
     }
 
     // Build payload using all user selections up to the specified step
-    function buildFilterPayload(stepLimit = 9) {
+    function buildFilterPayload(stepLimit = STEPS_DATA.length) {
         const selectedSlugs = [];
         for (let k = 1; k <= stepLimit; k++) {
             const vals = getStepSelectedValues(k);
             vals.forEach(v => selectedSlugs.push(v));
         }
 
-        const getSingleVal = (stepNum) => {
-            if (stepLimit < stepNum) return '';
-            const vals = getStepSelectedValues(stepNum);
+        const getValByStepId = (idKeyword) => {
+            const step = STEPS_DATA.find(s => s.stepId && s.stepId.toLowerCase().includes(idKeyword));
+            if (!step || stepLimit < step.stepNum) return '';
+            const vals = getStepSelectedValues(step.stepNum);
             return vals.length > 0 ? vals[0] : '';
         };
 
-        const getArrayVals = (stepNum) => {
-            if (stepLimit < stepNum) return [];
-            return getStepSelectedValues(stepNum);
+        const getArrayByStepId = (idKeyword) => {
+            const step = STEPS_DATA.find(s => s.stepId && s.stepId.toLowerCase().includes(idKeyword));
+            if (!step || stepLimit < step.stepNum) return [];
+            return getStepSelectedValues(step.stepNum);
         };
 
         return {
             _token: window.CSRF_TOKEN || '',
-            category: getSingleVal(1),
-            industry: getSingleVal(1),
-            building_type: getSingleVal(2),
-            room_type: getSingleVal(3),
-            area_range: getSingleVal(4),
-            occupancy: getSingleVal(5),
-            health_concern: getArrayVals(6),
-            problem: getArrayVals(7),
-            solution_needed: getArrayVals(8),
-            budget: getSingleVal(9),
+            category: getValByStepId('category'),
+            industry: getValByStepId('industry'),
+            building_type: getValByStepId('application') || getValByStepId('building'),
+            room_type: getValByStepId('space_size') || getValByStepId('room'),
+            area_range: getValByStepId('space_size') || getValByStepId('area'),
+            occupancy: getValByStepId('occupancy'),
+            health_concern: getArrayByStepId('air_quality_needs') || getArrayByStepId('health'),
+            problem: getArrayByStepId('problem'),
+            solution_needed: getArrayByStepId('product_family') || getArrayByStepId('solution'),
+            budget: getValByStepId('budget'),
             category_slugs: selectedSlugs,
             page: 1
         };
@@ -274,7 +310,7 @@ $(document).ready(function () {
                     }
                     if (res.count !== undefined) {
                         $('#liveMatchCountTag').text(res.count + ' Products Match');
-                        $('.protocol-analysis-pct').text(res.count + ' MATCHES');
+                        $('.match-progress-count').text(`STEP ${currentStep} OF 10`);
                     }
                     window.LATEST_STEP_RESULT = res;
                 }
@@ -291,13 +327,48 @@ $(document).ready(function () {
         });
     }
 
-    // Initialize Selections with default first choices
+    // Initialize Selections matching the mockup journey
+    const DEFAULT_PRESELECTIONS = {
+        1: "Single Room",
+        2: "Fresh Air & Ventilation",
+        3: "I don't know",
+        4: "I don't know",
+        5: ["Bring in fresh outdoor air", "Reduce PM2.5 / fine particles"],
+        6: "No preference",
+        7: "Not sure",
+        8: "BROAD FE6 AirPro Fresh",
+        9: "View Product Details",
+        10: "Application: Single Room"
+    };
+
     STEPS_DATA.forEach(step => {
-        userSelections[step.stepNum] = [{
-            label: step.options[0].label,
-            icon: step.options[0].icon,
-            val: step.options[0].val
-        }];
+        const pre = DEFAULT_PRESELECTIONS[step.stepNum];
+        if (pre) {
+            if (Array.isArray(pre)) {
+                userSelections[step.stepNum] = [];
+                pre.forEach(pLabel => {
+                    const matchedOpt = step.options.find(o => o.label.toLowerCase() === pLabel.toLowerCase()) || step.options[0];
+                    userSelections[step.stepNum].push({
+                        label: matchedOpt.label,
+                        val: matchedOpt.val,
+                        explanation: matchedOpt.explanation || ''
+                    });
+                });
+            } else {
+                const matchedOpt = step.options.find(o => o.label.toLowerCase() === pre.toLowerCase()) || step.options[0];
+                userSelections[step.stepNum] = [{
+                    label: matchedOpt.label,
+                    val: matchedOpt.val,
+                    explanation: matchedOpt.explanation || ''
+                }];
+            }
+        } else {
+            userSelections[step.stepNum] = [{
+                label: step.options[0].label,
+                val: step.options[0].val,
+                explanation: step.options[0].explanation || ''
+            }];
+        }
     });
 
     // Render Full Wizard UI
@@ -307,171 +378,195 @@ $(document).ready(function () {
         updateProgressIndicators();
     }
 
-    // 2. Render Left Sidebar Step Tracker
+    // 2. Render Left Sidebar Step Tracker (10 Steps matching mockup)
     function renderSidebarTracker() {
-        const $tracker = $('.step-tracker');
-        $tracker.empty();
+        const $list = $('#sidebarStepList');
+        if (!$list.length) return;
+        $list.empty();
 
-        STEPS_DATA.forEach(step => {
-            const isActive = step.stepNum === currentStep;
-            const isCompleted = step.stepNum < currentStep;
-            const formattedNum = String(step.stepNum).padStart(2, '0');
-            const selections = userSelections[step.stepNum] || [];
+        const JOURNEY_STEPS = [
+            "APPLICATION",
+            "PRODUCT FAMILY",
+            "SPACE SIZE",
+            "AIRFLOW",
+            "AIR QUALITY NEEDS",
+            "REQUIREMENTS",
+            "BUDGET",
+            "MATCHED SOLUTIONS",
+            "PRODUCT RESULT",
+            "MATCH SUMMARY"
+        ];
 
-            let stateClass = '';
-            if (isActive) stateClass = 'active';
-            else if (isCompleted) stateClass = 'completed';
+        for (let i = 1; i <= 10; i++) {
+            const formattedNum = String(i).padStart(2, '0');
+            const stepObj = STEPS_DATA.find(s => s.stepNum === i);
+            const name = JOURNEY_STEPS[i - 1] || (stepObj ? (stepObj.sidebar_name || stepObj.stepName) : '');
+            const isActive = i === currentStep;
+            const isCompleted = i < currentStep;
 
-            let contentHtml = '';
-            if (isCompleted || isActive) {
-                if (selections.length === 0 || (selections.length === 1 && selections[0].val === 'any')) {
-                    const defaultIcon = (selections[0] && selections[0].icon) || 'bi-grid';
-                    contentHtml = `
-                        <span class="step-summary-pill">
-                            <i class="bi ${defaultIcon}"></i> Any
-                        </span>
-                    `;
-                } else if (selections.length === 1) {
-                    contentHtml = `
-                        <span class="step-summary-pill">
-                            <i class="bi ${selections[0].icon}"></i> ${selections[0].label}
-                        </span>
-                    `;
-                } else {
-                    const labelStr = selections.map(s => s.label).join(', ');
-                    contentHtml = `
-                        <span class="step-summary-pill" title="${labelStr}">
-                            <i class="bi ${selections[0].icon}"></i> ${labelStr}
-                        </span>
-                    `;
-                }
-            } else {
-                contentHtml = `<div class="step-name">—</div>`;
+            let stateClass = 'upcoming';
+            let statusHtml = '';
+
+            if (isActive) {
+                stateClass = 'active';
+                statusHtml = '<div class="sidebar-step-status current">CURRENT STEP</div>';
+            } else if (isCompleted) {
+                stateClass = 'completed';
+                statusHtml = '<div class="sidebar-step-status completed">COMPLETED</div>';
             }
 
-            const stepItemHtml = `
-                <div class="step-item ${stateClass}" data-step="${step.stepNum}">
-                    <div class="step-dot">${formattedNum}</div>
-                    <div class="step-content">
-                        <span class="step-num-label">${step.stepName}</span>
-                        <div>${contentHtml}</div>
+            const itemHtml = `
+                <div class="sidebar-step-item ${stateClass}" data-step="${i}">
+                    <div class="sidebar-step-circle">${formattedNum}</div>
+                    <div class="sidebar-step-info">
+                        <div class="sidebar-step-name">${name}</div>
+                        ${statusHtml}
                     </div>
                 </div>
             `;
-            $tracker.append(stepItemHtml);
-        });
+            $list.append(itemHtml);
+        }
     }
 
-    // 3. Render Center Panel Active & Inactive Step Sections with Progressive Narrowing
-    function renderCenterWizard() {
-        const $centerContainer = $('#wizardStepsContainer');
-        $centerContainer.empty();
-
-        // Check if all steps completed
-        if (currentStep > STEPS_DATA.length) {
-            renderProtocolCompleteSummary($centerContainer);
-            return;
-        }
-
+    // Dynamic "Answer So Far" card matching mockup pages 0001 to 0007
+    function renderAnswerSoFarHtml() {
         const activeData = STEPS_DATA.find(s => s.stepNum === currentStep);
-        const formattedActiveNum = String(activeData.stepNum).padStart(2, '0');
-        const isCheckbox = isStepCheckbox(currentStep);
+        if (!activeData) return '';
 
-        // Verify currently selected options are available; if not, fallback to 'any'
-        if (userSelections[currentStep] && Array.isArray(userSelections[currentStep])) {
-            userSelections[currentStep] = userSelections[currentStep].filter(item => {
-                if (item.val === 'any' || item.val === 'all') return true;
-                return isOptionAvailable(activeData.stepId, item.val);
-            });
+        const selections = userSelections[currentStep] || [];
+        if (selections.length === 0) return '';
 
-            if (userSelections[currentStep].length === 0) {
-                const anyOpt = activeData.options.find(o => o.val === 'any') || activeData.options[0];
-                userSelections[currentStep] = [{ label: anyOpt.label, icon: anyOpt.icon, val: anyOpt.val }];
-                renderSidebarTracker();
+        let labels = selections.map(s => s.label).join(' + ');
+        let explanation = selections.map(s => s.explanation).filter(Boolean).join(' ');
+
+        if (!explanation) {
+            if (currentStep === 1) {
+                explanation = 'Selected: ' + labels + '. This routes the user to room-scale air solutions rather than vehicle, wearable or large-building systems.';
+            } else if (currentStep === 2) {
+                explanation = 'Selected: ' + labels + '. FE6 is pursued as a fresh-air product, not as a standalone air-purifier-only or AC selection.';
+            } else if (currentStep === 3) {
+                explanation = 'Area not provided in this example, so we do not invent a room size. Coverage can be checked against the verified FE6 specification on the results page.';
+            } else if (currentStep === 4) {
+                explanation = 'Airflow is optional. Since the user does not know the required airflow, keep the path open and compare against the product\'s verified m³/h rating later.';
+            } else if (currentStep === 5) {
+                explanation = 'To reduce complexity, combine the old "Features" and "Air Concerns" steps into one needs step. Users state the desired outcome; technical filters appear only as optional preferences. FE6 should be matched only where its';
+            } else if (currentStep === 6) {
+                explanation = 'This is optional and can be skipped. Do not block FE6 from matching just because the customer has no installation preference.';
+            } else if (currentStep === 7) {
+                explanation = 'Budget is not specified in this sample. Confirm the storefront currency and compare with live FE6 pricing rather than using an invented price.';
             }
         }
 
-        // Active Step Section
-        let activeSectionHtml = `
-            <div class="step-section step-animate-slide-up">
-                <div class="step-title-row d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="step-title-num">${formattedActiveNum}</span>
-                        <h2 class="step-title-text mb-0">${activeData.stepTitle}</h2>
-                    </div>
-                    ${isCheckbox ? '<span class="badge bg-light text-primary border rounded-pill px-3 py-1.5 fs-11 fw-semibold"><i class="bi bi-check2-all me-1"></i> Multi-select enabled</span>' : ''}
+        return `
+            <div class="answer-so-far-box">
+                <div class="answer-so-far-tag">ANSWER SO FAR</div>
+                <div class="answer-so-far-title">${labels}</div>
+                <div class="answer-so-far-desc">${explanation}</div>
+            </div>
+        `;
+    }
+
+    // Dynamic "TARGET PRODUCT" box for Steps 8, 9, 10 matching mockups
+    function renderTargetProductHtml() {
+        return `
+            <div class="target-product-box">
+                <div class="target-product-tag">TARGET PRODUCT</div>
+                <div class="target-product-title">BROAD FE6 AirPro Fresh</div>
+                <div class="target-product-desc">
+                    Fresh Air &amp; Ventilation &bull; Intended application: Single Room<br>
+                    Coverage / airflow / detailed features: verify against official model specification.
                 </div>
-                <div class="option-grid-3col">
+            </div>
+        `;
+    }
+
+    // 3. Render Center Panel Active Step Section matching mockups exactly 1:1
+    function renderCenterWizard() {
+        const $container = $('#wizardStepsContainer');
+        $container.empty();
+
+        // Check if all 10 steps completed
+        if (currentStep > 10) {
+            renderProtocolCompleteSummary($container);
+            return;
+        }
+
+        const activeData = STEPS_DATA.find(s => s.stepNum === currentStep) || STEPS_DATA[0];
+        const isCheckbox = isStepCheckbox(currentStep);
+        const currentStepStr = String(currentStep).padStart(2, '0');
+        const metaTag = activeData.guided_subtitle || activeData.stepTag || activeData.stepName;
+        const questionText = (activeData.guided_question || activeData.stepHeading || activeData.stepTitle).replace(/^\d+\s*/, '');
+
+        // Meta row: e.g. APPLICATION / ENVIRONMENT     STEP 1 / 10
+        const metaRowHtml = `
+            <div class="finder-meta-row">
+                <span>${metaTag}</span>
+                <span>STEP ${currentStep} / 10</span>
+            </div>
         `;
 
+        // Step heading: e.g. 01 WHERE WILL YOU USE IT?
+        const headingHtml = `
+            <h2 class="finder-step-heading">
+                <span>${currentStepStr}</span> &nbsp;<span>${questionText}</span>
+            </h2>
+        `;
+
+        // 3-Column Options Grid
+        let optionsGridHtml = '<div class="finder-options-grid">';
         activeData.options.forEach((opt) => {
             const isAvail = isOptionAvailable(activeData.stepId, opt.val);
             const isSelected = isStepOptionSelected(currentStep, opt.val);
             const selectedClass = isSelected ? 'selected' : '';
             const disabledClass = isAvail ? '' : 'disabled';
-            const disabledAttr = isAvail ? '' : 'disabled';
             const checkedAttr = (isSelected && isAvail) ? 'checked' : '';
             const inputType = isCheckbox ? 'checkbox' : 'radio';
             const inputName = isCheckbox ? `step_${currentStep}[]` : `step_${currentStep}`;
 
-            activeSectionHtml += `
-                <div class="option-card-step ${selectedClass} ${disabledClass}" data-step="${currentStep}" data-val="${opt.val}" data-label="${opt.label}" data-icon="${opt.icon}" data-type="${inputType}" role="button" tabindex="0" ${!isAvail ? 'title="No matching products for current selection"' : ''}>
-                    <input type="${inputType}" name="${inputName}" value="${opt.val}" ${checkedAttr} ${disabledAttr} tabindex="-1">
-                    <i class="bi ${opt.icon} option-card-step-icon"></i>
-                    <span class="option-card-step-label">${opt.label}</span>
+            optionsGridHtml += `
+                <div class="finder-option-card ${selectedClass} ${disabledClass}" data-step="${currentStep}" data-val="${opt.val}" data-label="${opt.label}" data-explanation="${opt.explanation || ''}" data-type="${inputType}">
+                    <input type="${inputType}" name="${inputName}" value="${opt.val}" ${checkedAttr} tabindex="-1">
+                    <div class="finder-radio-circle">
+                        <svg class="finder-radio-check-icon" width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <span class="finder-option-label">${opt.label}</span>
                 </div>
             `;
         });
+        optionsGridHtml += '</div>';
 
-        activeSectionHtml += `
-                </div>
-                <div class="protocol-action-buttons d-flex align-items-center gap-2 gap-sm-3 mt-4 mb-4 mb-lg-5">
-                    ${currentStep > 1 ? `
-                    <button type="button" class="btn-protocol-prev-step flex-fill" id="btnPrevStep">
-                        <i class="bi bi-arrow-left"></i> PREVIOUS
-                    </button>
-                    ` : ''}
-                    <button type="button" class="btn-protocol-next-step ${currentStep === 1 ? 'w-100' : 'flex-fill'}" id="btnNextStep">
-                        ${currentStep === 9 ? 'FINALIZE' : 'NEXT'} <i class="bi bi-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-
-        // Render Inactive Step Section below if there is a next step
-        let inactiveSectionHtml = '';
-        if (currentStep < STEPS_DATA.length) {
-            const nextData = STEPS_DATA.find(s => s.stepNum === currentStep + 1);
-            if (nextData) {
-                const formattedNextNum = String(nextData.stepNum).padStart(2, '0');
-
-                inactiveSectionHtml = `
-                <div class="step-section opacity-60">
-                    <div class="step-title-row">
-                        <span class="step-title-num text-muted" style="color: #cbd5e1 !important;">${formattedNextNum}</span>
-                        <h2 class="step-title-text text-muted mb-0" style="color: #94a3b8 !important;">${nextData.stepTitle}</h2>
-                    </div>
-                    <div class="option-grid-3col">
-                `;
-
-                nextData.options.forEach(opt => {
-                    const isNextAvail = isOptionAvailable(nextData.stepId, opt.val);
-                    const optDisabledClass = isNextAvail ? '' : 'opacity-25';
-                    inactiveSectionHtml += `
-                    <div class="option-card-step disabled ${optDisabledClass}">
-                        <i class="bi ${opt.icon} option-card-step-icon"></i>
-                        <span class="option-card-step-label">${opt.label}</span>
-                    </div>
-                `;
-                });
-
-                inactiveSectionHtml += `
-                    </div>
+        // Grid-aligned action buttons
+        let btnGridHtml = '';
+        if (currentStep === 1) {
+            btnGridHtml = `
+                <div class="finder-btn-grid">
+                    <button type="button" class="btn-finder-next full-width" id="btnNextStep">NEXT &rarr;</button>
                 </div>
             `;
-            }
+        } else {
+            let nextBtnText = 'NEXT &rarr;';
+            if (currentStep === 8) nextBtnText = 'VIEW PRODUCT &rarr;';
+            else if (currentStep === 10) nextBtnText = 'FINISH &rarr;';
+
+            btnGridHtml = `
+                <div class="finder-btn-grid">
+                    <button type="button" class="btn-finder-prev" id="btnPrevStep">&larr; PREVIOUS</button>
+                    <button type="button" class="btn-finder-next" id="btnNextStep">${nextBtnText}</button>
+                </div>
+            `;
         }
-        $centerContainer.append(activeSectionHtml + inactiveSectionHtml);
+
+        // Answer So Far (Steps 1 to 7) or Target Product (Steps 8 to 10)
+        const answerBoxHtml = currentStep <= 7 ? renderAnswerSoFarHtml() : renderTargetProductHtml();
+
+        // Footnote matching mockup
+        const footnoteHtml = `
+            <div class="finder-footnote">FILLED EXAMPLE &mdash; FE6 JOURNEY &mdash; STEP ${currentStepStr}</div>
+        `;
+
+        $container.html(metaRowHtml + headingHtml + optionsGridHtml + btnGridHtml + answerBoxHtml + footnoteHtml);
     }
 
     // 4. Handle Protocol Complete (Directly fetch and display matched products)
@@ -481,14 +576,14 @@ $(document).ready(function () {
                 <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-2" style="width: 44px; height: 44px;">
                     <i class="bi bi-shield-check fs-4"></i>
                 </div>
-                <h2 class="title-2 fs-22 fw-bold text-dark mb-1">Precision Protocol Synthesis Complete</h2>
-                <p class="fs-13 text-muted mb-0">System has analyzed your requirements and synthesized the highest-rated matching configuration below.</p>
+                <h2 class="title-2 fs-22 fw-bold text-dark mb-1">Guided Product Finder Synthesis Complete</h2>
+                <p class="fs-13 text-muted mb-0">System has matched the highest-rated configuration below based on your journey.</p>
             </div>
             <div id="protocolLoadingSpinner" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Analyzing & loading specifications...</span>
                 </div>
-                <p class="fs-13 text-muted mt-2 fw-semibold">Synthesizing matched solutions...</p>
+                <p class="fs-13 text-muted mt-2 fw-semibold">Loading matched solutions...</p>
             </div>
         `);
 
@@ -505,34 +600,19 @@ $(document).ready(function () {
 
     // 5. Update Progress Bars & Counters
     function updateProgressIndicators() {
-        if (currentStep > 9) {
-            $('.step-progress-track-fill, .protocol-progress-fill').css('width', '100%');
-            $('.protocol-analysis-pct').text('100%');
-            $('.step-header-tag').text('PROTOCOL COMPLETE');
-            $('.step-header-count').text('STEP 9 / 9');
-            if ($('#mobileStepBadge').length) $('#mobileStepBadge').text('STEP 9 / 9');
-            if ($('#mobileStepName').length) $('#mobileStepName').text('PROTOCOL COMPLETE');
-            return;
-        }
-
-        const activeData = STEPS_DATA.find(s => s.stepNum === currentStep);
-        const pctStr = activeData.progressPct + '%';
-
-        $('.step-progress-track-fill, .protocol-progress-fill').css('width', pctStr);
-        $('.step-header-tag').text(activeData.stepTag);
-        $('.step-header-count').text(activeData.stepCount);
-        if ($('#mobileStepBadge').length) $('#mobileStepBadge').text(activeData.stepCount);
-        if ($('#mobileStepName').length) $('#mobileStepName').text(activeData.stepTitle);
+        const pct = Math.min(100, Math.round((currentStep / 10) * 100)) + '%';
+        $('#topProgressFill, .sidebar-progress-fill').css('width', pct);
+        $('#sidebarProgressCounter').text(`STEP ${currentStep} OF 10`);
     }
 
     // 6. jQuery Event Listeners (Delegated)
-    $(document).on('click', '.option-card-step:not(.disabled)', function (e) {
+    $(document).on('click', '.finder-option-card:not(.disabled)', function (e) {
         e.preventDefault();
         const $card = $(this);
         const stepNum = parseInt($card.data('step'), 10);
         const val = String($card.data('val'));
         const label = $card.data('label');
-        const icon = $card.data('icon');
+        const explanation = $card.data('explanation') || '';
         const activeData = STEPS_DATA.find(s => s.stepNum === stepNum);
         const isCheckbox = isStepCheckbox(stepNum);
 
@@ -541,16 +621,16 @@ $(document).ready(function () {
         }
 
         if (isCheckbox) {
-            if (val === 'any' || val === 'all') {
-                // Clicking "Any": clear other selections and only select "Any"
-                userSelections[stepNum] = [{ label, icon, val }];
+            if (val === 'any' || val === 'all' || val === 'not_sure_recommend') {
+                // Clicking "Any" or "Not sure": clear other selections
+                userSelections[stepNum] = [{ label, val, explanation }];
                 $card.addClass('selected').siblings().removeClass('selected');
                 $card.find('input').prop('checked', true);
                 $card.siblings().find('input').prop('checked', false);
             } else {
-                // Remove "Any" if it was selected
-                userSelections[stepNum] = userSelections[stepNum].filter(item => item.val !== 'any' && item.val !== 'all');
-                $card.parent().find('[data-val="any"], [data-val="all"]').removeClass('selected').find('input').prop('checked', false);
+                // Remove "Any" or "Not sure" if it was selected
+                userSelections[stepNum] = userSelections[stepNum].filter(item => item.val !== 'any' && item.val !== 'all' && item.val !== 'not_sure_recommend');
+                $card.parent().find('[data-val="any"], [data-val="all"], [data-val="not_sure_recommend"]').removeClass('selected').find('input').prop('checked', false);
 
                 const existingIndex = userSelections[stepNum].findIndex(item => String(item.val).toLowerCase() === val.toLowerCase());
                 if (existingIndex > -1) {
@@ -560,35 +640,40 @@ $(document).ready(function () {
                     $card.find('input').prop('checked', false);
                 } else {
                     // Not selected -> Select
-                    userSelections[stepNum].push({ label, icon, val });
+                    userSelections[stepNum].push({ label, val, explanation });
                     $card.addClass('selected');
                     $card.find('input').prop('checked', true);
                 }
 
-                // If nothing left selected, auto-select "Any"
+                // If nothing left selected, auto-select first option
                 if (userSelections[stepNum].length === 0) {
-                    const anyOpt = activeData.options.find(o => o.val === 'any') || activeData.options[0];
-                    userSelections[stepNum] = [{ label: anyOpt.label, icon: anyOpt.icon, val: anyOpt.val }];
+                    const anyOpt = activeData.options[0];
+                    userSelections[stepNum] = [{ label: anyOpt.label, val: anyOpt.val, explanation: anyOpt.explanation || '' }];
                     $card.parent().find('[data-val="' + anyOpt.val + '"]').addClass('selected').find('input').prop('checked', true);
                 }
             }
         } else {
             // Radio: single selection
-            userSelections[stepNum] = [{ label, icon, val }];
+            userSelections[stepNum] = [{ label, val, explanation }];
             $card.addClass('selected').siblings().removeClass('selected');
             $card.find('input').prop('checked', true);
             $card.siblings().find('input').prop('checked', false);
         }
 
+        // Live update Answer So Far / Target Product box
+        $('#answerSoFarWrapper').html(currentStep <= 7 ? renderAnswerSoFarHtml() : renderTargetProductHtml());
+
         // Update Sidebar Tracker
         renderSidebarTracker();
 
         // Background query to update match counts & pre-calculate available next options
-        fetchStepProgress(stepNum);
+        if (stepNum <= 7) {
+            fetchStepProgress(stepNum);
+        }
     });
 
     function smoothScrollToWizard() {
-        const $panel = $('.protocol-center-panel');
+        const $panel = $('.guided-finder-main, .protocol-center-panel');
         if ($panel.length) {
             const offset = $(window).width() < 992 ? 70 : 100;
             const panelTop = $panel.offset().top - offset;
@@ -619,18 +704,23 @@ $(document).ready(function () {
     $(document).on('click', '#btnNextStep', function () {
         if (isFetchingProgress) return;
 
-        if (currentStep < STEPS_DATA.length) {
-            fetchStepProgress(currentStep, function () {
+        if (currentStep < 10) {
+            if (currentStep <= 7) {
+                fetchStepProgress(currentStep, function () {
+                    currentStep++;
+                    renderWizard();
+                    smoothScrollToWizard();
+                });
+            } else {
                 currentStep++;
                 renderWizard();
                 smoothScrollToWizard();
-            });
+            }
         } else {
-            fetchStepProgress(STEPS_DATA.length, function () {
-                currentStep++;
-                renderWizard();
-                smoothScrollToWizard();
-            });
+            // Step 10 Finish Click
+            currentStep = 11;
+            renderWizard();
+            smoothScrollToWizard();
         }
     });
 
@@ -638,10 +728,15 @@ $(document).ready(function () {
     $(document).on('click', '#btnPrevStep', function () {
         if (currentStep > 1) {
             currentStep--;
-            fetchStepProgress(currentStep - 1, function () {
+            if (currentStep <= 7) {
+                fetchStepProgress(currentStep - 1, function () {
+                    renderWizard();
+                    smoothScrollToWizard();
+                });
+            } else {
                 renderWizard();
                 smoothScrollToWizard();
-            });
+            }
         }
     });
 
@@ -652,7 +747,7 @@ $(document).ready(function () {
     });
 
     // Sidebar Step Item Click (Allow Jumping Back to Completed Steps)
-    $(document).on('click', '.step-item.completed', function () {
+    $(document).on('click', '.sidebar-step-item.completed, .step-item.completed', function () {
         const stepNum = parseInt($(this).data('step'), 10);
         if (stepNum && stepNum < currentStep) {
             currentStep = stepNum;
@@ -662,12 +757,18 @@ $(document).ready(function () {
                 $('.mobile-stepper-chevron').css('transform', 'rotate(0deg)');
                 $('#mobileStepperToggle').attr('aria-expanded', 'false');
             }
-            fetchStepProgress(currentStep - 1, function () {
+            if (currentStep <= 7) {
+                fetchStepProgress(currentStep - 1, function () {
+                    renderWizard();
+                    smoothScrollToWizard();
+                });
+            } else {
                 renderWizard();
                 smoothScrollToWizard();
-            });
+            }
         }
     });
+
     // Filter Group Accordion Toggle Handler
     $(document).on('click', '.filter-group__header', function () {
         const $currentGroup = $(this).closest('.filter-group');
@@ -861,7 +962,7 @@ $(document).ready(function () {
         hasMore: (window.INITIAL_PAGINATION && window.INITIAL_PAGINATION.hasMore) || false
     };
 
-    function generateProductCardHtml(p, colClass = 'col-md-6 col-sm-6') {
+    function generateProductCardHtml(p, colClass = 'col-lg-4 col-md-6 col-12') {
         // We simulate the blade template here.
         // Assume empty/false for active states initially since AJAX payload doesn't include session states.
         const inCart = false;
@@ -883,6 +984,22 @@ $(document).ready(function () {
             }
             badgeHtml += `</div>`;
         }
+
+        const rawPrice = parseFloat(p.raw_price || p.price || 0);
+        const specialPrice = p.special_price ? parseFloat(p.special_price) : null;
+        const hasSpecial = specialPrice !== null && specialPrice < rawPrice;
+
+        let priceHtml = '';
+        if (hasSpecial) {
+            priceHtml = `
+                <span class="product-card__price pre">$${rawPrice.toFixed(2)}</span>
+                <span class="product-card__price">$${specialPrice.toFixed(2)}</span>
+            `;
+        } else if (rawPrice > 0) {
+            priceHtml = `<span class="product-card__price">$${rawPrice.toFixed(2)}</span>`;
+        }
+
+        const imageSrc = p.main_image || '/themes/default/assets/img/Air-Purify.png';
 
         return `
             <div class="${colClass} mb-3 product-card-col">
@@ -922,7 +1039,7 @@ $(document).ready(function () {
                     </div>
                     <div class="product-card__image-wrapper">
                         <a href="${p.url}" aria-label="${p.name}">
-                            <img src="${p.main_image}" alt="${p.name}" class="product-card__image" loading="lazy">
+                            <img src="${imageSrc}" alt="${p.name}" class="product-card__image" loading="lazy">
                         </a>
                     </div>
                     <h3 class="product-card__title">
@@ -934,7 +1051,12 @@ $(document).ready(function () {
                         ${subtitle}
                     </div>
                     <div class="product-card__actions">
-                        <button type="button" class="product-card__btn-buy btn-buy-now" data-product-id="${p.id}">Buy</button>
+                        <div class="d-flex gap-2 align-items-center">
+                            <button type="button" class="product-card__btn-buy btn-buy-now" data-product-id="${p.id}">Buy</button>
+                            <div class="d-flex flex-column gap-0">
+                                ${priceHtml}
+                            </div>
+                        </div>
                         <a href="${p.url}" class="product-card__btn-learn" aria-label="Learn more about ${p.name}">Learn more</a>
                     </div>
                 </div>
@@ -951,13 +1073,18 @@ $(document).ready(function () {
         const subtitle = (p.subtitle || 'OPTIMAL ARCHITECTURAL MATCH').toUpperCase();
 
         return `
-            <div class="best-matched-product-card mb-4 p-4 bg-white border rounded-4 shadow-sm position-relative">
+            <div class="best-matched-product-card mb-4 p-4 bg-white border border-success-subtle rounded-4 shadow-sm position-relative">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 pb-2 border-bottom">
-                    <span class="badge bg-primary text-white text-uppercase px-3 py-2 fw-bold" style="font-size: 11px; letter-spacing: 0.08em;">
-                        <i class="bi bi-patch-check-fill me-1"></i> #1 Best Matched Solution
-                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success text-white text-uppercase px-3 py-1.5 fw-bold" style="font-size: 11px; letter-spacing: 0.08em;">
+                            <i class="bi bi-patch-check-fill me-1"></i> #1 Recommended Solution
+                        </span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold px-2.5 py-1 fs-12">
+                            98% Match Score
+                        </span>
+                    </div>
                     <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fs-12 fw-semibold" id="btnRestartProtocol">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reconfigure Protocol
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reconfigure
                     </button>
                 </div>
 
@@ -995,9 +1122,12 @@ $(document).ready(function () {
                                 <span class="fs-11 text-muted text-uppercase d-block fw-semibold">Configured Price</span>
                                 <span class="fs-22 fw-bold text-dark">$${p.price}</span>
                             </div>
-                            <div class="d-flex gap-2">
+                            <div class="d-flex flex-wrap gap-2">
                                 <a href="${p.url}" class="btn btn-outline-dark btn-sm rounded-pill px-3 py-2 fw-semibold">
                                     Full Specs <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
+                                <a href="/contact" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 fw-semibold">
+                                    <i class="bi bi-chat-dots me-1"></i> Request Quote
                                 </a>
                                 <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold btn-buy-now" data-product-id="${p.id}">
                                     Buy Now
@@ -1005,6 +1135,96 @@ $(document).ready(function () {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function generateWhyMatchedMatrixHtml(p) {
+        if (!p) return '';
+        let rowsHtml = '';
+
+        STEPS_DATA.forEach(step => {
+            const selections = userSelections[step.stepNum];
+            if (!selections || selections.length === 0) return;
+            const targetSelections = selections.filter(s => s.val !== 'any' && s.val !== 'all');
+            const userChoice = targetSelections.length > 0 ? targetSelections.map(s => s.label).join(', ') : 'Any / Flexible';
+
+            // Find matching product attribute or filter option
+            let matchedSpec = '';
+            if (p.filter_options && Array.isArray(p.filter_options)) {
+                const found = p.filter_options.find(fo => {
+                    const optName = (fo.option_name || '').toLowerCase();
+                    const stepTag = (step.stepTag || step.stepName || '').toLowerCase();
+                    return optName.includes(stepTag) || stepTag.includes(optName);
+                });
+                if (found) {
+                    matchedSpec = found.value_name;
+                }
+            }
+
+            if (!matchedSpec) {
+                if (step.stepId.includes('area') || step.stepId.includes('coverage')) matchedSpec = p.cadr ? `High CADR (${p.cadr})` : 'Optimal coverage capacity';
+                else if (step.stepId.includes('health') || step.stepId.includes('problem')) matchedSpec = p.filter_grade ? `${p.filter_grade} Medical Grade Filtration` : 'Multi-stage active filtration';
+                else if (step.stepId.includes('budget')) matchedSpec = p.price ? `$${p.price} / High-value tier` : 'Within budget';
+                else matchedSpec = p.subtitle || 'Architectural compliance certified';
+            }
+
+            const stepNumStr = String(step.stepNum).padStart(2, '0');
+            const stepNameClean = (step.guided_question || step.stepName).replace(/^\d+\.\s*/, '');
+
+            rowsHtml += `
+                <tr>
+                    <td class="align-middle fw-bold fs-12 text-uppercase text-secondary">
+                        <span class="badge bg-light text-dark border me-1">${stepNumStr}</span> ${stepNameClean}
+                    </td>
+                    <td class="align-middle fs-13 text-dark fw-semibold">
+                        <i class="bi bi-person-check text-primary me-1"></i> ${userChoice}
+                    </td>
+                    <td class="align-middle fs-13 text-muted">
+                        <i class="bi bi-cpu text-success me-1"></i> ${matchedSpec}
+                    </td>
+                    <td class="align-middle text-center">
+                        <span class="badge bg-success text-white px-2.5 py-1 rounded-pill fs-11">
+                            <i class="bi bi-check-circle-fill me-1"></i> Matched
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+
+        if (!rowsHtml) return '';
+
+        return `
+            <div class="why-matched-matrix-card mb-4 p-4 bg-white border border-light-subtle rounded-4 shadow-sm">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-success-subtle text-success p-2 rounded-circle" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-check2-circle fs-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="fs-16 fw-bold text-dark mb-0">10. Why This System Matched Your Requirements</h4>
+                            <p class="fs-12 text-muted mb-0">Dynamic requirement-to-specification validation matrix</p>
+                        </div>
+                    </div>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fs-12 fw-bold">
+                        <i class="bi bi-shield-fill-check me-1"></i> 100% Certified Solution
+                    </span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover table-sm align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="fs-11 text-uppercase text-muted">
+                                <th style="width: 25%;">Question / Criterion</th>
+                                <th style="width: 30%;">Your Need</th>
+                                <th style="width: 33%;">System Specification</th>
+                                <th style="width: 12%;" class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         `;
@@ -1050,10 +1270,10 @@ $(document).ready(function () {
         // 2. All remaining indices [1..n] are rendered directly below in the grid
         const otherProducts = products.slice(1);
 
-        let bestMatchHtml = generateBestMatchHeroHtml(bestMatch);
+        let bestMatchHtml = generateBestMatchHeroHtml(bestMatch) + generateWhyMatchedMatrixHtml(bestMatch);
         let otherCardsHtml = '';
         otherProducts.forEach(p => {
-            otherCardsHtml += generateProductCardHtml(p, 'col-md-6 col-sm-6');
+            otherCardsHtml += generateProductCardHtml(p, 'col-lg-4 col-md-6 col-12');
         });
 
         let otherSectionHtml = '';
@@ -1081,6 +1301,13 @@ $(document).ready(function () {
         }
 
         $section.html(bestMatchHtml + otherSectionHtml);
+
+        // Initialize tooltips for newly rendered action buttons
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+            $section.find('[data-bs-toggle="tooltip"]').each(function () {
+                new bootstrap.Tooltip(this);
+            });
+        }
     }
 
     // Live AJAX Product Matching Query

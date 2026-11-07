@@ -8,6 +8,11 @@ class MenuItem extends Model
 {
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'has_quick_view' => 'boolean',
+        'enabled'        => 'boolean',
+    ];
+
     protected static function booted()
     {
         static::saved(function () {
@@ -26,7 +31,7 @@ class MenuItem extends Model
     public function children()
     {
         return $this->hasMany(MenuItem::class, 'parent_id')
-            ->with('children')->orderBy('order'); // recursion
+            ->with('children')->orderBy('order', 'asc')->orderBy('id', 'asc'); // recursion
     }
 
     public function parent()
@@ -44,9 +49,17 @@ class MenuItem extends Model
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
+
+    public function productCategory()
+    {
+        return $this->belongsTo(ProductCategory::class, 'product_category_id');
+    }
+
     public function getUrlAttribute()
     {
         switch ($this->link_type) {
+            case 'product_category':
+                return $this->productCategory ? route('category.show', $this->productCategory->slug) : '#';
             case 'page':
                 return $this->page ? route('page.details', $this->page->slug) : '#';
             case 'category':

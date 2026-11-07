@@ -66,7 +66,7 @@ class PageController extends Controller
      */
     public function show($id)
     {
-        $page = Page::findOrFail($id);
+        $page = Page::with('menu')->findOrFail($id);
         return ApiResponse::success($page, 'Page retrieved successfully');
     }
 
@@ -89,6 +89,7 @@ class PageController extends Controller
             'short_des'        => 'nullable|string|max:255',
             'page_description' => 'nullable|string',
             'temp'             => 'nullable|string|max:255',
+            'menu_id'          => 'nullable|integer|exists:menus,id',
             'f_image'          => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
             'meta_title'       => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:255',
@@ -116,6 +117,8 @@ class PageController extends Controller
             $page->update(['f_image' => $path]);
         }
 
+        Page::clearPageCache($page);
+
         return response()->json(['message' => 'Page created successfully', 'data' => $page], 201);
     }
 
@@ -134,6 +137,7 @@ class PageController extends Controller
     public function update(Request $request, $id)
     {
         $page = Page::findOrFail($id);
+        $oldSlug = $page->slug;
         $validated = $request->validate([
             'page_title'       => 'required|string|max:255',
             'breadcrumb'       => 'required|string|max:255',
@@ -141,6 +145,7 @@ class PageController extends Controller
             'short_des'        => 'nullable|string|max:255',
             'page_description' => 'nullable|string',
             'temp'             => 'nullable|string|max:255',
+            'menu_id'          => 'nullable|integer|exists:menus,id',
             'f_image'          => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
             'remove_f_image'   => 'nullable|numeric',
             'meta_title'       => 'nullable|string|max:255',
@@ -167,6 +172,8 @@ class PageController extends Controller
         }
 
         $page->update($validated);
+        Page::clearPageCache($page, $oldSlug);
+
         return response()->json(['message' => 'Page updated successfully', 'data' => $page], 200);
     }
 
@@ -190,6 +197,7 @@ class PageController extends Controller
             $page->status = (int) $page->status === 1 ? 0 : 1;
         }
         $page->save();
+        Page::clearPageCache($page);
 
         return response()->json([
             'message' => $page->status === 1 ? 'Page activated' : 'Page deactivated',
@@ -210,10 +218,13 @@ class PageController extends Controller
     public function destroy($id)
     {
         $page = Page::findOrFail($id);
+        $oldSlug = $page->slug;
 
         $this->fileUploader->delete($page->f_image);
 
         $page->delete();
+        Page::clearPageCache($page, $oldSlug);
+
         return ApiResponse::success($page, 'Page deleted successfully');
     }
 }

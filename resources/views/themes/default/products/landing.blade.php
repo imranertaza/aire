@@ -105,7 +105,7 @@
 @if ($product)
     @include('themes.default.partials.product_schema', [
         'product' => $product,
-        'canonicalUrl' => $canonicalUrl
+        'canonicalUrl' => $canonicalUrl,
     ])
 @endif
 
@@ -120,13 +120,60 @@
 
 @section('content')
     <!-- Top Breadcrumb Bar -->
+    @php
+        $targetCategory = $category ?? null;
+        if (!$targetCategory && !empty($breadcrumb['name']) && $breadcrumb['name'] !== 'Products') {
+            if ($product && $product->categories) {
+                $targetCategory = $product->categories->first(function ($c) use ($breadcrumb) {
+                    return $c->category_name === $breadcrumb['name']
+                        || (!empty($breadcrumb['url']) && (str_contains($breadcrumb['url'], (string) ($c->slug ?? '')) || str_contains($breadcrumb['url'], (string) ($c->id ?? ''))));
+                });
+            }
+            if (!$targetCategory) {
+                $targetCategory = \App\Models\ProductCategory::where('category_name', $breadcrumb['name'])
+                    ->orWhere('slug', \Illuminate\Support\Str::slug($breadcrumb['name']))
+                    ->first();
+            }
+        }
+        if (!$targetCategory && (!isset($breadcrumb['name']) || $breadcrumb['name'] !== 'Products') && $product && $product->categories) {
+            $targetCategory = $product->categories->first();
+        }
+
+        $ancestors = collect();
+        if ($targetCategory) {
+            $curr = ($targetCategory->parent && $targetCategory->parent->id !== $targetCategory->id)
+                ? $targetCategory->parent
+                : (!empty($targetCategory->parent_id) ? \App\Models\ProductCategory::find($targetCategory->parent_id) : null);
+
+            $seenIds = [$targetCategory->id];
+            while ($curr && !in_array($curr->id, $seenIds)) {
+                $seenIds[] = $curr->id;
+                $ancestors->prepend($curr);
+                $curr = ($curr->parent && $curr->parent->id !== $curr->id)
+                    ? $curr->parent
+                    : (!empty($curr->parent_id) ? \App\Models\ProductCategory::find($curr->parent_id) : null);
+            }
+        }
+    @endphp
     <div class="landing-breadcrumb-bar py-3 border-bottom bg-white">
         <div class="container-fluid main-container">
-            <div class="sub-header-breadcrumb">
-                <a href="{{ route('products.index') }}">Products</a>
+            <div class="sub-header-breadcrumb d-flex align-items-center flex-wrap" style="gap: 4px;">
+                <a href="{{ route('home') }}">Home</a>
                 <span class="mx-1 text-muted">&gt;</span>
-                <span
-                    class="text-dark fw-medium">{{ $product?->categories?->first()?->category_name ?? 'Air Purify' }}</span>
+
+                @if ($targetCategory)
+                    @foreach ($ancestors as $ancestor)
+                        <a href="{{ route('category.show', $ancestor->slug ?? $ancestor->id) }}">{{ $ancestor->category_name }}</a>
+                        <span class="mx-1 text-muted">&gt;</span>
+                    @endforeach
+                    <a href="{{ route('category.show', $targetCategory->slug ?? $targetCategory->id) }}">{{ $targetCategory->category_name }}</a>
+                    <span class="mx-1 text-muted">&gt;</span>
+                @else
+                    <a href="{{ $breadcrumb['url'] ?? route('products.index') }}">{{ $breadcrumb['name'] ?? 'Products' }}</a>
+                    <span class="mx-1 text-muted">&gt;</span>
+                @endif
+
+                <span class="text-dark fw-medium">{{ $landingHeroTitle ?? ($product?->name ?? 'Product') }}</span>
             </div>
         </div>
     </div>

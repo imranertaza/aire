@@ -11,9 +11,9 @@ class ProductOverviewSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         DB::table('product_overviews')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         $products = Product::with(['categories', 'productAttributes'])->get();
         echo "Seeding overview data for " . $products->count() . " products...\n";

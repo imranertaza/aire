@@ -19,16 +19,6 @@ class MenuSeeder extends Seeder
                 'enabled'  => true,
             ],
             [
-                'name'     => 'SOLUTIONS',
-                'position' => 'footer',
-                'enabled'  => true,
-            ],
-            [
-                'name'     => 'PRODUCTS',
-                'position' => 'footer',
-                'enabled'  => true,
-            ],
-            [
                 'name'     => 'COMPANY',
                 'position' => 'footer',
                 'enabled'  => true,
@@ -51,6 +41,16 @@ class MenuSeeder extends Seeder
             [
                 'name'     => 'Industries',
                 'position' => 'Footer',
+                'enabled'  => true,
+            ],
+            [
+                'name'     => 'GET IN TOUCH',
+                'position' => 'footer',
+                'enabled'  => true,
+            ],
+            [
+                'name'     => 'CUSTOMER CARE',
+                'position' => 'footer',
                 'enabled'  => true,
             ],
         ];

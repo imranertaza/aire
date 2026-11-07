@@ -22,7 +22,7 @@ class JsonDatabaseSeeder extends Seeder
 
         $this->command?->info("Loading and parsing {$jsonPath}...");
 
-        $jsonContent = File::get($jsonPath);
+        $jsonContent = preg_replace('/^\xEF\xBB\xBF/', '', File::get($jsonPath));
         $elements = json_decode($jsonContent, true);
 
         if (!is_array($elements)) {

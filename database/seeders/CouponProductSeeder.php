@@ -18,7 +18,7 @@ class CouponProductSeeder extends Seeder
         $products = Product::all();
 
         if ($coupons->isEmpty() || $products->isEmpty()) {
-            $this->command->warn('Coupons or Products are empty. Skipping.');
+            $this->command?->warn('Coupons or Products are empty. Skipping.');
             return;
         }
 

@@ -73,6 +73,18 @@
                                         </select>
                                     </div>
 
+                                    <!-- Associated Menu Dropdown (Shown when legal template is selected) -->
+                                    <div class="form-group" v-if="form.temp === 'legal'">
+                                        <label>Select Associated Menu</label>
+                                        <select v-model="form.menu_id" class="custom-select">
+                                            <option :value="null">-- Default (Policies &amp; Legal) --</option>
+                                            <option v-for="menu in activeMenus" :key="menu.id" :value="menu.id">
+                                                {{ menu.name }} {{ menu.position ? `(${menu.position})` : '' }}
+                                            </option>
+                                        </select>
+                                        <small class="form-text text-muted">Choose which menu to render in the sidebar.</small>
+                                    </div>
+
                                     <!-- Status -->
                                     <div class="form-group">
                                         <label>Status</label>
@@ -111,6 +123,7 @@ import { generateSlug } from '../../../layouts/helpers/helpers';
 const toast = useToast();
 const imageFile = ref(null);
 const templates = ref(['default', 'legal']);
+const activeMenus = ref([]);
 const form = reactive({
     page_title: '',
     slug: '',
@@ -122,7 +135,21 @@ const form = reactive({
     meta_keyword: '',
     meta_description: '',
     breadcrumb: '',
-    temp: 'default'
+    temp: 'default',
+    menu_id: null,
+});
+
+const fetchActiveMenus = async () => {
+    try {
+        const res = await axios.get('/api/menus?all=1&enabled=1');
+        activeMenus.value = res.data.data || [];
+    } catch (error) {
+        console.warn('Could not load active menus', error);
+    }
+};
+
+onMounted(() => {
+    fetchActiveMenus();
 });
 
 const submitPage = async () => {
@@ -132,7 +159,9 @@ const submitPage = async () => {
     // Append form fields
     for (const key in form) {
         if (key !== 'f_image') {
-            payload.append(key, form[key]);
+            if (form[key] !== null && form[key] !== undefined && form[key] !== '') {
+                payload.append(key, form[key]);
+            }
         }
     }
     // Append image file from Dropzone

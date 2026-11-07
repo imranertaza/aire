@@ -7,31 +7,24 @@
     $lastUpdatedIso = $page->updated_at ? $page->updated_at->toIso8601String() : now()->toIso8601String();
     $lastUpdatedFormatted = $page->updated_at ? $page->updated_at->format('F Y') : now()->format('F Y');
 
-    // Icon mapping dictionary for known legal slugs
-    $iconMap = [
-        'cookie-policy' => 'bi-shield-check',
-        'privacy-policy' => 'bi-lock',
-        'terms-of-service' => 'bi-file-earmark-text',
-        'terms-and-conditions' => 'bi-file-earmark-text',
-        'modern-slavery-statement' => 'bi-globe2',
-        'modern-slavery' => 'bi-globe2',
-        'data-protection' => 'bi-shield-lock',
-        'export-compliance' => 'bi-check2-circle',
-        'legal-notice' => 'bi-info-circle',
-        'terms-of-use' => 'bi-journal-text',
-        'sitemap' => 'bi-diagram-3',
-    ];
-
-    // Extract menu items from $legalPages passed from StorefrontController
+    // Extract menu items from $sidebarMenu or $legalPages
     $menuItems = collect();
     $menuTitle = 'Legal & Policies';
 
-    if (isset($legalPages) && $legalPages) {
-        if ($legalPages instanceof \App\Models\Menu) {
-            $menuItems = $legalPages->menus ?? collect();
-            $menuTitle = $legalPages->name ?: 'Legal & Policies';
-        } elseif ($legalPages instanceof \Illuminate\Support\Collection || is_array($legalPages)) {
-            $menuItems = collect($legalPages);
+    $targetMenu = $sidebarMenu ?? ($legalPages ?? null);
+    if ($targetMenu) {
+        if ($targetMenu instanceof \App\Models\Menu) {
+            $menuItems = $targetMenu->menus ?? collect();
+            $menuTitle = $targetMenu->name ?: 'Legal & Policies';
+        } elseif ($targetMenu instanceof \Illuminate\Support\Collection || is_array($targetMenu)) {
+            $menuItems = collect($targetMenu);
+        }
+
+        if ($menuItems instanceof \Illuminate\Support\Collection && $menuItems->isNotEmpty()) {
+            $menuItems = $menuItems->sortBy([
+                ['order', 'asc'],
+                ['id', 'asc'],
+            ])->values();
         }
     }
 
@@ -54,7 +47,7 @@
     'canonicalUrl' => $canonicalUrl,
     'plainText' => $plainText,
     'lastUpdatedIso' => $lastUpdatedIso,
-    'categoryName' => $page->breadcrumb ?? 'Legal & Compliance'
+    'categoryName' => $page->breadcrumb ?? 'Legal & Compliance',
 ])
 
 @pushOnce('styles')
@@ -131,9 +124,11 @@
             <div class="d-flex align-items-center gap-3 flex-wrap">
                 <span class="text-muted fs-13 d-flex align-items-center gap-1">
                     <i class="bi bi-clock-history"></i> Last updated:
-                    <time datetime="{{ $lastUpdatedIso }}" class="fw-semibold text-dark">{{ $lastUpdatedFormatted }}</time>
+                    <time datetime="{{ $lastUpdatedIso }}"
+                        class="fw-semibold text-dark">{{ $lastUpdatedFormatted }}</time>
                 </span>
-                <span class="badge bg-light text-secondary border px-2 py-1 fs-12 fw-normal d-inline-flex align-items-center gap-1">
+                <span
+                    class="badge bg-light text-secondary border px-2 py-1 fs-12 fw-normal d-inline-flex align-items-center gap-1">
                     <i class="bi bi-book"></i> ~{{ $readTimeMinutes }} min read
                 </span>
                 <div class="d-flex align-items-center gap-2">
@@ -201,7 +196,8 @@
                                     $isActive =
                                         $itemSlug === $currentSlug ||
                                         (!empty($mItem->page_id) && !empty($page->id) && $mItem->page_id == $page->id);
-                                    $icon = $iconMap[$itemSlug] ?? 'bi-file-earmark-text';
+                                    $rawIcon = is_object($mItem) ? ($mItem->icon ?? null) : ($mItem['icon'] ?? null);
+                                    $icon = !empty($rawIcon) ? $rawIcon : 'bi-file-earmark-text';
                                 @endphp
                                 <li>
                                     <a href="{{ $itemUrl }}"
@@ -253,12 +249,11 @@
 
                 <!-- Featured Image (if uploaded) -->
                 @if (!empty($page->f_image))
-                    <div class="mb-4 rounded-4 overflow-hidden position-relative shadow-sm" style="aspect-ratio: 16/9; max-height: 400px; background-color: #f1f5f9;">
+                    <div class="mb-4 rounded-4 overflow-hidden position-relative shadow-sm"
+                        style="max-height: 400px; background-color: #f1f5f9;">
                         <img src="{{ getImageUrl($page->f_image) }}" alt="{{ $page->page_title }}"
-                            class="img-fluid w-100 h-100 object-fit-cover"
-                            width="1200" height="400"
-                            decoding="async"
-                            fetchpriority="high">
+                            class="img-fluid w-100 h-100 object-fit-cover" width="1200" height="400"
+                            decoding="async" fetchpriority="high">
                     </div>
                 @endif
 
@@ -283,7 +278,7 @@
                     @include('themes.default.partials.share_buttons', [
                         'shareUrl' => $canonicalUrl,
                         'shareTitle' => $page->page_title,
-                        'shareLabel' => 'Share Policy:'
+                        'shareLabel' => 'Share Policy:',
                     ])
 
                     <div class="text-muted fs-13">

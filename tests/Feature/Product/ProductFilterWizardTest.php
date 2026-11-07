@@ -80,4 +80,41 @@ class ProductFilterWizardTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_guided_product_finder_routes_return_successful_response(): void
+    {
+        $response1 = $this->get(route('products.filter-step'));
+        $response1->assertStatus(200);
+
+        $response2 = $this->get(route('products.finder'));
+        $response2->assertStatus(200);
+    }
+
+    public function test_filter_option_supports_guided_finder_fields(): void
+    {
+        $option = \App\Models\FilterOption::create([
+            'name'                  => 'Application Environment',
+            'type'                  => 'radio',
+            'show_in_catalog'       => 1,
+            'show_in_guided_finder' => 1,
+            'guided_step_number'    => 1,
+            'guided_question'       => '01 WHERE WILL YOU USE IT?',
+            'guided_subtitle'       => 'Select environment',
+            'has_unknown_option'    => 1,
+            'unknown_option_label'  => "I don't know",
+            'status'                => 1,
+        ]);
+
+        $val = $option->optionValues()->create([
+            'name'        => 'Single Room',
+            'explanation' => 'Selected: Single Room. Routes user to room solutions.',
+            'sort_order'  => 0,
+            'status'      => 1,
+        ]);
+
+        $this->assertEquals(1, $option->show_in_guided_finder);
+        $this->assertEquals(1, $option->guided_step_number);
+        $this->assertEquals('01 WHERE WILL YOU USE IT?', $option->guided_question);
+        $this->assertEquals('Selected: Single Room. Routes user to room solutions.', $val->explanation);
+    }
 }

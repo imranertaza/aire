@@ -17,6 +17,7 @@ class FilterOptionValue extends Model
             Cache::forget('filter_budget_option_v1');
             Cache::forget('filter_active_db_options');
             Cache::forget('filter_steps_data_v9');
+            Cache::forget('guided_finder_steps_data_v1');
         });
 
         static::deleted(function ($optionValue) {
@@ -25,6 +26,7 @@ class FilterOptionValue extends Model
             Cache::forget('filter_budget_option_v1');
             Cache::forget('filter_active_db_options');
             Cache::forget('filter_steps_data_v9');
+            Cache::forget('guided_finder_steps_data_v1');
         });
     }
 

@@ -16,11 +16,11 @@ class BlogSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         DB::table('blog_category_maps')->truncate();
         DB::table('blogs')->truncate();
         DB::table('blog_categories')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         $adminId = \App\Models\User::value('id') ?: 1;
 

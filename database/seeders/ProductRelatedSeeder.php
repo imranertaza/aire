@@ -16,7 +16,7 @@ class ProductRelatedSeeder extends Seeder
         $products = Product::where('status', 1)->with('categories')->get();
 
         if ($products->isEmpty()) {
-            $this->command->info('No products found to seed related products for.');
+            $this->command?->info('No products found to seed related products for.');
             return;
         }
 
@@ -68,6 +68,6 @@ class ProductRelatedSeeder extends Seeder
         }
 
         $totalInserted = count($relatedRecords);
-        $this->command->info("Successfully seeded {$totalInserted} related product mappings for {$products->count()} products.");
+        $this->command?->info("Successfully seeded {$totalInserted} related product mappings for {$products->count()} products.");
     }
 }

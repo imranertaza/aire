@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Models\Product;
 use App\Models\ProductAttribute;
+use App\Models\ProductCategory;
 use App\Models\ProductDescription;
 use App\Models\ProductFilterOption;
 use App\Models\ProductOption;
@@ -11,6 +12,7 @@ use App\Services\Common\FileUploadService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AdvancedProductService
@@ -75,7 +77,10 @@ class AdvancedProductService
             ]
         );
 
-        return Product::with(['brand', 'categories', 'description'])->findOrFail($productId);
+        $product = Product::with(['brand', 'categories', 'description'])->findOrFail($productId);
+        Product::clearProductCache($product);
+
+        return $product;
     }
 
     /**
@@ -92,6 +97,9 @@ class AdvancedProductService
                 $product->categories()->sync($categoryIds);
             }
         });
+
+        Product::clearProductCache();
+        ProductCategory::clearCategoryCache();
     }
 
     /**
@@ -202,6 +210,16 @@ class AdvancedProductService
                 }
             }
         });
+
+        Product::clearProductCache();
+        Cache::forget('filter_steps_data_v9');
+        Cache::forget('filter_all_option_values_v1');
+        Cache::forget('filter_active_db_options');
+        foreach ($productIds as $pid) {
+            Cache::forget("product_detail_{$pid}");
+            Cache::forget("product_landing_{$pid}");
+            Cache::forget("product_related_{$pid}");
+        }
     }
 
     /**
@@ -221,5 +239,12 @@ class AdvancedProductService
                 'updatedBy' => Auth::id(),
             ]);
         });
+
+        Product::clearProductCache();
+        foreach ($productIds as $pid) {
+            Cache::forget("product_detail_{$pid}");
+            Cache::forget("product_landing_{$pid}");
+            Cache::forget("product_related_{$pid}");
+        }
     }
 }

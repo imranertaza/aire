@@ -62,29 +62,20 @@ class ProductCategoryController extends Controller
      */
     private function getCategoryAndDescendantIds($categoryId, $allCategories = null)
     {
-        if ($allCategories === null) {
-            $allCategories = Cache::rememberForever('catalog_category_pairs_v1', function () {
-                return ProductCategory::select('id', 'parent_id')->get();
-            });
-        }
-
-        $ids = [(int) $categoryId];
-        $children = $allCategories->where('parent_id', (int) $categoryId);
-
-        foreach ($children as $child) {
-            $ids = array_merge($ids, $this->getCategoryAndDescendantIds($child->id, $allCategories));
-        }
-
-        return array_values(array_unique($ids));
+        return ProductCategory::getCategoryAndDescendantIds($categoryId, $allCategories);
     }
 
     /**
-     * Retrieve all categories for dropdown (id and name only).
+     * Retrieve all categories for dropdown (id, name, slug, image).
      */
     public function allCategories()
     {
-        $categories = Cache::rememberForever('all_categories', function () {
-            return ProductCategory::select('id', 'category_name', 'parent_id', 'bg_color')->get();
+        $categories = Cache::remember('all_categories_v2', 86400, function () {
+            return ProductCategory::select('id', 'category_name', 'slug', 'parent_id', 'bg_color', 'image')
+                ->where('status', 1)
+                ->orderBy('sort_order', 'asc')
+                ->orderBy('category_name', 'asc')
+                ->get();
         });
         return ApiResponse::success($categories, 'All categories retrieved successfully');
     }
@@ -271,6 +262,7 @@ class ProductCategoryController extends Controller
         }
 
         $this->syncFeaturedProducts($category, $request);
+        ProductCategory::clearCategoryCache($category);
 
         return ApiResponse::success($category, 'Category created successfully');
     }
@@ -360,6 +352,7 @@ class ProductCategoryController extends Controller
         $category->update($validated);
 
         $this->syncFeaturedProducts($category, $request);
+        ProductCategory::clearCategoryCache($category);
 
         return ApiResponse::success($category, 'Category updated successfully');
     }

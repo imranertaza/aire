@@ -15,7 +15,7 @@ class ProductAttributeSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('Seeding Product Attributes...');
+        $this->command?->info('Seeding Product Attributes...');
 
         $adminId = \App\Models\User::value('id') ?: 1;
         // Get existing records
@@ -23,7 +23,7 @@ class ProductAttributeSeeder extends Seeder
         $groups = ProductAttributeGroup::pluck('id')->toArray();
 
         if (empty($products) || empty($groups)) {
-            $this->command->warn('No products or attribute groups found. Please seed them first.');
+            $this->command?->warn('No products or attribute groups found. Please seed them first.');
             return;
         }
 
@@ -86,6 +86,6 @@ class ProductAttributeSeeder extends Seeder
             );
         }
 
-        $this->command->info('ProductAttributeSeeder completed successfully!');
+        $this->command?->info('ProductAttributeSeeder completed successfully!');
     }
 }

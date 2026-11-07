@@ -15,24 +15,25 @@
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 24px;
+    padding: 16px;
     position: sticky;
-    top: 100px;
-    z-index: 10;
+    /* top: 100px; */
+    /* z-index: 10; */
+    margin-bottom: 16px;
 }
 
 .confirm-summary-title {
     font-size: 20px;
     font-weight: 600;
     color: #0F172A;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .confirm-product-row {
     display: flex;
     align-items: center;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .confirm-product-thumb {
@@ -71,12 +72,12 @@
 
 .confirm-summary-divider-light {
     border-top: 1px solid #e2e8f0;
-    margin: 20px 0;
+    margin: 10px 0;
 }
 
 .confirm-summary-divider-dark {
     border-top: 2px solid #0F172A;
-    margin: 20px 0;
+    margin: 10px 0;
 }
 
 .confirm-row-item {
@@ -85,7 +86,7 @@
     justify-content: space-between;
     font-size: 15px;
     color: #475569;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .confirm-row-val {
@@ -245,6 +246,13 @@
     flex: 1;
 }
 
+.confirm-timeline-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
 .confirm-timeline-icon {
     width: 48px;
     height: 48px;
@@ -286,6 +294,154 @@
 
 .confirm-timeline-step.active .confirm-timeline-sub {
     color: #475569;
+}
+
+/* Responsive Timeline (Tablets & Landscape Mobile) */
+@media (min-width: 641px) and (max-width: 860px) {
+    .confirm-timeline {
+        padding: 0 4px;
+    }
+    .confirm-timeline::before {
+        top: 20px;
+        left: 10%;
+        right: 10%;
+    }
+    .confirm-timeline-progress {
+        top: 20px;
+        left: 10%;
+    }
+    .confirm-timeline-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+    .confirm-timeline-label {
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+    .confirm-timeline-sub {
+        font-size: 12px;
+    }
+}
+
+/* Responsive Timeline (Mobile Devices: Vertical Stepper) */
+@media (max-width: 640px) {
+    .confirm-card-box {
+        padding: 1.25rem 1rem;
+    }
+
+    .confirm-timeline {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 4px 0 4px 6px;
+        gap: 22px;
+    }
+
+    .confirm-timeline::before {
+        top: 21px;
+        bottom: 21px;
+        left: 27px; /* 6px padding + 21px (half of 42px icon) */
+        width: 2px;
+        height: auto;
+        right: auto;
+    }
+
+    .confirm-timeline-progress {
+        top: 21px;
+        left: 27px;
+        width: 2px;
+        height: 33.33%;
+        right: auto;
+    }
+
+    .confirm-timeline-step {
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        width: 100%;
+        gap: 16px;
+        flex: none;
+    }
+
+    .confirm-timeline-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+        margin-bottom: 0;
+        flex-shrink: 0;
+        background-color: #ffffff;
+        border: 2px solid #e2e8f0;
+        box-shadow: 0 0 0 4px #ffffff;
+    }
+
+    .confirm-timeline-step.completed .confirm-timeline-icon {
+        background-color: var(--color-primary, #1d4ed8);
+        border-color: var(--color-primary, #1d4ed8);
+        color: #ffffff;
+        box-shadow: 0 0 0 4px #ffffff, 0 3px 8px var(--color-primary-shadow, rgba(29, 78, 216, 0.25));
+    }
+
+    .confirm-timeline-step.active .confirm-timeline-icon {
+        background-color: #ffffff;
+        border: 2px solid var(--color-primary, #1d4ed8);
+        color: var(--color-primary, #1d4ed8);
+        box-shadow: 0 0 0 4px var(--color-primary-icon, #dbeafe);
+    }
+
+    .confirm-timeline-content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .confirm-timeline-label {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0F172A;
+        margin-bottom: 2px;
+        line-height: 1.3;
+    }
+
+    .confirm-timeline-sub {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.3;
+    }
+
+    .confirm-timeline-step.active .confirm-timeline-label {
+        color: var(--color-primary, #1d4ed8);
+    }
+
+    .confirm-timeline-step.active .confirm-timeline-sub {
+        color: var(--color-primary, #1d4ed8);
+        font-weight: 600;
+    }
+
+    /* Fallback if wrapper is not used */
+    .confirm-timeline-step:not(:has(.confirm-timeline-content)) {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 16px;
+        align-items: center;
+        text-align: left;
+    }
+    .confirm-timeline-step:not(:has(.confirm-timeline-content)) .confirm-timeline-icon {
+        grid-row: 1 / 3;
+        grid-column: 1;
+    }
+    .confirm-timeline-step:not(:has(.confirm-timeline-content)) .confirm-timeline-label {
+        grid-row: 1;
+        grid-column: 2;
+    }
+    .confirm-timeline-step:not(:has(.confirm-timeline-content)) .confirm-timeline-sub {
+        grid-row: 2;
+        grid-column: 2;
+    }
 }
 
 /* Order Details Table */
@@ -445,15 +601,20 @@
     border-color: var(--color-primary-hover, #1e40af);
 }
 
+.sticky-sidebar {
+    top: 80px;
+    z-index: 10;
+}
+
 /* Estimated Delivery Box (Right Column) */
 .confirm-delivery-card {
     background: #f8fafc;
     border: 1px solid #cbd5e1;
     border-radius: 12px;
-    padding: 24px;
+    padding: 16px;
     position: sticky;
-    top: 100px;
-    z-index: 10;
+    /* top: 100px; */
+    /* z-index: 10; */
     overflow: hidden;
 }
 
@@ -471,7 +632,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
 }
 
 .confirm-delivery-icon {
@@ -491,7 +652,7 @@
     font-size: 18px;
     font-weight: 600;
     color: #0F172A;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
 }
 
 .confirm-delivery-text {

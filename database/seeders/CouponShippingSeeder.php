@@ -18,7 +18,7 @@ class CouponShippingSeeder extends Seeder
         $shippingMethods = ShippingMethod::all();
 
         if ($coupons->isEmpty() || $shippingMethods->isEmpty()) {
-            $this->command->warn('Coupons or Shipping Methods are empty. Skipping.');
+            $this->command?->warn('Coupons or Shipping Methods are empty. Skipping.');
             return;
         }
 
@@ -29,6 +29,6 @@ class CouponShippingSeeder extends Seeder
             $coupon->shippingMethods()->sync($randomIds);
         }
 
-        $this->command->info('Coupon Shipping relationships seeded successfully!');
+        $this->command?->info('Coupon Shipping relationships seeded successfully!');
     }
 }

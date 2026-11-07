@@ -76,6 +76,6 @@ class ProductAttributeGroupSeeder extends Seeder
             );
         }
 
-        $this->command->info('ProductAttributeGroupSeeder completed successfully!');
+        $this->command?->info('ProductAttributeGroupSeeder completed successfully!');
     }
 }

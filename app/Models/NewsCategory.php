@@ -3,10 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class NewsCategory extends Model
 {
     protected $guarded = ['id'];
+
+    protected static function booted()
+    {
+        static::saved(function () {
+            Cache::forget('storefront_news_categories_v1');
+            Cache::forget('storefront_about_news_v1');
+            Cache::forget('storefront_news_featured_v1');
+        });
+
+        static::deleted(function () {
+            Cache::forget('storefront_news_categories_v1');
+            Cache::forget('storefront_about_news_v1');
+            Cache::forget('storefront_news_featured_v1');
+        });
+    }
     public function children()
     {
         return $this->hasMany(NewsCategory::class, 'parent_id');

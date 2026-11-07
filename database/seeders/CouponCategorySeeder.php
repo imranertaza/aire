@@ -18,7 +18,7 @@ class CouponCategorySeeder extends Seeder
         $categories = ProductCategory::all();
 
         if ($coupons->isEmpty() || $categories->isEmpty()) {
-            $this->command->warn('Coupons or Categories table is empty. Skipping seeding.');
+            $this->command?->warn('Coupons or Categories table is empty. Skipping seeding.');
             return;
         }
 

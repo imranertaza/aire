@@ -16,7 +16,11 @@
                                     <!-- Title & Slug -->
                                     <div class="form-group">
                                         <label>Page Title</label>
-                                        <input v-model="form.page_title" type="text" class="form-control" required />
+                                        <input v-model="form.page_title" @input="form.slug = generateSlug(form.page_title)" type="text" class="form-control" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Slug</label>
+                                        <input v-model="form.slug" type="text" class="form-control" required />
                                     </div>
                                     <div class="form-group">
                                         <label>Breadcrumb</label>
@@ -69,6 +73,18 @@
                                         </select>
                                     </div>
 
+                                    <!-- Associated Menu Dropdown (Shown when legal template is selected) -->
+                                    <div class="form-group" v-if="form.temp === 'legal'">
+                                        <label>Select Associated Menu</label>
+                                        <select v-model="form.menu_id" class="custom-select">
+                                            <option :value="null">-- Default (Policies &amp; Legal) --</option>
+                                            <option v-for="menu in activeMenus" :key="menu.id" :value="menu.id">
+                                                {{ menu.name }} {{ menu.position ? `(${menu.position})` : '' }}
+                                            </option>
+                                        </select>
+                                        <small class="form-text text-muted">Choose which menu to render in the sidebar.</small>
+                                    </div>
+
                                     <!-- Status -->
                                     <div class="form-group">
                                         <label>Status</label>
@@ -96,7 +112,7 @@ import { ref, reactive, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
 import DashboardHeader from '@/components/DashboardHeader.vue';
-import { getImageCacheUrl } from '@/layouts/helpers/helpers';
+import { getImageCacheUrl, generateSlug } from '@/layouts/helpers/helpers';
 import Vue3Dropzone from '@jaxtheprime/vue3-dropzone';
 import '@jaxtheprime/vue3-dropzone/dist/style.css';
 import { useToast } from '@/composables/useToast';
@@ -107,6 +123,7 @@ const previews = ref([]);
 const route = useRoute();
 const router = useRouter();
 const templates = ref(['default', 'legal']);
+const activeMenus = ref([]);
 
 const form = reactive({
     page_title: '',
@@ -119,6 +136,7 @@ const form = reactive({
     meta_keyword: '',
     meta_description: '',
     temp: 'default',
+    menu_id: null,
     createdBy: 1,
     breadcrumb: '',
     updatedBy: null
@@ -126,12 +144,21 @@ const form = reactive({
 
 const imageFile = ref(null);
 
+const fetchActiveMenus = async () => {
+    try {
+        const res = await axios.get('/api/menus?all=1&enabled=1');
+        activeMenus.value = res.data.data || [];
+    } catch (err) {
+        console.warn('Could not load active menus', err);
+    }
+};
 
 const fetchPage = async () => {
     try {
         const res = await axios.get(`/api/pages/${route.params.id}`);
         const normalized = Object.fromEntries(Object.entries(res.data.data).map(([key, value]) => [key, value ?? ""]));
         Object.assign(form, normalized);
+        form.menu_id = res.data.data.menu_id || null;
         if (form.f_image) {
             previews.value = [getImageCacheUrl(form.f_image)];
         }
@@ -146,7 +173,11 @@ const updatePage = async () => {
     // Append form fields
     for (const key in form) {
         if (key !== 'f_image') {
-            payload.append(key, form[key]);
+            if (key === 'menu_id') {
+                payload.append('menu_id', form.menu_id ? form.menu_id : '');
+            } else if (form[key] !== null && form[key] !== undefined) {
+                payload.append(key, form[key]);
+            }
         }
     }
     // Append image file from Dropzone
@@ -169,6 +200,7 @@ const updatePage = async () => {
 
 onMounted(async () => {
     fetchPage();
+    fetchActiveMenus();
     try {
         const response = await axios.get('/api/templates');
         if (Array.isArray(response.data) && response.data.length > 0) {

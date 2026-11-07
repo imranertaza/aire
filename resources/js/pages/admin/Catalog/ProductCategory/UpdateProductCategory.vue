@@ -15,7 +15,7 @@
                                 <div class="col-md-8">
                                     <div class="form-group">
                                         <label>Category Name <span class="text-danger">*</span></label>
-                                        <input v-model="form.category_name" @input="form.slug = form.slug ? form.slug : generateSlug(form.category_name)" type="text" class="form-control" required />
+                                        <input v-model="form.category_name" @input="form.slug = generateSlug(form.category_name)" type="text" class="form-control" required />
                                     </div>
 
                                     <div class="form-group">

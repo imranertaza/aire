@@ -43,13 +43,13 @@
             font-weight: 400;
             font-display: swap;
             src: local('Roboto'), local('Roboto-Regular'),
-                 url('https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBHMdazQ.woff2') format('woff2');
+                url('https://fonts.gstatic.com/s/roboto/v48/KFO7CnqEu92Fr1ME7kSn66aGLdTylUAMa3yUBHMdazQ.woff2') format('woff2');
             unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
         }
 
         :root {
-            --color-primary: #0072B2;
-            --color-primary-hover: #005a8f;
+            --color-primary: #0095DA;
+            --color-primary-hover: #047cc2;
             --color-dark: #0f172a;
             --color-bg: #f8fafc;
             --color-border: #e2e8f0;
@@ -199,34 +199,13 @@
         }
     </style>
 
-    <!-- Bootstrap 5 (Local Preload + Non-blocking Stylesheet) -->
-    <link rel="preload" as="style" href="{{ theme_asset('css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.min.css') }}" media="print" onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.min.css') }}">
-    </noscript>
+    <!-- Core Bootstrap 5 & Vendor Styles -->
+    <link rel="stylesheet" href="{{ theme_asset('css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/bootstrap-icons.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_asset('css/swiper-bundle.min.css') }}">
 
-    <!-- Non-blocking Local Bootstrap Icons (with font-display: swap) -->
-    <link rel="preload" as="style" href="{{ theme_asset('css/bootstrap-icons.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/bootstrap-icons.min.css') }}" media="print"
-        onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="{{ theme_asset('css/bootstrap-icons.min.css') }}">
-    </noscript>
-
-    <!-- Non-blocking Local Swiper CSS -->
-    <link rel="preload" as="style" href="{{ theme_asset('css/swiper-bundle.min.css') }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/swiper-bundle.min.css') }}" media="print"
-        onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="{{ theme_asset('css/swiper-bundle.min.css') }}">
-    </noscript>
-
-    <!-- Theme Custom CSS (Powered by Vite with HMR in dev & non-blocking production bundle) -->
-    @vite(['resources/themes/default/css/theme.css'])
-    <noscript>
-        <link rel="stylesheet" href="{{ \Illuminate\Support\Facades\Vite::asset('resources/themes/default/css/theme.css') }}">
-    </noscript>
+    <!-- Theme Custom CSS -->
+    {!! theme_css() !!}
     @stack('styles')
 </head>
 

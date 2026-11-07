@@ -17,7 +17,7 @@ class ProductApplicationSeeder extends Seeder
         $products = Product::all();
 
         if ($products->isEmpty()) {
-            $this->command->info('No products found to seed applications for.');
+            $this->command?->info('No products found to seed applications for.');
             return;
         }
 
@@ -159,6 +159,6 @@ class ProductApplicationSeeder extends Seeder
             }
         }
 
-        $this->command->info("Successfully seeded applications and descriptions for {$products->count()} products.");
+        $this->command?->info("Successfully seeded applications and descriptions for {$products->count()} products.");
     }
 }

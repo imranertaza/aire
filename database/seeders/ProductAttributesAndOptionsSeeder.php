@@ -10,10 +10,10 @@ class ProductAttributesAndOptionsSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         DB::table('product_attributes')->truncate();
         DB::table('product_options')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         $adminId = \App\Models\User::value('id') ?: 1;
 

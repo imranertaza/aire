@@ -14,10 +14,10 @@ class ProductLandingSeeder extends Seeder
     public function run(): void
     {
         $targetSlug = 'aire-pure-studio-mini';
-        $product = Product::where('slug', $targetSlug)->first();
+        $product = Product::where('slug', $targetSlug)->first() ?? Product::first();
 
         if (!$product) {
-            $this->command->error("Product with slug '{$targetSlug}' not found.");
+            $this->command?->error("No product found to seed landing page for.");
             return;
         }
 
@@ -118,6 +118,6 @@ class ProductLandingSeeder extends Seeder
             $landingData
         );
 
-        $this->command->info("Successfully seeded landing page for '{$product->name}' (slug: {$targetSlug}, ID: {$product->id}).");
+        $this->command?->info("Successfully seeded landing page for '{$product->name}' (slug: {$product->slug}, ID: {$product->id}).");
     }
 }

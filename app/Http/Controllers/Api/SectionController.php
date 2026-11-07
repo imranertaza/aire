@@ -95,6 +95,47 @@ class SectionController extends Controller
                     ],
                 ]);
             }
+            if (!Section::where('name', 'home_category_grid')->exists()) {
+                Section::create([
+                    'name' => 'home_category_grid',
+                    'data' => [
+                        'action_text' => 'Find Your Solutions',
+                        'action_url'  => '/category/products',
+
+                        'fresh_air_category_id' => null,
+                        'fresh_air_title'       => 'Fresh Air Unit',
+                        'fresh_air_url'         => '/category/fresh-air-systems',
+                        'fresh_air_image'       => 'themes/default/assets/img/home/fresh-air-unit.webp',
+
+                        'mask_category_id'      => null,
+                        'mask_title'            => 'Air Pro Mask',
+                        'mask_url'              => '/category/smart-wearable-masks',
+                        'mask_image'            => 'themes/default/assets/img/home/air-pro-mask.webp',
+
+                        'accessories_category_id' => null,
+                        'accessories_title'       => 'Accessories',
+                        'accessories_url'         => '/category/accessories-parts',
+                        'accessories_image'       => 'themes/default/assets/img/home/accessories.webp',
+
+                        'purifier_category_id'  => null,
+                        'purifier_title'        => 'Air Purifiers',
+                        'purifier_url'          => '/category/air-purifiers',
+                        'purifier_image'        => 'themes/default/assets/img/home/air-purifiers.webp',
+
+                        'home_solutions_category_id' => null,
+                        'home_solutions_title'       => 'Solutions for Home',
+                        'home_solutions_sub'         => 'Ventilation and Filtration Solution',
+                        'home_solutions_url'         => '/category/home-fresh-air-systems',
+                        'home_solutions_image'       => 'themes/default/assets/img/home/solutions-home.webp',
+
+                        'biz_solutions_category_id' => null,
+                        'biz_solutions_title'       => 'Solutions for Business',
+                        'biz_solutions_sub'         => 'Air Disinfection & Air Monitoring',
+                        'biz_solutions_url'         => '/category/commercial-fresh-air-systems',
+                        'biz_solutions_image'       => 'themes/default/assets/img/home/solutions-business.webp',
+                    ],
+                ]);
+            }
             return true;
         });
     }
@@ -108,6 +149,7 @@ class SectionController extends Controller
     public function homeSections(Request $request)
     {
         $homeSectionKeys = [
+            'home_category_grid',
             'home_benefits',
             'home_best_selling',
             'home_lifestyle',
@@ -253,6 +295,25 @@ class SectionController extends Controller
                 }
             }
             unset($item);
+        }
+
+        // Handle Category Grid individual slot images
+        $gridImageKeys = [
+            'fresh_air_image',
+            'mask_image',
+            'accessories_image',
+            'purifier_image',
+            'home_solutions_image',
+            'biz_solutions_image',
+        ];
+        foreach ($gridImageKeys as $imgKey) {
+            $fileKey = "{$imgKey}_file";
+            if ($request->hasFile($fileKey)) {
+                $file = $request->file($fileKey);
+                $filename = uniqid("grid_{$imgKey}_") . '.' . $file->getClientOriginalExtension();
+                $storedPath = $file->storeAs("sections/{$section->id}/category_grid", $filename, 'public');
+                $data[$imgKey] = 'storage/' . $storedPath;
+            }
         }
 
         $section->data = $data;

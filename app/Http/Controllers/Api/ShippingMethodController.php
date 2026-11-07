@@ -148,6 +148,9 @@ class ShippingMethodController extends Controller
             }
 
             DB::commit();
+            Cache::forget('active_shipping_methods');
+            Cache::forget('all_shipping_methods');
+
             return ApiResponse::success(null, 'Settings updated successfully');
 
         } catch (\Exception $e) {
@@ -162,6 +165,9 @@ class ShippingMethodController extends Controller
     public function deleteZoneRate($id)
     {
         GeoZoneShippingRate::findOrFail($id)->delete();
+        Cache::forget('active_shipping_methods');
+        Cache::forget('all_shipping_methods');
+
         return ApiResponse::success(null, 'Zone rate deleted successfully');
     }
 
@@ -171,6 +177,9 @@ class ShippingMethodController extends Controller
     public function deleteWeightRate($id)
     {
         WeightShippingSetting::findOrFail($id)->delete();
+        Cache::forget('active_shipping_methods');
+        Cache::forget('all_shipping_methods');
+
         return ApiResponse::success(null, 'Weight setting deleted successfully');
     }
 }

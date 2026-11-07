@@ -12,18 +12,16 @@
                         class="brand-logo text-decoration-none mb-4 d-flex align-items-center justify-content-end text-end ms-auto">
                         @if (!empty($settings['footer_logo']) && !str_contains($settings['footer_logo'], 'placehold.co'))
                             @php
-                                $ftrLogo1x = getImageCacheUrl($settings['footer_logo'], 120, 36, 'webp');
-                                $ftrLogo2x = getImageCacheUrl($settings['footer_logo'], 240, 72, 'webp');
+                                $ftrLogo1x = getImageCacheUrl($settings['footer_logo'], 120, 38, 'webp');
+                                $ftrLogo2x = getImageCacheUrl($settings['footer_logo'], 240, 76, 'webp');
                             @endphp
-                            <img src="{{ $ftrLogo1x }}"
-                                srcset="{{ $ftrLogo1x }} 1x, {{ $ftrLogo2x }} 2x"
-                                width="120" height="36"
-                                alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-footer-img"
-                                style="max-height: 34px; width: auto; height: auto;">
+                            <img src="{{ $ftrLogo1x }}" srcset="{{ $ftrLogo1x }} 1x, {{ $ftrLogo2x }} 2x"
+                                width="120" height="38" alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo"
+                                class="img-fluid logo-footer-img" style="max-height: 34px; width: auto; height: auto;">
                         @else
-                            <img src="{{ theme_asset('img/aire-industries-logo-white.png') }}" width="120" height="36"
-                                alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo" class="img-fluid logo-footer-img"
-                                style="max-height: 34px; width: auto; height: auto;">
+                            <img src="{{ theme_asset('img/aire-industries-logo-white.png') }}" width="120"
+                                height="36" alt="{{ $settings['brand_name'] ?? 'AIRE' }} logo"
+                                class="img-fluid logo-footer-img" style="max-height: 34px; width: auto; height: auto;">
                         @endif
                     </a>
                     <p class="fs-14 lh-lg text-muted-50 text-end mb-0">
@@ -37,8 +35,7 @@
                             class="footer-heading-sm text-uppercase fw-bold text-white mb-2">SUBSCRIBE TO OUR
                             NEWSLETTER</label>
                         <form id="footerNewsletterForm" action="{{ route('newsletter.subscribe') }}" method="POST"
-                            class="newsletter-form position-relative"
-                            data-sitekey="{{ config('services.sitekey') }}"
+                            class="newsletter-form position-relative" data-sitekey="{{ config('services.sitekey') }}"
                             data-use-recaptcha="{{ config('services.use_recaptcha') ? '1' : '0' }}">
                             <div style="display:none !important; position:absolute; left:-9999px;"><input type="text"
                                     name="b_extra_field" tabindex="-1" autocomplete="off"></div>
@@ -59,28 +56,28 @@
                     <!-- Dynamic Social Pill Buttons -->
                     <div class="d-flex align-items-center gap-2 justify-content-md-end">
                         @if (!empty($settings['linkedin_url']) && $settings['linkedin_url'] !== '#')
-                            <a href="{{ $settings['linkedin_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
-                                aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                            <a href="{{ $settings['linkedin_url'] }}" target="_blank" rel="noopener noreferrer"
+                                class="footer-social-pill" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
                         @endif
 
                         @if (!empty($settings['youtube_url']) && $settings['youtube_url'] !== '#')
-                            <a href="{{ $settings['youtube_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
-                                aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                            <a href="{{ $settings['youtube_url'] }}" target="_blank" rel="noopener noreferrer"
+                                class="footer-social-pill" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
                         @endif
 
                         @if (!empty($settings['twitter_url']) && $settings['twitter_url'] !== '#')
-                            <a href="{{ $settings['twitter_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
-                                aria-label="X / Twitter"><i class="bi bi-twitter-x"></i></a>
+                            <a href="{{ $settings['twitter_url'] }}" target="_blank" rel="noopener noreferrer"
+                                class="footer-social-pill" aria-label="X / Twitter"><i class="bi bi-twitter-x"></i></a>
                         @endif
 
                         @if (!empty($settings['instagram_url']) && $settings['instagram_url'] !== '#')
-                            <a href="{{ $settings['instagram_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
-                                aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                            <a href="{{ $settings['instagram_url'] }}" target="_blank" rel="noopener noreferrer"
+                                class="footer-social-pill" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
                         @endif
 
                         @if (!empty($settings['fb_url']) && $settings['fb_url'] !== '#')
-                            <a href="{{ $settings['fb_url'] }}" target="_blank" rel="noopener noreferrer" class="footer-social-pill"
-                                aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                            <a href="{{ $settings['fb_url'] }}" target="_blank" rel="noopener noreferrer"
+                                class="footer-social-pill" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
                         @endif
                     </div>
                 </div>
@@ -133,14 +130,18 @@
                     $appStoreUrl = $settings['app_store_url'] ?? ($settings['apple_store_url'] ?? '#');
                     $rawGooglePlay = !empty($settings['google_play_image'])
                         ? $settings['google_play_image']
-                        : (!empty($settings['play_store_image']) ? $settings['play_store_image'] : null);
+                        : (!empty($settings['play_store_image'])
+                            ? $settings['play_store_image']
+                            : null);
                     $googlePlayImg = !empty($rawGooglePlay)
                         ? getImageCacheUrl($rawGooglePlay, 110, 35, 'webp')
                         : theme_asset('img/play-store.png');
 
                     $rawAppStore = !empty($settings['app_store_image'])
                         ? $settings['app_store_image']
-                        : (!empty($settings['apple_store_image']) ? $settings['apple_store_image'] : null);
+                        : (!empty($settings['apple_store_image'])
+                            ? $settings['apple_store_image']
+                            : null);
                     $appStoreImg = !empty($rawAppStore)
                         ? getImageCacheUrl($rawAppStore, 110, 35, 'webp')
                         : theme_asset('img/apopel-store.png');
@@ -163,7 +164,8 @@
                                 <ul class="footer-links list-unstyled mb-0">
                                     @foreach ($fMenu->menus as $mItem)
                                         <li class="{{ $loop->last ? 'mb-0' : 'mb-2' }}">
-                                            <a href="{{ !empty($mItem->url) && $mItem->url !== '#' ? $mItem->url : url('/') }}">{{ $mItem->name }}</a>
+                                            <a
+                                                href="{{ !empty($mItem->url) && $mItem->url !== '#' ? $mItem->url : url('/') }}">{{ $mItem->name }}</a>
                                         </li>
                                     @endforeach
                                 </ul>
@@ -193,10 +195,14 @@
                         </div>
                     @else
                         <div class="d-flex align-items-center gap-4 flex-wrap text-muted-50 fs-13">
-                            <a href="{{ route('page.show', 'cookie-policy') }}" class="footer-legal-link text-decoration-none">Cookie Policy</a>
-                            <a href="{{ route('page.show', 'privacy-policy') }}" class="footer-legal-link text-decoration-none">Privacy Policy</a>
-                            <a href="{{ route('page.show', 'terms-of-service') }}" class="footer-legal-link text-decoration-none">Terms of Service</a>
-                            <a href="{{ route('page.show', 'data-protection') }}" class="footer-legal-link text-decoration-none">Data Protection</a>
+                            <a href="{{ route('page.show', 'cookie-policy') }}"
+                                class="footer-legal-link text-decoration-none">Cookie Policy</a>
+                            <a href="{{ route('page.show', 'privacy-policy') }}"
+                                class="footer-legal-link text-decoration-none">Privacy Policy</a>
+                            <a href="{{ route('page.show', 'terms-of-service') }}"
+                                class="footer-legal-link text-decoration-none">Terms of Service</a>
+                            <a href="{{ route('page.show', 'data-protection') }}"
+                                class="footer-legal-link text-decoration-none">Data Protection</a>
                         </div>
                     @endif
                     @if ($showAppLinks)
@@ -204,26 +210,26 @@
                             @if (!empty($googlePlayUrl) && $googlePlayUrl !== '#')
                                 <a href="{{ $googlePlayUrl }}" target="_blank" rel="noopener noreferrer"
                                     aria-label="Google Play">
-                                    <img src="{{ $googlePlayImg }}" width="110" height="35"
-                                        alt="Google Play" loading="lazy" decoding="async">
+                                    <img src="{{ $googlePlayImg }}" width="110" height="35" alt="Google Play"
+                                        loading="lazy" decoding="async">
                                 </a>
                             @else
                                 <span class="d-inline-block" aria-label="Google Play">
-                                    <img src="{{ $googlePlayImg }}" width="110" height="35"
-                                        alt="Google Play" loading="lazy" decoding="async">
+                                    <img src="{{ $googlePlayImg }}" width="110" height="35" alt="Google Play"
+                                        loading="lazy" decoding="async">
                                 </span>
                             @endif
 
                             @if (!empty($appStoreUrl) && $appStoreUrl !== '#')
                                 <a href="{{ $appStoreUrl }}" target="_blank" rel="noopener noreferrer"
                                     aria-label="App Store">
-                                    <img src="{{ $appStoreImg }}" width="110" height="35"
-                                        alt="App Store" loading="lazy" decoding="async">
+                                    <img src="{{ $appStoreImg }}" width="110" height="35" alt="App Store"
+                                        loading="lazy" decoding="async">
                                 </a>
                             @else
                                 <span class="d-inline-block" aria-label="App Store">
-                                    <img src="{{ $appStoreImg }}" width="110" height="35"
-                                        alt="App Store" loading="lazy" decoding="async">
+                                    <img src="{{ $appStoreImg }}" width="110" height="35" alt="App Store"
+                                        loading="lazy" decoding="async">
                                 </span>
                             @endif
                         </div>
@@ -259,7 +265,11 @@
 
                 if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
                     while (callbacks.length) {
-                        try { callbacks.shift()(); } catch(e) { console.error(e); }
+                        try {
+                            callbacks.shift()();
+                        } catch (e) {
+                            console.error(e);
+                        }
                     }
                     return;
                 }
@@ -268,14 +278,18 @@
                 recaptchaLoaded = true;
 
                 var s = document.createElement('script');
-                s.src = 'https://www.google.com/recaptcha/api.js?render={{ config("services.sitekey") }}';
+                s.src = 'https://www.google.com/recaptcha/api.js?render={{ config('services.sitekey') }}';
                 s.async = true;
                 s.defer = true;
                 s.onload = function() {
                     if (window.grecaptcha && typeof window.grecaptcha.ready === 'function') {
                         window.grecaptcha.ready(function() {
                             while (callbacks.length) {
-                                try { callbacks.shift()(); } catch(e) { console.error(e); }
+                                try {
+                                    callbacks.shift()();
+                                } catch (e) {
+                                    console.error(e);
+                                }
                             }
                         });
                     }
@@ -287,30 +301,47 @@
             var emailInput = document.getElementById('newsletterEmailInput');
             if (emailInput) {
                 ['focus', 'input', 'pointerdown'].forEach(function(evt) {
-                    emailInput.addEventListener(evt, function() { window.loadRecaptcha(); }, { once: true, passive: true });
+                    emailInput.addEventListener(evt, function() {
+                        window.loadRecaptcha();
+                    }, {
+                        once: true,
+                        passive: true
+                    });
                 });
             }
 
             var nForm = document.getElementById('footerNewsletterForm');
             if (nForm) {
                 ['submit', 'pointerenter'].forEach(function(evt) {
-                    nForm.addEventListener(evt, function() { window.loadRecaptcha(); }, { once: true, passive: true });
+                    nForm.addEventListener(evt, function() {
+                        window.loadRecaptcha();
+                    }, {
+                        once: true,
+                        passive: true
+                    });
                 });
             }
 
             // Trigger on Auth modal interactions
             document.addEventListener('click', function(e) {
-                var btn = e.target.closest('[data-bs-target="#authModal"], [data-bs-toggle="modal"][data-bs-target="#authModal"], .open-auth-modal, .btn-login');
+                var btn = e.target.closest(
+                    '[data-bs-target="#authModal"], [data-bs-toggle="modal"][data-bs-target="#authModal"], .open-auth-modal, .btn-login'
+                    );
                 if (btn) {
                     window.loadRecaptcha();
                 }
-            }, { passive: true });
+            }, {
+                passive: true
+            });
 
             var authModal = document.getElementById('authModal');
             if (authModal) {
                 authModal.addEventListener('show.bs.modal', function() {
                     window.loadRecaptcha();
-                }, { once: true, passive: true });
+                }, {
+                    once: true,
+                    passive: true
+                });
             }
         })();
     </script>

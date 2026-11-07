@@ -84,7 +84,8 @@
                                     </div>
                                     <div class="sidebar-compare-info">
                                         <p class="sidebar-compare-name">{{ $p->name }}</p>
-                                        <button type="button" class="btn p-0 border-0 bg-transparent sidebar-compare-remove btn-remove-compare"
+                                        <button type="button"
+                                            class="btn p-0 border-0 bg-transparent sidebar-compare-remove btn-remove-compare"
                                             data-product-id="{{ $p->id }}">Remove</button>
                                     </div>
                                 </div>
@@ -287,8 +288,8 @@
                             ];
                             $trustBadgesSection = getSection('trust_badges', ['badges' => $defaultBadges]);
                             $trustBadges = is_array($trustBadgesSection)
-                                ? ($trustBadgesSection['badges'] ?? $defaultBadges)
-                                : ($trustBadgesSection->data['badges'] ?? $defaultBadges);
+                                ? $trustBadgesSection['badges'] ?? $defaultBadges
+                                : $trustBadgesSection->data['badges'] ?? $defaultBadges;
                         @endphp
                         <div class="row g-4 my-4 center-feed">
                             @foreach ($trustBadges as $badge)

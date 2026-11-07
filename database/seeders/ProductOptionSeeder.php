@@ -15,11 +15,11 @@ class ProductOptionSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->info('Starting ProductOptionSeeder...');
+        $this->command?->info('Starting ProductOptionSeeder...');
 
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         ProductOption::truncate();
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         // Get first few existing records
         $productIds = Product::pluck('id')->take(10)->toArray();
@@ -27,11 +27,11 @@ class ProductOptionSeeder extends Seeder
         $valueIds   = OptionValue::pluck('id')->take(20)->toArray();
 
         if (empty($productIds) || empty($optionIds) || empty($valueIds)) {
-            $this->command->error('No products, options, or option values found. Please seed them first!');
+            $this->command?->error('No products, options, or option values found. Please seed them first!');
             return;
         }
 
-        $this->command->info("Found " . count($productIds) . " products, " .
+        $this->command?->info("Found " . count($productIds) . " products, " .
             count($optionIds) . " options, " . count($valueIds) . " option values.");
 
         // Sample data using existing IDs
@@ -61,6 +61,6 @@ class ProductOptionSeeder extends Seeder
             );
         }
 
-        $this->command->info('ProductOptionSeeder completed successfully!');
+        $this->command?->info('ProductOptionSeeder completed successfully!');
     }
 }

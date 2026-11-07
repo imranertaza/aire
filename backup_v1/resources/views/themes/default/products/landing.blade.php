@@ -92,7 +92,7 @@
     <div class="landing-breadcrumb-bar py-3 border-bottom bg-white">
         <div class="container-fluid main-container">
             <div class="sub-header-breadcrumb">
-                <a href="{{ route('products.index') }}">Products</a>
+                    <a href="{{ route('products.index') }}">Products</a>
                 <span class="mx-1 text-muted">&gt;</span>
                 <span
                     class="text-dark fw-medium">{{ $product?->categories?->first()?->category_name ?? 'Air Purify' }}</span>

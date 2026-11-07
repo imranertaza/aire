@@ -14,9 +14,379 @@
         <section class="content">
             <div class="container-fluid">
                 <!-- ==================================================== -->
+                <!-- SPECIAL MODE: Category Showcase & Solutions Grid     -->
+                <!-- ==================================================== -->
+                <div v-if="form.key === 'home_category_grid'">
+                    <!-- Top Action / CTA Bar Settings -->
+                    <div class="card card-primary card-outline shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h3 class="card-title font-weight-bold text-dark">
+                                <i class="fas fa-bullhorn text-primary mr-2"></i> Section Action Buttons (Top & Bottom CTA)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-600">Button Label Text</label>
+                                        <input v-model="form.action_text" type="text" class="form-control"
+                                            placeholder="e.g. Find Your Solutions" />
+                                        <small class="text-muted">Displays on the top and bottom lightbulb pill button.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-0">
+                                        <label class="font-weight-600">Target Link URL</label>
+                                        <input v-model="form.action_url" type="text" class="form-control"
+                                            placeholder="e.g. /category/products or custom link" />
+                                        <small class="text-muted">Destination page when user clicks the CTA button.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Row: 4 Bento Category Cards -->
+                    <div class="card card-outline card-info shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h3 class="card-title font-weight-bold text-dark">
+                                <i class="fas fa-th-large text-info mr-2"></i> Top Row: 4 Bento Category Cards
+                            </h3>
+                            <div class="card-tools">
+                                <span class="badge badge-info px-2 py-1">50% Left / 50% Right Cluster</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Card 1: Fresh Air Unit (Left Large Tile) -->
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100 border bg-light">
+                                        <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-wind text-primary mr-1"></i> Slot 1: Left Large Card (Fresh Air)</span>
+                                            <span class="badge badge-primary">50% Width</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Link to Product Category</label>
+                                                <Multiselect
+                                                    v-model="form.fresh_air_category_id"
+                                                    :options="categorySelectOptions"
+                                                    :searchable="true"
+                                                    placeholder="-- Choose Category (Auto-fills Title & URL) --"
+                                                    class="multiselect-custom"
+                                                    @select="() => onCategorySelect('fresh_air')"
+                                                    @clear="() => onCategoryClear('fresh_air')"
+                                                />
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="small font-weight-bold">Badge Title <span class="text-danger">*</span></label>
+                                                        <input v-model="form.fresh_air_title" type="text" class="form-control form-control-sm" placeholder="Fresh Air Unit" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="small font-weight-bold">Target Link URL</label>
+                                                        <input v-model="form.fresh_air_url" type="text" class="form-control form-control-sm" placeholder="/category/..." />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small font-weight-bold">Card Background Image</label>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="border rounded p-1 bg-white" style="width: 80px; height: 60px; overflow: hidden; flex-shrink: 0;">
+                                                        <img :src="gridPreviews.fresh_air_image || getImageUrl(form.fresh_air_image)" class="w-100 h-100" style="object-fit: cover;" alt="Preview" />
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <input type="file" accept="image/*" class="form-control-file form-control-sm" @change="(e) => onGridFileChange(e, 'fresh_air_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: 4:3 ratio</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 2: Air Pro Mask (Middle Top Tile) -->
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100 border bg-light">
+                                        <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-head-side-mask text-info mr-1"></i> Slot 2: Middle Top Card (Masks)</span>
+                                            <span class="badge badge-light border">25% Width</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Link to Product Category</label>
+                                                <Multiselect
+                                                    v-model="form.mask_category_id"
+                                                    :options="categorySelectOptions"
+                                                    :searchable="true"
+                                                    placeholder="-- Choose Category --"
+                                                    class="multiselect-custom"
+                                                    @select="() => onCategorySelect('mask')"
+                                                    @clear="() => onCategoryClear('mask')"
+                                                />
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="small font-weight-bold">Badge Title <span class="text-danger">*</span></label>
+                                                        <input v-model="form.mask_title" type="text" class="form-control form-control-sm" placeholder="Air Pro Mask" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="small font-weight-bold">Target Link URL</label>
+                                                        <input v-model="form.mask_url" type="text" class="form-control form-control-sm" placeholder="/category/..." />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small font-weight-bold">Card Background Image</label>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="border rounded p-1 bg-white" style="width: 80px; height: 60px; overflow: hidden; flex-shrink: 0;">
+                                                        <img :src="gridPreviews.mask_image || getImageUrl(form.mask_image)" class="w-100 h-100" style="object-fit: cover;" alt="Preview" />
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <input type="file" accept="image/*" class="form-control-file form-control-sm" @change="(e) => onGridFileChange(e, 'mask_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: 1:1 or 4:3 ratio</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 3: Accessories (Middle Bottom Tile) -->
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100 border bg-light">
+                                        <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-tools text-warning mr-1"></i> Slot 3: Middle Bottom Card (Accessories)</span>
+                                            <span class="badge badge-light border">25% Width</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Link to Product Category</label>
+                                                <Multiselect
+                                                    v-model="form.accessories_category_id"
+                                                    :options="categorySelectOptions"
+                                                    :searchable="true"
+                                                    placeholder="-- Choose Category --"
+                                                    class="multiselect-custom"
+                                                    @select="() => onCategorySelect('accessories')"
+                                                    @clear="() => onCategoryClear('accessories')"
+                                                />
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="small font-weight-bold">Badge Title <span class="text-danger">*</span></label>
+                                                        <input v-model="form.accessories_title" type="text" class="form-control form-control-sm" placeholder="Accessories" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="small font-weight-bold">Target Link URL</label>
+                                                        <input v-model="form.accessories_url" type="text" class="form-control form-control-sm" placeholder="/category/..." />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small font-weight-bold">Card Background Image</label>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="border rounded p-1 bg-white" style="width: 80px; height: 60px; overflow: hidden; flex-shrink: 0;">
+                                                        <img :src="gridPreviews.accessories_image || getImageUrl(form.accessories_image)" class="w-100 h-100" style="object-fit: cover;" alt="Preview" />
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <input type="file" accept="image/*" class="form-control-file form-control-sm" @change="(e) => onGridFileChange(e, 'accessories_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: 1:1 or 4:3 ratio</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card 4: Air Purifiers (Right Tall Tile) -->
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100 border bg-light">
+                                        <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-fan text-success mr-1"></i> Slot 4: Right Tall Card (Purifiers)</span>
+                                            <span class="badge badge-success">25% Width Full Height</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Link to Product Category</label>
+                                                <Multiselect
+                                                    v-model="form.purifier_category_id"
+                                                    :options="categorySelectOptions"
+                                                    :searchable="true"
+                                                    placeholder="-- Choose Category --"
+                                                    class="multiselect-custom"
+                                                    @select="() => onCategorySelect('purifier')"
+                                                    @clear="() => onCategoryClear('purifier')"
+                                                />
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="small font-weight-bold">Badge Title <span class="text-danger">*</span></label>
+                                                        <input v-model="form.purifier_title" type="text" class="form-control form-control-sm" placeholder="Air Purifiers" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-sm-6">
+                                                    <div class="form-group">
+                                                        <label class="small font-weight-bold">Target Link URL</label>
+                                                        <input v-model="form.purifier_url" type="text" class="form-control form-control-sm" placeholder="/category/..." />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small font-weight-bold">Card Background Image</label>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="border rounded p-1 bg-white" style="width: 80px; height: 60px; overflow: hidden; flex-shrink: 0;">
+                                                        <img :src="gridPreviews.purifier_image || getImageUrl(form.purifier_image)" class="w-100 h-100" style="object-fit: cover;" alt="Preview" />
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <input type="file" accept="image/*" class="form-control-file form-control-sm" @change="(e) => onGridFileChange(e, 'purifier_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: 3:4 portrait ratio (e.g. 800x1067)</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Row: 2 Solutions Banners (50% / 50%) -->
+                    <div class="card card-outline card-purple shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h3 class="card-title font-weight-bold text-dark">
+                                <i class="fas fa-layer-group text-purple mr-2"></i> Bottom Row: 2 Solutions Banners (50% / 50%)
+                            </h3>
+                            <div class="card-tools">
+                                <span class="badge badge-purple px-2 py-1">Full Width Half-Half</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Banner 5: Solutions for Home -->
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100 border bg-light">
+                                        <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-home text-primary mr-1"></i> Slot 5: Solutions for Home</span>
+                                            <span class="badge badge-primary">50% Width Banner</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Link to Product Category</label>
+                                                <Multiselect
+                                                    v-model="form.home_solutions_category_id"
+                                                    :options="categorySelectOptions"
+                                                    :searchable="true"
+                                                    placeholder="-- Choose Category --"
+                                                    class="multiselect-custom"
+                                                    @select="() => onCategorySelect('home_solutions')"
+                                                    @clear="() => onCategoryClear('home_solutions')"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Banner Headline <span class="text-danger">*</span></label>
+                                                <input v-model="form.home_solutions_title" type="text" class="form-control form-control-sm" placeholder="Solutions for Home" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Subtitle / Description</label>
+                                                <input v-model="form.home_solutions_sub" type="text" class="form-control form-control-sm" placeholder="Ventilation and Filtration Solution" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Target Link URL</label>
+                                                <input v-model="form.home_solutions_url" type="text" class="form-control form-control-sm" placeholder="/category/..." />
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small font-weight-bold">Banner Background Image</label>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="border rounded p-1 bg-white" style="width: 100px; height: 60px; overflow: hidden; flex-shrink: 0;">
+                                                        <img :src="gridPreviews.home_solutions_image || getImageUrl(form.home_solutions_image)" class="w-100 h-100" style="object-fit: cover;" alt="Preview" />
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <input type="file" accept="image/*" class="form-control-file form-control-sm" @change="(e) => onGridFileChange(e, 'home_solutions_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: 16:9 landscape ratio (e.g. 1400x780)</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Banner 6: Solutions for Business -->
+                                <div class="col-lg-6 mb-4">
+                                    <div class="card h-100 border bg-light">
+                                        <div class="card-header bg-white font-weight-bold d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-building text-info mr-1"></i> Slot 6: Solutions for Business</span>
+                                            <span class="badge badge-info">50% Width Banner</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Link to Product Category</label>
+                                                <Multiselect
+                                                    v-model="form.biz_solutions_category_id"
+                                                    :options="categorySelectOptions"
+                                                    :searchable="true"
+                                                    placeholder="-- Choose Category --"
+                                                    class="multiselect-custom"
+                                                    @select="() => onCategorySelect('biz_solutions')"
+                                                    @clear="() => onCategoryClear('biz_solutions')"
+                                                />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Banner Headline <span class="text-danger">*</span></label>
+                                                <input v-model="form.biz_solutions_title" type="text" class="form-control form-control-sm" placeholder="Solutions for Business" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Subtitle / Description</label>
+                                                <input v-model="form.biz_solutions_sub" type="text" class="form-control form-control-sm" placeholder="Air Disinfection & Air Monitoring" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="small font-weight-bold">Target Link URL</label>
+                                                <input v-model="form.biz_solutions_url" type="text" class="form-control form-control-sm" placeholder="/category/..." />
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <label class="small font-weight-bold">Banner Background Image</label>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <div class="border rounded p-1 bg-white" style="width: 100px; height: 60px; overflow: hidden; flex-shrink: 0;">
+                                                        <img :src="gridPreviews.biz_solutions_image || getImageUrl(form.biz_solutions_image)" class="w-100 h-100" style="object-fit: cover;" alt="Preview" />
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <input type="file" accept="image/*" class="form-control-file form-control-sm" @change="(e) => onGridFileChange(e, 'biz_solutions_image')" />
+                                                        <small class="text-muted d-block mt-1">Recommended: 16:9 landscape ratio (e.g. 1400x780)</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="d-flex justify-content-end align-items-center mb-5">
+                        <router-link :to="{ name: 'Section' }" class="btn btn-secondary mr-2">
+                            <i class="fas fa-times mr-1"></i> Cancel
+                        </router-link>
+                        <button type="button" @click="updateSections" class="btn btn-primary" :disabled="saving">
+                            <i class="fas fa-save mr-1"></i> {{ saving ? 'Saving...' : 'Save & Update Category Grid' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ==================================================== -->
                 <!-- SPECIAL MODE: Why Choose AIRE (Stacked Cards)        -->
                 <!-- ==================================================== -->
-                <div v-if="form.key === 'why_choose_aire'">
+                <div v-else-if="form.key === 'why_choose_aire'">
                     <div class="card card-primary card-outline">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -2183,10 +2553,113 @@ const form = reactive({
     image: "",
     video_url: "",
     video_file: "",
+    // Category Showcase Grid
+    action_text: "Find Your Solutions",
+    action_url: "/category/products",
+
+    fresh_air_category_id: null,
+    fresh_air_title: "Fresh Air Unit",
+    fresh_air_url: "/category/fresh-air-systems",
+    fresh_air_image: "",
+
+    mask_category_id: null,
+    mask_title: "Air Pro Mask",
+    mask_url: "/category/smart-wearable-masks",
+    mask_image: "",
+
+    accessories_category_id: null,
+    accessories_title: "Accessories",
+    accessories_url: "/category/accessories-parts",
+    accessories_image: "",
+
+    purifier_category_id: null,
+    purifier_title: "Air Purifiers",
+    purifier_url: "/category/air-purifiers",
+    purifier_image: "",
+
+    home_solutions_category_id: null,
+    home_solutions_title: "Solutions for Home",
+    home_solutions_sub: "Ventilation and Filtration Solution",
+    home_solutions_url: "/category/home-fresh-air-systems",
+    home_solutions_image: "",
+
+    biz_solutions_category_id: null,
+    biz_solutions_title: "Solutions for Business",
+    biz_solutions_sub: "Air Disinfection & Air Monitoring",
+    biz_solutions_url: "/category/commercial-fresh-air-systems",
+    biz_solutions_image: "",
+
     status: "1",
     createdBy: 1,
     updatedBy: null,
 });
+
+// Category Showcase Grid specific state & helpers
+const allCategories = ref([]);
+const loadingCategories = ref(false);
+
+const loadCategories = async () => {
+    try {
+        loadingCategories.value = true;
+        const res = await axios.get("/api/product-categories/all");
+        allCategories.value = res.data.data || [];
+    } catch (err) {
+        console.error("Failed to load categories dropdown", err);
+    } finally {
+        loadingCategories.value = false;
+    }
+};
+
+const categorySelectOptions = computed(() => {
+    return allCategories.value.map((c) => ({
+        value: c.id,
+        label: c.category_name,
+        slug: c.slug,
+        image: c.image,
+    }));
+});
+
+const onCategorySelect = (slotPrefix) => {
+    const catId = form[`${slotPrefix}_category_id`];
+    if (!catId) return;
+    const cat = allCategories.value.find((c) => Number(c.id) === Number(catId));
+    if (cat) {
+        if (!form[`${slotPrefix}_title`] || form[`${slotPrefix}_title`] === 'Untitled') {
+            form[`${slotPrefix}_title`] = cat.category_name;
+        }
+        form[`${slotPrefix}_url`] = `/category/${cat.slug}`;
+    }
+};
+
+const onCategoryClear = (slotPrefix) => {
+    form[`${slotPrefix}_category_id`] = null;
+};
+
+const gridFiles = reactive({
+    fresh_air_image_file: null,
+    mask_image_file: null,
+    accessories_image_file: null,
+    purifier_image_file: null,
+    home_solutions_image_file: null,
+    biz_solutions_image_file: null,
+});
+
+const gridPreviews = reactive({
+    fresh_air_image: '',
+    mask_image: '',
+    accessories_image: '',
+    purifier_image: '',
+    home_solutions_image: '',
+    biz_solutions_image: '',
+});
+
+const onGridFileChange = (e, key) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        gridFiles[`${key}_file`] = file;
+        gridPreviews[key] = URL.createObjectURL(file);
+    }
+};
 
 // Best Selling Products specific state & helpers
 const allProducts = ref([]);
@@ -2638,6 +3111,43 @@ const fetchSections = async () => {
             })) : [];
         }
 
+        if (form.key === 'home_category_grid') {
+            form.action_text = d.action_text || "Find Your Solutions";
+            form.action_url = d.action_url || "/category/products";
+
+            form.fresh_air_category_id = d.fresh_air_category_id ? Number(d.fresh_air_category_id) : null;
+            form.fresh_air_title = d.fresh_air_title || "Fresh Air Unit";
+            form.fresh_air_url = d.fresh_air_url || "/category/fresh-air-systems";
+            form.fresh_air_image = d.fresh_air_image || "themes/default/assets/img/home/fresh-air-unit.webp";
+
+            form.mask_category_id = d.mask_category_id ? Number(d.mask_category_id) : null;
+            form.mask_title = d.mask_title || "Air Pro Mask";
+            form.mask_url = d.mask_url || "/category/smart-wearable-masks";
+            form.mask_image = d.mask_image || "themes/default/assets/img/home/air-pro-mask.webp";
+
+            form.accessories_category_id = d.accessories_category_id ? Number(d.accessories_category_id) : null;
+            form.accessories_title = d.accessories_title || "Accessories";
+            form.accessories_url = d.accessories_url || "/category/accessories-parts";
+            form.accessories_image = d.accessories_image || "themes/default/assets/img/home/accessories.webp";
+
+            form.purifier_category_id = d.purifier_category_id ? Number(d.purifier_category_id) : null;
+            form.purifier_title = d.purifier_title || "Air Purifiers";
+            form.purifier_url = d.purifier_url || "/category/air-purifiers";
+            form.purifier_image = d.purifier_image || "themes/default/assets/img/home/air-purifiers.webp";
+
+            form.home_solutions_category_id = d.home_solutions_category_id ? Number(d.home_solutions_category_id) : null;
+            form.home_solutions_title = d.home_solutions_title || "Solutions for Home";
+            form.home_solutions_sub = d.home_solutions_sub || "Ventilation and Filtration Solution";
+            form.home_solutions_url = d.home_solutions_url || "/category/home-fresh-air-systems";
+            form.home_solutions_image = d.home_solutions_image || "themes/default/assets/img/home/solutions-home.webp";
+
+            form.biz_solutions_category_id = d.biz_solutions_category_id ? Number(d.biz_solutions_category_id) : null;
+            form.biz_solutions_title = d.biz_solutions_title || "Solutions for Business";
+            form.biz_solutions_sub = d.biz_solutions_sub || "Air Disinfection & Air Monitoring";
+            form.biz_solutions_url = d.biz_solutions_url || "/category/commercial-fresh-air-systems";
+            form.biz_solutions_image = d.biz_solutions_image || "themes/default/assets/img/home/solutions-business.webp";
+        }
+
         // About Sections Specific Parsing
         if (form.key === 'about_hero') {
             form.badge = d.badge || "OUR STORY";
@@ -2768,7 +3278,16 @@ const fetchSections = async () => {
 // Submit updated section
 const updateSections = async () => {
     // Client-side required field validations
-    if (form.key === "why_choose_aire") {
+    if (form.key === "home_category_grid") {
+        if (!form.fresh_air_title?.trim() || !form.mask_title?.trim() || !form.accessories_title?.trim() || !form.purifier_title?.trim()) {
+            toast.error("Please provide titles for all 4 Category cards.");
+            return;
+        }
+        if (!form.home_solutions_title?.trim() || !form.biz_solutions_title?.trim()) {
+            toast.error("Please provide headlines for both Solutions banners.");
+            return;
+        }
+    } else if (form.key === "why_choose_aire") {
         if (!form.title?.trim()) {
             toast.error("Section Title is required.");
             return;
@@ -2856,7 +3375,44 @@ const updateSections = async () => {
     saving.value = true;
     let data = {};
 
-    if (form.key === "why_choose_aire") {
+    if (form.key === "home_category_grid") {
+        data = {
+            action_text: form.action_text || "Find Your Solutions",
+            action_url: form.action_url || "/category/products",
+
+            fresh_air_category_id: form.fresh_air_category_id || null,
+            fresh_air_title: form.fresh_air_title || "Fresh Air Unit",
+            fresh_air_url: form.fresh_air_url || "/category/fresh-air-systems",
+            fresh_air_image: form.fresh_air_image || "themes/default/assets/img/home/fresh-air-unit.webp",
+
+            mask_category_id: form.mask_category_id || null,
+            mask_title: form.mask_title || "Air Pro Mask",
+            mask_url: form.mask_url || "/category/smart-wearable-masks",
+            mask_image: form.mask_image || "themes/default/assets/img/home/air-pro-mask.webp",
+
+            accessories_category_id: form.accessories_category_id || null,
+            accessories_title: form.accessories_title || "Accessories",
+            accessories_url: form.accessories_url || "/category/accessories-parts",
+            accessories_image: form.accessories_image || "themes/default/assets/img/home/accessories.webp",
+
+            purifier_category_id: form.purifier_category_id || null,
+            purifier_title: form.purifier_title || "Air Purifiers",
+            purifier_url: form.purifier_url || "/category/air-purifiers",
+            purifier_image: form.purifier_image || "themes/default/assets/img/home/air-purifiers.webp",
+
+            home_solutions_category_id: form.home_solutions_category_id || null,
+            home_solutions_title: form.home_solutions_title || "Solutions for Home",
+            home_solutions_sub: form.home_solutions_sub || "Ventilation and Filtration Solution",
+            home_solutions_url: form.home_solutions_url || "/category/home-fresh-air-systems",
+            home_solutions_image: form.home_solutions_image || "themes/default/assets/img/home/solutions-home.webp",
+
+            biz_solutions_category_id: form.biz_solutions_category_id || null,
+            biz_solutions_title: form.biz_solutions_title || "Solutions for Business",
+            biz_solutions_sub: form.biz_solutions_sub || "Air Disinfection & Air Monitoring",
+            biz_solutions_url: form.biz_solutions_url || "/category/commercial-fresh-air-systems",
+            biz_solutions_image: form.biz_solutions_image || "themes/default/assets/img/home/solutions-business.webp",
+        };
+    } else if (form.key === "why_choose_aire") {
         data = {
             title: form.title,
             subtitle: form.subtitle,
@@ -3056,7 +3612,7 @@ const updateSections = async () => {
 
     const payload = new FormData();
     const specialKeys = [
-        "why_choose_aire", "trust_badges", "home_benefits", "benefits",
+        "home_category_grid", "why_choose_aire", "trust_badges", "home_benefits", "benefits",
         "home_lifestyle", "lifestyle", "home_faq", "faq", "home_video", "video",
         "home_best_selling", "best_selling", "home_new_arrival", "new_arrival",
         "home_customer_favorites", "customer_favorites", "home_living_hero", "living_hero",
@@ -3067,6 +3623,14 @@ const updateSections = async () => {
         payload.append('remove_image', 1);
     }
     payload.append("data", JSON.stringify(data));
+
+    if (form.key === "home_category_grid") {
+        Object.keys(gridFiles).forEach(k => {
+            if (gridFiles[k]) {
+                payload.append(k, gridFiles[k]);
+            }
+        });
+    }
 
     if (["home_lifestyle", "lifestyle"].includes(form.key) && form.items) {
         form.items.forEach((it, idx) => {
@@ -3111,6 +3675,7 @@ const updateSections = async () => {
 
 onMounted(async () => {
     loadProducts();
+    loadCategories();
     await fetchSections();
 });
 </script>

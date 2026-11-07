@@ -35,10 +35,10 @@ class ModuleSeeder extends Seeder
             ['id' => 19, 'name' => 'Other Products',        'module_key' => 'other_products',        'status' => 1],
         ];
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         DB::table('module_settings')->truncate();
         DB::table('modules')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         // 1. Seed or update all modules first
         foreach ($modules as $module) {

@@ -26,7 +26,7 @@
                     </div>
 
                     <!-- Level 1: Parent Category -->
-                    <div class="col-md-3 col-sm-6 py-1">
+                    <div class="col-md col-sm-6 py-1">
                         <select v-model="selectedLevel1" @change="onLevel1Change" class="custom-select custom-select-sm">
                             <option value="">All Parent Categories</option>
                             <option v-for="cat in level1Categories" :key="cat.id" :value="cat.id">
@@ -36,7 +36,7 @@
                     </div>
 
                     <!-- Level 2: Sub Category -->
-                    <div class="col-md-3 col-sm-6 py-1">
+                    <div class="col-md col-sm-6 py-1">
                         <select v-model="selectedLevel2" @change="onLevel2Change" class="custom-select custom-select-sm"
                             :disabled="!selectedLevel1 || level2Categories.length === 0">
                             <option value="">
@@ -49,7 +49,7 @@
                     </div>
 
                     <!-- Level 3: That Sub / Child Category -->
-                    <div class="col-md-3 col-sm-6 py-1">
+                    <div class="col-md col-sm-6 py-1">
                         <select v-model="selectedLevel3" @change="onLevel3Change" class="custom-select custom-select-sm"
                             :disabled="!selectedLevel2 || level3Categories.length === 0">
                             <option value="">
@@ -63,9 +63,22 @@
 
                     <!-- Reset Filter Button -->
                     <div class="col-auto py-1" v-if="selectedLevel1 || selectedLevel2 || selectedLevel3">
-                        <button @click="resetCategoryFilters" class="btn btn-sm btn-outline-danger" title="Clear All Category Filters">
+                        <button @click="resetCategoryFilters" class="btn btn-sm btn-outline-danger text-nowrap" title="Clear All Category Filters">
                             <i class="fas fa-times mr-1"></i> Clear
                         </button>
+                    </div>
+
+                    <!-- Result Count Badge (Single Row Inline Placement) -->
+                    <div class="col-auto ml-auto py-1 text-right text-nowrap" v-if="categories?.total !== undefined">
+                        <span class="badge badge-light border text-dark px-2 py-1 shadow-sm" style="font-size: 12px; line-height: 1.5;">
+                            <i class="fas fa-layer-group text-primary mr-1"></i>
+                            <span v-if="selectedLevel1 || selectedLevel2 || selectedLevel3 || currentSearchTerm">
+                                Found: <strong class="text-primary">{{ categories.total }}</strong> {{ categories.total === 1 ? 'Category' : 'Categories' }}
+                            </span>
+                            <span v-else>
+                                Total: <strong class="text-primary">{{ categories.total }}</strong> {{ categories.total === 1 ? 'Category' : 'Categories' }}
+                            </span>
+                        </span>
                     </div>
                 </div>
             </div>

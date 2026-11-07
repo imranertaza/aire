@@ -45,20 +45,55 @@ class ProductMediaService
     }
 
     /**
+     * Upload or update quickview product image.
+     */
+    public function saveQuickviewImage(UploadedFile $file, Product $product): string
+    {
+        $oldImage = $product->quickview_image;
+        if (!empty($oldImage)) {
+            \App\Services\ImageService::clearCache($oldImage);
+        }
+
+        $baseName = Str::slug($product->name ?: 'product') . '-quickview';
+        $filename = $baseName . '-' . time();
+        $path = $this->fileUploadService->replace(
+            $file,
+            "product/{$product->id}",
+            $oldImage,
+            $this->disk,
+            $filename
+        );
+
+        $product->update(['quickview_image' => $path]);
+
+        return $path;
+    }
+
+    /**
      * Save gallery images for a product.
      *
      * @param array<UploadedFile> $files
+     * @param array<int, int> $sortOrders
      */
-    public function saveGalleryImages(array $files, Product $product): void
+    public function saveGalleryImages(array $files, Product $product, array $sortOrders = []): void
     {
-        foreach ($files as $file) {
+        foreach ($files as $index => $file) {
             if (!$file instanceof UploadedFile) {
                 continue;
             }
 
+            $mime = $file->getMimeType() ?: '';
+            $extension = strtolower($file->getClientOriginalExtension());
+            $isVideo = str_starts_with($mime, 'video/') || in_array($extension, ['mp4', 'webm', 'mov', 'ogg', 'mkv']);
+            $fileType = $isVideo ? 'video' : 'image';
+
+            $sortOrder = isset($sortOrders[$index]) ? (int)$sortOrders[$index] : $index;
+
             $productImage = ProductImage::create([
                 'product_id' => $product->id,
                 'image'      => '',
+                'file_type'  => $fileType,
+                'sort_order' => $sortOrder,
                 'alt_name'   => $product->name,
                 'createdBy'  => Auth::id(),
                 'updatedBy'  => Auth::id(),
@@ -72,7 +107,62 @@ class ProductMediaService
                 $filename
             );
 
-            $productImage->update(['image' => $path]);
+            $productImage->update([
+                'image'     => $path,
+                'file_type' => $fileType,
+            ]);
+        }
+    }
+
+    /**
+     * Save external gallery video links (YouTube, Vimeo, direct video URL) for a product.
+     *
+     * @param array $videos Array of items: [['url' => '...', 'file_type' => 'youtube', 'sort_order' => 0], ...]
+     */
+    public function saveGalleryVideos(array $videos, Product $product): void
+    {
+        foreach ($videos as $item) {
+            $url = trim((string)($item['url'] ?? ''));
+            if (empty($url)) {
+                continue;
+            }
+
+            $fileType = $item['file_type'] ?? 'youtube';
+            if (!in_array($fileType, ['youtube', 'vimeo', 'video'])) {
+                if (str_contains($url, 'youtube.com') || str_contains($url, 'youtu.be')) {
+                    $fileType = 'youtube';
+                } elseif (str_contains($url, 'vimeo.com')) {
+                    $fileType = 'vimeo';
+                } else {
+                    $fileType = 'video';
+                }
+            }
+
+            $sortOrder = isset($item['sort_order']) ? (int)$item['sort_order'] : 0;
+
+            ProductImage::create([
+                'product_id' => $product->id,
+                'image'      => $url,
+                'file_type'  => $fileType,
+                'sort_order' => $sortOrder,
+                'alt_name'   => $product->name,
+                'createdBy'  => Auth::id(),
+                'updatedBy'  => Auth::id(),
+            ]);
+        }
+    }
+
+    /**
+     * Update sort orders for existing gallery images.
+     *
+     * @param array<int|string, int|string> $sortOrders Key is product_image ID, value is sort_order
+     */
+    public function updateGallerySortOrders(array $sortOrders, int $productId): void
+    {
+        foreach ($sortOrders as $imageId => $order) {
+            ProductImage::where('id', (int)$imageId)
+                ->where('product_id', $productId)
+                ->update(['sort_order' => (int)$order]);
         }
     }
 
@@ -89,7 +179,9 @@ class ProductMediaService
 
         foreach ($images as $img) {
             if (!empty($img->image)) {
-                \App\Services\ImageService::clearCache($img->image);
+                if ($img->file_type !== 'video') {
+                    \App\Services\ImageService::clearCache($img->image);
+                }
             }
             $this->deleteFile($img->image);
             $img->delete();

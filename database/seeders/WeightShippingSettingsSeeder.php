@@ -17,7 +17,7 @@ class WeightShippingSettingsSeeder extends Seeder
         $shippingMethod = ShippingMethod::where('code', 'weight')->first();
 
         if (!$shippingMethod) {
-            $this->command->warn('Weight based shipping method not found. Skipping.');
+            $this->command?->warn('Weight based shipping method not found. Skipping.');
             return;
         }
 
@@ -38,6 +38,6 @@ class WeightShippingSettingsSeeder extends Seeder
             );
         }
 
-        $this->command->info('Weight shipping settings seeded successfully!');
+        $this->command?->info('Weight shipping settings seeded successfully!');
     }
 }

@@ -67,6 +67,6 @@ class ProductTagSeeder extends Seeder
             }
         }
 
-        $this->command->info("Successfully seeded tags for {$products->count()} products.");
+        $this->command?->info("Successfully seeded tags for {$products->count()} products.");
     }
 }

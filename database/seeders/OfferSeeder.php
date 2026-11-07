@@ -22,11 +22,11 @@ class OfferSeeder extends Seeder
         // ----------------------------------------------------------------
         // 1. offers  (disable FK checks so child tables can be truncated first)
         // ----------------------------------------------------------------
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         DB::table('offer_on_products')->truncate();
         DB::table('offer_discounts')->truncate();
         DB::table('offers')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         DB::table('offers')->insert([
             [

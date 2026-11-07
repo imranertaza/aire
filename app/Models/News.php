@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class News extends Model
 {
@@ -9,6 +10,40 @@ class News extends Model
     protected $casts   = [
         'status' => 'integer',
     ];
+
+    protected static function booted()
+    {
+        static::saved(function ($news) {
+            static::clearNewsCache($news);
+        });
+
+        static::deleted(function ($news) {
+            static::clearNewsCache($news);
+        });
+    }
+
+    /**
+     * Clear all news-related caches.
+     */
+    public static function clearNewsCache(?News $news = null): void
+    {
+        Cache::forget('storefront_about_news_v1');
+        Cache::forget('storefront_news_featured_v1');
+        Cache::forget('storefront_news_categories_v1');
+
+        if ($news) {
+            if (!empty($news->slug)) {
+                Cache::forget("storefront_news_detail_{$news->slug}");
+            }
+            if ($news->isDirty('slug') && $news->getOriginal('slug')) {
+                Cache::forget("storefront_news_detail_{$news->getOriginal('slug')}");
+            }
+            if (!empty($news->id)) {
+                Cache::forget("storefront_news_detail_{$news->id}");
+                Cache::forget("storefront_news_related_{$news->id}");
+            }
+        }
+    }
     /**
      * Relationship: A news item can belong to many categories.
      */

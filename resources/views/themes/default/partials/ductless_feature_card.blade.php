@@ -60,7 +60,7 @@
 
     // Diagram Box
     $diagramBrand = $showcase->diagram_brand ?? ($product->brand->name ?? 'BROAD');
-    $diagramModel = $productName;
+    $diagramModel = !empty($showcase->diagram_model) ? $showcase->diagram_model : $productName;
     $productShortDesc = !empty($showcase->diagram_system)
         ? $showcase->diagram_system
         : (!empty($desc->description) && strlen(trim(strip_tags($desc->description))) <= 50
@@ -176,235 +176,241 @@
             </button>
         </div>
 
-    {{-- Title & Subtitle --}}
-    <div class="ductless-showcase-card__header position-relative" style="z-index: 2;">
-        <h2 class="ductless-showcase-card__title">
-            <a href="{{ $targetUrl }}" class="text-decoration-none text-reset">
-                {{ $cardTitle }}
-            </a>
-        </h2>
-        <p class="ductless-showcase-card__subtitle" title="{{ $cardSubtitle }}">
-            {{ $cardSubtitle }}
-        </p>
-    </div>
-
-    {{-- Feature Pills Column --}}
-    <div class="ductless-showcase-card__pills position-relative" style="z-index: 2;">
-        @if (!empty($showcase->feature_pills) && is_array($showcase->feature_pills))
-            @foreach ($showcase->feature_pills as $pill)
-                <div class="ductless-pill {{ !empty($pill['subtext']) ? 'ductless-pill--dual' : '' }}">
-                    <i class="bi {{ $pill['icon'] ?? 'bi-check-circle' }} ductless-pill__icon"></i>
-                    @if (!empty($pill['subtext']))
-                        <div class="ductless-pill__dual-text">
-                            <span class="ductless-pill__dual-main">{{ $pill['text'] ?? '' }}</span>
-                            <span class="ductless-pill__dual-sub">{{ $pill['subtext'] }}</span>
-                        </div>
-                    @else
-                        <span class="ductless-pill__text">{{ $pill['text'] ?? '' }}</span>
-                    @endif
-                </div>
-            @endforeach
-        @else
-            {{-- Default Feature Pills --}}
-            {{-- 1. Square Footage --}}
-            <div class="ductless-pill">
-                <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="15 3 21 3 21 9" />
-                    <polyline points="9 21 3 21 3 15" />
-                    <line x1="21" y1="3" x2="14" y2="10" />
-                    <line x1="3" y1="21" x2="10" y2="14" />
-                </svg>
-                <span class="ductless-pill__text">200–500 sq ft</span>
-            </div>
-
-            {{-- 2. Heat Recovery --}}
-            <div class="ductless-pill">
-                <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-                </svg>
-                <span class="ductless-pill__text">Heat Recovery 70%</span>
-            </div>
-
-            {{-- 3. PM 2.5 99% --}}
-            <div class="ductless-pill">
-                <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <path d="m9 12 2 2 4-4" />
-                </svg>
-                <span class="ductless-pill__text">PM 2.5 99%</span>
-            </div>
-
-            {{-- 4. 100% Fresh Air / No Recycled Air --}}
-            <div class="ductless-pill ductless-pill--dual">
-                <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M5 12h14" />
-                    <path d="m12 5 7 7-7 7" />
-                </svg>
-                <div class="ductless-pill__dual-text">
-                    <span class="ductless-pill__dual-main">100% Fresh Air</span>
-                    <span class="ductless-pill__dual-sub">No Recycled Air</span>
-                </div>
-            </div>
-
-            {{-- 5. Infection Control --}}
-            <div class="ductless-pill">
-                <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="22" y1="12" x2="18" y2="12" />
-                    <line x1="6" y1="12" x2="2" y2="12" />
-                    <line x1="12" y1="6" x2="12" y2="2" />
-                    <line x1="12" y1="22" x2="12" y2="18" />
-                </svg>
-                <span class="ductless-pill__text">Infection Control</span>
-            </div>
-
-            {{-- 6. Asthma --}}
-            <div class="ductless-pill">
-                <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="12" y1="18" x2="12" y2="12" />
-                    <line x1="9" y1="15" x2="15" y2="15" />
-                </svg>
-                <span class="ductless-pill__text">Asthma</span>
-            </div>
-
-            {{-- 7. Allergies & Dust --}}
-            <div class="ductless-pill">
-                <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path
-                        d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                </svg>
-                <span class="ductless-pill__text">Allergies &amp; Dust</span>
-            </div>
-        @endif
-    </div>
-
-    {{-- Quick View Floating Button --}}
-    <button type="button" class="ductless-quickview-btn border-0" data-bs-toggle="modal"
-        data-bs-target="#{{ $modalTargetId }}">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-            <circle cx="12" cy="12" r="3" />
-        </svg>
-        <span>Quick View</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6" />
-        </svg>
-    </button>
-</div>
-
-{{-- Bottom Body Section --}}
-<div class="ductless-showcase-card__body">
-    {{-- Middle Ventilation Diagram Box --}}
-    <div class="ductless-diagram-box">
-        <div class="ductless-diagram-box__meta">
-            <span class="ductless-diagram-box__brand">{{ $diagramBrand }}</span>
-            <h3 class="ductless-diagram-box__model">
-                <a href="{{ $detailUrl }}" class="text-decoration-none text-reset">
-                    {{ $diagramModel }}
+        {{-- Title & Subtitle --}}
+        <div class="ductless-showcase-card__header position-relative" style="z-index: 2;">
+            <h2 class="ductless-showcase-card__title">
+                <a href="{{ $targetUrl }}" class="text-decoration-none text-reset">
+                    {{ $cardTitle }}
                 </a>
-            </h3>
-            <p class="ductless-diagram-box__system" title="{{ $diagramSystem }}">
-                {{ \Illuminate\Support\Str::limit($diagramSystem, 55) }}</p>
+            </h2>
+            <p class="ductless-showcase-card__subtitle" title="{{ $cardSubtitle }}">
+                {{ $cardSubtitle }}
+            </p>
         </div>
 
-        <div class="ductless-diagram-box__illustration">
-            <a href="{{ $detailUrl }}" class="ductless-diagram-link text-decoration-none">
-                <img src="{{ $diagramImage }}" alt="{{ $diagramModel }}" class="ductless-diagram-img"
-                    width="343" height="184" loading="lazy" decoding="async">
-            </a>
+        {{-- Feature Pills Column --}}
+        <div class="ductless-showcase-card__pills position-relative" style="z-index: 2;">
+            @if (!empty($showcase->feature_pills) && is_array($showcase->feature_pills))
+                @foreach ($showcase->feature_pills as $pill)
+                    <div class="ductless-pill {{ !empty($pill['subtext']) ? 'ductless-pill--dual' : '' }}">
+                        <i class="bi {{ $pill['icon'] ?? 'bi-check-circle' }} ductless-pill__icon"></i>
+                        @if (!empty($pill['subtext']))
+                            <div class="ductless-pill__dual-text">
+                                <span class="ductless-pill__dual-main">{{ $pill['text'] ?? '' }}</span>
+                                <span class="ductless-pill__dual-sub">{{ $pill['subtext'] }}</span>
+                            </div>
+                        @else
+                            <span class="ductless-pill__text">{{ $pill['text'] ?? '' }}</span>
+                        @endif
+                    </div>
+                @endforeach
+            @else
+                {{-- Default Feature Pills --}}
+                {{-- 1. Square Footage --}}
+                <div class="ductless-pill">
+                    <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 3 21 3 21 9" />
+                        <polyline points="9 21 3 21 3 15" />
+                        <line x1="21" y1="3" x2="14" y2="10" />
+                        <line x1="3" y1="21" x2="10" y2="14" />
+                    </svg>
+                    <span class="ductless-pill__text">200–500 sq ft</span>
+                </div>
+
+                {{-- 2. Heat Recovery --}}
+                <div class="ductless-pill">
+                    <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    <span class="ductless-pill__text">Heat Recovery 70%</span>
+                </div>
+
+                {{-- 3. PM 2.5 99% --}}
+                <div class="ductless-pill">
+                    <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="m9 12 2 2 4-4" />
+                    </svg>
+                    <span class="ductless-pill__text">PM 2.5 99%</span>
+                </div>
+
+                {{-- 4. 100% Fresh Air / No Recycled Air --}}
+                <div class="ductless-pill ductless-pill--dual">
+                    <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M5 12h14" />
+                        <path d="m12 5 7 7-7 7" />
+                    </svg>
+                    <div class="ductless-pill__dual-text">
+                        <span class="ductless-pill__dual-main">100% Fresh Air</span>
+                        <span class="ductless-pill__dual-sub">No Recycled Air</span>
+                    </div>
+                </div>
+
+                {{-- 5. Infection Control --}}
+                <div class="ductless-pill">
+                    <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="22" y1="12" x2="18" y2="12" />
+                        <line x1="6" y1="12" x2="2" y2="12" />
+                        <line x1="12" y1="6" x2="12" y2="2" />
+                        <line x1="12" y1="22" x2="12" y2="18" />
+                    </svg>
+                    <span class="ductless-pill__text">Infection Control</span>
+                </div>
+
+                {{-- 6. Asthma --}}
+                <div class="ductless-pill">
+                    <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="12" y1="18" x2="12" y2="12" />
+                        <line x1="9" y1="15" x2="15" y2="15" />
+                    </svg>
+                    <span class="ductless-pill__text">Asthma</span>
+                </div>
+
+                {{-- 7. Allergies & Dust --}}
+                <div class="ductless-pill">
+                    <svg class="ductless-pill__icon" width="11" height="11" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                            d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                    </svg>
+                    <span class="ductless-pill__text">Allergies &amp; Dust</span>
+                </div>
+            @endif
         </div>
-    </div>
 
-    {{-- Bottom Specs Highlight Bar --}}
-    <div class="ductless-specs-bar">
-        {{-- Spec 1: Airflow --}}
-        <div class="ductless-spec-item">
-            <div class="ductless-spec-item__value">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m21 16-9 5-9-5V8l9-5 9 5v8Z" />
-                    <path d="M3.27 6.96 12 12.01l8.73-5.05" />
-                    <path d="M12 22.08V12" />
-                </svg>
-                <span>{!! $airflow !!}</span>
-            </div>
-            <span class="ductless-spec-item__label">Airflow</span>
-        </div>
-
-        <div class="ductless-specs-bar__divider"></div>
-
-        {{-- Spec 2: Power --}}
-        <div class="ductless-spec-item">
-            <div class="ductless-spec-item__value">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-                <span>{!! $power !!}</span>
-            </div>
-            <span class="ductless-spec-item__label">Power</span>
-        </div>
-
-        <div class="ductless-specs-bar__divider"></div>
-
-        {{-- Spec 3: Apartment Area --}}
-        <div class="ductless-spec-item">
-            <div class="ductless-spec-item__value">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                    <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-                <span>{!! $coverageArea !!}</span>
-            </div>
-            <span class="ductless-spec-item__label">Apartment</span>
-        </div>
-    </div>
-
-    {{-- Bottom Action & Price Bar --}}
-    <div class="ductless-card-footer">
-        <button type="button" class="ductless-buy-btn btn-buy-now" data-product-id="{{ $product->id }}">
-            <span>Buy</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        {{-- Quick View Floating Button --}}
+        <button type="button" class="ductless-quickview-btn border-0" data-bs-toggle="modal"
+            data-bs-target="#{{ $modalTargetId }}">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span>Quick View</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
+                <polyline points="9 18 15 12 9 6" />
             </svg>
         </button>
+    </div>
 
-        <div class="ductless-price-wrap">
-            <div class="d-flex flex-column align-items-end">
-                @if ($hasSpecial)
-                    <span class="text-muted text-decoration-line-through"
-                        style="font-size: 11px; opacity: 0.8; line-height: 1;">${{ number_format($price, 2) }}</span>
-                    <div class="ductless-price text-danger">${{ number_format($specialPrice, 2) }}</div>
-                @else
-                    <div class="ductless-price">${{ number_format($price, 2) }}</div>
-                @endif
+    {{-- Bottom Body Section --}}
+    <div class="ductless-showcase-card__body">
+        {{-- Middle Ventilation Diagram Box --}}
+        <div class="ductless-diagram-box">
+            <div class="ductless-diagram-box__meta">
+                <span class="ductless-diagram-box__brand">{{ $diagramBrand }}</span>
+                <h3 class="ductless-diagram-box__model">
+                    <a href="{{ $detailUrl }}" class="text-decoration-none text-reset">
+                        {{ $productName }}
+                    </a>
+                </h3>
+                <p class="ductless-diagram-box__system" title="{{ $diagramSystem }}">
+                    {{ \Illuminate\Support\Str::limit($diagramSystem, 55) }}</p>
             </div>
-            <a href="{{ $detailUrl }}" class="ductless-learn-more"
-                aria-label="Learn more about {{ $product->name }}">
-                <span>Learn more</span>
-                <span class="visually-hidden"> about {{ $product->name }}</span>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+
+            <div class="ductless-diagram-box__illustration">
+                <a href="{{ $detailUrl }}" class="ductless-diagram-link text-decoration-none">
+                    <img src="{{ $diagramImage }}" alt="{{ $diagramModel }}" class="ductless-diagram-img"
+                        width="343" height="184" loading="lazy" decoding="async">
+                </a>
+            </div>
+        </div>
+
+        {{-- Bottom Specs Highlight Bar --}}
+        <div class="ductless-specs-bar">
+            {{-- Spec 1: Airflow --}}
+            <div class="ductless-spec-item">
+                <div class="ductless-spec-item__value">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m21 16-9 5-9-5V8l9-5 9 5v8Z" />
+                        <path d="M3.27 6.96 12 12.01l8.73-5.05" />
+                        <path d="M12 22.08V12" />
+                    </svg>
+                    <span>{!! $airflow !!}</span>
+                </div>
+                <span class="ductless-spec-item__label">Airflow</span>
+            </div>
+
+            <div class="ductless-specs-bar__divider"></div>
+
+            {{-- Spec 2: Power --}}
+            <div class="ductless-spec-item">
+                <div class="ductless-spec-item__value">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                    </svg>
+                    <span>{!! $power !!}</span>
+                </div>
+                <span class="ductless-spec-item__label">Power</span>
+            </div>
+
+            <div class="ductless-specs-bar__divider"></div>
+
+            {{-- Spec 3: Apartment Area --}}
+            <div class="ductless-spec-item">
+                <div class="ductless-spec-item__value">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <span>{!! $coverageArea !!}</span>
+                </div>
+                <span class="ductless-spec-item__label">Apartment</span>
+            </div>
+        </div>
+
+        {{-- Bottom Action & Price Bar --}}
+        <div class="ductless-card-footer">
+            <a href="{{ $detailUrl }}" aria-label="Buy {{ $product->name }}" class="ductless-buy-btn">
+                <span>Buy</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
                 </svg>
             </a>
+
+            <div class="ductless-price-wrap">
+                <div class="d-flex flex-column align-items-end">
+                    @if ($hasSpecial)
+                        <span class="text-muted text-decoration-line-through"
+                            style="font-size: 11px; opacity: 0.8; line-height: 1;">${{ number_format($price, 2) }}</span>
+                        <div class="ductless-price text-danger">${{ number_format($specialPrice, 2) }}</div>
+                    @else
+                        <div class="ductless-price">${{ number_format($price, 2) }}</div>
+                    @endif
+                </div>
+                <a href="{{ $detailUrl }}#overview" class="ductless-learn-more"
+                    aria-label="Learn more about {{ $product->name }}">
+                    <span>Learn more</span>
+                    <span class="visually-hidden"> about {{ $product->name }}</span>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </div>
-</div>
 </div>
 
 {{-- Dynamic Quick View Detail Modal for this product --}}

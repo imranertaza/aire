@@ -9,6 +9,16 @@ class FilterOption extends Model
 {
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'show_in_filter'        => 'integer',
+        'show_in_catalog'       => 'integer',
+        'show_in_guided_finder' => 'integer',
+        'has_unknown_option'    => 'integer',
+        'guided_step_number'    => 'integer',
+        'sort_order'            => 'integer',
+        'status'                => 'integer',
+    ];
+
     protected static function booted()
     {
         static::saved(function ($option) {
@@ -17,6 +27,7 @@ class FilterOption extends Model
             Cache::forget('filter_budget_option_v1');
             Cache::forget('filter_active_db_options');
             Cache::forget('filter_steps_data_v9');
+            Cache::forget('guided_finder_steps_data_v1');
         });
 
         static::deleted(function ($option) {
@@ -25,6 +36,7 @@ class FilterOption extends Model
             Cache::forget('filter_budget_option_v1');
             Cache::forget('filter_active_db_options');
             Cache::forget('filter_steps_data_v9');
+            Cache::forget('guided_finder_steps_data_v1');
         });
     }
 
@@ -35,6 +47,21 @@ class FilterOption extends Model
 
     public function scopeShowInFilter($query)
     {
-        return $query->where('show_in_filter', 1);
+        return $query->where(function ($q) {
+            $q->where('show_in_catalog', 1)->orWhere('show_in_filter', 1);
+        });
+    }
+
+    public function scopeCatalogFilter($query)
+    {
+        return $query->where('status', 1)->where('show_in_catalog', 1);
+    }
+
+    public function scopeGuidedFinder($query)
+    {
+        return $query->where('status', 1)
+            ->where('show_in_guided_finder', 1)
+            ->orderBy('guided_step_number', 'asc')
+            ->orderBy('sort_order', 'asc');
     }
 }

@@ -641,4 +641,99 @@ class ProductCreateAndUpdateTest extends TestCase
         $storage->assertExists($landing->science_image);
         $storage->assertExists($landing->specs_groups[0]['image']);
     }
+
+    /**
+     * Test admin can filter products by 3-level category hierarchy.
+     */
+    public function test_admin_can_filter_products_by_category_levels(): void
+    {
+        $parentCat = ProductCategory::create([
+            'category_name' => 'Fresh Air Systems',
+            'slug'          => 'fresh-air-systems',
+            'status'        => 1,
+            'parent_id'     => null,
+        ]);
+
+        $subCat = ProductCategory::create([
+            'category_name' => 'Commercial Ventilators',
+            'slug'          => 'commercial-ventilators',
+            'status'        => 1,
+            'parent_id'     => $parentCat->id,
+        ]);
+
+        $childCat = ProductCategory::create([
+            'category_name' => 'Roof Mounted Units',
+            'slug'          => 'roof-mounted-units',
+            'status'        => 1,
+            'parent_id'     => $subCat->id,
+        ]);
+
+        $otherCat = ProductCategory::create([
+            'category_name' => 'Standalone Purifiers',
+            'slug'          => 'standalone-purifiers',
+            'status'        => 1,
+            'parent_id'     => null,
+        ]);
+
+        // Product in child category
+        $prod1 = Product::create([
+            'store_id' => $this->store->id,
+            'name'     => 'Industrial Roof Ventilator 900',
+            'slug'     => 'industrial-roof-ventilator-900',
+            'model'    => 'IRV-900',
+            'price'    => 1500.00,
+            'quantity' => 10,
+            'status'   => 1,
+        ]);
+        $prod1->categories()->attach($childCat->id);
+
+        // Product in standalone category
+        $prod2 = Product::create([
+            'store_id' => $this->store->id,
+            'name'     => 'Compact Home Purifier H1',
+            'slug'     => 'compact-home-purifier-h1',
+            'model'    => 'CHP-H1',
+            'price'    => 250.00,
+            'quantity' => 20,
+            'status'   => 1,
+        ]);
+        $prod2->categories()->attach($otherCat->id);
+
+        // 1. Filter by Level 1 (Parent): Should return child product via recursive descendant match
+        $resLevel1 = $this->actingAs($this->admin, 'user')
+            ->getJson("/api/products?level1_id={$parentCat->id}");
+        $resLevel1->assertStatus(200);
+        $data1 = $resLevel1->json('data.data');
+        $ids1 = collect($data1)->pluck('id')->all();
+        $this->assertContains($prod1->id, $ids1);
+        $this->assertNotContains($prod2->id, $ids1);
+
+        // 2. Filter by Level 2 (Sub)
+        $resLevel2 = $this->actingAs($this->admin, 'user')
+            ->getJson("/api/products?level2_id={$subCat->id}");
+        $resLevel2->assertStatus(200);
+        $data2 = $resLevel2->json('data.data');
+        $ids2 = collect($data2)->pluck('id')->all();
+        $this->assertContains($prod1->id, $ids2);
+        $this->assertNotContains($prod2->id, $ids2);
+
+        // 3. Filter by Level 3 (Child)
+        $resLevel3 = $this->actingAs($this->admin, 'user')
+            ->getJson("/api/products?level3_id={$childCat->id}");
+        $resLevel3->assertStatus(200);
+        $data3 = $resLevel3->json('data.data');
+        $ids3 = collect($data3)->pluck('id')->all();
+        $this->assertContains($prod1->id, $ids3);
+        $this->assertNotContains($prod2->id, $ids3);
+
+        // 4. Filter by other category: Should only return prod2
+        $resOther = $this->actingAs($this->admin, 'user')
+            ->getJson("/api/products?level1_id={$otherCat->id}");
+        $resOther->assertStatus(200);
+        $dataOther = $resOther->json('data.data');
+        $idsOther = collect($dataOther)->pluck('id')->all();
+        $this->assertContains($prod2->id, $idsOther);
+        $this->assertNotContains($prod1->id, $idsOther);
+    }
 }
+

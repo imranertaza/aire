@@ -76,6 +76,6 @@ class CuponSeeder extends Seeder
             ]
         );
 
-        $this->command->info('CouponSeeder completed successfully!');
+        $this->command?->info('CouponSeeder completed successfully!');
     }
 }

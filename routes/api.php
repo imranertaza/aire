@@ -28,6 +28,8 @@ use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SliderController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\ProductCategoryController;
+use App\Http\Controllers\Api\ResourceCategoryController;
+use App\Http\Controllers\Api\ResourceController;
 use App\Http\Controllers\Api\EventCategoryController;
 use App\Http\Controllers\Api\AdvancedProductController;
 use Illuminate\Support\Facades\File;
@@ -82,6 +84,13 @@ Route::middleware(['auth:user'])->group(function () {
 
     // Color Families
     Route::apiResource('color-families', \App\Http\Controllers\Api\ColorFamilyController::class);
+
+    // Resource Categories & Resources
+    Route::apiResource('resource-categories', \App\Http\Controllers\Api\ResourceCategoryController::class);
+    Route::post('resource-categories/{id}/toggle', [\App\Http\Controllers\Api\ResourceCategoryController::class, 'toggleStatus']);
+
+    Route::apiResource('resources', \App\Http\Controllers\Api\ResourceController::class);
+    Route::post('resources/{id}/toggle', [\App\Http\Controllers\Api\ResourceController::class, 'toggleStatus']);
 });
 
 /* Posts Management */
@@ -373,6 +382,27 @@ Route::prefix('product-categories')->middleware(['auth:user'])->controller(Produ
     Route::delete('{id}', 'destroy')->name('product-categories.destroy')->middleware('permission:delete-product-categories');
 });
 
+/* Resource Categories */
+Route::prefix('resource-categories')->middleware(['auth:user'])->controller(ResourceCategoryController::class)->group(function () {
+    Route::get('/', 'index')->name('resource-categories.index');
+    Route::post('/', 'store')->name('resource-categories.store');
+    Route::get('{id}', 'show')->name('resource-categories.show');
+    Route::put('{id}', 'update')->name('resource-categories.update');
+    Route::match(['post', 'patch'], '{id}/toggle', 'toggleStatus')->name('resource-categories.toggle');
+    Route::delete('{id}', 'destroy')->name('resource-categories.destroy');
+});
+
+/* Resources */
+Route::prefix('resources')->middleware(['auth:user'])->controller(ResourceController::class)->group(function () {
+    Route::get('/', 'index')->name('resources.index');
+    Route::post('/', 'store')->name('resources.store');
+    Route::get('{id}', 'show')->name('resources.show');
+    Route::post('{id}', 'update')->name('resources.update-post');
+    Route::put('{id}', 'update')->name('resources.update');
+    Route::match(['post', 'patch'], '{id}/toggle', 'toggleStatus')->name('resources.toggle');
+    Route::delete('{id}', 'destroy')->name('resources.destroy');
+});
+
 /* Product Attribute Groups */
 Route::prefix('product-attribute-groups')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductAttributeGroupController::class)->group(function () {
     Route::get('/', 'index')->name('product-attribute-groups.index')->middleware('permission:view-attribute-groups');
@@ -404,6 +434,8 @@ Route::prefix('filter-options')->middleware(['auth:user'])->controller(\App\Http
     Route::put('{id}', 'update')->name('filter-options.update')->middleware('permission:edit-options');
     Route::patch('{id}/toggle-status', 'toggleStatus')->name('filter-options.toggle')->middleware('permission:edit-options');
     Route::patch('{id}/toggle-show-in-filter', 'toggleShowInFilter')->name('filter-options.toggle-show-in-filter')->middleware('permission:edit-options');
+    Route::patch('{id}/toggle-show-in-catalog', 'toggleShowInCatalog')->name('filter-options.toggle-show-in-catalog')->middleware('permission:edit-options');
+    Route::patch('{id}/toggle-show-in-guided-finder', 'toggleShowInGuidedFinder')->name('filter-options.toggle-show-in-guided-finder')->middleware('permission:edit-options');
     Route::delete('{id}', 'destroy')->name('filter-options.destroy')->middleware('permission:delete-options');
 });
 
@@ -411,14 +443,14 @@ Route::prefix('filter-options')->middleware(['auth:user'])->controller(\App\Http
 Route::prefix('products')->middleware(['auth:user'])->controller(\App\Http\Controllers\Api\ProductController::class)->group(function () {
     Route::get('all-dropdown', 'dropdownList')->name('api.products.dropdown');
     Route::get('/', 'index')->name('api.products.index')->middleware('permission:view-products');
-    Route::post('/', 'store')->name('api.products.store')->middleware('permission:create-products');
-    Route::post('/copy', 'copy')->name('api.products.copy')->middleware('permission:create-products');
-    Route::post('/bulk-status', 'bulkStatus')->name('api.products.bulk-status')->middleware('permission:edit-products');
-    Route::delete('/bulk-delete', 'bulkDelete')->name('api.products.bulk-delete')->middleware('permission:delete-products');
-    Route::get('{id}', 'show')->name('api.products.show')->middleware('permission:view-products');
-    Route::post('{id}', 'update')->name('api.products.update')->middleware('permission:edit-products'); // using POST because of multipart/form-data for files
-    Route::patch('{id}/toggle-status', 'toggleStatus')->name('api.products.toggle')->middleware('permission:edit-products');
-    Route::delete('{id}', 'destroy')->name('api.products.destroy')->middleware('permission:delete-products');
+    Route::post('/', 'store')->name('products.store')->middleware('permission:create-products');
+    Route::post('/copy', 'copy')->name('products.copy')->middleware('permission:create-products');
+    Route::post('/bulk-status', 'bulkStatus')->name('products.bulk-status')->middleware('permission:edit-products');
+    Route::delete('/bulk-delete', 'bulkDelete')->name('products.bulk-delete')->middleware('permission:delete-products');
+    Route::get('{id}', 'show')->name('products.show')->middleware('permission:view-products');
+    Route::post('{id}', 'update')->name('products.update')->middleware('permission:edit-products'); // using POST because of multipart/form-data for files
+    Route::patch('{id}/toggle-status', 'toggleStatus')->name('products.toggle')->middleware('permission:edit-products');
+    Route::delete('{id}', 'destroy')->name('products.destroy')->middleware('permission:delete-products');
 });
 
 /* Advanced Products (Bulk Product Editing) */

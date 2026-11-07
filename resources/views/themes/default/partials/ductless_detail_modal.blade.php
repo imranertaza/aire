@@ -5,7 +5,7 @@
 
     $brandName = $showcase->diagram_brand ?? ($product->brand->name ?? 'BROAD');
     $seriesBadge = $showcase->series_badge ?? 'AIRPRO HEPA Series';
-    $title = $desc->name ?? ($product->name ?? 'AirPro Fresh FE6');
+    $title = !empty($showcase->title) ? $showcase->title : $desc->name ?? ($product->name ?? 'AirPro Fresh FE6');
     $subtitle =
         $showcase->modal_subtitle ?? ($showcase->subtitle ?? 'Single Room Ductless Wall–Mounted Fresh Air Ventilator');
     $description = !empty($desc->description)
@@ -63,7 +63,7 @@
                             </div>
 
                             {{-- Title & Subtitle --}}
-                            <h2 class="ductless-modal__title" id="{{ $targetModalId }}Label">{{ $title }}</h2>
+                            <h2 class="ductless-modal__title" id="{{ $targetModalId }}Label">{{ $product->name }}</h2>
                             <h3 class="ductless-modal__subtitle">{{ $subtitle }}</h3>
 
                             {{-- Description --}}

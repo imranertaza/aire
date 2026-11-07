@@ -4,8 +4,8 @@
    ============================================================ */
 :root {
     /* ── Brand / Primary ─────────────────────────────────── */
-    --color-primary: #0072B2;
-    --color-primary-hover: #005a8f;
+    --color-primary: #0095DA;
+    --color-primary-hover: #047cc2;
     --color-primary-light: #2563eb;
     --bs-primary: #0072B2;
     --bs-primary-rgb: 0, 114, 178;
@@ -179,6 +179,10 @@ h6,
 p {
     font-size: var(--fs-body);
     line-height: 1.6;
+}
+
+.text-primary {
+    color: var(--color-primary) !important;
 }
 
 small,

@@ -33,6 +33,31 @@ class ProductLanding extends Model
         'specs_groups'     => 'array',
     ];
 
+    protected static function booted()
+    {
+        static::saved(function ($landing) {
+            if (!empty($landing->product_id)) {
+                $product = $landing->product ?? Product::find($landing->product_id);
+                if ($product) {
+                    Product::clearProductCache($product);
+                    return;
+                }
+            }
+            Product::clearProductCache();
+        });
+
+        static::deleted(function ($landing) {
+            if (!empty($landing->product_id)) {
+                $product = $landing->product ?? Product::find($landing->product_id);
+                if ($product) {
+                    Product::clearProductCache($product);
+                    return;
+                }
+            }
+            Product::clearProductCache();
+        });
+    }
+
     /**
      * Get the product that owns this landing configuration.
      */

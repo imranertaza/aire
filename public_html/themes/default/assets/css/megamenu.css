@@ -1,0 +1,473 @@
+/* ==========================================================================
+   Air Purifiers MegaMenu / Quick View Styles
+   High-Fidelity Category-Grouped Layout matching official BROAD / Aire design
+   ========================================================================== */
+
+.megamenu-quickview-overlay {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1050;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.22s;
+    padding-top: 8px;
+    padding-bottom: 24px;
+}
+
+/* Invisible bridge buffer between navbar and megamenu to prevent mouse leave gap */
+.megamenu-quickview-overlay::before {
+    content: '';
+    position: absolute;
+    top: -16px;
+    left: 0;
+    right: 0;
+    height: 24px;
+    background: transparent;
+}
+
+.megamenu-quickview-overlay.is-active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Card Container */
+.air-purifiers-quickview-card {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.16), 0 4px 14px rgba(15, 23, 42, 0.05);
+    padding: 24px 28px 22px 28px;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* Header */
+.quickview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+}
+
+.quickview-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.3px;
+    display: inline-flex;
+    align-items: center;
+    font-family: inherit;
+}
+
+.quickview-title-sep {
+    color: #cbd5e1;
+    font-weight: 300;
+    margin: 0 8px;
+    font-size: 20px;
+    user-select: none;
+}
+
+.quickview-title-sub {
+    font-size: 18px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.quickview-desc {
+    font-size: 13.5px;
+    color: #64748b;
+    margin: 4px 0 16px 0;
+    line-height: 1.4;
+}
+
+.quickview-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 6px 8px;
+    line-height: 1;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 20;
+}
+
+.quickview-close-btn i {
+    pointer-events: none;
+}
+
+.quickview-close-btn:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+
+/* Carousel & Groups Track */
+.quickview-carousel-wrapper {
+    position: relative;
+    margin: 6px 0 18px 0;
+}
+
+.quickview-scroll-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.quickview-scroll-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #0f172a;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.quickview-scroll-btn.prev {
+    left: -14px;
+}
+
+.quickview-scroll-btn.next {
+    right: -14px;
+}
+
+.quickview-groups-track {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 2px 12px 2px;
+}
+
+.quickview-groups-track::-webkit-scrollbar {
+    display: none;
+}
+
+/* Category Group Column */
+.quickview-category-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+
+/* Group Header Pill */
+.quickview-group-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-height: 62px;
+    height: 62px;
+    overflow: hidden;
+}
+
+.quickview-group-pill:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.quickview-group-pill.active {
+    border: 1.5px solid #0ea5e9;
+    box-shadow: 0 3px 12px rgba(14, 165, 233, 0.12);
+}
+
+.quickview-group-pill.green {
+    border: 1.5px solid #86efac;
+    background: #f0fdf4;
+}
+
+.quickview-group-pill.red {
+    border: 1.5px solid #fca5a5;
+    background: #ffffff;
+    justify-content: center;
+    align-items: center;
+}
+
+.quickview-group-pill.red .red-badge-text {
+    color: #ef4444;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    display: block;
+}
+
+.quickview-pill-icon-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 15px;
+}
+
+.quickview-pill-icon-circle.blue {
+    border: 1.5px solid #38bdf8;
+    background: #f0f9ff;
+    color: #0284c7;
+}
+
+.quickview-pill-icon-circle.green {
+    border: 1.5px solid #4ade80;
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.quickview-pill-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.quickview-pill-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.quickview-pill-desc {
+    font-size: 10.5px;
+    color: #64748b;
+    margin-top: 2px;
+    line-height: 1.25;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+}
+
+.quickview-pill-action {
+    font-size: 11px;
+    font-weight: 600;
+    color: #0284c7;
+    white-space: nowrap;
+    margin-left: 8px;
+}
+
+/* Group Product Cards Row */
+.quickview-group-cards {
+    display: flex;
+    gap: 12px;
+    height: 100%;
+}
+
+/* Individual Product Card */
+.quickview-product-card {
+    width: 168px;
+    min-width: 168px;
+    max-width: 168px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.quickview-product-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.quickview-product-img-box {
+    height: 102px;
+    background: #f8fafc;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+.quickview-product-img-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+    transition: transform 0.25s ease;
+}
+
+.quickview-product-card:hover .quickview-product-img-box img {
+    transform: scale(1.04);
+}
+
+.quickview-product-brand {
+    font-size: 10.5px;
+    color: #94a3b8;
+    font-weight: 500;
+    margin-bottom: 3px;
+    letter-spacing: 0.2px;
+}
+
+.quickview-product-name {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.35;
+    height: 46px;
+    max-height: 46px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    margin: 0 0 6px 0;
+}
+
+.quickview-product-price {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.quickview-product-btn {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #0284c7;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 20px;
+    padding: 5px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    margin-top: auto;
+    transition: all 0.2s ease;
+}
+
+.quickview-product-btn:hover {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+}
+
+/* Footer & Feature Highlights */
+.quickview-footer {
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.quickview-features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.quickview-feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.quickview-feature-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #bae6fd;
+    background: #f0f9ff;
+    color: #0284c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+}
+
+.quickview-feature-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 2px 0;
+}
+
+.quickview-feature-desc {
+    font-size: 11px;
+    color: #64748b;
+    margin: 0;
+    line-height: 1.35;
+}
+
+.quickview-cta-wrap {
+    margin-top: 14px;
+}
+
+.quickview-cta-btn {
+    background: #0066cc;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s, transform 0.15s;
+}
+
+.quickview-cta-btn:hover {
+    background: #0052a3;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 991.98px) {
+    .megamenu-quickview-overlay {
+        display: none !important;
+    }
+}

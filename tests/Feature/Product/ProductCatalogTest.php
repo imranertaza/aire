@@ -33,6 +33,16 @@ class ProductCatalogTest extends TestCase
     }
 
     /**
+     * Test resources documentation page returns 200 OK.
+     */
+    public function test_resources_page_returns_successful_response(): void
+    {
+        $response = $this->get(route('resources'));
+
+        $response->assertStatus(200);
+    }
+
+    /**
      * Test product detail page returns 200 OK.
      */
     public function test_product_detail_page_returns_successful_response(): void

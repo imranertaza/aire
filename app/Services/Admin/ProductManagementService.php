@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Models\Product;
 use App\Models\ProductAttribute;
+use App\Models\ProductCategory;
 use App\Models\ProductFilterOption;
 use App\Models\ProductImage;
 use App\Models\ProductLanding;
@@ -15,6 +16,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -29,10 +31,19 @@ class ProductManagementService
      */
     public function listProducts(array $filters = [], int $perPage = 10): LengthAwarePaginator
     {
-        return Product::with(['brand'])
-            ->search($filters['search'] ?? null)
-            ->latest('id')
-            ->paginate($perPage);
+        $query = Product::with(['brand', 'categories'])
+            ->search($filters['search'] ?? null);
+
+        // 3-Level Category Filtering: Level 3 (Child) > Level 2 (Sub) > Level 1 (Parent) > Category ID
+        $categoryId = $filters['level3_id'] ?? $filters['level2_id'] ?? $filters['level1_id'] ?? $filters['category_id'] ?? null;
+        if (!empty($categoryId)) {
+            $ids = ProductCategory::getCategoryAndDescendantIds((int) $categoryId);
+            $query->whereHas('categories', function ($q) use ($ids) {
+                $q->whereIn('product_categories.id', $ids);
+            });
+        }
+
+        return $query->latest('id')->paginate($perPage)->onEachSide(1);
     }
 
     /**
@@ -102,9 +113,12 @@ class ProductManagementService
                 'updatedBy'      => Auth::id(),
             ]);
 
-            // 1. Main Image
+            // 1. Main & Quick View Images
             if ($request->hasFile('main_image')) {
                 $this->mediaService->saveMainImage($request->file('main_image'), $product);
+            }
+            if ($request->hasFile('quickview_image')) {
+                $this->mediaService->saveQuickviewImage($request->file('quickview_image'), $product);
             }
 
             // 2. Description
@@ -138,11 +152,23 @@ class ProductManagementService
             // 8. Attributes
             $this->saveAttributes($product, $validated['attributes'] ?? $request->input('attributes'));
 
-            // 9. Gallery Images
+            // 9. Gallery Images & Videos
             if ($request->hasFile('gallery_images')) {
                 $galleryFiles = $request->file('gallery_images');
                 $galleryFiles = is_array($galleryFiles) ? $galleryFiles : [$galleryFiles];
-                $this->mediaService->saveGalleryImages($galleryFiles, $product);
+                $gallerySortOrders = $request->input('gallery_sort_orders', []);
+                if (is_string($gallerySortOrders)) {
+                    $gallerySortOrders = json_decode($gallerySortOrders, true) ?: [];
+                }
+                $this->mediaService->saveGalleryImages($galleryFiles, $product, is_array($gallerySortOrders) ? $gallerySortOrders : []);
+            }
+
+            $galleryVideos = $request->input('gallery_videos', []);
+            if (is_string($galleryVideos)) {
+                $galleryVideos = json_decode($galleryVideos, true) ?: [];
+            }
+            if (!empty($galleryVideos) && is_array($galleryVideos)) {
+                $this->mediaService->saveGalleryVideos($galleryVideos, $product);
             }
 
             // 10. FAQs & Applications
@@ -154,6 +180,8 @@ class ProductManagementService
 
             // 12. Landing Page
             $this->saveLandingPage($product, $request);
+
+            Product::clearProductCache($product);
 
             return $product->load([
                 'productOptions',
@@ -214,6 +242,14 @@ class ProductManagementService
                 $product->update(['main_image' => null]);
             }
 
+            // Quick View Image
+            if ($request->hasFile('quickview_image')) {
+                $this->mediaService->saveQuickviewImage($request->file('quickview_image'), $product);
+            } elseif (in_array('quickview_image', $deletedFiles)) {
+                $this->mediaService->deleteFile($product->quickview_image);
+                $product->update(['quickview_image' => null]);
+            }
+
             // 3. Description
             $this->updateDescription($product, $request, $deletedFiles, $validated);
 
@@ -263,10 +299,32 @@ class ProductManagementService
                 $this->mediaService->deleteGalleryImages($deletedImages, $product->id);
             }
 
+            // Update existing images sort orders
+            $existingSortOrders = $request->input('existing_image_sort_orders');
+            if (is_string($existingSortOrders)) {
+                $existingSortOrders = json_decode($existingSortOrders, true);
+            }
+            if (!empty($existingSortOrders) && is_array($existingSortOrders)) {
+                $this->mediaService->updateGallerySortOrders($existingSortOrders, $product->id);
+            }
+
+            // 10. Gallery Images & Videos
             if ($request->hasFile('gallery_images')) {
                 $galleryFiles = $request->file('gallery_images');
                 $galleryFiles = is_array($galleryFiles) ? $galleryFiles : [$galleryFiles];
-                $this->mediaService->saveGalleryImages($galleryFiles, $product);
+                $gallerySortOrders = $request->input('gallery_sort_orders', []);
+                if (is_string($gallerySortOrders)) {
+                    $gallerySortOrders = json_decode($gallerySortOrders, true) ?: [];
+                }
+                $this->mediaService->saveGalleryImages($galleryFiles, $product, is_array($gallerySortOrders) ? $gallerySortOrders : []);
+            }
+
+            $galleryVideos = $request->input('gallery_videos', []);
+            if (is_string($galleryVideos)) {
+                $galleryVideos = json_decode($galleryVideos, true) ?: [];
+            }
+            if (!empty($galleryVideos) && is_array($galleryVideos)) {
+                $this->mediaService->saveGalleryVideos($galleryVideos, $product);
             }
 
             // 11. FAQs & Applications
@@ -276,6 +334,8 @@ class ProductManagementService
             // 12. Landing Page & Showcase
             $this->updateLandingPage($product, $request, $deletedFiles);
             $this->updateShowcase($product, $request, $deletedFiles);
+
+            Product::clearProductCache($product);
 
             return $product->refresh()->load([
                 'productOptions',
@@ -300,8 +360,10 @@ class ProductManagementService
      */
     public function deleteProduct(Product $product): void
     {
+        ProductCategory::clearCategoryCache();
         $this->mediaService->deleteProductDirectory($product->id);
         $product->delete();
+        ProductCategory::clearCategoryCache();
     }
 
     /**
@@ -311,11 +373,15 @@ class ProductManagementService
      */
     public function bulkDelete(array $productIds): void
     {
+        ProductCategory::clearCategoryCache();
         $products = Product::whereIn('id', $productIds)->get();
 
         foreach ($products as $product) {
             $this->deleteProduct($product);
         }
+
+        ProductCategory::clearCategoryCache();
+        Product::clearProductCache();
     }
 
     /**
@@ -329,6 +395,13 @@ class ProductManagementService
             'status'    => $status,
             'updatedBy' => Auth::id(),
         ]);
+
+        Product::clearProductCache();
+        foreach ($productIds as $pid) {
+            Cache::forget("product_detail_{$pid}");
+            Cache::forget("product_landing_{$pid}");
+            Cache::forget("product_related_{$pid}");
+        }
     }
 
     /**
@@ -495,6 +568,8 @@ class ProductManagementService
 
         $boughtTogether = $this->parseArrayInput($request->input('bought_together_ids'));
         $product->boughtTogether()->sync($boughtTogether);
+
+        Product::clearProductCache($product);
     }
 
     protected function parseArrayInput(mixed $input): array
@@ -642,7 +717,7 @@ class ProductManagementService
     {
         $descData = $this->extractDescriptionFields($request, $validated);
 
-        foreach (['documentation_pdf' => 'doc', 'safety_pdf' => 'safety', 'instructions_pdf' => 'instruction', 'description_image' => 'desc_img', 'specs_image' => 'specs_bg', 'features_image' => 'feat_bg', 'technology_image' => 'tech'] as $fileField => $prefix) {
+        foreach (['documentation_pdf' => 'doc', 'safety_pdf' => 'safety', 'instructions_pdf' => 'instruction', 'description_image' => 'desc_img', 'specs_image' => 'specs_bg', 'features_image' => 'feat_bg', 'technology_image' => 'tech', 'in_the_box_image' => 'box_bg'] as $fileField => $prefix) {
             if ($request->hasFile($fileField)) {
                 $descData[$fileField] = $this->mediaService->uploadAuxiliaryFile($request->file($fileField), $product->id, '', $prefix);
             } elseif ($request->filled($fileField) && is_string($request->input($fileField))) {
@@ -658,7 +733,7 @@ class ProductManagementService
         $descData = $this->extractDescriptionFields($request, $validated);
         $existing = $product->description;
 
-        foreach (['documentation_pdf' => 'doc', 'safety_pdf' => 'safety', 'instructions_pdf' => 'instruction', 'description_image' => 'desc_img', 'specs_image' => 'specs_bg', 'features_image' => 'feat_bg', 'technology_image' => 'tech'] as $fileField => $prefix) {
+        foreach (['documentation_pdf' => 'doc', 'safety_pdf' => 'safety', 'instructions_pdf' => 'instruction', 'description_image' => 'desc_img', 'specs_image' => 'specs_bg', 'features_image' => 'feat_bg', 'technology_image' => 'tech', 'in_the_box_image' => 'box_bg'] as $fileField => $prefix) {
             if (in_array($fileField, $deletedFiles)) {
                 if ($existing && $existing->$fileField) {
                     $this->mediaService->deleteFile($existing->$fileField);
@@ -736,7 +811,42 @@ class ProductManagementService
             'tech_feature2_desc'          => $request->input('tech_feature2_desc'),
             'tech_feature3_title'         => $request->input('tech_feature3_title'),
             'tech_feature3_desc'          => $request->input('tech_feature3_desc'),
+            'in_the_box_badge'            => $request->input('in_the_box_badge'),
+            'in_the_box_title'            => $request->input('in_the_box_title'),
+            'in_the_box_description'      => $request->input('in_the_box_description'),
+            'in_the_box_items'            => $this->normalizeInTheBoxItems($request->input('in_the_box_items')),
         ];
+    }
+
+    /**
+     * Normalize in_the_box_items array or JSON string into a clean array.
+     */
+    protected function normalizeInTheBoxItems(mixed $items): ?array
+    {
+        if (is_string($items)) {
+            $items = json_decode($items, true);
+        }
+
+        if (!is_array($items)) {
+            return null;
+        }
+
+        $cleaned = [];
+        foreach ($items as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $title = isset($item['title']) ? trim((string) $item['title']) : '';
+            $desc = isset($item['description']) ? trim((string) $item['description']) : '';
+            if ($title !== '' || $desc !== '') {
+                $cleaned[] = [
+                    'title'       => $title,
+                    'description' => $desc,
+                ];
+            }
+        }
+
+        return !empty($cleaned) ? $cleaned : null;
     }
 
     protected function saveOverview(Product $product, Request $request): void
@@ -801,7 +911,22 @@ class ProductManagementService
 
     protected function saveShowcase(Product $product, Request $request): void
     {
-        if (!$request->has('showcase_title') && !$request->has('showcase_subtitle') && !$request->has('showcase_series_badge') && !$request->has('showcase_airflow') && !$request->has('showcase_feature_pills') && !$request->hasFile('showcase_hero_bg_image_file') && !$request->hasFile('showcase_diagram_image_file')) {
+        $showcaseInputKeys = [
+            'showcase_title', 'showcase_subtitle', 'showcase_modal_subtitle',
+            'showcase_series_badge', 'showcase_badge_residential', 'showcase_badge_fresh_air',
+            'showcase_diagram_brand', 'showcase_diagram_model', 'showcase_diagram_system',
+            'showcase_airflow', 'showcase_power', 'showcase_coverage_area',
+            'showcase_feature_pills', 'showcase_spec_highlights', 'showcase_matched_features',
+            'showcase_health_tags', 'showcase_hero_bg_image', 'showcase_diagram_image'
+        ];
+        $hasShowcaseData = false;
+        foreach ($showcaseInputKeys as $key) {
+            if ($request->has($key)) {
+                $hasShowcaseData = true;
+                break;
+            }
+        }
+        if (!$hasShowcaseData && !$request->hasFile('showcase_hero_bg_image_file') && !$request->hasFile('showcase_diagram_image_file')) {
             return;
         }
 
@@ -820,11 +945,27 @@ class ProductManagementService
         }
 
         $product->showcase()->create($showcaseData);
+        Product::clearProductCache($product);
     }
 
     protected function updateShowcase(Product $product, Request $request, array $deletedFiles): void
     {
-        if (!$request->has('showcase_title') && !$request->has('showcase_subtitle') && !$request->has('showcase_series_badge') && !$request->has('showcase_airflow') && !$request->has('showcase_feature_pills')) {
+        $showcaseInputKeys = [
+            'showcase_title', 'showcase_subtitle', 'showcase_modal_subtitle',
+            'showcase_series_badge', 'showcase_badge_residential', 'showcase_badge_fresh_air',
+            'showcase_diagram_brand', 'showcase_diagram_model', 'showcase_diagram_system',
+            'showcase_airflow', 'showcase_power', 'showcase_coverage_area',
+            'showcase_feature_pills', 'showcase_spec_highlights', 'showcase_matched_features',
+            'showcase_health_tags', 'showcase_hero_bg_image', 'showcase_diagram_image'
+        ];
+        $hasShowcaseData = false;
+        foreach ($showcaseInputKeys as $key) {
+            if ($request->has($key)) {
+                $hasShowcaseData = true;
+                break;
+            }
+        }
+        if (!$hasShowcaseData && !$request->hasFile('showcase_hero_bg_image_file') && !$request->hasFile('showcase_diagram_image_file') && !in_array('showcase_hero_bg_image', $deletedFiles) && !in_array('showcase_diagram_image', $deletedFiles)) {
             return;
         }
 

@@ -245,6 +245,390 @@
 }
 
 /* ==========================================================================
+   Home Category Bento & Solutions Showcase Section (Matching Mockup)
+   ========================================================================== */
+:root {
+    --showcase-gap: 14px;
+}
+
+.home-category-showcase-section {
+    position: relative;
+    width: 100%;
+}
+
+.home-showcase-inner-container {
+    width: 100%;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Action Button (Top & Bottom) */
+.home-showcase-action-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-showcase-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 7px 22px;
+    background: #ffffff;
+    color: #0284c7;
+    border: 1.5px solid #0284c7;
+    border-radius: 4px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: -0.1px;
+    box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-showcase-btn:hover {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.home-showcase-btn__icon {
+    width: 15px;
+    height: 15px;
+    stroke: currentColor;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+}
+
+.home-showcase-btn:hover .home-showcase-btn__icon {
+    transform: rotate(8deg) scale(1.1);
+}
+
+/* --- Master Showcase Layout (Full Width) --- */
+.home-showcase-master-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--showcase-gap, 14px);
+    width: 100%;
+}
+
+/* --- Top Row: 50% / 50% Equal Split --- */
+.home-showcase-top-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--showcase-gap, 14px);
+    height: 480px;
+    width: 100%;
+}
+
+.bento-card {
+    position: relative;
+    display: block;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    background-color: #f1f5f9;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+    text-decoration: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.bento-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+    text-decoration: none;
+}
+
+.bento-card__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.5s ease;
+}
+
+.bento-card:hover .bento-card__bg {
+    transform: scale(1.035);
+}
+
+/* Fresh Air Unit fills the entire left 50% */
+.bento-card--fresh-air {
+    height: 100%;
+}
+
+/* Right 50% Subgrid for Mask, Accessories, and Purifiers */
+.home-showcase-subgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: var(--showcase-gap, 14px);
+    height: 100%;
+    width: 100%;
+}
+
+.bento-card--mask {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+}
+
+.bento-card--accessories {
+    grid-column: 1 / 2;
+    grid-row: 2 / 3;
+}
+
+.bento-card--purifiers {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3;
+}
+
+/* White Pill Badges matching mockup */
+.bento-card__pill {
+    position: absolute;
+    z-index: 2;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    letter-spacing: -0.1px;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.bento-card__pill--center {
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.bento-card:hover .bento-card__pill {
+    background-color: var(--primary-blue, #1d4ed8);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(29, 78, 216, 0.25);
+}
+
+/* --- Bottom Row: 50% / 50% Half-Half Guaranteed Full Width --- */
+.home-showcase-bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--showcase-gap, 14px);
+    width: 100%;
+}
+
+
+.solution-banner-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 380px;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #0f172a;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.solution-banner-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.14);
+    text-decoration: none;
+}
+
+.solution-banner-card__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.5s ease;
+}
+
+.solution-banner-card:hover .solution-banner-card__bg {
+    transform: scale(1.035);
+}
+
+.solution-banner-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.12) 0%, rgba(15, 23, 42, 0.45) 100%);
+    transition: background 0.3s ease;
+}
+
+.solution-banner-card:hover .solution-banner-card__overlay {
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.55) 100%);
+}
+
+.solution-banner-card__content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 24px;
+    max-width: 90%;
+}
+
+.solution-banner-card__title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.solution-banner-card__subtitle {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 0;
+    letter-spacing: -0.1px;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Responsive Media Queries (Mobile, Tablet, Desktop) --- */
+@media (max-width: 991px) and (min-width: 768px) {
+    .home-showcase-top-row {
+        height: 420px;
+    }
+
+    .solution-banner-card {
+        height: 240px;
+    }
+}
+
+@media (max-width: 767px) {
+    .home-showcase-inner-container {
+        width: 100%;
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Top Row Stacking on Mobile/Small Tablet */
+    .home-showcase-top-row {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 10px;
+    }
+
+    .bento-card--fresh-air {
+        height: 240px;
+    }
+
+    /* 3-Item Cluster: 2-column mobile bento */
+    .home-showcase-subgrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 135px 135px;
+        height: 280px;
+        gap: 10px;
+    }
+
+    .bento-card--mask {
+        grid-column: 1 / 2;
+        grid-row: 1 / 2;
+        height: 100%;
+    }
+
+    .bento-card--accessories {
+        grid-column: 1 / 2;
+        grid-row: 2 / 3;
+        height: 100%;
+    }
+
+    .bento-card--purifiers {
+        grid-column: 2 / 3;
+        grid-row: 1 / 3;
+        height: 100%;
+    }
+
+    /* Compact Pill Badges for Small Screens */
+    .bento-card__pill {
+        padding: 4px 10px;
+        font-size: 11px;
+        bottom: 10px;
+        border-radius: 3px;
+    }
+
+    /* Bottom Row: 2 columns on wide mobile/tablet, single column on narrow mobile */
+    .home-showcase-bottom-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .solution-banner-card {
+        height: 210px;
+    }
+
+    .solution-banner-card__content {
+        padding: 14px;
+        max-width: 95%;
+    }
+
+    .solution-banner-card__title {
+        font-size: 20px;
+        margin-bottom: 3px;
+    }
+
+    .solution-banner-card__subtitle {
+        font-size: 12px;
+        line-height: 1.35;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* Narrow Mobile Phones: Stack bottom row for comfortable viewing */
+    .home-showcase-bottom-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .solution-banner-card {
+        height: 185px;
+    }
+
+    .bento-card--fresh-air {
+        height: 210px;
+    }
+
+    .home-showcase-subgrid {
+        grid-template-rows: 120px 120px;
+        height: 250px;
+    }
+
+    .solution-banner-card__title {
+        font-size: 19px;
+    }
+
+    .solution-banner-card__subtitle {
+        font-size: 11.5px;
+    }
+
+    .home-showcase-btn {
+        padding: 6px 16px;
+        font-size: 12.5px;
+    }
+}
+
+/* ==========================================================================
    Home Benefits Section (Matching Home.png Mockup)
    ========================================================================== */
 .home-benefits-section {

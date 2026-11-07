@@ -18,11 +18,28 @@ class FilterOptionController extends Controller
      */
     public function index(Request $request)
     {
-        $query = FilterOption::with('optionValues')->orderBy('sort_order', 'asc')->latest();
+        $query = FilterOption::with('optionValues');
+
+        // Optional view filter: 'catalog', 'guided_finder', or 'all'
+        $view = $request->query('view');
+        if ($view === 'guided_finder') {
+            $query->where('show_in_guided_finder', 1)
+                ->orderBy('guided_step_number', 'asc')
+                ->orderBy('sort_order', 'asc');
+        } elseif ($view === 'catalog') {
+            $query->where('show_in_catalog', 1)
+                ->orderBy('sort_order', 'asc');
+        } else {
+            $query->orderBy('sort_order', 'asc')->latest('id');
+        }
 
         if ($request->filled('search')) {
             $search = $request->input('search');
-            $query->where('name', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('guided_question', 'like', "%{$search}%")
+                    ->orWhere('guided_subtitle', 'like', "%{$search}%");
+            });
         }
 
         $perPage = (int) $request->input('per_page', 10);
@@ -63,24 +80,44 @@ class FilterOptionController extends Controller
             'sort_order'               => 'nullable|integer|min:0',
             'status'                   => 'required|in:0,1,true,false',
             'show_in_filter'           => 'nullable|in:0,1,true,false',
+            'show_in_catalog'          => 'nullable|in:0,1,true,false',
+            'show_in_guided_finder'    => 'nullable|in:0,1,true,false',
+            'guided_step_number'       => 'nullable|integer|min:1|max:20',
+            'guided_question'          => 'nullable|string|max:255',
+            'guided_subtitle'          => 'nullable|string|max:255',
+            'has_unknown_option'       => 'nullable|in:0,1,true,false',
+            'unknown_option_label'     => 'nullable|string|max:100',
             'option_values'            => 'nullable|array',
             'option_values.*.name'       => 'required_with:option_values|string|max:155',
             'option_values.*.icon'       => 'nullable|string|max:255',
+            'option_values.*.explanation'=> 'nullable|string|max:1000',
             'option_values.*.sort_order' => 'nullable|integer|min:0',
         ]);
 
         try {
             DB::beginTransaction();
 
+            $showInFilter = filter_var($validated['show_in_filter'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+            $showInCatalog = isset($validated['show_in_catalog'])
+                ? (filter_var($validated['show_in_catalog'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0)
+                : $showInFilter;
+
             $optionData = [
-                'name'           => $validated['name'],
-                'icon'           => $validated['icon'] ?? null,
-                'type'           => $validated['type'],
-                'sort_order'     => $validated['sort_order'] ?? 0,
-                'status'         => filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
-                'show_in_filter' => filter_var($validated['show_in_filter'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
-                'createdBy'      => Auth::id(),
-                'updatedBy'      => Auth::id(),
+                'name'                  => $validated['name'],
+                'icon'                  => $validated['icon'] ?? null,
+                'type'                  => $validated['type'],
+                'sort_order'            => $validated['sort_order'] ?? 0,
+                'status'                => filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                'show_in_filter'        => $showInCatalog,
+                'show_in_catalog'       => $showInCatalog,
+                'show_in_guided_finder' => filter_var($validated['show_in_guided_finder'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                'guided_step_number'    => $validated['guided_step_number'] ?? null,
+                'guided_question'       => $validated['guided_question'] ?? null,
+                'guided_subtitle'       => $validated['guided_subtitle'] ?? null,
+                'has_unknown_option'    => filter_var($validated['has_unknown_option'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                'unknown_option_label'  => $validated['unknown_option_label'] ?? "I don't know",
+                'createdBy'             => Auth::id(),
+                'updatedBy'             => Auth::id(),
             ];
 
             $option = FilterOption::create($optionData);
@@ -88,12 +125,13 @@ class FilterOptionController extends Controller
             if (!empty($validated['option_values'])) {
                 foreach ($validated['option_values'] as $value) {
                     $option->optionValues()->create([
-                        'name'       => $value['name'],
-                        'icon'       => $value['icon'] ?? null,
-                        'sort_order' => $value['sort_order'] ?? 0,
-                        'status'     => 1, // Default active
-                        'createdBy'  => Auth::id(),
-                        'updatedBy'  => Auth::id(),
+                        'name'        => $value['name'],
+                        'icon'        => $value['icon'] ?? null,
+                        'explanation' => $value['explanation'] ?? null,
+                        'sort_order'  => $value['sort_order'] ?? 0,
+                        'status'      => 1, // Default active
+                        'createdBy'   => Auth::id(),
+                        'updatedBy'   => Auth::id(),
                     ]);
                 }
             }
@@ -124,24 +162,44 @@ class FilterOptionController extends Controller
             'sort_order'               => 'nullable|integer|min:0',
             'status'                   => 'required|in:0,1,true,false',
             'show_in_filter'           => 'nullable|in:0,1,true,false',
+            'show_in_catalog'          => 'nullable|in:0,1,true,false',
+            'show_in_guided_finder'    => 'nullable|in:0,1,true,false',
+            'guided_step_number'       => 'nullable|integer|min:1|max:20',
+            'guided_question'          => 'nullable|string|max:255',
+            'guided_subtitle'          => 'nullable|string|max:255',
+            'has_unknown_option'       => 'nullable|in:0,1,true,false',
+            'unknown_option_label'     => 'nullable|string|max:100',
             'option_values'            => 'nullable|array',
             'option_values.*.id'         => 'nullable|integer',
             'option_values.*.name'       => 'required_with:option_values|string|max:155',
             'option_values.*.icon'       => 'nullable|string|max:255',
+            'option_values.*.explanation'=> 'nullable|string|max:1000',
             'option_values.*.sort_order' => 'nullable|integer|min:0',
         ]);
 
         try {
             DB::beginTransaction();
 
+            $showInFilter = filter_var($validated['show_in_filter'] ?? $option->show_in_filter, FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+            $showInCatalog = isset($validated['show_in_catalog'])
+                ? (filter_var($validated['show_in_catalog'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0)
+                : $showInFilter;
+
             $optionData = [
-                'name'           => $validated['name'],
-                'icon'           => $validated['icon'] ?? null,
-                'type'           => $validated['type'],
-                'sort_order'     => $validated['sort_order'] ?? 0,
-                'status'         => filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
-                'show_in_filter' => filter_var($validated['show_in_filter'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
-                'updatedBy'      => Auth::id(),
+                'name'                  => $validated['name'],
+                'icon'                  => $validated['icon'] ?? null,
+                'type'                  => $validated['type'],
+                'sort_order'            => $validated['sort_order'] ?? 0,
+                'status'                => filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                'show_in_filter'        => $showInCatalog,
+                'show_in_catalog'       => $showInCatalog,
+                'show_in_guided_finder' => filter_var($validated['show_in_guided_finder'] ?? 0, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                'guided_step_number'    => $validated['guided_step_number'] ?? null,
+                'guided_question'       => $validated['guided_question'] ?? null,
+                'guided_subtitle'       => $validated['guided_subtitle'] ?? null,
+                'has_unknown_option'    => filter_var($validated['has_unknown_option'] ?? 1, FILTER_VALIDATE_BOOLEAN) ? 1 : 0,
+                'unknown_option_label'  => $validated['unknown_option_label'] ?? "I don't know",
+                'updatedBy'             => Auth::id(),
             ];
 
             $option->update($optionData);
@@ -154,22 +212,24 @@ class FilterOptionController extends Controller
                         $optionValue = FilterOptionValue::find($value['id']);
                         if ($optionValue) {
                             $optionValue->update([
-                                'name'       => $value['name'],
-                                'icon'       => $value['icon'] ?? null,
-                                'sort_order' => $value['sort_order'] ?? 0,
-                                'updatedBy'  => Auth::id(),
+                                'name'        => $value['name'],
+                                'icon'        => $value['icon'] ?? null,
+                                'explanation' => $value['explanation'] ?? null,
+                                'sort_order'  => $value['sort_order'] ?? 0,
+                                'updatedBy'   => Auth::id(),
                             ]);
                             $existingValueIds[] = $optionValue->id;
                         }
                     } else {
                         // Create new
                         $newOptionValue = $option->optionValues()->create([
-                            'name'       => $value['name'],
-                            'icon'       => $value['icon'] ?? null,
-                            'sort_order' => $value['sort_order'] ?? 0,
-                            'status'     => 1,
-                            'createdBy'  => Auth::id(),
-                            'updatedBy'  => Auth::id(),
+                            'name'        => $value['name'],
+                            'icon'        => $value['icon'] ?? null,
+                            'explanation' => $value['explanation'] ?? null,
+                            'sort_order'  => $value['sort_order'] ?? 0,
+                            'status'      => 1,
+                            'createdBy'   => Auth::id(),
+                            'updatedBy'   => Auth::id(),
                         ]);
                         $existingValueIds[] = $newOptionValue->id;
                     }
@@ -207,18 +267,44 @@ class FilterOptionController extends Controller
     }
 
     /**
-     * Toggle the show_in_filter.
+     * Toggle the show_in_filter / show_in_catalog.
      */
     public function toggleShowInFilter($id)
     {
+        return $this->toggleShowInCatalog($id);
+    }
+
+    /**
+     * Toggle the show_in_catalog.
+     */
+    public function toggleShowInCatalog($id)
+    {
         $option = FilterOption::findOrFail($id);
-        $option->show_in_filter = $option->show_in_filter == 1 ? 0 : 1;
+        $newVal = $option->show_in_catalog == 1 ? 0 : 1;
+        $option->show_in_catalog = $newVal;
+        $option->show_in_filter = $newVal;
         $option->updatedBy = Auth::id();
         $option->save();
 
         return ApiResponse::success([
-            'show_in_filter' => $option->show_in_filter,
-        ], $option->show_in_filter == 1 ? 'Show in filter enabled' : 'Show in filter disabled');
+            'show_in_catalog' => $option->show_in_catalog,
+            'show_in_filter'  => $option->show_in_filter,
+        ], $option->show_in_catalog == 1 ? 'Catalog filter enabled' : 'Catalog filter disabled');
+    }
+
+    /**
+     * Toggle the show_in_guided_finder.
+     */
+    public function toggleShowInGuidedFinder($id)
+    {
+        $option = FilterOption::findOrFail($id);
+        $option->show_in_guided_finder = $option->show_in_guided_finder == 1 ? 0 : 1;
+        $option->updatedBy = Auth::id();
+        $option->save();
+
+        return ApiResponse::success([
+            'show_in_guided_finder' => $option->show_in_guided_finder,
+        ], $option->show_in_guided_finder == 1 ? 'Guided Finder step enabled' : 'Guided Finder step disabled');
     }
 
     /**

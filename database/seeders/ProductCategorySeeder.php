@@ -14,10 +14,10 @@ class ProductCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         DB::table('product_to_categories')->truncate();
         DB::table('product_categories')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         $categories = [
             // 1. PRODUCTS (Parent Category - 6 Subcategories)

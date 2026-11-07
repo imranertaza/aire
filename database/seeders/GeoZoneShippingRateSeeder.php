@@ -17,7 +17,7 @@ class GeoZoneShippingRateSeeder extends Seeder
         $zones = GeoZone::all();
 
         if ($zones->isEmpty()) {
-            $this->command->warn('No GeoZones found. Please seed the GeoZone table first.');
+            $this->command?->warn('No GeoZones found. Please seed the GeoZone table first.');
             return;
         }
 
@@ -43,6 +43,6 @@ class GeoZoneShippingRateSeeder extends Seeder
             }
         }
 
-        $this->command->info('Geo Zone Shipping Rates seeded successfully!');
+        $this->command?->info('Geo Zone Shipping Rates seeded successfully!');
     }
 }

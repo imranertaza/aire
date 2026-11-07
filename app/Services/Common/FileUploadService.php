@@ -166,6 +166,22 @@ class FileUploadService
         $disk = $disk ?? $this->defaultDisk;
 
         try {
+            // Normalize path by stripping leading slashes and any public/storage or storage/ prefix
+            $cleanPath = ltrim($path, '/\\');
+            $cleanPath = preg_replace('#^(public/)?storage/#i', '', $cleanPath);
+
+            // Attempt direct physical deletion if using public disk
+            if ($disk === 'public' || $disk === $this->defaultDisk) {
+                $absoluteStoragePath = storage_path('app/public/' . $cleanPath);
+                if (file_exists($absoluteStoragePath) && is_file($absoluteStoragePath)) {
+                    @unlink($absoluteStoragePath);
+                }
+            }
+
+            if (Storage::disk($disk)->exists($cleanPath)) {
+                return Storage::disk($disk)->delete($cleanPath);
+            }
+
             if (Storage::disk($disk)->exists($path)) {
                 return Storage::disk($disk)->delete($path);
             }

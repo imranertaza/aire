@@ -169,7 +169,7 @@ const f_imageFile = ref(null);    // New featured image
 
 // Reactive form state
 const form = reactive({
-    news_title: '',
+    title: '',
     slug: '',
     short_des: '',
     description: '',

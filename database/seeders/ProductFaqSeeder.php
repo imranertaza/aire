@@ -17,7 +17,7 @@ class ProductFaqSeeder extends Seeder
         $products = Product::all();
 
         if ($products->isEmpty()) {
-            $this->command->info('No products found to seed FAQs for.');
+            $this->command?->info('No products found to seed FAQs for.');
             return;
         }
 
@@ -67,6 +67,6 @@ class ProductFaqSeeder extends Seeder
             ProductFaq::insert($productFaqs);
         }
 
-        $this->command->info("Successfully seeded FAQs for {$products->count()} products.");
+        $this->command?->info("Successfully seeded FAQs for {$products->count()} products.");
     }
 }
