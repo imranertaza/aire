@@ -21,17 +21,129 @@ use Illuminate\Support\Facades\Cache;
 class SectionController extends Controller
 {
     /**
-     * Retrieve a paginated list of all sections.
+     * Retrieve a paginated list of all sections with search and filtering.
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
         $this->ensureDefaultSectionsExist();
 
-        $sections = Section::paginate(15);
+        $query = Section::query();
+
+        // 1. Search filter (by identifier name or JSON content like title)
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('data', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. Type filter: 'block', 'standard'
+        $type = $request->input('type');
+        if ($type === 'block') {
+            $query->where(function ($q) {
+                $q->where('data', 'like', '%"blocks":%')
+                  ->orWhere('name', 'like', 'builder_%')
+                  ->orWhere('name', 'like', 'custom_%');
+            });
+        } elseif ($type === 'standard') {
+            $query->where(function ($q) {
+                $q->where('data', 'not like', '%"blocks":%')
+                  ->where('name', 'not like', 'builder_%')
+                  ->where('name', 'not like', 'custom_%');
+            });
+        }
+
+        // 3. Page / Category Group filter: 'home', 'about', 'custom'
+        $group = $request->input('group');
+        if ($group === 'home') {
+            $query->where(function ($q) {
+                $q->where('name', 'like', 'home_%')
+                  ->orWhereIn('name', ['why_choose_aire', 'trust_badges', 'client_testimonials', 'banner_section', 'benefits', 'lifestyle', 'video']);
+            });
+        } elseif ($group === 'about') {
+            $query->where(function ($q) {
+                $q->where('name', 'like', 'about_%')
+                  ->orWhere('name', 'like', 'history_%');
+            });
+        } elseif ($group === 'custom') {
+            $query->where(function ($q) {
+                $q->where('name', 'like', 'custom_%')
+                  ->orWhere('name', 'like', 'builder_%');
+            });
+        }
+
+        $perPage = (int) $request->input('per_page', 15);
+        if ($perPage <= 0 || $perPage > 100) {
+            $perPage = 15;
+        }
+
+        $sort = $request->input('sort', 'desc');
+        $query->orderBy('id', $sort === 'asc' ? 'asc' : 'desc');
+
+        $sections = $query->paginate($perPage);
 
         return ApiResponse::success($sections, 'Sections retrieved successfully');
+    }
+
+    /**
+     * Create a new custom or builder section.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:191|unique:sections,name',
+            'data' => 'nullable',
+        ]);
+
+        $name = $validated['name'] ?? null;
+        if (empty($name)) {
+            $name = 'custom_section_' . uniqid();
+        }
+
+        $data = $request->input('data');
+        if (is_string($data)) {
+            $decoded = json_decode($data, true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $data = $decoded;
+            }
+        }
+
+        $section = Section::create([
+            'name' => $name,
+            'data' => $data ?? ['blocks' => []],
+            'createdBy' => Auth::id(),
+            'updatedBy' => Auth::id(),
+        ]);
+
+        return ApiResponse::success($section, 'Section created successfully', 201);
+    }
+
+    /**
+     * Upload an image asset for block builder.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,jpg,png,gif,svg,webp|max:10240',
+        ]);
+
+        $file = $request->file('image');
+        $filename = 'block_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('sections/builder', $filename, 'public');
+
+        return ApiResponse::success([
+            'url' => 'storage/' . $path,
+            'filename' => $filename,
+        ], 'Image uploaded successfully');
     }
 
     /**
@@ -228,7 +340,7 @@ class SectionController extends Controller
         $section = Section::findOrFail($id);
 
         $request->validate([
-            'data'  => 'required|json',
+            'data'  => 'required',
             'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,svg,webp|max:10240',
             'video_file' => 'nullable|file|mimes:mp4,webm,ogg,mov|max:102400',
         ]);
@@ -238,10 +350,14 @@ class SectionController extends Controller
                 'image' => 'required|image|mimes:jpeg,jpg,png,gif,svg,webp|max:2048',
             ]);
         }
-        $data = json_decode($request->input('data'), true);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return ApiResponse::error('Invalid JSON format provided.', 422);
+        if (is_array($request->input('data'))) {
+            $data = $request->input('data');
+        } else {
+            $request->validate([
+                'data' => 'required|json',
+            ]);
+            $data = json_decode($request->input('data'), true);
         }
 
         if ($request->hasFile('image')) {

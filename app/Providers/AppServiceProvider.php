@@ -226,6 +226,11 @@ class AppServiceProvider extends ServiceProvider
 
         \Illuminate\Pagination\Paginator::useBootstrapFive();
 
+        // Dynamic Visual Builder Section Blade Directive
+        \Illuminate\Support\Facades\Blade::directive('renderSection', function ($expression) {
+            return "<?php echo                    render_section($expression); ?>";
+        });
+
         Auth::provider('cached', function ($app, array $config) {
             return new \App\Providers\CachedUserProvider($app['hash'], $config['model']);
         });

@@ -487,7 +487,7 @@
                             </li>
                             <li class="nav-item" v-if="authStore.hasPermission('view-sections')">
                                 <router-link :to="{ name: 'Section' }" class="nav-link"
-                                    :class="{ active: ['Section', 'CreateSection', 'UpdateSection', 'ShowSection'].includes($route.name) }">
+                                    :class="{ active: ['Section', 'CreateSection', 'UpdateSection', 'ShowSection', 'CreateSectionBuilder', 'EditSectionBuilder'].includes($route.name) }">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>All Sections</p>
                                 </router-link>
@@ -681,6 +681,8 @@ const openParentMenus = () => {
         'CreateSection': ['frontend'],
         'ShowSection': ['frontend'],
         'UpdateSection': ['frontend'],
+        'CreateSectionBuilder': ['frontend'],
+        'EditSectionBuilder': ['frontend'],
 
         // Users / Roles
         'RolePermission': ['users'],
@@ -706,9 +708,31 @@ const openParentMenus = () => {
     }
 }
 
+/**
+ * Handle auto-collapsing sidebar when on the Section Builder page
+ */
+const handleBuilderSidebarState = (routeName, prevRouteName = null) => {
+    const isBuilder = ['CreateSectionBuilder', 'EditSectionBuilder'].includes(routeName)
+    const wasBuilder = ['CreateSectionBuilder', 'EditSectionBuilder'].includes(prevRouteName)
+
+    if (isBuilder) {
+        document.body.classList.add('sidebar-collapse')
+        document.body.classList.remove('sidebar-open')
+    } else if (wasBuilder) {
+        document.body.classList.remove('sidebar-collapse')
+    }
+}
+
 // Open correct menus on initial load and when route changes
-onMounted(openParentMenus)
-watch(() => route.name, openParentMenus)
+onMounted(() => {
+    openParentMenus()
+    handleBuilderSidebarState(route.name)
+})
+
+watch(() => route.name, (newName, oldName) => {
+    openParentMenus()
+    handleBuilderSidebarState(newName, oldName)
+})
 
 /**
  * Handle admin logout: clear auth data and redirect to login

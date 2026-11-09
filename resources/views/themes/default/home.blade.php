@@ -6,7 +6,8 @@
     <!-- Critical Home Page Above-The-Fold CSS (Instant First Paint with 0 FOUC) -->
 
     <!-- Home Page Stylesheets -->
-    <link rel="stylesheet" href="{{ theme_asset('css/home.css') }}?v={{ file_exists(public_path('themes/default/assets/css/home.css')) ? filemtime(public_path('themes/default/assets/css/home.css')) : time() }}">
+    <link rel="stylesheet"
+        href="{{ theme_asset('css/home.css') }}?v={{ file_exists(public_path('themes/default/assets/css/home.css')) ? filemtime(public_path('themes/default/assets/css/home.css')) : time() }}">
     <link rel="stylesheet" href="{{ theme_asset('css/product-filter.min.css') }}">
 @endpush
 
@@ -94,6 +95,7 @@
                 </div>
             </section>
         </div>
+        @renderSection('custom_section_131027')
         <!-- Section: Category Showcase & Solutions Grid (matching Mockup) -->
         @include('themes.default.partials.home_category_showcase')
         <!-- Section 2: Benefits (Pure Air, Healthy Living) matching Home.png -->

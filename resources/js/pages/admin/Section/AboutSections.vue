@@ -264,8 +264,9 @@
                 </div>
 
                 <router-link
-                  :to="{ name: 'UpdateSection', params: { id: sec.id } }"
-                  class="btn btn-sm btn-outline-primary px-3"
+                  :to="isBlockSection(sec) ? { name: 'EditSectionBuilder', params: { id: sec.id } } : { name: 'UpdateSection', params: { id: sec.id } }"
+                  class="btn btn-sm px-3"
+                  :class="isBlockSection(sec) ? 'btn-primary' : 'btn-outline-primary'"
                 >
                   <i class="fas fa-edit mr-1"></i> Edit Section
                 </router-link>
@@ -325,8 +326,9 @@
                 </td>
                 <td class="text-center">
                   <router-link
-                    :to="{ name: 'UpdateSection', params: { id: sec.id } }"
-                    class="btn btn-xs btn-info text-white"
+                    :to="isBlockSection(sec) ? { name: 'EditSectionBuilder', params: { id: sec.id } } : { name: 'UpdateSection', params: { id: sec.id } }"
+                    class="btn btn-xs text-white"
+                    :class="isBlockSection(sec) ? 'btn-primary' : 'btn-info'"
                   >
                     <i class="fas fa-edit mr-1"></i> Edit
                   </router-link>
@@ -436,6 +438,14 @@ const metaRegistry = {
     icon: 'fas fa-globe',
     description: 'Worldwide distribution hubs, regional headquarters, and 100+ country coverage network.'
   }
+};
+
+const isBlockSection = (sec) => {
+  if (!sec) return false;
+  if (Array.isArray(sec.data?.blocks)) return true;
+  if (sec.data?.is_builder === true) return true;
+  if (typeof sec.name === 'string' && (sec.name.startsWith('custom_') || sec.name.startsWith('builder_'))) return true;
+  return false;
 };
 
 const getMeta = (name) => {

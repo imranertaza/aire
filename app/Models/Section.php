@@ -40,11 +40,14 @@ class Section extends Model
 
         if ($section && !empty($section->name)) {
             Cache::forget("section_{$section->name}");
+            Cache::forget("section_builder_obj_{$section->name}");
             if (str_starts_with($section->name, 'home_')) {
                 $alt = substr($section->name, 5);
                 Cache::forget("section_{$alt}");
+                Cache::forget("section_builder_obj_{$alt}");
             } else {
                 Cache::forget("section_home_{$section->name}");
+                Cache::forget("section_builder_obj_home_{$section->name}");
             }
         }
     }

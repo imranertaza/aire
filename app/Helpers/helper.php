@@ -329,3 +329,35 @@ if (! function_exists('get_section')) {
         return getSection($name, $default);
     }
 }
+
+if (! function_exists('render_section')) {
+    /**
+     * Render a dynamic Gutenberg-style visual builder section by name in storefront.
+     *
+     * @param string $name
+     * @return string
+     */
+    function render_section(string $name): string
+    {
+        try {
+            $section = \Illuminate\Support\Facades\Cache::remember("section_builder_obj_{$name}", 86400, function () use ($name) {
+                return \App\Models\Section::where('name', $name)->first();
+            });
+
+            if (!$section) {
+                return '';
+            }
+
+            $theme = function_exists('active_theme') ? active_theme() : 'default';
+            $viewName = "themes.{$theme}.sections.builder";
+            if (!view()->exists($viewName)) {
+                $viewName = 'themes.default.sections.builder';
+            }
+
+            return view($viewName, ['section' => $section])->render();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to render section {$name}: " . $e->getMessage());
+            return '';
+        }
+    }
+}

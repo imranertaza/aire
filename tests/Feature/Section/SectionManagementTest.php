@@ -328,4 +328,45 @@ class SectionManagementTest extends TestCase
         $section = Section::where('name', 'about_news')->first();
         $this->assertEquals('Updated Press Center', $section->data['title']);
     }
+
+    public function test_admin_can_filter_sections_by_type_and_group(): void
+    {
+        Sanctum::actingAs($this->admin, ['*'], 'user');
+
+        Section::create([
+            'name' => 'home_hero',
+            'data' => ['title' => 'Home Hero Banner'],
+        ]);
+
+        Section::create([
+            'name' => 'about_vision',
+            'data' => ['title' => 'Our Corporate Vision'],
+        ]);
+
+        Section::create([
+            'name' => 'builder_custom_spotlight',
+            'data' => [
+                'title' => 'Spotlight Innovation',
+                'blocks' => [['type' => 'heading', 'settings' => ['text' => 'Hello']]],
+            ],
+        ]);
+
+        // Filter by block type
+        $blockRes = $this->getJson('/api/sections?type=block');
+        $blockRes->assertStatus(200);
+        $names = collect($blockRes->json('data.data'))->pluck('name')->all();
+        $this->assertContains('builder_custom_spotlight', $names);
+
+        // Filter by home group
+        $homeRes = $this->getJson('/api/sections?group=home');
+        $homeRes->assertStatus(200);
+        $homeNames = collect($homeRes->json('data.data'))->pluck('name')->all();
+        $this->assertContains('home_hero', $homeNames);
+
+        // Filter by search
+        $searchRes = $this->getJson('/api/sections?search=Corporate Vision');
+        $searchRes->assertStatus(200);
+        $searchNames = collect($searchRes->json('data.data'))->pluck('name')->all();
+        $this->assertContains('about_vision', $searchNames);
+    }
 }

@@ -1,6 +1,9 @@
 <template>
   <DashboardHeader title="Manage Sections">
-    <div class="d-flex justify-content-end">
+    <div class="d-flex justify-content-end align-items-center">
+      <router-link :to="{ name: 'CreateSectionBuilder' }" class="btn btn-sm btn-primary shadow-sm font-weight-bold mr-2">
+        <i class="fas fa-magic mr-1"></i> Visual Section Builder
+      </router-link>
       <SearchBox @search="onSearch" />
     </div>
   </DashboardHeader>
@@ -9,18 +12,120 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-12">
-          <div class="card card-primary card-outline">
-            <div class="card-header">
-              <h3 class="card-title">
-                <i class="fas fa-th-list mr-1"></i> Sections List
-              </h3>
+          <div class="card card-primary card-outline shadow-sm">
+            <!-- Filter & Navigation Toolbar Header -->
+            <div class="card-header border-bottom bg-white py-3">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <!-- Left: Quick Filter Pills -->
+                <div class="btn-group btn-group-sm p-1 bg-light rounded-pill border">
+                  <button
+                    type="button"
+                    class="btn rounded-pill font-weight-bold px-3 transition-all"
+                    :class="activeQuickFilter === 'all' ? 'btn-primary shadow-sm' : 'btn-light text-secondary border-0'"
+                    @click="setQuickFilter('all')"
+                  >
+                    <i class="fas fa-th-list mr-1"></i> All
+                  </button>
+                  <button
+                    type="button"
+                    class="btn rounded-pill font-weight-bold px-3 transition-all"
+                    :class="activeQuickFilter === 'block' ? 'btn-primary shadow-sm' : 'btn-light text-secondary border-0'"
+                    @click="setQuickFilter('block')"
+                  >
+                    <i class="fas fa-cubes mr-1 text-info"></i> Block Sections
+                  </button>
+                  <button
+                    type="button"
+                    class="btn rounded-pill font-weight-bold px-3 transition-all"
+                    :class="activeQuickFilter === 'home' ? 'btn-primary shadow-sm' : 'btn-light text-secondary border-0'"
+                    @click="setQuickFilter('home')"
+                  >
+                    <i class="fas fa-home mr-1 text-success"></i> Homepage
+                  </button>
+                  <button
+                    type="button"
+                    class="btn rounded-pill font-weight-bold px-3 transition-all"
+                    :class="activeQuickFilter === 'about' ? 'btn-primary shadow-sm' : 'btn-light text-secondary border-0'"
+                    @click="setQuickFilter('about')"
+                  >
+                    <i class="fas fa-info-circle mr-1 text-primary"></i> About Page
+                  </button>
+                  <button
+                    type="button"
+                    class="btn rounded-pill font-weight-bold px-3 transition-all"
+                    :class="activeQuickFilter === 'custom' ? 'btn-primary shadow-sm' : 'btn-light text-secondary border-0'"
+                    @click="setQuickFilter('custom')"
+                  >
+                    <i class="fas fa-star mr-1 text-warning"></i> Custom
+                  </button>
+                </div>
+
+                <!-- Right: Detailed Filter Dropdowns & Reset -->
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                  <!-- Type Filter Dropdown -->
+                  <div class="d-flex align-items-center">
+                    <span class="small text-muted font-weight-bold mr-1 d-none d-lg-inline">Type:</span>
+                    <select v-model="filterType" @change="onDropdownFilterChange" class="custom-select custom-select-sm" style="width: auto;">
+                      <option value="">All Types</option>
+                      <option value="block">Block Sections (Visual Builder)</option>
+                      <option value="standard">Standard Form Sections</option>
+                    </select>
+                  </div>
+
+                  <!-- Page Group Dropdown -->
+                  <div class="d-flex align-items-center">
+                    <span class="small text-muted font-weight-bold mr-1 d-none d-lg-inline">Group:</span>
+                    <select v-model="filterGroup" @change="onDropdownFilterChange" class="custom-select custom-select-sm" style="width: auto;">
+                      <option value="">All Groups</option>
+                      <option value="home">Homepage Sections</option>
+                      <option value="about">About Page Sections</option>
+                      <option value="custom">Custom Sections</option>
+                    </select>
+                  </div>
+
+                  <!-- Sort Order Dropdown -->
+                  <select v-model="sortBy" @change="fetchPage(1)" class="custom-select custom-select-sm" style="width: auto;">
+                    <option value="desc">Newest First</option>
+                    <option value="asc">Oldest First</option>
+                  </select>
+
+                  <!-- Per Page Dropdown -->
+                  <select v-model.number="perPage" @change="fetchPage(1)" class="custom-select custom-select-sm" style="width: auto;">
+                    <option :value="15">15 / page</option>
+                    <option :value="25">25 / page</option>
+                    <option :value="50">50 / page</option>
+                    <option :value="100">100 / page</option>
+                  </select>
+
+                  <!-- Reset Filters Button -->
+                  <button
+                    v-if="hasActiveFilters"
+                    type="button"
+                    class="btn btn-sm btn-outline-danger font-weight-bold"
+                    @click="resetFilters"
+                    title="Clear and reset all filters"
+                  >
+                    <i class="fas fa-undo-alt mr-1"></i> Reset
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div class="card-body p-0">
+            <div class="card-body p-0 position-relative">
+              <!-- Loading overlay -->
+              <div v-if="loading" class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 z-index-10" style="z-index: 10;">
+                <div class="spinner-border text-primary spinner-border-sm mr-2" role="status"></div>
+                <span class="small text-muted font-weight-bold">Filtering sections...</span>
+              </div>
+
               <!-- Empty State -->
-              <div v-if="!sections || sections?.data?.length === 0" class="p-4 text-center text-muted">
-                <i class="fas fa-info-circle fa-2x mb-2 text-info"></i>
-                <p class="mb-0">No sections found.</p>
+              <div v-if="!sections || sections?.data?.length === 0" class="p-5 text-center text-muted">
+                <i class="fas fa-filter fa-2x mb-3 text-secondary opacity-50"></i>
+                <h6 class="font-weight-bold text-dark">No sections match your filter criteria</h6>
+                <p class="small text-muted mb-3">Try choosing a different filter tab, clearing the search keyword, or resetting all filters.</p>
+                <button v-if="hasActiveFilters" type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm font-weight-bold" @click="resetFilters">
+                  <i class="fas fa-sync-alt mr-1"></i> Reset All Filters
+                </button>
               </div>
 
               <!-- Table -->
@@ -46,7 +151,10 @@
                       </td>
                       <td class="align-middle">
                         <span class="font-weight-600">{{ truncateText(section.data?.title || section.name, 45) }}</span>
-                        <span v-if="section.name === 'why_choose_aire'" class="badge badge-info ml-2">Stacked Deck</span>
+                        <span v-if="isBlockSection(section)" class="badge badge-primary ml-2">
+                          <i class="fas fa-cubes mr-1"></i> Block Section
+                        </span>
+                        <span v-else-if="section.name === 'why_choose_aire'" class="badge badge-info ml-2">Stacked Deck</span>
                         <span v-else-if="section.name === 'trust_badges'" class="badge badge-warning ml-2">Grid Layout</span>
                         <span v-else-if="section.name === 'home_benefits' || section.name === 'benefits'" class="badge badge-info ml-2">Benefits Parallax</span>
                         <span v-else-if="section.name === 'home_faq' || section.name === 'faq'" class="badge badge-success ml-2">FAQ Accordion</span>
@@ -68,7 +176,10 @@
                         <span v-else-if="section.name === 'about_global'" class="badge badge-primary ml-2">About Global</span>
                       </td>
                       <td class="align-middle text-center">
-                        <span v-if="section.name === 'why_choose_aire'" class="badge badge-purple">
+                        <span v-if="isBlockSection(section)" class="badge badge-primary">
+                          <i class="fas fa-cubes mr-1"></i> {{ section.data?.blocks?.length || 0 }} Blocks
+                        </span>
+                        <span v-else-if="section.name === 'why_choose_aire'" class="badge badge-purple">
                           <i class="fas fa-layer-group mr-1"></i> {{ section.data?.cards?.length || 4 }} Cards
                         </span>
                         <span v-else-if="section.name === 'trust_badges'" class="badge badge-success">
@@ -125,8 +236,19 @@
                       </td>
                       <td class="align-middle text-center">
                         <div class="d-flex justify-content-center gap-1">
+                          <!-- 1. Block Section: Show ONLY ONE Edit button opening Visual Section Builder -->
                           <router-link
-                            v-if="(authStore.hasPermission('manage-frontend') || authStore.hasPermission('edit-sections') || authStore.hasPermission('view-sections')) && section.name === 'client_testimonials'"
+                            v-if="isBlockSection(section) && (authStore.hasPermission('manage-frontend') || authStore.hasPermission('edit-sections') || authStore.hasPermission('view-sections'))"
+                            :to="{ name: 'EditSectionBuilder', params: { id: section.id } }"
+                            class="btn btn-sm btn-primary"
+                            title="Edit Block Section (Visual Section Builder)"
+                          >
+                            <i class="fas fa-edit"></i>
+                          </router-link>
+
+                          <!-- 2. Testimonials Slider -->
+                          <router-link
+                            v-else-if="section.name === 'client_testimonials' && (authStore.hasPermission('manage-frontend') || authStore.hasPermission('edit-sections') || authStore.hasPermission('view-sections'))"
                             :to="{ name: 'TestimonialsSection' }"
                             class="btn btn-sm btn-primary"
                             title="Manage Testimonials Slider"
@@ -134,22 +256,24 @@
                             <i class="fas fa-quote-left"></i>
                           </router-link>
 
+                          <!-- 3. Banner Section Sliders -->
                           <router-link
-                            v-else-if="(authStore.hasPermission('manage-frontend') || authStore.hasPermission('edit-sections') || authStore.hasPermission('view-sections')) && section.name != 'banner_section'"
-                            :to="{ name: 'UpdateSection', params: { id: section.id } }"
-                            class="btn btn-sm btn-info"
-                            title="Edit Section"
-                          >
-                            <i class="fas fa-edit"></i>
-                          </router-link>
-
-                          <router-link
-                            v-if="(authStore.hasPermission('manage-frontend') || authStore.hasPermission('edit-sections') || authStore.hasPermission('view-sections')) && section.name == 'banner_section'"
+                            v-else-if="section.name === 'banner_section' && (authStore.hasPermission('manage-frontend') || authStore.hasPermission('edit-sections') || authStore.hasPermission('view-sections'))"
                             :to="{ name: 'UpdateSectionSliders', params: { id: section.id } }"
                             class="btn btn-sm btn-info"
                             title="Edit Sliders"
                           >
                             <i class="fas fa-images"></i>
+                          </router-link>
+
+                          <!-- 4. Standard / Legacy Section -->
+                          <router-link
+                            v-else-if="authStore.hasPermission('manage-frontend') || authStore.hasPermission('edit-sections') || authStore.hasPermission('view-sections')"
+                            :to="{ name: 'UpdateSection', params: { id: section.id } }"
+                            class="btn btn-sm btn-info"
+                            title="Edit Section"
+                          >
+                            <i class="fas fa-edit"></i>
                           </router-link>
                         </div>
                       </td>
@@ -188,7 +312,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
 
@@ -207,20 +331,79 @@ const toast = useToast();
 // Reactive state
 const sections = ref([]);
 const previewUrl = ref(null);
+const loading = ref(false);
 
-// Fetch all sections from API
-const fetchPage = async (page = 1, term = '') => {
+// Filter states
+const filterType = ref(''); // '', 'block', 'standard'
+const filterGroup = ref(''); // '', 'home', 'about', 'custom'
+const searchTerm = ref('');
+const perPage = ref(15);
+const sortBy = ref('desc'); // 'desc', 'asc'
+const activeQuickFilter = ref('all'); // 'all', 'block', 'home', 'about', 'custom'
+
+const hasActiveFilters = computed(() => {
+  return !!(filterType.value || filterGroup.value || searchTerm.value || activeQuickFilter.value !== 'all');
+});
+
+// Fetch all sections from API with full filter parameters
+const fetchPage = async (page = 1, term = null) => {
+  if (term !== null) {
+    searchTerm.value = term;
+  }
+  loading.value = true;
   try {
     const res = await axios.get('/api/sections', {
       params: {
         page,
-        search: term,
+        search: searchTerm.value,
+        type: filterType.value,
+        group: filterGroup.value,
+        per_page: perPage.value,
+        sort: sortBy.value,
       },
     });
     sections.value = res.data.data;
   } catch (err) {
     toast.error('Failed to load sections');
+  } finally {
+    loading.value = false;
   }
+};
+
+const setQuickFilter = (tab) => {
+  activeQuickFilter.value = tab;
+  if (tab === 'all') {
+    filterType.value = '';
+    filterGroup.value = '';
+  } else if (tab === 'block') {
+    filterType.value = 'block';
+    filterGroup.value = '';
+  } else if (tab === 'home') {
+    filterType.value = '';
+    filterGroup.value = 'home';
+  } else if (tab === 'about') {
+    filterType.value = '';
+    filterGroup.value = 'about';
+  } else if (tab === 'custom') {
+    filterType.value = '';
+    filterGroup.value = 'custom';
+  }
+  fetchPage(1);
+};
+
+const onDropdownFilterChange = () => {
+  activeQuickFilter.value = '';
+  fetchPage(1);
+};
+
+const resetFilters = () => {
+  filterType.value = '';
+  filterGroup.value = '';
+  searchTerm.value = '';
+  activeQuickFilter.value = 'all';
+  sortBy.value = 'desc';
+  perPage.value = 15;
+  fetchPage(1);
 };
 
 // Search handling
@@ -231,6 +414,15 @@ const onSearch = (term) => {
 // Preview image in modal
 const previewImage = (url) => {
   previewUrl.value = url;
+};
+
+// Check if section is built with the visual block builder
+const isBlockSection = (section) => {
+  if (!section) return false;
+  if (Array.isArray(section.data?.blocks)) return true;
+  if (section.data?.is_builder === true) return true;
+  if (typeof section.name === 'string' && (section.name.startsWith('custom_') || section.name.startsWith('builder_'))) return true;
+  return false;
 };
 
 onMounted(() => {
@@ -249,5 +441,15 @@ onMounted(() => {
 }
 .font-weight-600 {
   font-weight: 600;
+}
+.gap-2 {
+  gap: 0.5rem !important;
+}
+.transition-all {
+  transition: all 0.2s ease-in-out;
+}
+.btn-white {
+  background-color: #fff !important;
+  border-color: #dee2e6 !important;
 }
 </style>

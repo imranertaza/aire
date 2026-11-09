@@ -579,6 +579,23 @@ const routes = [{
                 },
             },
             {
+                path: "section-builder/create",
+                name: "CreateSectionBuilder",
+                component: () => import('@/pages/admin/Section/SectionBuilder.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "section-builder/:id",
+                name: "EditSectionBuilder",
+                component: () => import('@/pages/admin/Section/SectionBuilder.vue'),
+                props: true,
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
                 path: "edit-sections/:id",
                 name: "UpdateSection",
                 component: () => import('@/pages/admin/Section/UpdateSection.vue'),

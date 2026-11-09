@@ -116,6 +116,8 @@ Route::middleware('auth:user')->prefix('pages')->controller(PageController::clas
 /* Frontend Sections & Sliders */
 Route::prefix('sections')->middleware(['auth:user', 'permission:manage-frontend'])->controller(SectionController::class)->group(function () {
     Route::get('/', 'index');
+    Route::post('/', 'store')->name('sections.store');
+    Route::post('upload-image', 'uploadImage')->name('sections.upload-image');
     Route::get('home-sections', 'homeSections')->name('sections.home-sections');
     Route::get('about-sections', 'aboutSections')->name('sections.about-sections');
     Route::get('by-name/{name}', 'getByName')->name('sections.by-name');
