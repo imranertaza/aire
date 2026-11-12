@@ -37,6 +37,7 @@ class UpdateProductRequest extends FormRequest
             'showcase_matched_features',
             'showcase_health_tags',
             'landing_specs_groups',
+            'block_sections',
         ];
 
         foreach ($jsonFields as $field) {
@@ -185,6 +186,9 @@ class UpdateProductRequest extends FormRequest
             'applications.*.description' => 'nullable|string',
             'applications.*.badge'  => 'nullable|string|max:100',
             'applications.*.sort_order'  => 'nullable|integer|min:0',
+
+            // Block Sections
+            'block_sections'        => 'nullable',
         ];
     }
 }

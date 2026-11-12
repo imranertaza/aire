@@ -58,6 +58,9 @@
         <div class="row g-4 g-xl-5">
             <!-- Main Article Content Column -->
             <article class="col-lg-8">
+                {{-- Layout Pipeline Slot: Before Article Header --}}
+                @renderPageSlot('news_detail', 'before:article_header')
+
                 <!-- Article Header -->
                 <header class="news-article-header">
                     <div class="news-header-badge-row">
@@ -124,6 +127,9 @@
                     </div>
                 </header>
 
+                {{-- Layout Pipeline Slot: After Article Header / Meta Bar --}}
+                @renderPageSlot('news_detail', 'after:article_header')
+
                 <!-- Featured Banner Image -->
                 @if (!empty($news->f_image) || !empty($news->image))
                     <div class="news-featured-banner">
@@ -145,6 +151,9 @@
                         <p>{{ $news->short_des }}</p>
                     @endif
                 </div>
+
+                {{-- Layout Pipeline Slot: After Article Body (Ideal for Related Product Cards / Newsletter) --}}
+                @renderPageSlot('news_detail', 'after:article_body')
 
                 <!-- Tags & Footer Actions -->
                 <div class="news-footer-tags-wrap">
@@ -168,6 +177,9 @@
                         </a>
                     </div>
                 </div>
+
+                {{-- Layout Pipeline Slot: After Article Tags & Footer Navigation --}}
+                @renderPageSlot('news_detail', 'after:article_footer')
             </article>
 
             <!-- Right Sticky Sidebar -->
@@ -324,6 +336,9 @@
                 </div>
             </section>
         @endif
+
+        {{-- Layout Pipeline Slot: Bottom of Article Page --}}
+        @renderPageSlot('news_detail', 'after:related_stories')
     </main>
 @endsection
 

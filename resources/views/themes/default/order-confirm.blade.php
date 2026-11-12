@@ -7,6 +7,7 @@
 @section('content')
     <!-- Main Content: 3-Column Layout -->
     <main class="">
+        @renderPageSlot('order_confirm', 'before:order_confirmation')
         <div class="container main-container border-top border-light">
             <div class="row g-0">
 
@@ -103,6 +104,7 @@
                             <p class="confirm-delivery-text">You will receive a tracking link via email as soon as your
                                 order ships.</p>
                         </div>
+                        @renderPageSlot('order_confirm', 'after:order_summary')
                     </div>
 
                 </div>
@@ -127,6 +129,7 @@
                             AIRE-{{ $order ? $order->created_at->format('Y') : '2026' }}-{{ $order ? $order->invoice_no : '1234' }}
                         </div>
                     </div>
+                    @renderPageSlot('order_confirm', 'after:hero_card')
 
                     <!-- What Happens Next Timeline -->
                     <div class="confirm-card-box">
@@ -181,6 +184,7 @@
                             </div>
                         </div>
                     </div>
+                    @renderPageSlot('order_confirm', 'after:timeline')
 
                     <!-- Order Details Box -->
                     <div class="confirm-card-box">
@@ -228,6 +232,7 @@
                         <div class="confirm-address-divider"></div>
                         <div class="confirm-address-phone">{{ $order ? $order->shipping_phone : '(555) 0123-4567' }}</div>
                     </div>
+                    @renderPageSlot('order_confirm', 'after:order_details')
 
                     <!-- Questions About Your Order Box -->
                     <div class="confirm-questions-card">
@@ -245,10 +250,12 @@
                             </a>
                         </div>
                     </div>
+                    @renderPageSlot('order_confirm', 'after:support_card')
 
                 </div>
 
             </div>
         </div>
+        @renderPageSlot('order_confirm', 'after:order_confirmation')
     </main>
 @endsection

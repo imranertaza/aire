@@ -553,4 +553,118 @@ class SectionController extends Controller
 
         return ApiResponse::success($section, 'Section key updated successfully');
     }
+
+    /**
+     * Get available visual block builder sections for selection in page layouts.
+     */
+    public function availableBlocks(Request $request)
+    {
+        $sections = Section::query()
+            ->where(function ($q) {
+                $q->where('data', 'like', '%"blocks":%')
+                  ->orWhere('name', 'like', 'builder_%')
+                  ->orWhere('name', 'like', 'custom_%');
+            })
+            ->where('name', 'not like', '%_layout')
+            ->latest('id')
+            ->get();
+
+        $formatted = $sections->map(function ($s) {
+            $blocks = $s->data['blocks'] ?? [];
+            return [
+                'id' => $s->id,
+                'name' => $s->name,
+                'title' => $s->data['title'] ?? $s->name,
+                'category' => $s->data['category'] ?? 'Custom',
+                'block_count' => is_array($blocks) ? count($blocks) : 0,
+                'updated_at' => $s->updated_at ? $s->updated_at->diffForHumans() : null,
+            ];
+        });
+
+        return ApiResponse::success($formatted, 'Available block sections retrieved successfully');
+    }
+
+    /**
+     * Get the dynamic layout sequence and slot injections for a given page.
+     *
+     * @param string $page ('home', 'about', 'resources')
+     */
+    public function getPageLayout(string $page)
+    {
+        $validPages = ['home', 'about', 'resources', 'product', 'contact', 'category', 'news', 'news_detail', 'order_confirm', 'cart', 'not_found', 'favorite', 'compare'];
+        if (!in_array($page, $validPages)) {
+            return ApiResponse::error('Invalid page identifier', 400);
+        }
+
+        $layoutSection = Section::where('name', "{$page}_layout")->first();
+        $slots = $layoutSection?->data['slots'] ?? null;
+
+        // Default initial fallback for home if not yet saved
+        if ($slots === null && $page === 'home') {
+            $customExists = Section::where('name', 'custom_section_131027')->exists();
+            $slots = [
+                'before:slider_section' => [],
+                'after:slider_section' => $customExists ? [
+                    ['key' => 'custom_section_131027', 'name' => 'Visual Hero Extension (131027)', 'enabled' => true]
+                ] : [],
+                'after:home_category_grid' => [],
+                'after:home_benefits' => [],
+                'after:home_best_selling' => [],
+                'after:home_lifestyle' => [],
+                'after:home_new_arrival' => [],
+                'after:why_choose_aire' => [],
+                'after:home_customer_favorites' => [],
+                'after:home_video' => [],
+                'after:home_living_hero' => [],
+                'after:home_faq' => [],
+            ];
+        } elseif ($slots === null) {
+            $slots = [];
+        }
+
+        return ApiResponse::success([
+            'page' => $page,
+            'slots' => $slots,
+            'updated_at' => $layoutSection?->updated_at ? $layoutSection->updated_at->toIso8601String() : null,
+        ], 'Page layout retrieved successfully');
+    }
+
+    /**
+     * Save the dynamic layout slots for a given page and bust cache immediately.
+     *
+     * @param Request $request
+     * @param string $page ('home', 'about', 'resources')
+     */
+    public function savePageLayout(Request $request, string $page)
+    {
+        $validPages = ['home', 'about', 'resources', 'product', 'contact', 'category', 'news', 'news_detail', 'order_confirm', 'cart', 'not_found', 'favorite', 'compare'];
+        if (!in_array($page, $validPages)) {
+            return ApiResponse::error('Invalid page identifier', 400);
+        }
+
+        $validated = $request->validate([
+            'slots' => 'required|array',
+        ]);
+
+        $section = Section::updateOrCreate(
+            ['name' => "{$page}_layout"],
+            [
+                'page_name' => $page,
+                'data' => [
+                    'page' => $page,
+                    'slots' => $validated['slots'],
+                    'updated_at' => now()->toIso8601String(),
+                ],
+                'updatedBy' => Auth::id() ?? 1,
+            ]
+        );
+
+        Cache::forget("page_layout_{$page}_v1");
+        Section::clearSectionCache($section);
+
+        return ApiResponse::success([
+            'page' => $page,
+            'slots' => $section->data['slots'] ?? [],
+        ], 'Page layout updated and cached successfully');
+    }
 }

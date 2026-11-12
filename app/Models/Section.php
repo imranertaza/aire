@@ -36,6 +36,19 @@ class Section extends Model
         Cache::forget('all_sections');
         Cache::forget('default_home_sections_ensured_v1');
         Cache::forget('storefront_about_sections_v1');
+        Cache::forget('page_layout_home_v1');
+        Cache::forget('page_layout_about_v1');
+        Cache::forget('page_layout_resources_v1');
+        Cache::forget('page_layout_product_v1');
+        Cache::forget('page_layout_contact_v1');
+        Cache::forget('page_layout_category_v1');
+        Cache::forget('page_layout_news_v1');
+        Cache::forget('page_layout_news_detail_v1');
+        Cache::forget('page_layout_order_confirm_v1');
+        Cache::forget('page_layout_cart_v1');
+        Cache::forget('page_layout_not_found_v1');
+        Cache::forget('page_layout_favorite_v1');
+        Cache::forget('page_layout_compare_v1');
         Product::clearProductCache();
 
         if ($section && !empty($section->name)) {

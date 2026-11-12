@@ -119,6 +119,7 @@ import draggable from 'vuedraggable';
 import HeadingBlock from './HeadingBlock.vue';
 import ParagraphBlock from './ParagraphBlock.vue';
 import ImageBlock from './ImageBlock.vue';
+import VideoBlock from './VideoBlock.vue';
 import CardBlock from './CardBlock.vue';
 import ButtonBlock from './ButtonBlock.vue';
 import SpacerBlock from './SpacerBlock.vue';
@@ -218,6 +219,7 @@ function resolveSubComponent(type) {
     case 'heading': return HeadingBlock;
     case 'paragraph': return ParagraphBlock;
     case 'image': return ImageBlock;
+    case 'video': return VideoBlock;
     case 'card': return CardBlock;
     case 'button': return ButtonBlock;
     case 'spacer': return SpacerBlock;

@@ -133,6 +133,10 @@
     @php
         $isProducts = request()->route('slug') === 'products';
     @endphp
+
+    {{-- Layout Pipeline Slot: Before Catalog Content (Top Promo Banner / Seasonal Showcase) --}}
+    @renderPageSlot('category', 'before:catalog_content')
+
     <main class="container main-container">
         <h1 class="d-none">Your Main Page Title</h1>
         <div class="row g-0">
@@ -271,6 +275,9 @@
                     </div>
                 </div>
 
+                {{-- Layout Pipeline Slot: After Catalog Header / Breadcrumbs --}}
+                @renderPageSlot('category', 'after:catalog_header')
+
                 <!-- Dynamic Category Showcase Sections (Loop through categories and their products) -->
                 @foreach ($displayCategories as $cat)
                     <div id="cat-{{ $cat->id }}" class="category-showcase-section content-section mt-0 pt-0 mb-4">
@@ -318,6 +325,9 @@
                         </div>
                     </div>
                 @endforeach
+
+                {{-- Layout Pipeline Slot: After Product Showcase Grid --}}
+                @renderPageSlot('category', 'after:product_grid')
             </section>
 
             @if ($adSliders->count() > 0)
@@ -330,4 +340,7 @@
             @endif
         </div>
     </main>
+
+    {{-- Layout Pipeline Slot: Bottom of Catalog Page --}}
+    @renderPageSlot('category', 'after:catalog_content')
 @endsection

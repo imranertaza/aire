@@ -100,6 +100,12 @@
                                     <i class="fas fa-layer-group text-success mr-1"></i> Showcase Card
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="tab-block-sections" data-toggle="pill" href="#custom-tabs-block-sections"
+                                    role="tab" aria-controls="custom-tabs-block-sections" aria-selected="false">
+                                    <i class="fas fa-cubes text-info mr-1"></i> Block Sections
+                                </a>
+                            </li>
                         </ul>
                     </div>
 
@@ -2596,6 +2602,128 @@
                                     </div>
                                 </div>
 
+                                <!-- Block Sections Tab -->
+                                <div class="tab-pane fade" id="custom-tabs-block-sections" role="tabpanel" aria-labelledby="tab-block-sections">
+                                    <div class="card card-outline card-info mb-4">
+                                        <div class="card-header bg-light d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                            <div>
+                                                <h5 class="card-title font-weight-bold mb-0">
+                                                    <i class="fas fa-cubes text-info mr-2"></i> Product-Specific Dynamic Block Sections
+                                                </h5>
+                                                <small class="text-muted d-block mt-1">
+                                                    Assign, reorder, and position Visual Block Sections specifically for this product's detail page (PDP).
+                                                </small>
+                                            </div>
+                                            <div>
+                                                <router-link :to="{ name: 'CreateSectionBuilder' }" target="_blank" class="btn btn-outline-primary btn-sm font-weight-bold">
+                                                    <i class="fas fa-plus mr-1"></i> Create New Block Section
+                                                </router-link>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Add Section Bar -->
+                                            <div class="row align-items-end mb-4 bg-light p-3 rounded border">
+                                                <div class="col-md-5 form-group mb-md-0">
+                                                    <label class="font-weight-bold text-dark font-13">Select Visual Block Section</label>
+                                                    <select v-model="selectedNewBlock" class="form-control form-control-sm">
+                                                        <option :value="null">-- Choose a Block Section --</option>
+                                                        <option v-for="b in availableBlocksList" :key="b.name" :value="b">
+                                                            {{ b.title || b.name }} ({{ b.block_count }} blocks)
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-5 form-group mb-md-0">
+                                                    <label class="font-weight-bold text-dark font-13">Target Slot / Position</label>
+                                                    <select v-model="selectedNewSlot" class="form-control form-control-sm">
+                                                        <option v-for="slot in pdpSlotOptions" :key="slot.value" :value="slot.value">
+                                                            {{ slot.label }}
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2 form-group mb-0">
+                                                    <button type="button" class="btn btn-primary btn-sm btn-block font-weight-bold"
+                                                        :disabled="!selectedNewBlock" @click="addBlockSection">
+                                                        <i class="fas fa-plus mr-1"></i> Add Section
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <!-- List of Assigned Sections -->
+                                            <div v-if="form.block_sections && form.block_sections.length > 0" class="table-responsive">
+                                                <table class="table table-bordered table-hover align-middle mb-0">
+                                                    <thead class="thead-light">
+                                                        <tr>
+                                                            <th style="width: 50px;" class="text-center">#</th>
+                                                            <th>Section Name</th>
+                                                            <th>Slot Location</th>
+                                                            <th style="width: 140px;" class="text-center">Status</th>
+                                                            <th style="width: 110px;" class="text-center">Sort Order</th>
+                                                            <th style="width: 80px;" class="text-center">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr v-for="(sec, idx) in form.block_sections" :key="idx">
+                                                            <td class="text-center font-weight-bold text-muted">{{ idx + 1 }}</td>
+                                                            <td>
+                                                                <div class="d-flex align-items-center">
+                                                                    <span class="badge badge-info px-2 py-1 mr-2 text-uppercase font-11">
+                                                                        <i class="fas fa-layer-group mr-1"></i> Block
+                                                                    </span>
+                                                                    <div>
+                                                                        <div class="font-weight-bold text-dark">{{ sec.title || sec.section_name }}</div>
+                                                                        <code class="small text-muted">{{ sec.section_name }}</code>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <select v-model="sec.slot_key" class="form-control form-control-sm" style="max-width: 320px;">
+                                                                    <option v-for="slot in pdpSlotOptions" :key="slot.value" :value="slot.value">
+                                                                        {{ slot.label }}
+                                                                    </option>
+                                                                </select>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <div class="custom-control custom-switch d-inline-block">
+                                                                    <input type="checkbox" class="custom-control-input" :id="`blockSecStatus_${idx}`" v-model="sec.is_enabled">
+                                                                    <label class="custom-control-label" :for="`blockSecStatus_${idx}`">
+                                                                        <span :class="sec.is_enabled ? 'text-success font-weight-bold' : 'text-muted'">
+                                                                            {{ sec.is_enabled ? 'Active' : 'Disabled' }}
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <div class="btn-group btn-group-sm">
+                                                                    <button type="button" class="btn btn-outline-secondary" :disabled="idx === 0" @click="moveBlockSection(idx, -1)" title="Move Up">
+                                                                        <i class="fas fa-arrow-up"></i>
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-outline-secondary" :disabled="idx === form.block_sections.length - 1" @click="moveBlockSection(idx, 1)" title="Move Down">
+                                                                        <i class="fas fa-arrow-down"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <button type="button" class="btn btn-sm btn-outline-danger" @click="removeBlockSection(idx)" title="Remove Section">
+                                                                    <i class="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <!-- Empty State -->
+                                            <div v-else class="text-center py-5 bg-light rounded border">
+                                                <i class="fas fa-cubes fa-3x text-muted opacity-50 mb-3"></i>
+                                                <h6 class="font-weight-bold text-secondary">No custom block sections assigned to this product</h6>
+                                                <p class="small text-muted mb-0">
+                                                    Select a section and target slot above to display dynamic visual blocks on this product's page.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </form>
                     </div>
@@ -2682,6 +2810,68 @@ const getGuidedStepNum = (fOpt) => {
     return opt ? opt.guided_step_number : null;
 };
 
+// PDP Slot Positions for Dynamic Block Sections
+const pdpSlotOptions = [
+    { value: 'before:product_top', label: '1. Top of Page (Above Main Product / Gallery)' },
+    { value: 'after:product_top', label: '2. Below Main Product / Buy Box' },
+    { value: 'after:overview', label: '3. Below Product Overview' },
+    { value: 'after:specs', label: '4. Below Technical Specifications' },
+    { value: 'after:features', label: '5. Below Feature Grid & Capabilities' },
+    { value: 'after:tech', label: '6. Below Engineering & Technology' },
+    { value: 'after:in_the_box', label: '7. Below In The Box (Unboxing)' },
+    { value: 'after:applications', label: '8. Below Applications & Environments' },
+    { value: 'after:related_products', label: '9. Below Related Products' },
+    { value: 'after:faq', label: '10. Bottom of Page (Below FAQs)' },
+];
+
+const availableBlocksList = ref([]);
+const selectedNewBlock = ref(null);
+const selectedNewSlot = ref('after:overview');
+
+const fetchAvailableBlocksList = async () => {
+    try {
+        const res = await axios.get('/api/sections/available-blocks');
+        availableBlocksList.value = res.data?.data || [];
+    } catch (e) {
+        console.error('Failed to load available visual block sections:', e);
+    }
+};
+
+const addBlockSection = () => {
+    if (!selectedNewBlock.value) return;
+    if (!Array.isArray(form.value.block_sections)) {
+        form.value.block_sections = [];
+    }
+    const block = selectedNewBlock.value;
+    form.value.block_sections.push({
+        section_name: block.name,
+        title: block.title || block.name,
+        slot_key: selectedNewSlot.value || 'after:overview',
+        sort_order: form.value.block_sections.length,
+        is_enabled: true,
+    });
+    selectedNewBlock.value = null;
+    toast.success(`"${block.title || block.name}" added. Click "Update Product" to save changes.`);
+};
+
+const removeBlockSection = (idx) => {
+    if (form.value.block_sections) {
+        form.value.block_sections.splice(idx, 1);
+        form.value.block_sections.forEach((item, i) => item.sort_order = i);
+    }
+};
+
+const moveBlockSection = (idx, dir) => {
+    const list = form.value.block_sections;
+    if (!list) return;
+    const target = idx + dir;
+    if (target < 0 || target >= list.length) return;
+    const temp = list[idx];
+    list[idx] = list[target];
+    list[target] = temp;
+    list.forEach((item, i) => item.sort_order = i);
+};
+
 const form = ref({
     name: '',
     slug: '',
@@ -2703,6 +2893,7 @@ const form = ref({
     attributes: [],
     faqs: [],
     applications: [],
+    block_sections: [],
 
     specs_badge: '',
     specs_title: '',
@@ -3646,6 +3837,23 @@ onMounted(async () => {
             ];
         }
 
+        // Product Block Sections Data
+        if (p.block_sections && Array.isArray(p.block_sections)) {
+            form.value.block_sections = p.block_sections.map((bs, idx) => ({
+                id: bs.id,
+                section_name: bs.section_name,
+                title: bs.section ? (bs.section.data?.header_title || bs.section.data?.title || bs.section_name) : bs.section_name,
+                slot_key: bs.slot_key || 'after:overview',
+                sort_order: bs.sort_order !== undefined ? bs.sort_order : idx,
+                is_enabled: bs.is_enabled !== undefined ? Boolean(bs.is_enabled) : true,
+            }));
+        } else {
+            form.value.block_sections = [];
+        }
+
+        // Fetch available visual block sections for dropdown
+        fetchAvailableBlocksList();
+
     } catch (error) {
         toast.error("Failed to load product details.");
         console.error(error);
@@ -4031,7 +4239,7 @@ const submitForm = async () => {
     Object.keys(form.value).forEach(key => {
         if (key.startsWith('landing_') || key.startsWith('showcase_')) {
             // Handled separately below
-        } else if (['options', 'filter_options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids', 'in_the_box_items'].includes(key)) {
+        } else if (['options', 'filter_options', 'attributes', 'category_ids', 'related_ids', 'bought_together_ids', 'in_the_box_items', 'block_sections'].includes(key)) {
             formData.append(key, JSON.stringify(form.value[key]));
         } else if (['faqs', 'applications'].includes(key)) {
             // Handled separately below

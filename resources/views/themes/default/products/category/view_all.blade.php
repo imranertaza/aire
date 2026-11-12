@@ -254,6 +254,9 @@
         }
     @endphp
 
+    {{-- Layout Pipeline Slot: Before Catalog Content (Top Promo Banner / Seasonal Showcase) --}}
+    @renderPageSlot('category', 'before:catalog_content')
+
     <main class="container main-container">
         <h1 class="d-none">{{ $currentCategory->category_name }} - All Solutions</h1>
 
@@ -412,6 +415,9 @@
                     @endif
                 </div>
 
+                {{-- Layout Pipeline Slot: After Category Info Header --}}
+                @renderPageSlot('category', 'after:catalog_header')
+
                 <!-- Products Showcase Grid: Option B (ductless_feature_card) -->
                 <div class="row g-4 mb-4">
                     @forelse ($products as $product)
@@ -455,6 +461,9 @@
                     </div>
                 @endif
 
+                {{-- Layout Pipeline Slot: After Product Showcase Grid & Pagination --}}
+                @renderPageSlot('category', 'after:product_grid')
+
             </section>
 
             @if ($adSliders && $adSliders->count() > 0)
@@ -465,4 +474,7 @@
             @endif
         </div>
     </main>
+
+    {{-- Layout Pipeline Slot: Bottom of Catalog Page --}}
+    @renderPageSlot('category', 'after:catalog_content')
 @endsection

@@ -1194,40 +1194,40 @@ $(document).ready(function () {
         });
 
         if (!rowsHtml) return '';
-
-        return `
-            <div class="why-matched-matrix-card mb-4 p-4 bg-white border border-light-subtle rounded-4 shadow-sm">
-                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="bg-success-subtle text-success p-2 rounded-circle" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-check2-circle fs-5"></i>
-                        </div>
-                        <div>
-                            <h4 class="fs-16 fw-bold text-dark mb-0">10. Why This System Matched Your Requirements</h4>
-                            <p class="fs-12 text-muted mb-0">Dynamic requirement-to-specification validation matrix</p>
-                        </div>
-                    </div>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fs-12 fw-bold">
-                        <i class="bi bi-shield-fill-check me-1"></i> 100% Certified Solution
-                    </span>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover table-sm align-middle mb-0">
-                        <thead class="table-light">
-                            <tr class="fs-11 text-uppercase text-muted">
-                                <th style="width: 25%;">Question / Criterion</th>
-                                <th style="width: 30%;">Your Need</th>
-                                <th style="width: 33%;">System Specification</th>
-                                <th style="width: 12%;" class="text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rowsHtml}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
+        return '';
+        // return `
+        //     <div class="why-matched-matrix-card mb-4 p-4 bg-white border border-light-subtle rounded-4 shadow-sm">
+        //         <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom flex-wrap gap-2">
+        //             <div class="d-flex align-items-center gap-2">
+        //                 <div class="bg-success-subtle text-success p-2 rounded-circle" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+        //                     <i class="bi bi-check2-circle fs-5"></i>
+        //                 </div>
+        //                 <div>
+        //                     <h4 class="fs-16 fw-bold text-dark mb-0">10. Why This System Matched Your Requirements</h4>
+        //                     <p class="fs-12 text-muted mb-0">Dynamic requirement-to-specification validation matrix</p>
+        //                 </div>
+        //             </div>
+        //             <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fs-12 fw-bold">
+        //                 <i class="bi bi-shield-fill-check me-1"></i> 100% Certified Solution
+        //             </span>
+        //         </div>
+        //         <div class="table-responsive">
+        //             <table class="table table-hover table-sm align-middle mb-0">
+        //                 <thead class="table-light">
+        //                     <tr class="fs-11 text-uppercase text-muted">
+        //                         <th style="width: 25%;">Question / Criterion</th>
+        //                         <th style="width: 30%;">Your Need</th>
+        //                         <th style="width: 33%;">System Specification</th>
+        //                         <th style="width: 12%;" class="text-center">Status</th>
+        //                     </tr>
+        //                 </thead>
+        //                 <tbody>
+        //                     ${rowsHtml}
+        //                 </tbody>
+        //             </table>
+        //         </div>
+        //     </div>
+        // `;
     }
 
     // Render Matched Products List (products[0] as #1 Best Match + products[1..n] in grid below)

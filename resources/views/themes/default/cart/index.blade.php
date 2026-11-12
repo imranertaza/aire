@@ -8,6 +8,7 @@
     <!-- Main Content -->
     <main class="">
         <h1 class="d-none">Shopping Cart</h1>
+        @renderPageSlot('cart', 'before:cart_content')
         <div class="container main-container border-top border-light">
             <div class="row g-0">
                 <div class="col-lg-3 border-right1px pt-4 pe-lg-4">
@@ -126,6 +127,7 @@
                             Guaranteed
                         </div>
                     </div>
+                    @renderPageSlot('cart', 'after:order_summary')
                 </div>
                 <!-- MAIN COLUMN: Breadcrumb, Basket, Saved for Later, Trust Features (col-lg-8) -->
                 <div class="col-lg-9 pt-3 px-lg-4 center-feed">
@@ -237,6 +239,7 @@
                             <i class="bi bi-arrow-left"></i> Continue Shopping
                         </a>
                     </div>
+                    @renderPageSlot('cart', 'after:cart_items')
 
                     <!-- Saved For Later Section -->
                     <div class="saved-later-block py-4">
@@ -274,6 +277,7 @@
                             @endforelse
                         </div>
                     </div>
+                    @renderPageSlot('cart', 'after:saved_later')
 
                     <!-- Trust Features Grid Section -->
                     <div class="trust-features-block pt-4 border-top mb-5 mb-lg-0">
@@ -308,11 +312,13 @@
                             </div>
                         </div>
                     </div>
+                    @renderPageSlot('cart', 'after:trust_features')
 
                 </div>
 
             </div>
         </div>
+        @renderPageSlot('cart', 'after:cart_content')
     </main>
 
 @endsection

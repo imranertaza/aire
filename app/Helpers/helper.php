@@ -361,3 +361,66 @@ if (! function_exists('render_section')) {
         }
     }
 }
+
+if (! function_exists('render_page_slot')) {
+    /**
+     * Universal page slot renderer for visual block section injection.
+     * Renders all active builder sections assigned to a specific page boundary slot.
+     * Also renders product-specific block sections when a Product context is supplied.
+     *
+     * @param string $pageKey ('home', 'about', 'product', 'resources')
+     * @param string $slotKey ('after:story', 'after:overview', etc.)
+     * @param mixed $context Optional context (e.g. Product model for product-specific sections)
+     * @return string
+     */
+    function render_page_slot(string $pageKey, string $slotKey, mixed $context = null): string
+    {
+        try {
+            $productHtml = '';
+
+            // 1. If context is a Product, render product-specific block sections for this slot
+            if ($context instanceof \App\Models\Product) {
+                $productSections = \Illuminate\Support\Facades\Cache::remember("product_sections_{$context->id}", 86400, function () use ($context) {
+                    return $context->blockSections()->where('is_enabled', 1)->orderBy('sort_order', 'asc')->get();
+                });
+
+                $matchingSections = $productSections->where('slot_key', $slotKey);
+                foreach ($matchingSections as $pSec) {
+                    if (!empty($pSec->section_name)) {
+                        $productHtml .= render_section($pSec->section_name);
+                    }
+                }
+            }
+
+            // 2. Render global page layout pipeline slot items
+            $slots = \Illuminate\Support\Facades\Cache::remember("page_layout_{$pageKey}_v1", 86400, function () use ($pageKey) {
+                $layout = \App\Models\Section::where('name', "{$pageKey}_layout")->first();
+                return $layout?->data['slots'] ?? [];
+            });
+
+            $items = $slots[$slotKey] ?? [];
+            $globalHtml = '';
+            if (!empty($items)) {
+                foreach ($items as $item) {
+                    if (is_array($item)) {
+                        if (isset($item['enabled']) && !$item['enabled']) {
+                            continue;
+                        }
+                        $secName = $item['key'] ?? ($item['name'] ?? '');
+                    } else {
+                        $secName = (string) $item;
+                    }
+
+                    if (!empty($secName)) {
+                        $globalHtml .= render_section($secName);
+                    }
+                }
+            }
+
+            return $productHtml . $globalHtml;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to render page slot [{$pageKey}][{$slotKey}]: " . $e->getMessage());
+            return '';
+        }
+    }
+}

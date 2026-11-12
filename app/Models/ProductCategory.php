@@ -260,7 +260,7 @@ class ProductCategory extends Model
     {
         if ($allCategories === null) {
             $allCategories = Cache::rememberForever('catalog_category_pairs_v1', function () {
-                return static::select('id', 'parent_id')->get();
+                return static::select('id', 'parent_id', 'slug', 'category_name')->get();
             });
         }
 

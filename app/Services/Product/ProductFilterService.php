@@ -149,14 +149,15 @@ class ProductFilterService
         return $allDbOptionValues->filter(function ($ov) use ($reqList, $optionNameKeyword) {
             if ($optionNameKeyword) {
                 $opt = $ov->filterOption;
-                if ($opt && stripos($opt->name, $optionNameKeyword) === false) {
+                if ($opt && stripos((string) ($opt->name ?? ''), $optionNameKeyword) === false) {
                     return false;
                 }
             }
-            $slug = Str::slug($ov->name, '_');
+            $ovName = (string) ($ov->name ?? '');
+            $slug = Str::slug($ovName, '_');
             return in_array($slug, $reqList, true)
                 || in_array((string) $ov->id, $reqList, true)
-                || in_array(strtolower($ov->name), array_map('strtolower', $reqList), true);
+                || in_array(strtolower($ovName), array_map('strtolower', $reqList), true);
         })->pluck('id')->map(fn($id) => (int) $id)->toArray();
     }
 
@@ -293,11 +294,14 @@ class ProductFilterService
                 $slugKeyword = str_replace('_', '-', (string) $cVal);
                 $nameKeyword = str_replace(['_', '-'], ' ', (string) $cVal);
                 $found = $allCategoryPairs->first(function ($cat) use ($cVal, $slugKeyword, $nameKeyword) {
+                    $catSlug = (string) ($cat->slug ?? '');
+                    $catName = (string) ($cat->category_name ?? '');
+
                     return (string) $cat->id === (string) $cVal
-                        || $cat->slug === $slugKeyword
-                        || $cat->slug === (string) $cVal
-                        || strcasecmp($cat->category_name, $nameKeyword) === 0
-                        || strcasecmp($cat->category_name, (string) $cVal) === 0;
+                        || ($catSlug !== '' && $catSlug === $slugKeyword)
+                        || ($catSlug !== '' && $catSlug === (string) $cVal)
+                        || ($catName !== '' && strcasecmp($catName, $nameKeyword) === 0)
+                        || ($catName !== '' && strcasecmp($catName, (string) $cVal) === 0);
                 });
                 if ($found) {
                     $baseCatIds[] = $found->id;
@@ -824,8 +828,9 @@ class ProductFilterService
                 if ($filterCategories->count() > 0) {
                     $options = [];
                     foreach ($filterCategories as $cat) {
-                        $catSlug = $cat->slug ?: Str::slug($cat->category_name, '_');
-                        $catNameLower = strtolower($cat->category_name);
+                        $catName = (string) ($cat->category_name ?? '');
+                        $catSlug = $cat->slug ?: ($catName !== '' ? Str::slug($catName, '_') : '');
+                        $catNameLower = strtolower($catName);
 
                         $icon = 'bi-grid';
                         if (str_contains($catNameLower, 'solution')) $icon = 'bi-box-seam';
@@ -1022,8 +1027,8 @@ class ProductFilterService
         $categoryBgColor = ($catBgRaw && strcasecmp($catBgRaw, '#00c853') !== 0) ? $catBgRaw : '#0a7a3b';
         $subtitle = $p->description?->tag ?: ($subCategory?->category_name ?: ($firstCategory?->alt_name ?: 'ENTERPRISE FILTRATION'));
 
-        $cadr = $p->productAttributes->first(fn($a) => stripos($a->name, 'CADR') !== false)?->details ?? '550 m³/h';
-        $grade = $p->productAttributes->first(fn($a) => stripos($a->name, 'Grade') !== false || stripos($a->name, 'Filter') !== false)?->details ?? 'HEPA H13';
+        $cadr = $p->productAttributes->first(fn($a) => !empty($a->name) && stripos($a->name, 'CADR') !== false)?->details ?? '550 m³/h';
+        $grade = $p->productAttributes->first(fn($a) => !empty($a->name) && (stripos($a->name, 'Grade') !== false || stripos($a->name, 'Filter') !== false))?->details ?? 'HEPA H13';
         $desc = function_exists('getLimitedText') ? \getLimitedText(strip_tags($p->description?->description ?? ''), 140) : '';
 
         $filterOptionValues = $p->productFilterOptions?->map(function ($pfo) {

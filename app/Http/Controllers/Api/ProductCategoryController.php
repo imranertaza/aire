@@ -188,6 +188,11 @@ class ProductCategoryController extends Controller
                 ]);
             }
         }
+
+        ProductCategory::clearCategoryCache();
+        if (!empty($category->slug)) {
+            \Illuminate\Support\Facades\Cache::forget("catalog_category_slug_v4_{$category->slug}");
+        }
     }
 
 

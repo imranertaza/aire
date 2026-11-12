@@ -11,6 +11,7 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "ionicons/css/ionicons.min.css";
 import "vue3-toastify/dist/index.css";
 import "@/assets/dist/css/adminlte.min.css";
+import "../css/app.css";
 import App from "./App.vue";
 import axios from "axios";
 import Vue3Toastify from "vue3-toastify";

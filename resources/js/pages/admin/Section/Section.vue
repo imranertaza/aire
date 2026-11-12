@@ -235,16 +235,25 @@
                         <span v-else class="text-muted">—</span>
                       </td>
                       <td class="align-middle text-center">
-                        <div class="d-flex justify-content-center gap-1">
-                          <!-- 1. Block Section: Show ONLY ONE Edit button opening Visual Section Builder -->
+                        <div class="d-flex justify-content-center align-items-center">
+                          <!-- 1. Block Section: Show Edit + Copy Directive button -->
                           <router-link
                             v-if="isBlockSection(section) && (authStore.hasPermission('manage-frontend') || authStore.hasPermission('edit-sections') || authStore.hasPermission('view-sections'))"
                             :to="{ name: 'EditSectionBuilder', params: { id: section.id } }"
-                            class="btn btn-sm btn-primary"
+                            class="btn btn-sm btn-primary mr-2"
                             title="Edit Block Section (Visual Section Builder)"
                           >
                             <i class="fas fa-edit"></i>
                           </router-link>
+                          <button
+                            v-if="isBlockSection(section)"
+                            type="button"
+                            class="btn btn-sm btn-light border text-dark"
+                            @click="copyBladeDirective(section.name)"
+                            title="Copy Blade Directive: @renderSection('...')"
+                          >
+                            <i class="fas fa-copy"></i>
+                          </button>
 
                           <!-- 2. Testimonials Slider -->
                           <router-link
@@ -425,6 +434,17 @@ const isBlockSection = (section) => {
   return false;
 };
 
+const copyBladeDirective = (name) => {
+  const code = `@renderSection('${name}')`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(code).then(() => {
+      if (window.toastr) {
+        window.toastr.success(`Copied: ${code}`);
+      }
+    }).catch(() => {});
+  }
+};
+
 onMounted(() => {
   fetchPage();
 });
@@ -442,8 +462,14 @@ onMounted(() => {
 .font-weight-600 {
   font-weight: 600;
 }
+.gap-1 {
+  gap: 0.35rem !important;
+}
 .gap-2 {
   gap: 0.5rem !important;
+}
+.gap-3 {
+  gap: 1rem !important;
 }
 .transition-all {
   transition: all 0.2s ease-in-out;

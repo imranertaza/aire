@@ -163,6 +163,7 @@ class BrandController extends Controller
         $this->fileUploader->delete($brand->image);
 
         Product::where('brand_id', $brand->id)->update(['brand_id' => null]);
+        Product::clearProductCache();
 
         $brand->delete();
         Cache::forget('all_brands');

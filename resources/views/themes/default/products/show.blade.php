@@ -201,6 +201,9 @@
         </div>
     </div>
 
+    {{-- Layout Pipeline Slot: Before Product Top Section --}}
+    @renderPageSlot('product', 'before:product_top', $product)
+
     <!-- Product Main Top Section -->
     <section class="container py-3" id="productTopSection">
         <!-- Breadcrumb -->
@@ -705,6 +708,9 @@
         </div>
     </div>
 
+    {{-- Layout Pipeline Slot: After Product Top Section --}}
+    @renderPageSlot('product', 'after:product_top', $product)
+
     <!-- Section 1: Overview -->
     @php
         $overview = $product->overview;
@@ -805,6 +811,9 @@
             </div>
         </div>
     </section>
+
+    {{-- Layout Pipeline Slot: After Product Overview --}}
+    @renderPageSlot('product', 'after:overview', $product)
 
     <!-- Section 2: Technical Specifications -->
     @php
@@ -1021,6 +1030,9 @@
         </section>
     @endif
 
+    {{-- Layout Pipeline Slot: After Product Specifications --}}
+    @renderPageSlot('product', 'after:specs', $product)
+
     <!-- Section 3: Features -->
     @php
         $desc = $product->description;
@@ -1156,6 +1168,9 @@
             @endif
         </section>
     @endif
+
+    {{-- Layout Pipeline Slot: After Product Features --}}
+    @renderPageSlot('product', 'after:features', $product)
 
     <!-- Section 4: Technology -->
     @php
@@ -1307,6 +1322,9 @@
         </section>
     @endif
 
+    {{-- Layout Pipeline Slot: After Product Engineering & Technology --}}
+    @renderPageSlot('product', 'after:tech', $product)
+
     <!-- In The Box Section -->
     @if ($hasBox)
         <section id="box" class="content-visibility-auto container py-4 py-md-5 my-3 my-md-4 position-relative">
@@ -1383,6 +1401,9 @@
         </section>
     @endif
 
+    {{-- Layout Pipeline Slot: After Product In The Box --}}
+    @renderPageSlot('product', 'after:in_the_box', $product)
+
     <!-- Section 5: Applications -->
     @if ($product->applications && $product->applications->count() > 0)
         <section id="apps" class="content-visibility-auto container py-5 my-4">
@@ -1451,6 +1472,9 @@
         </section>
     @endif
 
+    {{-- Layout Pipeline Slot: After Product Applications --}}
+    @renderPageSlot('product', 'after:applications', $product)
+
     <!-- Section 6: Related Products -->
     @if (!empty($relatedProducts) && $relatedProducts->count() > 0)
         <section id="box" class="content-visibility-auto py-5 bg-white">
@@ -1494,6 +1518,9 @@
         </section>
     @endif
 
+    {{-- Layout Pipeline Slot: After Related Products --}}
+    @renderPageSlot('product', 'after:related_products', $product)
+
     <!-- Downloads Section Placeholder -->
     <div id="downloads" class="d-none"></div>
 
@@ -1536,6 +1563,9 @@
             </div>
         </section>
     @endif
+
+    {{-- Layout Pipeline Slot: After Product FAQ --}}
+    @renderPageSlot('product', 'after:faq', $product)
 @endsection
 
 @push('scripts')

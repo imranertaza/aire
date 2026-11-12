@@ -16,6 +16,9 @@
 
 @section('content')
     <main class="container main-container py-3">
+        {{-- Layout Pipeline Slot: Before Newsroom Header Bar --}}
+        @renderPageSlot('news', 'before:header_bar')
+
         <!-- Unified Single Editorial Header Bar -->
         <div class="newsroom-header-bar mb-4">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pb-3 border-bottom">
@@ -61,6 +64,9 @@
                 </div>
             </div>
         </div>
+
+        {{-- Layout Pipeline Slot: After Newsroom Header & Category Pills --}}
+        @renderPageSlot('news', 'after:header_bar')
 
         <!-- Featured Story Spotlight (Shown on page 1 when not filtering/searching) -->
         @if (empty($searchQuery) &&
@@ -113,6 +119,9 @@
                 </div>
             </section>
         @endif
+
+        {{-- Layout Pipeline Slot: After Lead Story Spotlight (Ideal for Newsletter / Breaking Announcement) --}}
+        @renderPageSlot('news', 'after:featured_spotlight')
 
         <!-- Active Filter Indicator (Shown only when filtering or searching) -->
         @if (!empty($selectedCategory) || !empty($searchQuery))
@@ -193,6 +202,9 @@
             </div>
         @endif
 
+        {{-- Layout Pipeline Slot: After Articles Grid (Ideal for Product Showcase / Whitepapers) --}}
+        @renderPageSlot('news', 'after:articles_grid')
+
         <!-- Bottom Editorial CTA Banner -->
         <section class="newsroom-bottom-banner">
             <div class="newsroom-bottom-banner-text">
@@ -209,5 +221,8 @@
                 </a>
             </div>
         </section>
+
+        {{-- Layout Pipeline Slot: Bottom of Newsroom Hub --}}
+        @renderPageSlot('news', 'after:media_cta')
     </main>
 @endsection

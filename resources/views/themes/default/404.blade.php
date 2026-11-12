@@ -10,6 +10,7 @@
             background: radial-gradient(circle at 50% 20%, rgba(0, 102, 204, 0.04) 0%, rgba(248, 250, 252, 0.6) 70%, #ffffff 100%);
             min-height: calc(100vh - 160px);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 5rem 1.5rem;
@@ -276,6 +277,7 @@
 @endpush
 
 @section('content')
+    @renderPageSlot('not_found', 'before:error_content')
     <main class="error-page-wrapper">
         <!-- Ambient Halo Background -->
         <div class="error-ambient-halo"></div>
@@ -307,6 +309,7 @@
                     </button>
                 </div>
             </form>
+            @renderPageSlot('not_found', 'after:search_box')
 
             <!-- Primary Action Navigation -->
             <div class="error-actions">
@@ -343,5 +346,7 @@
                 </div>
             </div>
         </div>
+        @renderPageSlot('not_found', 'after:error_card')
     </main>
+    @renderPageSlot('not_found', 'after:error_content')
 @endsection

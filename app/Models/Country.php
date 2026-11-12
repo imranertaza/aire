@@ -15,8 +15,11 @@ class Country extends Model
             Cache::forget('all_active_countries');
         });
 
-        static::deleted(function () {
+        static::deleted(function ($country) {
             Cache::forget('all_active_countries');
+            if ($country->id) {
+                Cache::forget("zones_by_country_{$country->id}");
+            }
         });
     }
 

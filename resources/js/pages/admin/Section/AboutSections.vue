@@ -21,6 +21,16 @@
         <button
           type="button"
           class="btn view-toggle-btn"
+          :class="viewMode === 'pipeline' ? 'btn-primary active' : 'btn-outline-secondary'"
+          @click="viewMode = 'pipeline'"
+          title="Layout Flow & Block Section Injections"
+        >
+          <i class="fas fa-stream"></i>
+          <span>Layout Flow</span>
+        </button>
+        <button
+          type="button"
+          class="btn view-toggle-btn"
           :class="viewMode === 'grid' ? 'btn-primary active' : 'btn-outline-secondary'"
           @click="viewMode = 'grid'"
           title="Grid Card View"
@@ -146,6 +156,16 @@
             Clear Search
           </button>
         </div>
+      </div>
+
+      <!-- 0. LAYOUT PIPELINE FLOW VIEW -->
+      <div v-else-if="viewMode === 'pipeline'">
+        <PageSectionPipeline
+          page-key="about"
+          page-title="About Us Page"
+          :native-list="aboutNativeList"
+          first-slot-key="before:story"
+        />
       </div>
 
       <!-- 1. GRID / CARDS VIEW (Default) -->
@@ -367,12 +387,24 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import DashboardHeader from '@/components/DashboardHeader.vue';
+import PageSectionPipeline from './builder/PageSectionPipeline.vue';
 
 const aboutSections = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
-const viewMode = ref('grid');
+const viewMode = ref('grid'); // 'grid' | 'table' | 'pipeline'
 const modalImage = ref(null);
+
+const aboutNativeList = [
+  { key: 'story', title: '1. Our Journey / Company Story', badge: 'Company Story', icon: 'fas fa-history' },
+  { key: 'mission', title: '2. Mission & Vision Statement', badge: 'Mission & Vision', icon: 'fas fa-bullseye' },
+  { key: 'leadership', title: '3. Executive Leadership Team', badge: 'Leadership', icon: 'fas fa-users' },
+  { key: 'innovation', title: '4. Global Patents & Innovation', badge: 'Patents & Tech', icon: 'fas fa-lightbulb' },
+  { key: 'quality', title: '5. Quality & Global Certifications', badge: 'Certifications', icon: 'fas fa-certificate' },
+  { key: 'careers', title: '6. Careers & Culture', badge: 'Careers & Hiring', icon: 'fas fa-briefcase' },
+  { key: 'news', title: '7. News, Press & Media Coverage', badge: 'News & Media', icon: 'fas fa-newspaper' },
+  { key: 'global', title: '8. Global Presence & Footprint', badge: 'Worldwide Reach', icon: 'fas fa-globe' },
+];
 
 const metaRegistry = {
   'about_hero': {

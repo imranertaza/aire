@@ -1455,6 +1455,7 @@ import { getImageUrl } from '@/layouts/helpers/helpers';
 import HeadingBlock from './builder/blocks/HeadingBlock.vue';
 import ParagraphBlock from './builder/blocks/ParagraphBlock.vue';
 import ImageBlock from './builder/blocks/ImageBlock.vue';
+import VideoBlock from './builder/blocks/VideoBlock.vue';
 import ContainerBlock from './builder/blocks/ContainerBlock.vue';
 import CardBlock from './builder/blocks/CardBlock.vue';
 import ButtonBlock from './builder/blocks/ButtonBlock.vue';
@@ -1886,6 +1887,7 @@ function resolveBlockComponent(type) {
     case 'heading': return HeadingBlock;
     case 'paragraph': return ParagraphBlock;
     case 'image': return ImageBlock;
+    case 'video': return VideoBlock;
     case 'container': return ContainerBlock;
     case 'card': return CardBlock;
     case 'button': return ButtonBlock;
@@ -2056,6 +2058,24 @@ function createBlockInstance(type, columnsCount = null, extra = {}) {
         shadow: 'shadow-sm',
         fullWidth: true,
         align: 'text-center',
+        visibility: { hideOnMobile: false, hideOnDesktop: false }
+      };
+      break;
+    case 'video':
+      block.settings = {
+        source: 'youtube',
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        aspectRatio: '16:9',
+        autoplay: false,
+        loop: false,
+        controls: true,
+        muted: false,
+        poster: '',
+        caption: '',
+        maxWidth: '100%',
+        align: 'text-center',
+        rounded: 'rounded-4',
+        shadow: 'shadow-sm',
         visibility: { hideOnMobile: false, hideOnDesktop: false }
       };
       break;

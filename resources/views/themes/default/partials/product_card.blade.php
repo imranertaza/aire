@@ -22,9 +22,12 @@
         $firstCategory = $product->categories ? $product->categories->first() : null;
         $categoryName = $categoryName ?? ($firstCategory?->category_name ?? 'Home');
         $categoryBgColor = $categoryBgColor ?? ($firstCategory?->bg_color ?: '#1e1b4b');
-        $subtitle =
-            $subtitle ??
-            ($product->description?->description ?? ($firstCategory?->category_name ?? 'ENTERPRISE FILTRATION'));
+
+        $cardSubtitle = !empty($subtitle)
+            ? $subtitle
+            : (!empty($product->description?->description)
+                ? $product->description->description
+                : ($firstCategory?->category_name ?? 'ENTERPRISE FILTRATION'));
 
         static $cachedCart = null,
             $cachedCompare = null,
@@ -131,7 +134,7 @@
         </a>
     </h3>
     <div class="product-card__category">
-        {{ strtoupper(isset($isFavoritePage) ? $product->category->name ?? 'ENTERPRISE FILTRATION' : $subtitle) }}
+        {{ strtoupper(strip_tags($cardSubtitle ?? '')) }}
     </div>
     <div class="product-card__actions">
         <div class="d-flex gap-2 align-items-center">
@@ -154,7 +157,8 @@
             </button>
         @else
             <a href="{{ $detailUrl }}" class="product-card__btn-learn"
-                aria-label="Learn more about {{ $product->name }}">Learn more<span class="visually-hidden"> about {{ $product->name }}</span></a>
+                aria-label="Learn more about {{ $product->name }}">Learn more<span class="visually-hidden"> about
+                    {{ $product->name }}</span></a>
         @endif
     </div>
 </div>

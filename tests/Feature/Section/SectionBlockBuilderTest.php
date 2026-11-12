@@ -505,4 +505,612 @@ class SectionBlockBuilderTest extends TestCase
         $this->assertStringContainsString('builder-block-brands', $renderedHtml);
         $this->assertStringContainsString('Dyson Clean Tech', $renderedHtml);
     }
+
+    public function test_admin_can_fetch_available_blocks_for_slot_injection(): void
+    {
+        Section::create([
+            'name' => 'promo_custom_banner',
+            'data' => [
+                'title' => 'Special Promo Banner',
+                'blocks' => [
+                    ['id' => 'b1', 'type' => 'heading', 'settings' => ['text' => 'Winter Sale']],
+                ],
+            ],
+        ]);
+
+        $response = $this->actingAs($this->admin, 'user')
+            ->getJson('/api/sections/available-blocks');
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment([
+            'name' => 'promo_custom_banner',
+            'title' => 'Special Promo Banner',
+        ]);
+    }
+
+    public function test_admin_can_get_and_save_page_layout_pipeline(): void
+    {
+        $getResponse = $this->actingAs($this->admin, 'user')
+            ->getJson('/api/sections/layout/home');
+
+        $getResponse->assertStatus(200);
+        $this->assertIsArray($getResponse->json('data.slots'));
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/home', [
+                'slots' => [
+                    'after:slider_section' => [
+                        ['key' => 'promo_custom_banner', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $this->assertDatabaseHas('sections', [
+            'name' => 'home_layout',
+        ]);
+
+        $section = Section::where('name', 'home_layout')->first();
+        $this->assertArrayHasKey('after:slider_section', $section->data['slots']);
+    }
+
+    public function test_render_page_slot_renders_active_blocks_and_skips_inactive(): void
+    {
+        $block = Section::create([
+            'name' => 'feature_highlight_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Innovative Air Ionizer',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'h1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Breathe Pure Mountain Air',
+                            'tag' => 'h2',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        Section::create([
+            'name' => 'home_layout',
+            'status' => 1,
+            'data' => [
+                'slots' => [
+                    'after:slider_section' => [
+                        ['key' => 'feature_highlight_block', 'enabled' => true],
+                        ['key' => 'inactive_block', 'enabled' => false],
+                    ],
+                ],
+            ],
+        ]);
+
+        Cache::forget('page_layout_home_v1');
+
+        $rendered = render_page_slot('home', 'after:slider_section');
+
+        $this->assertStringContainsString('Breathe Pure Mountain Air', $rendered);
+        $this->assertStringNotContainsString('inactive_block', $rendered);
+    }
+
+    public function test_admin_can_save_and_render_product_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'pdp_warranty_badge_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Lifetime Warranty Protection',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'pdp_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => '10-Year Clean Air Guarantee',
+                            'tag' => 'h3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/product', [
+                'slots' => [
+                    'after:overview' => [
+                        ['key' => 'pdp_warranty_badge_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $rendered = render_page_slot('product', 'after:overview');
+        $this->assertStringContainsString('10-Year Clean Air Guarantee', $rendered);
+    }
+
+    public function test_admin_can_save_and_render_contact_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'contact_faq_support_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Support & Warranty Center FAQ',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'faq_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Frequently Asked Support Questions',
+                            'tag' => 'h2',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/contact', [
+                'slots' => [
+                    'after:contact_form' => [
+                        ['key' => 'contact_faq_support_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $rendered = render_page_slot('contact', 'after:contact_form');
+        $this->assertStringContainsString('Frequently Asked Support Questions', $rendered);
+    }
+
+    public function test_admin_can_save_and_render_category_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'catalog_seasonal_promo_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Winter IAQ Clean Air Campaign',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'promo_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Save 20% on Certified High Efficiency Purifiers',
+                            'tag' => 'h2',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/category', [
+                'slots' => [
+                    'before:catalog_content' => [
+                        ['key' => 'catalog_seasonal_promo_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $rendered = render_page_slot('category', 'before:catalog_content');
+        $this->assertStringContainsString('Save 20% on Certified High Efficiency Purifiers', $rendered);
+    }
+
+    public function test_admin_can_save_and_render_news_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'news_newsletter_subscription_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'AIRE Research Digest Subscription',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'news_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Subscribe to Global Air Quality Intelligence',
+                            'tag' => 'h2',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/news', [
+                'slots' => [
+                    'after:featured_spotlight' => [
+                        ['key' => 'news_newsletter_subscription_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $rendered = render_page_slot('news', 'after:featured_spotlight');
+        $this->assertStringContainsString('Subscribe to Global Air Quality Intelligence', $rendered);
+    }
+
+    public function test_admin_can_save_and_render_news_detail_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'article_author_bio_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Editorial Contributor Spotlight',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'art_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Meet the Environmental Engineering Authors',
+                            'tag' => 'h3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/news_detail', [
+                'slots' => [
+                    'after:article_body' => [
+                        ['key' => 'article_author_bio_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $rendered = render_page_slot('news_detail', 'after:article_body');
+        $this->assertStringContainsString('Meet the Environmental Engineering Authors', $rendered);
+    }
+
+    public function test_admin_can_save_and_render_order_confirm_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'order_filter_subscription_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'VIP Replacement Filter Auto-Ship',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'ord_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Never Forget a Fresh Filter: Join Auto-Ship & Save 20%',
+                            'tag' => 'h3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/order_confirm', [
+                'slots' => [
+                    'after:order_summary' => [
+                        ['key' => 'order_filter_subscription_block', 'enabled' => true],
+                    ],
+                    'after:order_confirmation' => [
+                        ['key' => 'order_filter_subscription_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $renderedSidebar = render_page_slot('order_confirm', 'after:order_summary');
+        $this->assertStringContainsString('Never Forget a Fresh Filter: Join Auto-Ship', $renderedSidebar);
+
+        $renderedBottom = render_page_slot('order_confirm', 'after:order_confirmation');
+        $this->assertStringContainsString('Never Forget a Fresh Filter: Join Auto-Ship', $renderedBottom);
+    }
+
+    public function test_admin_can_save_and_render_cart_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'cart_cross_sell_accessories_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Complete Your Air Purification Setup',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'cart_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Frequently Bought Together Accessories',
+                            'tag' => 'h3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/cart', [
+                'slots' => [
+                    'after:cart_items' => [
+                        ['key' => 'cart_cross_sell_accessories_block', 'enabled' => true],
+                    ],
+                    'after:order_summary' => [
+                        ['key' => 'cart_cross_sell_accessories_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $renderedItems = render_page_slot('cart', 'after:cart_items');
+        $this->assertStringContainsString('Frequently Bought Together Accessories', $renderedItems);
+
+        $renderedSidebar = render_page_slot('cart', 'after:order_summary');
+        $this->assertStringContainsString('Frequently Bought Together Accessories', $renderedSidebar);
+    }
+
+    public function test_admin_can_save_and_render_not_found_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'error_bestsellers_recovery_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Top Precision Air Purifiers & Clean Air Systems',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'nf_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Looking for clean air solutions? Discover our bestselling purifiers',
+                            'tag' => 'h3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/not_found', [
+                'slots' => [
+                    'after:search_box' => [
+                        ['key' => 'error_bestsellers_recovery_block', 'enabled' => true],
+                    ],
+                    'after:error_content' => [
+                        ['key' => 'error_bestsellers_recovery_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $renderedInside = render_page_slot('not_found', 'after:search_box');
+        $this->assertStringContainsString('Looking for clean air solutions? Discover our bestselling purifiers', $renderedInside);
+
+        $renderedBottom = render_page_slot('not_found', 'after:error_content');
+        $this->assertStringContainsString('Looking for clean air solutions? Discover our bestselling purifiers', $renderedBottom);
+    }
+
+    public function test_admin_can_save_and_render_favorite_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'fav_curated_collection_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Curated Pure Air Collections',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'fav_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Recommended Companions for Your Saved Items',
+                            'tag' => 'h3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/favorite', [
+                'slots' => [
+                    'after:favorite_grid' => [
+                        ['key' => 'fav_curated_collection_block', 'enabled' => true],
+                    ],
+                    'after:favorite_content' => [
+                        ['key' => 'fav_curated_collection_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $renderedGrid = render_page_slot('favorite', 'after:favorite_grid');
+        $this->assertStringContainsString('Recommended Companions for Your Saved Items', $renderedGrid);
+
+        $renderedBottom = render_page_slot('favorite', 'after:favorite_content');
+        $this->assertStringContainsString('Recommended Companions for Your Saved Items', $renderedBottom);
+    }
+
+    public function test_admin_can_save_and_render_compare_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'compare_technical_guide_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Technical CADR & HEPA Comparison Guide',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'comp_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Understanding Air Quality Metrics: CADR, Filter Grades and Coverage',
+                            'tag' => 'h3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/compare', [
+                'slots' => [
+                    'after:compare_matrix' => [
+                        ['key' => 'compare_technical_guide_block', 'enabled' => true],
+                    ],
+                    'after:compare_content' => [
+                        ['key' => 'compare_technical_guide_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $renderedMatrix = render_page_slot('compare', 'after:compare_matrix');
+        $this->assertStringContainsString('Understanding Air Quality Metrics: CADR, Filter Grades and Coverage', $renderedMatrix);
+
+        $renderedBottom = render_page_slot('compare', 'after:compare_content');
+        $this->assertStringContainsString('Understanding Air Quality Metrics: CADR, Filter Grades and Coverage', $renderedBottom);
+    }
+
+    public function test_admin_can_save_and_render_resources_page_layout_pipeline(): void
+    {
+        $block = Section::create([
+            'name' => 'resources_enterprise_cta_block',
+            'status' => 1,
+            'data' => [
+                'title' => 'Enterprise Engineering & Consultation Support',
+                'container_type' => 'container',
+                'blocks' => [
+                    [
+                        'id' => 'res_b1',
+                        'type' => 'heading',
+                        'settings' => [
+                            'text' => 'Need Technical Air Flow and HVAC System Calculations?',
+                            'tag' => 'h3',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $saveResponse = $this->actingAs($this->admin, 'user')
+            ->postJson('/api/sections/layout/resources', [
+                'slots' => [
+                    'before:catalog' => [
+                        ['key' => 'resources_enterprise_cta_block', 'enabled' => true],
+                    ],
+                    'after:catalog' => [
+                        ['key' => 'resources_enterprise_cta_block', 'enabled' => true],
+                    ],
+                ],
+            ]);
+
+        $saveResponse->assertStatus(200);
+        $saveResponse->assertJson(['success' => true]);
+
+        $renderedBefore = render_page_slot('resources', 'before:catalog');
+        $this->assertStringContainsString('Need Technical Air Flow and HVAC System Calculations?', $renderedBefore);
+
+        $renderedAfter = render_page_slot('resources', 'after:catalog');
+        $this->assertStringContainsString('Need Technical Air Flow and HVAC System Calculations?', $renderedAfter);
+    }
+
+    public function test_storefront_renders_video_block_properly(): void
+    {
+        // 1. YouTube Video Block
+        $ytSection = Section::create([
+            'name' => 'home_video_yt_' . uniqid(),
+            'data' => [
+                'title' => 'YouTube Showcase',
+                'blocks' => [
+                    [
+                        'id' => 'video_blk_yt',
+                        'type' => 'video',
+                        'settings' => [
+                            'source' => 'youtube',
+                            'url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                            'aspectRatio' => '16:9',
+                            'caption' => 'Official Demonstration Video',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $renderedYt = view('themes.default.sections.builder', ['section' => $ytSection])->render();
+        $this->assertStringContainsString('block-render-video', $renderedYt);
+        $this->assertStringContainsString('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', $renderedYt);
+        $this->assertStringContainsString('Official Demonstration Video', $renderedYt);
+
+        // 2. HTML5 Video Block
+        $html5Section = Section::create([
+            'name' => 'home_video_html5_' . uniqid(),
+            'data' => [
+                'title' => 'HTML5 Showcase',
+                'blocks' => [
+                    [
+                        'id' => 'video_blk_html5',
+                        'type' => 'video',
+                        'settings' => [
+                            'source' => 'html5',
+                            'url' => 'https://example.com/videos/demo.mp4',
+                            'controls' => true,
+                            'autoplay' => true,
+                            'loop' => true,
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $renderedHtml5 = view('themes.default.sections.builder', ['section' => $html5Section])->render();
+        $this->assertStringContainsString('<video', $renderedHtml5);
+        $this->assertStringContainsString('https://example.com/videos/demo.mp4', $renderedHtml5);
+
+        // 3. Fallback from image block when video url is supplied
+        $fallbackSection = Section::create([
+            'name' => 'fallback_video_' . uniqid(),
+            'data' => [
+                'blocks' => [
+                    [
+                        'id' => 'img_video_fallback',
+                        'type' => 'image',
+                        'settings' => [
+                            'url' => 'https://youtu.be/dQw4w9WgXcQ',
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $renderedFallback = view('themes.default.sections.builder', ['section' => $fallbackSection])->render();
+        $this->assertStringContainsString('block-render-video', $renderedFallback);
+        $this->assertStringContainsString('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ', $renderedFallback);
+    }
 }

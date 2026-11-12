@@ -51,6 +51,7 @@
     <!-- Main Content -->
     <main class="">
         <h1 class="d-none">Compare</h1>
+        @renderPageSlot('compare', 'before:compare_content')
         <div class="container main-container border-top border-light">
 
             <!-- Unified 3-Column Layout with Full Height Sticky Right Sidebar -->
@@ -239,6 +240,7 @@
 
                             </div>
                         </div>
+                        @renderPageSlot('compare', 'after:compare_matrix')
 
                         <!-- Expert Advice Banner -->
                         <div class="expert-advice-banner">
@@ -302,6 +304,7 @@
                             @endforeach
                         </div>
                     @endif
+                    @renderPageSlot('compare', 'after:trust_badges')
 
                 </section>
 
@@ -316,6 +319,7 @@
             </div>
 
         </div>
+        @renderPageSlot('compare', 'after:compare_content')
     </main>
 
     <!-- Add Product to Compare Modal -->

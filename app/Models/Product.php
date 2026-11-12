@@ -112,6 +112,7 @@ class Product extends Model
                 Cache::forget("product_detail_{$product->id}");
                 Cache::forget("product_landing_{$product->id}");
                 Cache::forget("product_related_{$product->id}");
+                Cache::forget("product_sections_{$product->id}");
 
                 // Invalidate specific categories linked to this product and all their ancestor categories
                 try {
@@ -268,6 +269,11 @@ class Product extends Model
         return $this->hasOne(ProductLanding::class, 'product_id');
     }
 
+    public function blockSections()
+    {
+        return $this->hasMany(ProductSection::class, 'product_id')->orderBy('sort_order', 'asc');
+    }
+
     // ========================================
     // Scopes
     // ========================================
@@ -374,7 +380,8 @@ class Product extends Model
             'faqs',
             'applications',
             'productLanding',
-            'showcase'
+            'showcase',
+            'blockSections'
         ]);
     }
 

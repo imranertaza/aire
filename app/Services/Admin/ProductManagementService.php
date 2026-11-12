@@ -181,6 +181,9 @@ class ProductManagementService
             // 12. Landing Page
             $this->saveLandingPage($product, $request);
 
+            // 13. Product Block Sections
+            $this->updateBlockSections($product, $request);
+
             Product::clearProductCache($product);
 
             return $product->load([
@@ -197,7 +200,8 @@ class ProductManagementService
                 'faqs',
                 'applications',
                 'productLanding',
-                'showcase'
+                'showcase',
+                'blockSections'
             ]);
         });
     }
@@ -335,6 +339,9 @@ class ProductManagementService
             $this->updateLandingPage($product, $request, $deletedFiles);
             $this->updateShowcase($product, $request, $deletedFiles);
 
+            // 13. Product Block Sections
+            $this->updateBlockSections($product, $request);
+
             Product::clearProductCache($product);
 
             return $product->refresh()->load([
@@ -350,7 +357,8 @@ class ProductManagementService
                 'faqs',
                 'applications',
                 'productLanding',
-                'showcase'
+                'showcase',
+                'blockSections'
             ]);
         });
     }
@@ -1159,5 +1167,48 @@ class ProductManagementService
             'specs_button_url'          => $request->input('landing_specs_button_url'),
             'specs_groups'              => is_string($specsGroups) ? json_decode($specsGroups, true) : (is_array($specsGroups) ? $specsGroups : null),
         ];
+    }
+
+    /**
+     * Update product-specific visual block sections.
+     */
+    protected function updateBlockSections(Product $product, Request $request): void
+    {
+        if (!$request->has('block_sections')) {
+            return;
+        }
+
+        $rawSections = $request->input('block_sections');
+        if (is_string($rawSections)) {
+            $rawSections = json_decode($rawSections, true) ?: [];
+        }
+
+        if (!is_array($rawSections)) {
+            return;
+        }
+
+        $product->blockSections()->delete();
+
+        foreach ($rawSections as $index => $item) {
+            $secName = trim($item['section_name'] ?? ($item['name'] ?? ($item['key'] ?? '')));
+            if (empty($secName)) {
+                continue;
+            }
+
+            $slotKey = trim($item['slot_key'] ?? 'after:overview');
+            $sortOrder = isset($item['sort_order']) ? (int) $item['sort_order'] : $index;
+            $isEnabled = isset($item['is_enabled'])
+                ? filter_var($item['is_enabled'], FILTER_VALIDATE_BOOLEAN)
+                : (isset($item['enabled']) ? filter_var($item['enabled'], FILTER_VALIDATE_BOOLEAN) : true);
+
+            $product->blockSections()->create([
+                'section_name' => $secName,
+                'slot_key'     => $slotKey,
+                'sort_order'   => $sortOrder,
+                'is_enabled'   => $isEnabled,
+            ]);
+        }
+
+        Cache::forget("product_sections_{$product->id}");
     }
 }

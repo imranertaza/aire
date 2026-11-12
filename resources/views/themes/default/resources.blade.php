@@ -577,8 +577,7 @@
 @section('content')
 
     <div class="container main-container">
-
-
+        @renderPageSlot('resources', 'before:resource_content')
         <div class="row g-0">
 
             <!-- Left Sticky Sidebar Navigation (Desktop) matching category/index.blade.php -->
@@ -673,6 +672,8 @@
                     </div>
                 </div>
 
+                @renderPageSlot('resources', 'before:catalog')
+
                 @if (session('error'))
                     <div class="alert alert-warning alert-dismissible fade show mb-4 rounded-3 shadow-sm border-0" role="alert">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
@@ -752,7 +753,9 @@
                     </div>
                 @endforeach
             </section>
+            @renderPageSlot('resources', 'after:catalog')
         </div>
+        @renderPageSlot('resources', 'after:resource_content')
     </div>
 
     <!-- Video Modal Player -->

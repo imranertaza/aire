@@ -193,12 +193,14 @@ class CheckoutController extends Controller
      */
     public function getZones(Request $request): JsonResponse
     {
-        $countryId = $request->input('country_id');
+        $countryId = (int) $request->input('country_id');
         if (!$countryId) {
             return response()->json(['success' => true, 'zones' => []]);
         }
 
-        $zones = Zone::where('country_id', $countryId)->orderBy('name')->get();
+        $zones = Cache::rememberForever("zones_by_country_{$countryId}", function () use ($countryId) {
+            return Zone::where('country_id', $countryId)->orderBy('name')->get();
+        });
 
         return response()->json(['success' => true, 'zones' => $zones]);
     }

@@ -39,9 +39,19 @@
     if ($anim && !empty($s['animationDuration'])) {
         $anim .= ' data-anim-duration="' . intval($s['animationDuration']) . '" data-aos-duration="' . intval($s['animationDuration']) . '"';
     }
+
+    $isMediaVideo = (!empty($s['mediaType']) && $s['mediaType'] === 'video') ||
+        (empty($s['mediaType']) && !empty($url) && (
+            str_contains($url, 'youtube.com') ||
+            str_contains($url, 'youtu.be') ||
+            str_contains($url, 'vimeo.com') ||
+            preg_match('/\.(mp4|webm|ogg|mov)($|\?)/i', $url)
+        ));
 @endphp
 
-@if ($imgSrc)
+@if ($isMediaVideo)
+    @include('themes.default.components.blocks.video', ['block' => $block])
+@elseif ($imgSrc)
     <div {!! $customId !!} {!! $anim !!} class="{{ $align }} {{ $visClass }} {{ $mt }} {{ $mb }} {{ $customClass }}">
         <div class="position-relative d-inline-block {{ $fullWidth ? 'w-100' : '' }} {{ $hoverEffect }}" style="max-width: {{ $maxWidth }};">
             @if ($linkUrl)

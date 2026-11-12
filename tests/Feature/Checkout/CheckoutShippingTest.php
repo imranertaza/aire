@@ -71,6 +71,31 @@ class CheckoutShippingTest extends TestCase
         $this->assertEquals('Dhaka City', $response->json('zones.0.name'));
     }
 
+    public function test_get_zones_caching_and_cache_invalidation(): void
+    {
+        // 1. Initial request populates cache
+        $this->postJson(route('checkout.zones'), ['country_id' => $this->country->id]);
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::has("zones_by_country_{$this->country->id}"));
+
+        // 2. Add new zone triggers booted() hook and invalidates cache
+        $newZone = Zone::create([
+            'country_id' => $this->country->id,
+            'name'       => 'Chittagong City',
+            'code'       => 'CTG',
+            'status'     => 1,
+        ]);
+        $this->assertFalse(\Illuminate\Support\Facades\Cache::has("zones_by_country_{$this->country->id}"));
+
+        // 3. Next request caches updated list
+        $response = $this->postJson(route('checkout.zones'), ['country_id' => $this->country->id]);
+        $this->assertCount(2, $response->json('zones'));
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::has("zones_by_country_{$this->country->id}"));
+
+        // 4. Deleting a zone also invalidates cache
+        $newZone->delete();
+        $this->assertFalse(\Illuminate\Support\Facades\Cache::has("zones_by_country_{$this->country->id}"));
+    }
+
     public function test_get_zones_empty_country_returns_empty_list(): void
     {
         $response = $this->postJson(route('checkout.zones'), [

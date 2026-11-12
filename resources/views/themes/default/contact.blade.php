@@ -10,6 +10,9 @@
     @endpush
 
 @section('content')
+    {{-- Layout Pipeline Slot: Before Hero Banner --}}
+    @renderPageSlot('contact', 'before:hero')
+
     <!-- =========================================================================
                                         | Atmospheric Hero Banner (Matching AIRE Theme)
                                         | ========================================================================= -->
@@ -41,6 +44,9 @@
             </div>
         </div>
     </section>
+
+    {{-- Layout Pipeline Slot: After Hero Banner --}}
+    @renderPageSlot('contact', 'after:hero')
 
     <!-- =========================================================================
                                         | Breadcrumbs & Quick Toolbar
@@ -75,6 +81,9 @@
             </div>
         </div>
     </section>
+
+    {{-- Layout Pipeline Slot: After Breadcrumb Toolbar --}}
+    @renderPageSlot('contact', 'after:toolbar')
 
     <!-- =========================================================================
                                         | Main Content: Contact Details & Interactive Inquiry Form
@@ -337,6 +346,9 @@
             </div>
         </div>
     </main>
+
+    {{-- Layout Pipeline Slot: After Contact Channels & Inquiry Form --}}
+    @renderPageSlot('contact', 'after:contact_form')
 @endsection
 
 @push('scripts')

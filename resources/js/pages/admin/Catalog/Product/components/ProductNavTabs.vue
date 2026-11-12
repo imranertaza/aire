@@ -85,6 +85,12 @@
                     <i class="fas fa-layer-group text-success mr-1"></i> Showcase Card
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" id="tab-block-sections" data-toggle="pill" href="#custom-tabs-block-sections"
+                    role="tab" aria-controls="custom-tabs-block-sections" aria-selected="false">
+                    <i class="fas fa-cubes text-info mr-1"></i> Block Sections
+                </a>
+            </li>
         </ul>
     </div>
 </template>

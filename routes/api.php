@@ -120,6 +120,9 @@ Route::prefix('sections')->middleware(['auth:user', 'permission:manage-frontend'
     Route::post('upload-image', 'uploadImage')->name('sections.upload-image');
     Route::get('home-sections', 'homeSections')->name('sections.home-sections');
     Route::get('about-sections', 'aboutSections')->name('sections.about-sections');
+    Route::get('available-blocks', 'availableBlocks')->name('sections.available-blocks');
+    Route::get('layout/{page}', 'getPageLayout')->name('sections.get-page-layout');
+    Route::post('layout/{page}', 'savePageLayout')->name('sections.save-page-layout');
     Route::get('by-name/{name}', 'getByName')->name('sections.by-name');
     Route::post('by-name/{name}', 'updateByName')->name('sections.update-by-name');
     Route::put('by-name/{name}', 'updateByName');

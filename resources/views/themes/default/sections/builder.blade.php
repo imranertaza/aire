@@ -1,7 +1,7 @@
 @php
     $data = $section->data ?? [];
     $blocks = $data['blocks'] ?? [];
-    $headerTitle = !empty($data['header_title']) ? $data['header_title'] : (!empty($data['title']) && $data['title'] !== $section->name ? $data['title'] : '');
+    $headerTitle = !empty($data['header_title']) ? $data['header_title'] : '';
     $badge = $data['badge'] ?? '';
     $subtitle = $data['subtitle'] ?? '';
     $headerAlign = $data['header_align'] ?? 'text-center';

@@ -547,6 +547,14 @@ const routes = [{
                 },
             },
             {
+                path: "page-layouts",
+                name: "PageLayoutsHub",
+                component: () => import('@/pages/admin/Section/PageLayoutsHub.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
                 path: "home-sections",
                 name: "HomeSections",
                 component: () => import('@/pages/admin/Section/HomeSections.vue'),
@@ -558,6 +566,94 @@ const routes = [{
                 path: "about-sections",
                 name: "AboutSections",
                 component: () => import('@/pages/admin/Section/AboutSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "product-sections",
+                name: "ProductSections",
+                component: () => import('@/pages/admin/Section/ProductSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "contact-sections",
+                name: "ContactSections",
+                component: () => import('@/pages/admin/Section/ContactSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "category-sections",
+                name: "CategorySections",
+                component: () => import('@/pages/admin/Section/CategorySections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "news-sections",
+                name: "NewsSections",
+                component: () => import('@/pages/admin/Section/NewsSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "article-sections",
+                name: "NewsDetailSections",
+                component: () => import('@/pages/admin/Section/NewsDetailSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "resource-sections",
+                name: "ResourceSections",
+                component: () => import('@/pages/admin/Section/ResourceSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "order-confirm-sections",
+                name: "OrderConfirmSections",
+                component: () => import('@/pages/admin/Section/OrderConfirmSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "cart-sections",
+                name: "CartSections",
+                component: () => import('@/pages/admin/Section/CartSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "not-found-sections",
+                name: "NotFoundSections",
+                component: () => import('@/pages/admin/Section/NotFoundSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "favorite-sections",
+                name: "FavoriteSections",
+                component: () => import('@/pages/admin/Section/FavoriteSections.vue'),
+                meta: {
+                    permission: "manage-frontend"
+                },
+            },
+            {
+                path: "compare-sections",
+                name: "CompareSections",
+                component: () => import('@/pages/admin/Section/CompareSections.vue'),
                 meta: {
                     permission: "manage-frontend"
                 },

@@ -23,7 +23,7 @@
                 v-model="searchQuery"
                 type="text"
                 class="form-control border-left-0"
-                placeholder="Search blocks (heading, image, columns, card, button)..."
+                placeholder="Search blocks (heading, image, video, media, columns, card, button)..."
               />
             </div>
           </div>
@@ -135,7 +135,8 @@ const basics = [
 ];
 
 const media = [
-  { type: 'image', title: 'Image', icon: 'fas fa-image', bgClass: 'bg-info-soft text-info', desc: 'Responsive graphic with rounded corners, captions, & shadow' }
+  { type: 'image', title: 'Image / Graphic', icon: 'fas fa-image', bgClass: 'bg-info-soft text-info', desc: 'Responsive photo, graphic, banner, or media with rounded corners & captions' },
+  { type: 'video', title: 'Video Player', icon: 'fas fa-play-circle', bgClass: 'bg-danger-soft text-danger', desc: 'Embed YouTube, Vimeo, or HTML5 MP4 videos with custom aspect ratio & autoplay' }
 ];
 
 const layout = [

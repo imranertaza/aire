@@ -61,10 +61,21 @@ class CartService
                 $originalPrice  = max(0, (float) $product->price + $optDiff);
                 $specialPrice   = $product->special_price !== null ? max(0, (float) $product->special_price + $optDiff) : null;
                 $isFree         = (bool) $product->freeDelivery;
+                $productName    = $product->name;
+                $productModel   = $product->model;
+                $productImage   = !empty($product->main_image) ? getImageUrl($product->main_image) : ($item['image'] ?? '');
 
                 if (!isset($item['price']) || (float) $item['price'] !== $effectivePrice
                     || !isset($item['free_delivery']) || $item['free_delivery'] !== $isFree
-                    || !isset($item['original_price']) || (float) $item['original_price'] !== $originalPrice) {
+                    || !isset($item['original_price']) || (float) $item['original_price'] !== $originalPrice
+                    || ($item['name'] ?? '') !== $productName
+                    || ($item['model'] ?? '') !== $productModel
+                    || (!empty($productImage) && ($item['image'] ?? '') !== $productImage)) {
+                    $item['name']           = $productName;
+                    $item['model']          = $productModel;
+                    if (!empty($productImage)) {
+                        $item['image']      = $productImage;
+                    }
                     $item['price']          = $effectivePrice;
                     $item['original_price'] = $originalPrice;
                     $item['special_price']  = $specialPrice;
@@ -77,6 +88,31 @@ class CartService
 
         if ($updated) {
             session()->put('cart', $cart);
+        }
+
+        // Also synchronize and refresh any saved-for-later items
+        $savedForLater = $this->getSavedForLater();
+        if (!empty($savedForLater)) {
+            $savedIds = collect($savedForLater)->pluck('id')->filter()->unique()->values();
+            $savedProducts = Product::whereIn('id', $savedIds)->get()->keyBy('id');
+            $savedUpdated = false;
+            foreach ($savedForLater as $sKey => &$sItem) {
+                $sp = $savedProducts->get($sItem['id']);
+                if ($sp) {
+                    if (($sItem['name'] ?? '') !== $sp->name || ($sItem['model'] ?? '') !== $sp->model) {
+                        $sItem['name'] = $sp->name;
+                        $sItem['model'] = $sp->model;
+                        if (!empty($sp->main_image)) {
+                            $sItem['image'] = getImageUrl($sp->main_image);
+                        }
+                        $savedUpdated = true;
+                    }
+                }
+            }
+            unset($sItem);
+            if ($savedUpdated) {
+                session()->put('saved_for_later', $savedForLater);
+            }
         }
 
         return $cart;

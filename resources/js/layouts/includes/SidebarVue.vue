@@ -465,17 +465,10 @@
                                 </router-link>
                             </li>
                             <li class="nav-item" v-if="authStore.hasPermission('view-sections')">
-                                <router-link :to="{ name: 'HomeSections' }" class="nav-link"
-                                    :class="{ active: ['HomeSections'].includes($route.name) }">
+                                <router-link :to="{ name: 'PageLayoutsHub' }" class="nav-link"
+                                    :class="{ active: ['PageLayoutsHub', 'HomeSections', 'AboutSections', 'ProductSections', 'ContactSections', 'CategorySections', 'ResourceSections', 'NewsSections', 'NewsDetailSections', 'OrderConfirmSections', 'CartSections', 'NotFoundSections', 'FavoriteSections', 'CompareSections'].includes($route.name) }">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Home Sections</p>
-                                </router-link>
-                            </li>
-                            <li class="nav-item" v-if="authStore.hasPermission('view-sections')">
-                                <router-link :to="{ name: 'AboutSections' }" class="nav-link"
-                                    :class="{ active: ['AboutSections'].includes($route.name) }">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>About Page Section</p>
+                                    <p>Page Layouts</p>
                                 </router-link>
                             </li>
                             <li class="nav-item" v-if="authStore.hasPermission('view-sections')">
@@ -674,8 +667,20 @@ const openParentMenus = () => {
         'CreateSlider': ['frontend'],
         'ShowSlider': ['frontend'],
         'UpdateSlider': ['frontend'],
+        'PageLayoutsHub': ['frontend'],
         'HomeSections': ['frontend'],
         'AboutSections': ['frontend'],
+        'ProductSections': ['frontend'],
+        'ContactSections': ['frontend'],
+        'CategorySections': ['frontend'],
+        'ResourceSections': ['frontend'],
+        'NewsSections': ['frontend'],
+        'NewsDetailSections': ['frontend'],
+        'OrderConfirmSections': ['frontend'],
+        'CartSections': ['frontend'],
+        'NotFoundSections': ['frontend'],
+        'FavoriteSections': ['frontend'],
+        'CompareSections': ['frontend'],
         'TestimonialsSection': ['frontend'],
         'Section': ['frontend'],
         'CreateSection': ['frontend'],

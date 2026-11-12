@@ -21,6 +21,16 @@
         <button
           type="button"
           class="btn view-toggle-btn"
+          :class="viewMode === 'pipeline' ? 'btn-primary active' : 'btn-outline-secondary'"
+          @click="viewMode = 'pipeline'"
+          title="Layout Flow & Block Section Injections"
+        >
+          <i class="fas fa-stream"></i>
+          <span>Layout Flow</span>
+        </button>
+        <button
+          type="button"
+          class="btn view-toggle-btn"
           :class="viewMode === 'grid' ? 'btn-primary active' : 'btn-outline-secondary'"
           @click="viewMode = 'grid'"
           title="Grid Card View"
@@ -146,6 +156,16 @@
             Clear Search
           </button>
         </div>
+      </div>
+
+      <!-- 0. LAYOUT PIPELINE FLOW VIEW -->
+      <div v-else-if="viewMode === 'pipeline'">
+        <PageSectionPipeline
+          page-key="home"
+          page-title="Homepage"
+          :native-list="homeNativeList"
+          first-slot-key="before:slider_section"
+        />
       </div>
 
       <!-- 1. GRID / CARDS VIEW (Default) -->
@@ -387,12 +407,27 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import DashboardHeader from '@/components/DashboardHeader.vue';
+import PageSectionPipeline from './builder/PageSectionPipeline.vue';
 
 const homeSections = ref([]);
 const loading = ref(false);
-const viewMode = ref('grid'); // 'grid' | 'table'
+const viewMode = ref('grid'); // 'grid' | 'table' | 'pipeline'
 const searchQuery = ref('');
 const previewUrl = ref(null);
+
+const homeNativeList = [
+  { key: 'slider_section', title: 'Hero Banner Sliders', badge: 'Top Banner', icon: 'fas fa-images', editRoute: { name: 'Sliders' } },
+  { key: 'home_category_grid', title: 'Category Showcase & Solutions Grid', badge: 'Category Showcase', icon: 'fas fa-th-large' },
+  { key: 'home_benefits', title: 'Benefits (Pure Air, Healthy Living)', badge: 'Benefits', icon: 'fas fa-check-circle' },
+  { key: 'home_best_selling', title: 'Best Selling Product', badge: 'Product Grid', icon: 'fas fa-star' },
+  { key: 'home_lifestyle', title: 'Lifestyle Showcase (Spaces)', badge: 'Lifestyle', icon: 'fas fa-home' },
+  { key: 'home_new_arrival', title: 'New Arrival Models', badge: 'Product Grid', icon: 'fas fa-box-open' },
+  { key: 'why_choose_aire', title: 'Why Choose AIRE? (GSAP Pinned Deck)', badge: 'Interactive', icon: 'fas fa-layer-group' },
+  { key: 'home_customer_favorites', title: 'Customers Favorites', badge: 'Product Grid', icon: 'fas fa-heart' },
+  { key: 'home_video', title: 'Technical Visualization & Video Banner', badge: 'Video Player', icon: 'fas fa-video' },
+  { key: 'home_living_hero', title: 'Living Hero Showcase (Future of Pure Living)', badge: 'GSAP Flight', icon: 'fas fa-wind' },
+  { key: 'home_faq', title: 'Frequently Asked Questions (FAQ)', badge: 'Support Accordion', icon: 'fas fa-question-circle' },
+];
 
 /**
  * Metadata definitions for homepage sections

@@ -30,6 +30,7 @@
 @section('content')
 
     <main class="container main-container product-filter-page__main">
+        @renderPageSlot('home', 'before:slider_section')
         <!-- Hero Slider Section matching Home.png -->
         <div class="">
             <section class="home-hero-section">
@@ -95,9 +96,10 @@
                 </div>
             </section>
         </div>
-        @renderSection('custom_section_131027')
+        @renderPageSlot('home', 'after:slider_section')
         <!-- Section: Category Showcase & Solutions Grid (matching Mockup) -->
         @include('themes.default.partials.home_category_showcase')
+        @renderPageSlot('home', 'after:home_category_grid')
         <!-- Section 2: Benefits (Pure Air, Healthy Living) matching Home.png -->
         @php
             $benefitsSection = getSection('home_benefits') ?? (getSection('benefits') ?? []);
@@ -170,6 +172,7 @@
                 </div>
             </div>
         </section>
+        @renderPageSlot('home', 'after:home_benefits')
 
         <!-- Section 3: Best Selling Product matching Home.png -->
         @php
@@ -246,6 +249,7 @@
                 </div>
             </div>
         </section>
+        @renderPageSlot('home', 'after:home_best_selling')
 
         @php
             $lifestyleSection = getSection('home_lifestyle') ?? (getSection('lifestyle') ?? []);
@@ -339,6 +343,7 @@
                 </div>
             </div>
         </section>
+        @renderPageSlot('home', 'after:home_lifestyle')
 
         <!-- Section: New Arrival / Freshly Launched Models matching Home.png -->
         @php
@@ -406,6 +411,7 @@
                 </div>
             </div>
         </section>
+        @renderPageSlot('home', 'after:home_new_arrival')
         <!-- Center Content Feed (col-lg-6) -->
         <!-- Section: Why Choose AIRE? (GSAP ScrollTrigger Pinned Deck Animation) -->
         @php
@@ -451,6 +457,7 @@
                 </div>
             </section>
         @endif
+        @renderPageSlot('home', 'after:why_choose_aire')
 
         <!-- Section: Customers Favorites matching Home.png -->
         @php
@@ -510,6 +517,7 @@
                 </div>
             </div>
         </section>
+        @renderPageSlot('home', 'after:home_customer_favorites')
 
         <!-- Section: Technical Visualization & Video Banner matching Home.png -->
         @php
@@ -559,6 +567,7 @@
                 </div>
             </div>
         </section>
+        @renderPageSlot('home', 'after:home_video')
 
         <!-- Section: The Future of Pure Living Hero (Bottom Featured Product) -->
         @php
@@ -618,6 +627,7 @@
                 </div>
             </section>
         @endif
+        @renderPageSlot('home', 'after:home_living_hero')
 
         <!-- Section 7: FAQ -->
         @php
@@ -702,6 +712,7 @@
 
             </div>
         </section>
+        @renderPageSlot('home', 'after:home_faq')
     </main>
 @endsection
 

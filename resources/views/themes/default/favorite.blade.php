@@ -7,6 +7,7 @@
 @endpush
 
 @section('content')
+    @renderPageSlot('favorite', 'before:favorite_content')
     <!-- Main Container: 3 Column Layout like index.html -->
     <main class="container main-container product-filter-page__main">
 
@@ -21,6 +22,7 @@
                     <span class="breadcrumb-nav__separator">&gt;</span>
                     <span class="breadcrumb-nav__current">Favorite</span>
                 </nav>
+                @renderPageSlot('favorite', 'after:breadcrumb')
 
             </aside>
 
@@ -67,6 +69,7 @@
                     @endforelse
 
                 </div>
+                @renderPageSlot('favorite', 'after:favorite_grid')
             </div>
 
             @if ($adSliders->count() > 0)
@@ -79,6 +82,7 @@
 
         </div>
     </main>
+    @renderPageSlot('favorite', 'after:favorite_content')
 @endsection
 
 @push('scripts')

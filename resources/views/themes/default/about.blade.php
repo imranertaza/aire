@@ -3242,6 +3242,7 @@
                     </p>
                 </div>
 
+                @renderPageSlot('about', 'before:story')
                 <!-- ================= 1. OUR STORY ================= -->
                 <div id="story" class="about-accordion-item content-section is-open">
                     <div class="about-accordion-header" onclick="toggleAboutAccordion('story')">
@@ -3426,6 +3427,7 @@
                         </div>
                     </div>
                 </div>
+                @renderPageSlot('about', 'after:story')
 
                 <!-- ================= 2. MISSION & VISION ================= -->
                 <div id="mission" class="about-accordion-item content-section is-open">
@@ -3539,6 +3541,7 @@
                         </div>
                     </div>
                 </div>
+                @renderPageSlot('about', 'after:mission')
 
                 <!-- ================= 3. LEADERSHIP ================= -->
                 <div id="leadership" class="about-accordion-item content-section is-open">
@@ -3661,6 +3664,7 @@
                         </div>
                     </div>
                 </div>
+                @renderPageSlot('about', 'after:leadership')
 
                 <!-- ================= 4. INNOVATION & PATENTS ================= -->
                 <div id="innovation" class="about-accordion-item content-section is-open">
@@ -3704,6 +3708,7 @@
                         </div>
                     </div>
                 </div>
+                @renderPageSlot('about', 'after:innovation')
 
                 <!-- ================= 5. QUALITY & CERTIFICATIONS ================= -->
                 <div id="quality" class="about-accordion-item content-section is-open">
@@ -3746,6 +3751,7 @@
                         </div>
                     </div>
                 </div>
+                @renderPageSlot('about', 'after:quality')
 
                 <!-- ================= 6. CAREERS ================= -->
                 <div id="careers" class="about-accordion-item content-section is-open">
@@ -3774,6 +3780,7 @@
                         </div>
                     </div>
                 </div>
+                @renderPageSlot('about', 'after:careers')
 
                 <!-- ================= 7. NEWS & MEDIA ================= -->
                 <div id="news" class="about-accordion-item content-section is-open">
@@ -3962,6 +3969,7 @@
                         </div>
                     </div>
                 </div>
+                @renderPageSlot('about', 'after:news')
 
                 <!-- ================= 8. GLOBAL PRESENCE ================= -->
                 <div id="global" class="about-accordion-item content-section is-open">
@@ -4005,6 +4013,7 @@
                         </div>
                     </div>
                 </div>
+                @renderPageSlot('about', 'after:global')
 
             </div>
 

@@ -228,7 +228,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Dynamic Visual Builder Section Blade Directive
         \Illuminate\Support\Facades\Blade::directive('renderSection', function ($expression) {
-            return "<?php echo                    render_section($expression); ?>";
+            return "<?php echo render_section($expression); ?>";
+        });
+
+        // Universal Dynamic Page Slot Blade Directive (e.g. @renderPageSlot('home', 'after:home_benefits'))
+        \Illuminate\Support\Facades\Blade::directive('renderPageSlot', function ($expression) {
+            return "<?php echo render_page_slot($expression); ?>";
         });
 
         Auth::provider('cached', function ($app, array $config) {
