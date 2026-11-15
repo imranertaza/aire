@@ -9,6 +9,23 @@
             <label :for="`enabled-${item.id}`"></label>
           </div>
           <h6 class="m-0">{{ item?.name }}</h6>
+
+          <!-- Link Type / Target Category Badges -->
+          <span v-if="item.link_type === 'product_category'" class="badge ml-2"
+            :class="item.product_category_id ? 'badge-info' : 'badge-warning'"
+            style="font-size: 11px;">
+            <i class="fas" :class="item.product_category_id ? 'fa-tags mr-1' : 'fa-exclamation-triangle mr-1'"></i>
+            {{ item.product_category?.category_name || (item.product_category_id ? 'Category #' + item.product_category_id : 'No Category') }}
+          </span>
+          <span v-else-if="item.link_type === 'page'" class="badge badge-light border ml-2" style="font-size: 11px;">
+            <i class="fas fa-file-alt mr-1"></i> Page
+          </span>
+          <span v-else-if="item.link_type === 'category'" class="badge badge-secondary ml-2" style="font-size: 11px;">
+            <i class="fas fa-newspaper mr-1"></i> Post Category
+          </span>
+          <span v-if="item.has_quick_view" class="badge badge-primary ml-1" style="font-size: 10px;" title="MegaMenu Quick View Enabled">
+            <i class="fas fa-bolt mr-1"></i> Quick View
+          </span>
         </div>
         <div class="d-flex g-3">
           <div v-if="submenuInput" class="d-flex gap-2">

@@ -31,7 +31,7 @@ class MenuItem extends Model
     public function children()
     {
         return $this->hasMany(MenuItem::class, 'parent_id')
-            ->with('children')->orderBy('order', 'asc')->orderBy('id', 'asc'); // recursion
+            ->with(['children', 'productCategory', 'page', 'category'])->orderBy('order', 'asc')->orderBy('id', 'asc'); // recursion
     }
 
     public function parent()

@@ -28,7 +28,7 @@ class MenuItemController extends Controller
      */
     public function index(Request $request)
     {
-        $query = MenuItem::with('children');
+        $query = MenuItem::with(['children', 'productCategory', 'page', 'category']);
 
         if ($request->has('menu_id')) {
             $query->where('menu_id', $request->input('menu_id'));
@@ -39,21 +39,31 @@ class MenuItemController extends Controller
         $items = $query->orderBy('order', 'asc')->orderBy('id', 'asc')->get();
 
         $transform = function ($item) use (&$transform) {
+            $productCategoryId = $item->product_category_id;
+            if ($item->link_type === 'product_category' && $productCategoryId && !$item->productCategory) {
+                $productCategoryId = null;
+            }
+
             return [
-                'id'            => $item->id,
-                'name'          => $item->name,
-                'icon'          => $item->icon,
-                'url'           => $item->getRawOriginal('url') ?? $item->url,
-                'link'          => $item->url,
+                'id'                  => $item->id,
+                'name'                => $item->name,
+                'icon'                => $item->icon,
+                'url'                 => $item->getRawOriginal('url') ?? $item->url,
+                'link'                => $item->url,
                 'link_type'           => $item->link_type,
                 'category_id'         => $item->category_id,
-                'product_category_id' => $item->product_category_id,
+                'product_category_id' => $productCategoryId,
+                'product_category'    => $item->productCategory ? [
+                    'id'            => $item->productCategory->id,
+                    'category_name' => $item->productCategory->category_name,
+                    'slug'          => $item->productCategory->slug,
+                ] : null,
                 'has_quick_view'      => (bool) $item->has_quick_view,
                 'page_id'             => $item->page_id,
-                'order'         => $item->order,
-                'enabled'       => (bool) $item->enabled,
-                '_newChildName' => '', // Helper for frontend (e.g., adding new child inline)
-                'elements'      => $item->children->map($transform)->toArray(),
+                'order'               => $item->order,
+                'enabled'             => (bool) $item->enabled,
+                '_newChildName'       => '', // Helper for frontend (e.g., adding new child inline)
+                'elements'            => $item->children->map($transform)->toArray(),
             ];
         };
 
@@ -99,6 +109,7 @@ class MenuItemController extends Controller
         $validated['has_quick_view'] = !empty($validated['has_quick_view']) ? 1 : 0;
 
         $item = MenuItem::create($validated);
+        $item->load(['productCategory', 'page', 'category']);
 
         return ApiResponse::success($item, 'Menu item created successfully', 201);
     }
@@ -157,6 +168,7 @@ class MenuItemController extends Controller
         }
 
         $menuItem->update($validated);
+        $menuItem->load(['productCategory', 'page', 'category']);
 
         return ApiResponse::success($menuItem, 'Menu item updated successfully');
     }

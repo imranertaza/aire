@@ -192,6 +192,7 @@
                                 <a href="{{ !empty($lItem->url) && $lItem->url !== '#' ? $lItem->url : url('/') }}"
                                     class="footer-legal-link text-decoration-none">{{ $lItem->name }}</a>
                             @endforeach
+
                         </div>
                     @else
                         <div class="d-flex align-items-center gap-4 flex-wrap text-muted-50 fs-13">
@@ -203,6 +204,8 @@
                                 class="footer-legal-link text-decoration-none">Terms of Service</a>
                             <a href="{{ route('page.show', 'data-protection') }}"
                                 class="footer-legal-link text-decoration-none">Data Protection</a>
+                            <a href="{{ route('sitemap.html') }}" class="footer-legal-link text-decoration-none">Site
+                                Map</a>
                         </div>
                     @endif
                     @if ($showAppLinks)
@@ -326,7 +329,7 @@
             document.addEventListener('click', function(e) {
                 var btn = e.target.closest(
                     '[data-bs-target="#authModal"], [data-bs-toggle="modal"][data-bs-target="#authModal"], .open-auth-modal, .btn-login'
-                    );
+                );
                 if (btn) {
                     window.loadRecaptcha();
                 }

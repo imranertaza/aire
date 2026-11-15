@@ -68,8 +68,12 @@ class ProductCategoryController extends Controller
     /**
      * Retrieve all categories for dropdown (id, name, slug, image).
      */
-    public function allCategories()
+    public function allCategories(Request $request)
     {
+        if ($request->has('nocache') || $request->has('refresh')) {
+            ProductCategory::clearCategoryCache();
+        }
+
         $categories = Cache::remember('all_categories_v2', 86400, function () {
             return ProductCategory::select('id', 'category_name', 'slug', 'parent_id', 'bg_color', 'image')
                 ->where('status', 1)
@@ -313,6 +317,7 @@ class ProductCategoryController extends Controller
             if ($category->image && Storage::disk('public')->exists($category->image)) {
                 Storage::disk('public')->delete($category->image);
             }
+            Storage::disk('public')->deleteDirectory("product-categories/{$category->id}");
             $validated['image'] = null;
         }
 
@@ -372,6 +377,9 @@ class ProductCategoryController extends Controller
         $category->updatedBy = Auth::id();
         $category->save();
 
+        ProductCategory::clearCategoryCache($category);
+        \App\Models\Menu::flushMenuCache();
+
         return ApiResponse::success([
             'status' => $category->status,
         ], $category->status == 1 ? 'Category active' : 'Category inactive');
@@ -387,6 +395,8 @@ class ProductCategoryController extends Controller
         $category->updatedBy = Auth::id();
         $category->save();
 
+        ProductCategory::clearCategoryCache($category);
+
         return ApiResponse::success([
             'show_in_filter' => $category->show_in_filter,
         ], $category->show_in_filter == 1 ? 'Show in filter enabled' : 'Show in filter disabled');
@@ -399,13 +409,28 @@ class ProductCategoryController extends Controller
     {
         $category = ProductCategory::findOrFail($id);
 
+        // Get descendant IDs including this category
+        $allAffectedIds = ProductCategory::getCategoryAndDescendantIds($category->id);
+
+        // Delete images and directories for this category and any descendants
+        foreach ($allAffectedIds as $catId) {
+            Storage::disk('public')->deleteDirectory("product-categories/{$catId}");
+        }
         if ($category->image && Storage::disk('public')->exists($category->image)) {
             Storage::disk('public')->delete($category->image);
         }
 
-        // Parent_id cascade is handled by DB foreign key constraint 'onDelete(cascade)'.
+        // Disassociate any menu items linking to this category or its descendants
+        \App\Models\MenuItem::whereIn('product_category_id', $allAffectedIds)->update([
+            'product_category_id' => null,
+            'has_quick_view'      => 0,
+        ]);
 
+        // Parent_id cascade is handled by DB foreign key constraint 'onDelete(cascade)'.
         $category->delete();
+
+        ProductCategory::clearCategoryCache($category);
+        \App\Models\Menu::flushMenuCache();
 
         return ApiResponse::success(null, 'Category deleted successfully');
     }

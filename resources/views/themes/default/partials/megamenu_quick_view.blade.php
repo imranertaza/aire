@@ -354,6 +354,7 @@
             isManuallyClosed = false;
             overlay.classList.add('is-active');
             overlay.setAttribute('aria-hidden', 'false');
+            overlay.closest('.category-section-header')?.classList.add('quickview-open');
             if (trigger) {
                 trigger.setAttribute('aria-expanded', 'true');
             }
@@ -373,6 +374,7 @@
             clearTimeout(hideTimer);
             overlay.classList.remove('is-active');
             overlay.setAttribute('aria-hidden', 'true');
+            overlay.closest('.category-section-header')?.classList.remove('quickview-open');
             const targetId = overlay.id;
             const triggers = document.querySelectorAll('[data-megamenu-target="' + targetId + '"]');
             triggers.forEach(t => t.setAttribute('aria-expanded', 'false'));
@@ -395,14 +397,28 @@
                 openOverlay(targetOverlay, trigger);
             });
             trigger.addEventListener('mouseleave', function() {
-                scheduleClose(200);
+                scheduleClose(220);
             });
             trigger.addEventListener('focus', function() {
                 isManuallyClosed = false;
                 openOverlay(targetOverlay, trigger);
             });
             trigger.addEventListener('blur', function() {
-                scheduleClose(200);
+                scheduleClose(220);
+            });
+            trigger.addEventListener('click', function(e) {
+                const isAnchor = trigger.tagName.toLowerCase() === 'a';
+                const href = trigger.getAttribute('href');
+                if (!isAnchor || !href || href === '#' || href.startsWith('javascript:')) {
+                    e.preventDefault();
+                }
+                if (activeOverlay === targetOverlay) {
+                    isManuallyClosed = true;
+                    closeOverlay(targetOverlay, true);
+                } else {
+                    isManuallyClosed = false;
+                    openOverlay(targetOverlay, trigger);
+                }
             });
         });
 

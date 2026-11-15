@@ -244,6 +244,10 @@ Route::middleware('customer.auth')->group(function () {
     });
 });
 
+// Human-readable Apple-style Site Map Page
+Route::get('/sitemap', [\App\Http\Controllers\SitemapController::class, 'htmlSitemap'])->name('sitemap.html');
+Route::get('/site-map', [\App\Http\Controllers\SitemapController::class, 'htmlSitemap'])->name('sitemap.alt');
+
 // Dynamic XML Sitemap & Robots.txt for Search Engines (Google, Bing)
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');

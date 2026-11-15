@@ -247,7 +247,51 @@
             color: #64748b;
             line-height: 1.5;
             margin-bottom: 16px;
-            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: calc(12.5px * 1.5 * 2);
+        }
+
+        .brochure-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .brochure-file-meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .brochure-file-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 4px;
+            background: #f1f5f9;
+            color: #334155;
+            letter-spacing: 0.3px;
+            border: 1px solid #e2e8f0;
+            line-height: 1.2;
+        }
+
+        .brochure-file-size {
+            font-size: 11px;
+            color: #94a3b8;
+            font-weight: 500;
         }
 
         .brochure-download-btn {

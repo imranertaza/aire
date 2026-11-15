@@ -93,15 +93,38 @@ class MediaController extends Controller
      */
     public function upload(Request $request)
     {
+        $allowedExtensions = [
+            // Images
+            'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'tiff', 'avif',
+            // Videos
+            'mp4', 'mov', 'avi', 'mkv', 'webm', 'ogg', 'wmv', 'flv', 'm4v', '3gp',
+            // Audio
+            'mp3', 'wav', 'm4a', 'aac', 'flac',
+            // Documents
+            'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'rtf', 'odt', 'ods', 'odp',
+            // Archives
+            'zip', 'rar', '7z', 'tar', 'gz'
+        ];
+
         $request->validate([
-            'file'   => 'required|file|mimes:jpg,jpeg,png,gif,webp,mp4,mov,avi,mkv,pdf|max:204800',
+            'file'   => [
+                'required',
+                'file',
+                'max:512000', // 500MB
+                function ($attribute, $value, $fail) use ($allowedExtensions) {
+                    $ext = strtolower($value->getClientOriginalExtension());
+                    if (!in_array($ext, $allowedExtensions)) {
+                        $fail("The {$attribute} format (.{$ext}) is not supported.");
+                    }
+                },
+            ],
             'folder' => 'nullable|string'
         ]);
 
         $folder = $request->input('folder', 'uploads');
 
         $originalName = pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME);
-        $extension    = $request->file('file')->getClientOriginalExtension();
+        $extension    = strtolower($request->file('file')->getClientOriginalExtension());
 
         $safeName = preg_replace('/\s+/', '-', $originalName);
         $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '', $safeName);

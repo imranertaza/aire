@@ -64,6 +64,11 @@
     @endif
 @endpush
 
+@pushOnce('styles')
+    <link rel="stylesheet"
+        href="{{ theme_asset('css/megamenu.css') }}?v={{ @filemtime(public_path('themes/default/assets/css/megamenu.css')) ?: time() }}">
+@endpushOnce
+
 @push('styles')
     <link rel="stylesheet"
         href="{{ theme_asset('css/product.css') }}?v={{ file_exists(public_path('themes/default/assets/css/product.min.css')) ? filemtime(public_path('themes/default/assets/css/product.min.css')) : time() }}">
@@ -281,9 +286,21 @@
                 <!-- Dynamic Category Showcase Sections (Loop through categories and their products) -->
                 @foreach ($displayCategories as $cat)
                     <div id="cat-{{ $cat->id }}" class="category-showcase-section content-section mt-0 pt-0 mb-4">
-                        <div class="category-section-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                        <div class="category-section-header position-relative d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
                             <div class="min-w-0">
-                                <h2 class="section-title title-1 text-primary pb-0 mb-0">{{ $cat->category_name }}</h2>
+                                <h2 class="section-title title-1 text-primary pb-0 mb-0 category-quickview-trigger cursor-pointer"
+                                    data-megamenu-target="quickViewSectionCat-{{ $cat->id }}"
+                                    tabindex="0"
+                                    role="button"
+                                    aria-haspopup="dialog"
+                                    aria-expanded="false"
+                                    title="Hover to quick view {{ $cat->category_name }} products">
+                                    <span>{{ $cat->category_name }}</span>
+                                    <span class="category-quickview-badge ms-2" aria-hidden="true">
+                                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                                        <span>Quick View</span>
+                                    </span>
+                                </h2>
                                 <p class="section-subtitle mb-0 text-muted fs-16 lh-base text-truncate"
                                     title="{{ strip_tags($cat->description ?? '') }}">
                                     {{ strip_tags($cat->description ?? '') }}
@@ -294,6 +311,9 @@
                                     View All <i class="bi bi-arrow-right"></i>
                                 </a>
                             </div>
+
+                            {{-- MegaMenu Quick View for this Category --}}
+                            @include('themes.default.partials.category_quick_view', ['cat' => $cat])
                         </div>
                         {{-- 2-Column Product Showcase Grid for this Category --}}
                         <div class="row g-4">

@@ -17,6 +17,33 @@
     if ($badgeIcon === 'bi bi-ruler' || $badgeIcon === 'bi-ruler') {
         $badgeIcon = 'bi bi-rulers';
     }
+
+    // Determine file type for display
+    $fileType = $item->file_type;
+    if (empty($fileType) && !empty($item->file_path)) {
+        $fileType = strtolower(pathinfo(parse_url($item->file_path, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION));
+    }
+    if (empty($fileType)) {
+        $fileType = $isLink ? 'link' : 'pdf';
+    }
+
+    // Determine file size for display
+    $fileSize = $item->file_size;
+    if (empty($fileSize) && !empty($item->file_path) && !$isLink) {
+        try {
+            $cleanPath = ltrim(preg_replace('/^storage\//', '', $item->file_path), '/');
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($cleanPath)) {
+                $bytes = \Illuminate\Support\Facades\Storage::disk('public')->size($cleanPath);
+                if ($bytes >= 1048576) {
+                    $fileSize = round($bytes / 1048576, 1) . ' MB';
+                } elseif ($bytes >= 1024) {
+                    $fileSize = round($bytes / 1024, 0) . ' KB';
+                } elseif ($bytes > 0) {
+                    $fileSize = $bytes . ' B';
+                }
+            }
+        } catch (\Throwable $e) {}
+    }
 @endphp
 
 <div class="col resource-card-col brochure-card-item" data-title="{{ $item->title }}"
@@ -41,17 +68,28 @@
                 <i class="{{ $badgeIcon }}"></i>
             </div>
             <h4 class="brochure-card-title">{{ $item->title }}</h4>
-            <p class="brochure-card-desc">{{ $item->description }}</p>
-            @if ($isLink)
-                <a href="{{ $item->external_url }}" class="brochure-download-btn" target="_blank" rel="noopener">
-                    Visit Link <i class="bi bi-arrow-right"></i>
-                </a>
-            @else
-                <a href="{{ route('resources.download', $item->id) }}" class="brochure-download-btn js-download-btn"
-                    data-doc="{{ $item->title }}">
-                    Download <i class="bi bi-arrow-right"></i>
-                </a>
-            @endif
+            <p class="brochure-card-desc" title="{{ $item->description }}">{{ $item->description }}</p>
+            <div class="brochure-card-footer">
+                @if ($isLink)
+                    <a href="{{ $item->external_url }}" class="brochure-download-btn" target="_blank" rel="noopener">
+                        Visit Link <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <div class="brochure-file-meta">
+                        <span class="brochure-file-badge"><i class="bi bi-link-45deg me-1"></i>Link</span>
+                    </div>
+                @else
+                    <a href="{{ route('resources.download', $item->id) }}" class="brochure-download-btn js-download-btn"
+                        data-doc="{{ $item->title }}">
+                        Download <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <div class="brochure-file-meta">
+                        <span class="brochure-file-badge">{{ strtoupper($fileType) }}</span>
+                        @if (!empty($fileSize))
+                            <span class="brochure-file-size">{{ $fileSize }}</span>
+                        @endif
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>

@@ -42,14 +42,21 @@ class ProductCategory extends Model
     public static function clearCategoryCache(?ProductCategory $category = null): void
     {
         Cache::forget('all_categories');
+        Cache::forget('all_categories_v2');
         Cache::forget('catalog_parent_categories_tree');
         Cache::forget('catalog_categories_tree_v4');
         Cache::forget('catalog_category_pairs_v1');
         Cache::forget('filter_active_categories');
         Cache::forget('filter_steps_data_v9');
+        Cache::forget('filter_steps_data_v10');
         Cache::forget('catalog_category_slug_v4_products');
+        Cache::forget('layout_main_header_menu_v1');
         Cache::forget('layout_main_header_menu_v2');
         Cache::forget('layout_header_megamenu_categories_v2');
+
+        try {
+            \App\Models\Menu::flushMenuCache();
+        } catch (\Throwable $e) {}
 
         if ($category) {
             $slugsToClear = collect(['products']);

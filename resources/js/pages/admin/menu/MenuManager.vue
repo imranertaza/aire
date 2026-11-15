@@ -72,7 +72,12 @@
 
               <!-- Conditional fields -->
               <div v-if="editForm.link_type === 'product_category'" class="form-group">
-                <label for="edit-product-category">Product Category</label>
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <label for="edit-product-category" class="mb-0">Product Category</label>
+                  <button type="button" class="btn btn-link btn-xs p-0 text-muted" @click="fetchProductCategories(true)" title="Refresh category list">
+                    <i class="fas fa-sync-alt mr-1"></i>Refresh
+                  </button>
+                </div>
                 <Multiselect v-model="editForm.product_category_id" :options="productCategoriesOptions"
                   :searchable="true" placeholder="Select product category" />
 
@@ -273,10 +278,14 @@ const productCategories = ref([]);
 /**
  * Fetch product categories for dropdown
  */
-const fetchProductCategories = async () => {
+const fetchProductCategories = async (forceRefresh = false) => {
   try {
-    const res = await axios.get('/api/product-categories/all');
+    const params = forceRefresh ? { refresh: 1 } : {};
+    const res = await axios.get('/api/product-categories/all', { params });
     productCategories.value = res.data.data || [];
+    if (forceRefresh) {
+      toast.info('Product categories refreshed.');
+    }
   } catch (error) {
     console.error('Failed to load product categories', error);
   }
@@ -471,6 +480,7 @@ const deleteItem = async (id, name = 'this item') => {
  * Open edit modal and populate form
  */
 const openEditPanel = (item) => {
+  fetchProductCategories();
   editModal.value.open = true
   editModal.value.target = item
   editForm.value = {

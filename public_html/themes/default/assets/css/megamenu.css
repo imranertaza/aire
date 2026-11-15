@@ -358,13 +358,22 @@
     font-weight: 600;
     color: #0f172a;
     line-height: 1.35;
-    height: 46px;
-    max-height: 46px;
+    height: 32px;
+    max-height: 32px;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     margin: 0 0 6px 0;
+}
+
+.quickview-product-name a {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .quickview-product-price {
@@ -464,6 +473,87 @@
     background: #0052a3;
     color: #ffffff;
     transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Category Showcase Page Quick View Overlays
+   ========================================================================== */
+
+.category-section-header.position-relative {
+    position: relative;
+}
+
+.category-section-header.quickview-open {
+    z-index: 1060;
+}
+
+.category-showcase-quickview-overlay {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1055;
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+/* Invisible bridge buffer between category heading and quickview card */
+.category-showcase-quickview-overlay::before {
+    content: '';
+    position: absolute;
+    top: -26px;
+    left: 0;
+    right: 0;
+    height: 36px;
+    background: transparent;
+    z-index: 5;
+}
+
+/* Category Trigger Heading */
+.category-quickview-trigger {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    transition: color 0.15s ease;
+    user-select: none;
+}
+
+.category-quickview-trigger:hover {
+    color: var(--color-primary, #0095DA) !important;
+}
+
+.category-quickview-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--color-primary, #0095DA);
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 9999px;
+    padding: 3px 10px;
+    letter-spacing: 0.2px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    vertical-align: middle;
+    box-shadow: 0 1px 3px rgba(0, 149, 218, 0.1);
+}
+
+.category-quickview-trigger:hover .category-quickview-badge,
+.category-quickview-trigger[aria-expanded="true"] .category-quickview-badge {
+    background: var(--color-primary, #0095DA);
+    color: #ffffff;
+    border-color: var(--color-primary, #0095DA);
+    box-shadow: 0 4px 10px rgba(0, 149, 218, 0.28);
+    transform: translateY(-1px);
+}
+
+.category-quickview-trigger:hover .category-quickview-badge i,
+.category-quickview-trigger[aria-expanded="true"] .category-quickview-badge i {
+    color: #ffffff !important;
 }
 
 @media (max-width: 991.98px) {
