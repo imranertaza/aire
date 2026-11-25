@@ -31,6 +31,11 @@
     $inStock = ($product->quantity ?? 0) > 0;
     $currency = 'USD';
     $primaryCat = $product->categories->first();
+
+    // Control parallax effects and dark/gradient overlays (0 = Off, 1 = On)
+    $enableParallaxOverlay = 0;
+    $enableParallax = $enableParallaxOverlay;
+    $enableOverlay = $enableParallaxOverlay;
 @endphp
 
 @section('title', $seoTitle)
@@ -58,6 +63,16 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ theme_asset('css/product-detail.css') }}">
+    @if (!$enableParallaxOverlay)
+        <style>
+            .app-card::before,
+            .app-card.no-overlay::before,
+            .box-banner-overlay,
+            .parallax-overlay {
+                display: none !important;
+            }
+        </style>
+    @endif
 @endpush
 
 @section('content')
@@ -439,7 +454,7 @@
 
                         <div class="zoom-image-container d-none position-absolute top-0 start-0 w-100 h-100 bg-white"
                             id="zoomContainer"
-                            style="background-repeat: no-repeat; background-size: 220% 220%; z-index: 5; pointer-events: none; opacity: 0; transition: opacity 0.2s ease;">
+                            style="background-repeat: no-repeat; background-size: 150% 150%; z-index: 5; pointer-events: none; opacity: 0; transition: opacity 0.2s ease;">
                         </div>
                     </div>
                 </div>
@@ -799,15 +814,21 @@
 
             <!-- Right Side Image Banner with Parallax -->
             <div class="col-lg-6">
-                <div class="position-relative rounded-4 overflow-hidden shadow-sm parallax-window"
-                    style="background-color: #0b1329; border: 1px solid var(--border-light); min-height: 420px;">
-                    <div class="parallax-slider" data-parallax-speed="6"
-                        style="background-image: url('{{ $overviewImage }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
+                @if ($enableParallaxOverlay)
+                    <div class="position-relative rounded-4 overflow-hidden shadow-sm parallax-window"
+                        style="background-color: #0b1329; border: 1px solid var(--border-light); min-height: 420px;">
+                        <div class="parallax-slider" data-parallax-speed="6"
+                            style="background-image: url('{{ $overviewImage }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
+                        </div>
+                        <div class="parallax-overlay"
+                            style="background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(11,19,41,0) 70%);">
+                        </div>
                     </div>
-                    <div class="parallax-overlay"
-                        style="background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(11,19,41,0) 70%);">
+                @else
+                    <div class="position-relative rounded-4 overflow-hidden shadow-sm"
+                        style="background-image: url('{{ $overviewImage }}'); background-size: cover; background-repeat: no-repeat; background-position: center; border: 1px solid var(--border-light); min-height: 420px;">
                     </div>
-                </div>
+                @endif
             </div>
         </div>
     </section>
@@ -869,15 +890,21 @@
                         : theme_asset('img/products/SPECIFICATIONS.png');
                 @endphp
                 @if ($specsBgImage)
-                    <div class="w-100 mb-5 position-relative overflow-hidden rounded-4 border bg-dark shadow-lg parallax-window"
-                        style="min-height: 440px;">
-                        <div class="parallax-slider" data-parallax-speed="8" data-bg="{{ $specsBgImage }}"
-                            style="background-size: cover;">
+                    @if ($enableParallaxOverlay)
+                        <div class="w-100 mb-5 position-relative overflow-hidden rounded-4 border bg-dark shadow-lg parallax-window"
+                            style="min-height: 440px;">
+                            <div class="parallax-slider" data-parallax-speed="8" data-bg="{{ $specsBgImage }}"
+                                style="background-size: cover;">
+                            </div>
+                            <div class="parallax-overlay"
+                                style="background: radial-gradient(circle, rgba(13, 110, 253, 0.05) 0%, rgba(11, 19, 41, 0.4) 100%);">
+                            </div>
                         </div>
-                        <div class="parallax-overlay"
-                            style="background: radial-gradient(circle, rgba(13, 110, 253, 0.05) 0%, rgba(11, 19, 41, 0.4) 100%);">
+                    @else
+                        <div class="w-100 mb-5 position-relative overflow-hidden rounded-4 border bg-dark shadow-lg"
+                            style="min-height: 440px; background-image: url('{{ $specsBgImage }}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
                         </div>
-                    </div>
+                    @endif
                 @endif
 
                 <!-- Stats Grid (Up to 4 Columns) -->
@@ -1088,14 +1115,17 @@
             @endphp
 
             @if ($featBgImage || $cardCount > 0)
-                <div class="precision-banner container parallax-window">
-                    @if ($featBgImage)
-                        <div class="parallax-slider" data-parallax-speed="8" data-bg="{{ $featBgImage }}"></div>
-                        <div class="parallax-overlay">
-                        </div>
+                <div class="precision-banner container {{ $enableParallaxOverlay ? 'parallax-window' : '' }}"
+                    @if (!$enableParallaxOverlay && $featBgImage) style="background-image: url('{{ $featBgImage }}'); background-size: cover; background-position: center; background-repeat: no-repeat;" @endif>
+                    @if ($enableParallaxOverlay)
+                        @if ($featBgImage)
+                            <div class="parallax-slider" data-parallax-speed="8" data-bg="{{ $featBgImage }}"></div>
+                            <div class="parallax-overlay">
+                            </div>
+                        @endif
                     @endif
                     @if ($cardCount > 0)
-                        <div class="row g-4 w-100 pb-2 parallax-content">
+                        <div class="row g-4 w-100 pb-2 {{ $enableParallaxOverlay ? 'parallax-content' : 'position-relative z-2' }}">
                             @if ($hasCard1)
                                 <div class="{{ $cardColClass }}">
                                     <div class="precision-card-item h-100">
@@ -1224,15 +1254,18 @@
             @endphp
 
             @if ($techBgImage || $hasCard)
-                <div class="physics-banner mb-5 parallax-window">
-                    @if ($techBgImage)
-                        <div class="parallax-slider" data-parallax-speed="8" data-bg="{{ $techBgImage }}"></div>
-                        <div class="parallax-overlay"
-                            style="background: linear-gradient(180deg, rgba(13, 27, 42, 0.3) 0%, rgba(13, 27, 42, 0.85) 100%);">
-                        </div>
+                <div class="physics-banner mb-5 {{ $enableParallaxOverlay ? 'parallax-window' : '' }}"
+                    @if (!$enableParallaxOverlay && $techBgImage) style="background-image: url('{{ $techBgImage }}'); background-size: cover; background-position: center; background-repeat: no-repeat;" @endif>
+                    @if ($enableParallaxOverlay)
+                        @if ($techBgImage)
+                            <div class="parallax-slider" data-parallax-speed="8" data-bg="{{ $techBgImage }}"></div>
+                            <div class="parallax-overlay"
+                                style="background: linear-gradient(180deg, rgba(13, 27, 42, 0.3) 0%, rgba(13, 27, 42, 0.85) 100%);">
+                            </div>
+                        @endif
                     @endif
                     @if ($hasCard)
-                        <div class="position-relative z-1 parallax-content" style="max-width: 420px;">
+                        <div class="position-relative z-1 {{ $enableParallaxOverlay ? 'parallax-content' : '' }}" style="max-width: 420px;">
                             <div
                                 style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 16px; padding: 24px; color: #fff;">
                                 @if ($desc->technology_card_title)
@@ -1366,8 +1399,10 @@
                     };
                 @endphp
                 <div class="box-banner" style="background-image: url('{{ $boxBgImage }}');">
-                    <!-- Ambient gradient overlay for glassmorphism card contrast -->
-                    <div class="box-banner-overlay"></div>
+                    @if ($enableParallaxOverlay)
+                        <!-- Ambient gradient overlay for glassmorphism card contrast -->
+                        <div class="box-banner-overlay"></div>
+                    @endif
 
                     <!-- Glassmorphism Item Cards Grid -->
                     <div class="position-relative z-1 w-100">
@@ -1445,27 +1480,47 @@
                         $bgImage = getImageCacheUrl($appSource, 900, 480, 'webp');
                     @endphp
                     <div class="{{ $gridCol }}">
-                        <div class="app-card parallax-window"
-                            style="min-height: {{ $gridCol === 'col-12' ? '300px' : '280px' }};">
-                            <div class="parallax-slider" data-parallax-speed="6" data-bg="{{ $bgImage }}"></div>
-                            <div class="parallax-overlay"
-                                style="background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);">
+                        @if ($enableParallaxOverlay)
+                            <div class="app-card parallax-window"
+                                style="min-height: {{ $gridCol === 'col-12' ? '300px' : '280px' }};">
+                                <div class="parallax-slider" data-parallax-speed="6" data-bg="{{ $bgImage }}"></div>
+                                <div class="parallax-overlay"
+                                    style="background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);">
+                                </div>
+                                <div class="app-card-content">
+                                    @if (!empty($appItem->badge))
+                                        <div class="badge bg-primary rounded-pill px-3 py-2 mb-2 text-uppercase fw-bold"
+                                            style="font-size: 0.65rem; letter-spacing: 1px;">{{ $appItem->badge }}</div>
+                                    @endif
+                                    <h3 class="fw-bold mb-2 text-white {{ $gridCol === 'col-12' ? 'title-2' : '' }}">
+                                        {{ $appItem->title }}</h3>
+                                    @if (!empty($appItem->description))
+                                        <p class="text-light opacity-90 small mb-0"
+                                            style="font-size: {{ $gridCol === 'col-12' ? '0.9rem' : '0.85rem' }}; max-width: {{ $gridCol === 'col-12' ? '500px' : '100%' }};">
+                                            {{ $appItem->description }}
+                                        </p>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="app-card-content">
-                                @if (!empty($appItem->badge))
-                                    <div class="badge bg-primary rounded-pill px-3 py-2 mb-2 text-uppercase fw-bold"
-                                        style="font-size: 0.65rem; letter-spacing: 1px;">{{ $appItem->badge }}</div>
-                                @endif
-                                <h3 class="fw-bold mb-2 text-white {{ $gridCol === 'col-12' ? 'title-2' : '' }}">
-                                    {{ $appItem->title }}</h3>
-                                @if (!empty($appItem->description))
-                                    <p class="text-light opacity-90 small mb-0"
-                                        style="font-size: {{ $gridCol === 'col-12' ? '0.9rem' : '0.85rem' }}; max-width: {{ $gridCol === 'col-12' ? '500px' : '100%' }};">
-                                        {{ $appItem->description }}
-                                    </p>
-                                @endif
+                        @else
+                            <div class="app-card no-overlay"
+                                style="min-height: {{ $gridCol === 'col-12' ? '300px' : '280px' }}; background-image: url('{{ $bgImage }}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                                <div class="app-card-content">
+                                    @if (!empty($appItem->badge))
+                                        <div class="badge bg-primary rounded-pill px-3 py-2 mb-2 text-uppercase fw-bold"
+                                            style="font-size: 0.65rem; letter-spacing: 1px;">{{ $appItem->badge }}</div>
+                                    @endif
+                                    <h3 class="fw-bold mb-2 text-white {{ $gridCol === 'col-12' ? 'title-2' : '' }}">
+                                        {{ $appItem->title }}</h3>
+                                    @if (!empty($appItem->description))
+                                        <p class="text-light opacity-90 small mb-0"
+                                            style="font-size: {{ $gridCol === 'col-12' ? '0.9rem' : '0.85rem' }}; max-width: {{ $gridCol === 'col-12' ? '500px' : '100%' }};">
+                                            {{ $appItem->description }}
+                                        </p>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
@@ -2466,7 +2521,9 @@
                     onScrollParallax();
                 }
 
-                initUniversalParallax();
+                @if ($enableParallaxOverlay)
+                    initUniversalParallax();
+                @endif
             });
         });
     </script>

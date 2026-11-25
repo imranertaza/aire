@@ -48,6 +48,11 @@
         }
 
         :root {
+            --site-zoom-xxl: 0.92;
+            --site-zoom-xl: 0.92;
+            --site-zoom-lg: 0.94;
+            --site-zoom-md: 1;
+            --site-zoom-sm: 1;
             --color-primary: #0095DA;
             --color-primary-hover: #047cc2;
             --color-dark: #0f172a;
@@ -55,6 +60,60 @@
             --color-border: #e2e8f0;
             --primary-color: var(--color-primary);
             --fs-body: 14px;
+        }
+
+        /* Responsive Viewport Zoom Scaling */
+        @media (min-width: 1400px) {
+            html {
+                zoom: 0.92;
+                zoom: var(--site-zoom-xxl, 0.92);
+            }
+        }
+
+        @media (min-width: 1200px) and (max-width: 1399.98px) {
+            html {
+                zoom: 0.92;
+                zoom: var(--site-zoom-xl, 0.92);
+            }
+        }
+
+        @media (min-width: 992px) and (max-width: 1199.98px) {
+            html {
+                zoom: 0.94;
+                zoom: var(--site-zoom-lg, 0.94);
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            html {
+                zoom: 1;
+                zoom: var(--site-zoom-md, 1);
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            html {
+                zoom: 1;
+                zoom: var(--site-zoom-sm, 1);
+            }
+        }
+
+        .why-choose-stacked-wrapper,
+        #whyChooseStackedWrapper,
+        .pin-spacer:has(> #whyChooseStackedWrapper),
+        .pin-spacer:has(> .why-choose-stacked-wrapper),
+        div.pin-spacer {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .stacked-cards-sticky-pin,
+        .stacked-cards-container {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         *,
@@ -73,7 +132,6 @@
         }
 
         .container,
-        .container-fluid,
         .main-container {
             width: 100%;
             padding-right: 15px;

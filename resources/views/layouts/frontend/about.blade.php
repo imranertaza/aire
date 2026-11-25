@@ -27,7 +27,7 @@
 
     </section>
     <!-- Our mission and vision Section End -->
-    <!-- Vision Start  -->
+    <!-- Vision Start -->
     @php
         $pageTitle = 'About Us';
         $vision = App\Models\Section::where('name', 'about_vision')->first();

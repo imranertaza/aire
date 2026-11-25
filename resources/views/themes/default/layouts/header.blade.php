@@ -51,27 +51,22 @@
                                     (request()->routeIs('categories') && strtolower($navItem->name) === 'products') ||
                                     (request()->routeIs('docs', 'resources') && strtolower($navItem->name) === 'resources') ||
                                     (request()->routeIs('about') && strtolower($navItem->name) === 'about');
-
-                                $megaMenuTarget = null;
-                                if ($navItem->link_type === 'product_category' && !empty($navItem->has_quick_view) && $navItem->productCategory) {
-                                    $megaMenuTarget = 'quickViewMenu-' . $navItem->id;
-                                }
                             @endphp
-                            <a href="{{ $itemUrl }}" class="nav-link {{ $isActive ? 'active' : '' }}" {!! $megaMenuTarget ? 'data-megamenu-target="' . $megaMenuTarget . '"' : '' !!}>
+                            <a href="{{ $itemUrl }}" class="nav-link {{ $isActive ? 'active' : '' }}">
                                 {{ $navItem->name }}
                             </a>
                         @endforeach
                     @else
                         <a href="{{ route('category.show', 'solutions') }}"
-                            class="nav-link {{ request()->route('slug') === 'solutions' ? 'active' : '' }}" data-megamenu-target="quickViewCategory-solutions">Solutions</a>
+                            class="nav-link {{ request()->route('slug') === 'solutions' ? 'active' : '' }}">Solutions</a>
 
                         <a href="{{ route('category.show', 'products') }}"
-                            class="nav-link {{ request()->routeIs('categories') || request()->route('slug') === 'products' ? 'active' : '' }}" data-megamenu-target="quickViewCategory-products">Products</a>
+                            class="nav-link {{ request()->routeIs('categories') || request()->route('slug') === 'products' ? 'active' : '' }}">Products</a>
 
                         <a href="{{ route('category.show', 'industries') }}"
-                            class="nav-link {{ request()->route('slug') === 'industries' ? 'active' : '' }}" data-megamenu-target="quickViewCategory-industries">Industries</a>
+                            class="nav-link {{ request()->route('slug') === 'industries' ? 'active' : '' }}">Industries</a>
                         <a href="{{ route('category.show', 'technologies') }}"
-                            class="nav-link {{ request()->route('slug') === 'technologies' ? 'active' : '' }}" data-megamenu-target="quickViewCategory-technologies">Technologies</a>
+                            class="nav-link {{ request()->route('slug') === 'technologies' ? 'active' : '' }}">Technologies</a>
 
                         <a href="{{ route('resources') }}"
                             class="nav-link {{ request()->routeIs('resources') || request()->route('slug') === 'resources' ? 'active' : '' }}">Resources</a>

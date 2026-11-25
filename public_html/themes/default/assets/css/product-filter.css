@@ -83,7 +83,7 @@
 .protocol-sidebar {
     position: sticky;
     top: 95px;
-    max-height: calc(100vh - 110px);
+    max-height: calc(100vh - 50px);
     overflow-y: auto;
     padding-right: 6px;
     scrollbar-width: thin;
@@ -683,11 +683,30 @@
 /* --------------------------------------------------------------------------
    WHY CHOOSE AIRE? (.why-choose-stacked-wrapper) — GSAP ScrollTrigger Deck
    -------------------------------------------------------------------------- */
-.why-choose-stacked-wrapper {
+.why-choose-stacked-wrapper,
+#whyChooseStackedWrapper {
     position: relative;
     margin-top: 3rem;
     margin-bottom: 4rem;
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.pin-spacer:has(> #whyChooseStackedWrapper),
+.pin-spacer:has(> .why-choose-stacked-wrapper),
+div.pin-spacer {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.stacked-cards-sticky-pin {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .why-choose-stacked__header {

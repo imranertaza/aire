@@ -226,7 +226,7 @@ class SectionManagementTest extends TestCase
             ],
         ]);
 
-        $imageFile = UploadedFile::fake()->image('purpose.jpg', 800, 600);
+        $imageFile = UploadedFile::fake()->create('purpose.jpg', 100, 'image/jpeg');
 
         $response = $this->postJson("/api/sections/{$section->id}?_method=PUT", [
             'data'  => json_encode([
@@ -242,6 +242,79 @@ class SectionManagementTest extends TestCase
         $this->assertEquals('Updated Mission & Vision', $section->data['title']);
         $this->assertNotEmpty($section->data['image']);
         Storage::disk('public')->assertExists($section->data['image']);
+    }
+
+    public function test_updating_about_section_image_deletes_previous_image_file(): void
+    {
+        Storage::fake('public');
+        Sanctum::actingAs($this->admin, ['*'], 'user');
+
+        // First upload
+        $section = Section::create([
+            'name' => 'about_story',
+            'data' => [
+                'title' => 'Our Story',
+                'hero_title' => 'Initial Story',
+            ],
+        ]);
+
+        $firstFile = UploadedFile::fake()->create('first_hero.jpg', 100, 'image/jpeg');
+        $this->postJson("/api/sections/{$section->id}?_method=PUT", [
+            'data' => json_encode($section->data),
+            'hero_image' => $firstFile,
+        ])->assertStatus(200);
+
+        $section->refresh();
+        $firstStoredPath = preg_replace('#^/?storage/#', '', $section->data['hero_image']);
+        Storage::disk('public')->assertExists($firstStoredPath);
+
+        // Second upload (updating image)
+        $secondFile = UploadedFile::fake()->create('second_hero.jpg', 150, 'image/jpeg');
+        $this->postJson("/api/sections/{$section->id}?_method=PUT", [
+            'data' => json_encode($section->data),
+            'hero_image' => $secondFile,
+        ])->assertStatus(200);
+
+        $section->refresh();
+        $secondStoredPath = preg_replace('#^/?storage/#', '', $section->data['hero_image']);
+        Storage::disk('public')->assertExists($secondStoredPath);
+
+        // Verify that the old first file was deleted from disk
+        Storage::disk('public')->assertMissing($firstStoredPath);
+    }
+
+    public function test_removing_about_section_image_deletes_file_from_storage(): void
+    {
+        Storage::fake('public');
+        Sanctum::actingAs($this->admin, ['*'], 'user');
+
+        $section = Section::create([
+            'name' => 'about_story',
+            'data' => [
+                'title' => 'Our Story',
+            ],
+        ]);
+
+        $file = UploadedFile::fake()->create('hero_to_remove.jpg', 100, 'image/jpeg');
+        $this->postJson("/api/sections/{$section->id}?_method=PUT", [
+            'data' => json_encode($section->data),
+            'hero_image' => $file,
+        ])->assertStatus(200);
+
+        $section->refresh();
+        $storedPath = preg_replace('#^/?storage/#', '', $section->data['hero_image']);
+        Storage::disk('public')->assertExists($storedPath);
+
+        // Remove image (user cleared image in UI, sends empty hero_image)
+        $updatedData = $section->data;
+        $updatedData['hero_image'] = '';
+        $this->postJson("/api/sections/{$section->id}?_method=PUT", [
+            'data' => json_encode($updatedData),
+        ])->assertStatus(200);
+
+        $section->refresh();
+        $this->assertNull($section->data['hero_image']);
+        Storage::disk('public')->assertMissing($storedPath);
     }
 
     public function test_section_update_validates_json_format(): void
@@ -339,7 +412,7 @@ class SectionManagementTest extends TestCase
         ]);
 
         Section::create([
-            'name' => 'about_vision',
+            'name' => 'about_mission_vision',
             'data' => ['title' => 'Our Corporate Vision'],
         ]);
 
@@ -367,6 +440,6 @@ class SectionManagementTest extends TestCase
         $searchRes = $this->getJson('/api/sections?search=Corporate Vision');
         $searchRes->assertStatus(200);
         $searchNames = collect($searchRes->json('data.data'))->pluck('name')->all();
-        $this->assertContains('about_vision', $searchNames);
+        $this->assertContains('about_mission_vision', $searchNames);
     }
 }

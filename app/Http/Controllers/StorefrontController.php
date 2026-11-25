@@ -55,7 +55,6 @@ class StorefrontController extends Controller
     public function categories(): View
     {
         $categories = $this->productService->getCategoryTree();
-
         return \theme_view('products.category.index', compact('categories'));
     }
 
@@ -283,15 +282,74 @@ class StorefrontController extends Controller
      */
     public function contact(): View
     {
-        $page = (object) [
-            'page_title'       => 'Contact Us',
-            'breadcrumb'       => 'Contact Us',
-            'meta_description' => 'Contact Aire Indoor Air Quality Solutions',
-            'meta_keywords'    => 'contact, air quality, aire',
-            'meta_title'       => 'Contact Us | Aire',
-        ];
+        $page = Page::query()
+            ->whereIn('slug', ['contact', 'contact-us'])
+            ->active()
+            ->first();
 
-        return \theme_view('contact', compact('page'));
+        if (!$page) {
+            $page = (object) [
+                'id'               => null,
+                'page_title'       => 'Contact Us',
+                'breadcrumb'       => 'Contact Us',
+                'meta_description' => 'Contact Aire Indoor Air Quality Solutions',
+                'meta_keywords'    => 'contact, air quality, aire',
+                'meta_title'       => 'Contact Us | Aire',
+                'slug'             => 'contact-us',
+                'temp'             => 'contact',
+                'short_des'        => null,
+                'page_description' => null,
+                'f_image'          => null,
+                'menu_id'          => 2,
+                'updated_at'       => now(),
+                'created_at'       => now(),
+            ];
+        }
+
+        $data = ['page' => $page];
+
+        $menuId = $page->menu_id ?? 2;
+        $sidebarMenu = Cache::remember("page_associated_menu_{$menuId}", 86400, function () use ($menuId) {
+            return Menu::query()
+                ->where('id', $menuId)
+                ->where('enabled', 1)
+                ->with([
+                    'menus' => function ($q) {
+                        $q->where('enabled', 1)
+                            ->whereNull('parent_id')
+                            ->with('page')
+                            ->orderBy('order', 'asc')
+                            ->orderBy('id', 'asc');
+                    }
+                ])
+                ->first();
+        });
+
+        if (!$sidebarMenu) {
+            $sidebarMenu = Cache::remember('layout_contact_pages_menu_v1', 86400, function () {
+                return Menu::query()
+                    ->where(function ($q) {
+                        $q->where('name', 'LIKE', '%GET IN TOUCH%')
+                            ->orWhere('name', 'LIKE', '%CONTACT%');
+                    })
+                    ->where('enabled', 1)
+                    ->with([
+                        'menus' => function ($q) {
+                            $q->where('enabled', 1)
+                                ->whereNull('parent_id')
+                                ->with('page')
+                                ->orderBy('order', 'asc')
+                                ->orderBy('id', 'asc');
+                        }
+                    ])
+                    ->first();
+            });
+        }
+
+        $data['sidebarMenu'] = $sidebarMenu;
+        $data['legalPages'] = $sidebarMenu;
+
+        return \theme_view('contact', $data);
     }
 
     /**
@@ -513,6 +571,33 @@ class StorefrontController extends Controller
                         ])
                         ->first();
                 });
+            }
+            $data['sidebarMenu'] = $data['legalPages'] ?? null;
+
+            return \theme_view('page', $data);
+        }
+
+        if ($normalizedTemp === 'contact') {
+            if (!isset($data['sidebarMenu'])) {
+                $data['sidebarMenu'] = Cache::remember('layout_contact_pages_menu_v1', 86400, function () {
+                    return Menu::query()
+                        ->where(function ($q) {
+                            $q->where('name', 'LIKE', '%GET IN TOUCH%')
+                                ->orWhere('name', 'LIKE', '%CONTACT%');
+                        })
+                        ->where('enabled', 1)
+                        ->with([
+                            'menus' => function ($q) {
+                                $q->where('enabled', 1)
+                                    ->whereNull('parent_id')
+                                    ->with('page')
+                                    ->orderBy('order', 'asc')
+                                    ->orderBy('id', 'asc');
+                            }
+                        ])
+                        ->first();
+                });
+                $data['legalPages'] = $data['sidebarMenu'] ?? null;
             }
 
             return \theme_view('page', $data);

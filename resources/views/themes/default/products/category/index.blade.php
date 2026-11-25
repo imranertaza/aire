@@ -35,6 +35,18 @@
                 : collect([$categories]))
             : $categories ?? ($allCategories ?? collect());
 
+    $currentSlug = request()->route('slug');
+    $currentCategory =
+        $catModel ??
+        ((!empty($currentSlug) ? \App\Models\ProductCategory::where('slug', $currentSlug)->first() : null) ??
+            $displayCategories->first());
+
+    // Quick View enabled only for specific category slugs (e.g. solution-by-space)
+    $allowedQuickViewSlugs = ['solution-by-space', 'solutions-by-space'];
+    $isQuickViewEnabled = in_array($currentSlug, $allowedQuickViewSlugs);
+    // Sidebar Quick View trigger is enabled when a category exists
+    $isQuickViewEnabledInSidebar = !in_array($currentSlug, $allowedQuickViewSlugs);
+
     $firstCat = $displayCategories->first();
     $firstProduct = null;
     if ($firstCat) {
@@ -131,6 +143,48 @@
             border-color: var(--color-primary, #0095DA);
             transform: translateX(3px);
         }
+
+        /* ── Sidebar Quick View Trigger Button ── */
+        .sidebar-quickview-btn {
+            text-decoration: none;
+            outline: none;
+            width: 100%;
+        }
+
+        .sidebar-quickview-header {
+            background: #ffffff;
+            border: 1px solid #e2e8f0 !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sidebar-quickview-btn:hover .sidebar-quickview-header,
+        .sidebar-quickview-btn[aria-expanded="true"] .sidebar-quickview-header {
+            background: #f0f9ff;
+            border-color: #0095da !important;
+            box-shadow: 0 4px 12px rgba(0, 149, 218, 0.12);
+            /* transform: translateY(-1px); */
+        }
+
+        .sidebar-quickview-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #f0f9ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-quickview-btn:hover .sidebar-quickview-icon,
+        .sidebar-quickview-btn[aria-expanded="true"] .sidebar-quickview-icon {
+            background: #0095da;
+        }
+
+        .sidebar-quickview-btn:hover .sidebar-quickview-icon i,
+        .sidebar-quickview-btn[aria-expanded="true"] .sidebar-quickview-icon i {
+            color: #ffffff !important;
+        }
     </style>
 @endpush
 
@@ -148,6 +202,38 @@
             <!-- Left Sidebar Navigation -->
             <aside class="col-lg-3 d-none d-lg-block border-right1px pe-lg-4">
                 <nav class="sidebar-menu sticky-sidebar" data-lenis-prevent>
+                    @if ($isQuickViewEnabledInSidebar && $currentCategory)
+                        <div class="sidebar-quickview-wrapper mb-3">
+                            <button type="button"
+                                class="sidebar-quickview-btn category-quickview-trigger w-100 text-start border-0 bg-transparent p-0 cursor-pointer"
+                                data-megamenu-target="quickViewSectionCat-{{ $currentCategory->id }}" tabindex="0"
+                                role="button" aria-haspopup="dialog" aria-expanded="false"
+                                title="Click to quick view {{ $currentCategory->category_name }} products">
+                                <div
+                                    class="sidebar-quickview-header d-flex align-items-center justify-content-between p-2 rounded-3 border">
+                                    <div class="min-w-0 me-2 d-flex align-items-center">
+                                        <div class="sidebar-quickview-icon me-2 flex-shrink-0">
+                                            <i class="bi bi-grid-3x3-gap-fill text-primary fs-5"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <span class="d-block fw-bold text-dark text-truncate fs-14">
+                                                {{ $currentCategory->category_name }}
+                                            </span>
+                                            <small class="d-block text-muted text-truncate" style="font-size: 11px;">
+                                                Click to preview
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <span class="category-quickview-badge flex-shrink-0 ms-auto" aria-hidden="true">
+                                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                                        <span>Quick View</span>
+                                    </span>
+                                </div>
+                            </button>
+                        </div>
+                        <hr class="sidebar-divider mb-3">
+                    @endif
+
                     @if ($isProducts)
                         <a href="{{ route('products.filter') }}" class="menu-item--special">
                             <span class="special-icon">
@@ -270,7 +356,8 @@
                         @endif
 
                         @foreach ($displayCategories as $cat)
-                            <a href="#cat-{{ $cat->id }}" class="mobile-cat-pill {{ $loop->first ? 'active' : '' }}">
+                            <a href="#cat-{{ $cat->id }}"
+                                class="mobile-cat-pill {{ $loop->first ? 'active' : '' }}">
                                 <span class="mobile-cat-pill__icon">
                                     <x-category-icon :category="$cat" />
                                 </span>
@@ -283,23 +370,36 @@
                 {{-- Layout Pipeline Slot: After Catalog Header / Breadcrumbs --}}
                 @renderPageSlot('category', 'after:catalog_header')
 
+                {{-- Primary Category Quick View Overlay for current category (triggered from sidebar or catalog header) --}}
+                @php
+                    $alreadyInLoopWithQuickView =
+                        $isQuickViewEnabled && $displayCategories->contains('id', $currentCategory?->id);
+                @endphp
+                @if ($currentCategory && ($isQuickViewEnabled || $isQuickViewEnabledInSidebar) && !$alreadyInLoopWithQuickView)
+                    <div class="category-section-header position-relative mb-0 p-0" style="min-height: 0;">
+                        @include('themes.default.partials.category_quick_view', [
+                            'cat' => $currentCategory,
+                        ])
+                    </div>
+                @endif
+
                 <!-- Dynamic Category Showcase Sections (Loop through categories and their products) -->
                 @foreach ($displayCategories as $cat)
                     <div id="cat-{{ $cat->id }}" class="category-showcase-section content-section mt-0 pt-0 mb-4">
-                        <div class="category-section-header position-relative d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+                        <div
+                            class="category-section-header position-relative d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
                             <div class="min-w-0">
-                                <h2 class="section-title title-1 text-primary pb-0 mb-0 category-quickview-trigger cursor-pointer"
-                                    data-megamenu-target="quickViewSectionCat-{{ $cat->id }}"
-                                    tabindex="0"
-                                    role="button"
-                                    aria-haspopup="dialog"
-                                    aria-expanded="false"
-                                    title="Hover to quick view {{ $cat->category_name }} products">
+                                <h2 class="section-title title-1 text-primary pb-0 mb-0 {{ $isQuickViewEnabled ? 'category-quickview-trigger cursor-pointer' : '' }}"
+                                    @if ($isQuickViewEnabled) data-megamenu-target="quickViewSectionCat-{{ $cat->id }}" tabindex="0"
+                                        role="button" aria-haspopup="dialog" aria-expanded="false"
+                                        title="Click to quick view {{ $cat->category_name }} products" @endif>
                                     <span>{{ $cat->category_name }}</span>
-                                    <span class="category-quickview-badge ms-2" aria-hidden="true">
-                                        <i class="bi bi-grid-3x3-gap-fill"></i>
-                                        <span>Quick View</span>
-                                    </span>
+                                    @if ($isQuickViewEnabled)
+                                        <span class="category-quickview-badge ms-2" aria-hidden="true">
+                                            <i class="bi bi-grid-3x3-gap-fill"></i>
+                                            <span>Quick View</span>
+                                        </span>
+                                    @endif
                                 </h2>
                                 <p class="section-subtitle mb-0 text-muted fs-16 lh-base text-truncate"
                                     title="{{ strip_tags($cat->description ?? '') }}">
@@ -307,22 +407,24 @@
                                 </p>
                             </div>
                             <div class="category-header-controls flex-shrink-0">
-                                <a href="{{ route('category.all', $cat->slug ?: $cat->id) }}" class="category-view-all-link">
+                                {{-- <a href="{{ route('category.all', $cat->slug ?: $cat->id) }}"
+                                    class="category-view-all-link">
                                     View All <i class="bi bi-arrow-right"></i>
-                                </a>
+                                </a> --}}
                             </div>
 
-                            {{-- MegaMenu Quick View for this Category --}}
-                            @include('themes.default.partials.category_quick_view', ['cat' => $cat])
+                            @if ($isQuickViewEnabled)
+                                {{-- MegaMenu Quick View for this Category --}}
+                                @include('themes.default.partials.category_quick_view', ['cat' => $cat])
+                            @endif
                         </div>
                         {{-- 2-Column Product Showcase Grid for this Category --}}
                         <div class="row g-4">
                             @php
                                 $categoryProducts = $cat->products;
                                 if ($categoryProducts->isEmpty() && $cat->children && $cat->children->isNotEmpty()) {
-                                    $categoryProducts = $cat->children->pluck('products')->flatten();
+                                    $categoryProducts = $cat->children->pluck('products')->flatten()->unique('id');
                                 }
-                                $categoryProducts = $categoryProducts->take(4);
                             @endphp
 
                             @forelse ($categoryProducts as $product)

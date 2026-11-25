@@ -24,7 +24,12 @@
         if ($u === '') {
             return route($fallbackRoute);
         }
-        if (str_starts_with($u, 'http://') || str_starts_with($u, 'https://') || str_starts_with($u, '/') || str_starts_with($u, '#')) {
+        if (
+            str_starts_with($u, 'http://') ||
+            str_starts_with($u, 'https://') ||
+            str_starts_with($u, '/') ||
+            str_starts_with($u, '#')
+        ) {
             return $u;
         }
         return url($u);
@@ -34,34 +39,47 @@
     $actionUrl = $resolveTargetUrl($catGrid['action_url'] ?? null, 'products.finder');
 
     $freshAirTitle = $catGrid['fresh_air_title'] ?? 'Fresh Air Unit';
-    $freshAirUrl = !empty($catGrid['fresh_air_url']) ? $resolveTargetUrl($catGrid['fresh_air_url'], 'home') : route('category.show', 'fresh-air-systems');
+    $freshAirUrl = !empty($catGrid['fresh_air_url'])
+        ? $resolveTargetUrl($catGrid['fresh_air_url'], 'home')
+        : route('category.show', 'fresh-air-systems');
     $freshAirImg = $resolveUrl($catGrid['fresh_air_image'] ?? null, 'img/home/fresh-air-unit.webp');
 
     $maskTitle = $catGrid['mask_title'] ?? 'Air Pro Mask';
-    $maskUrl = !empty($catGrid['mask_url']) ? $resolveTargetUrl($catGrid['mask_url'], 'home') : route('category.show', 'smart-wearable-masks');
+    $maskUrl = !empty($catGrid['mask_url'])
+        ? $resolveTargetUrl($catGrid['mask_url'], 'home')
+        : route('category.show', 'smart-wearable-masks');
     $maskImg = $resolveUrl($catGrid['mask_image'] ?? null, 'img/home/air-pro-mask.webp');
 
     $accTitle = $catGrid['accessories_title'] ?? 'Accessories';
-    $accUrl = !empty($catGrid['accessories_url']) ? $resolveTargetUrl($catGrid['accessories_url'], 'home') : route('category.show', 'accessories-parts');
+    $accUrl = !empty($catGrid['accessories_url'])
+        ? $resolveTargetUrl($catGrid['accessories_url'], 'home')
+        : route('category.show', 'accessories-parts');
     $accImg = $resolveUrl($catGrid['accessories_image'] ?? null, 'img/home/accessories.webp');
 
     $purifierTitle = $catGrid['purifier_title'] ?? 'Air Purifiers';
-    $purifierUrl = !empty($catGrid['purifier_url']) ? $resolveTargetUrl($catGrid['purifier_url'], 'home') : route('category.show', 'air-purifiers');
+    $purifierUrl = !empty($catGrid['purifier_url'])
+        ? $resolveTargetUrl($catGrid['purifier_url'], 'home')
+        : route('category.show', 'air-purifiers');
     $purifierImg = $resolveUrl($catGrid['purifier_image'] ?? null, 'img/home/air-purifiers.webp');
 
     $homeSolTitle = $catGrid['home_solutions_title'] ?? 'Solutions for Home';
     $homeSolSub = $catGrid['home_solutions_sub'] ?? 'Ventilation and Filtration Solution';
-    $homeSolUrl = !empty($catGrid['home_solutions_url']) ? $resolveTargetUrl($catGrid['home_solutions_url'], 'home') : route('category.show', 'home-fresh-air-systems');
+    $homeSolUrl = !empty($catGrid['home_solutions_url'])
+        ? $resolveTargetUrl($catGrid['home_solutions_url'], 'home')
+        : route('category.show', 'home-fresh-air-systems');
     $homeSolImg = $resolveUrl($catGrid['home_solutions_image'] ?? null, 'img/home/solutions-home.webp');
 
     $bizSolTitle = $catGrid['biz_solutions_title'] ?? 'Solutions for Business';
     $bizSolSub = $catGrid['biz_solutions_sub'] ?? 'Air Disinfection & Air Monitoring';
-    $bizSolUrl = !empty($catGrid['biz_solutions_url']) ? $resolveTargetUrl($catGrid['biz_solutions_url'], 'home') : route('category.show', 'commercial-fresh-air-systems');
+    $bizSolUrl = !empty($catGrid['biz_solutions_url'])
+        ? $resolveTargetUrl($catGrid['biz_solutions_url'], 'home')
+        : route('category.show', 'commercial-fresh-air-systems');
     $bizSolImg = $resolveUrl($catGrid['biz_solutions_image'] ?? null, 'img/home/solutions-business.webp');
 @endphp
 
-<section class="home-category-showcase-section py-4 my-2" aria-label="Product Categories and Solutions">
-    <div class="home-showcase-inner-container">
+<section class="container main-container home-category-showcase-section py-4 my-2"
+    aria-label="Product Categories and Solutions">
+    <div class="home-showcase-inner-container ">
         <!-- Top Action Button -->
         <div class="home-showcase-action-wrapper text-center mb-5">
             <a href="{{ $actionUrl }}" class="home-showcase-btn" aria-label="{{ $actionText }}">
@@ -85,13 +103,13 @@
                 <a href="{{ $freshAirUrl }}" class="bento-card bento-card--fresh-air"
                     aria-label="{{ $freshAirTitle }}">
                     <picture>
-                        @if(str_ends_with(strtolower($freshAirImg), '.webp'))
+                        @if (str_ends_with(strtolower($freshAirImg), '.webp'))
                             <source srcset="{{ $freshAirImg }}" type="image/webp">
-                            <img src="{{ str_replace('.webp', '.jpg', $freshAirImg) }}"
-                                alt="{{ $freshAirTitle }}" class="bento-card__bg" loading="lazy">
+                            <img src="{{ str_replace('.webp', '.jpg', $freshAirImg) }}" alt="{{ $freshAirTitle }}"
+                                class="bento-card__bg" loading="lazy">
                         @else
-                            <img src="{{ $freshAirImg }}"
-                                alt="{{ $freshAirTitle }}" class="bento-card__bg" loading="lazy">
+                            <img src="{{ $freshAirImg }}" alt="{{ $freshAirTitle }}" class="bento-card__bg"
+                                loading="lazy">
                         @endif
                     </picture>
                     <div class="bento-card__pill bento-card__pill--center">
@@ -105,13 +123,13 @@
                     <a href="{{ $maskUrl }}" class="bento-card bento-card--mask"
                         aria-label="{{ $maskTitle }}">
                         <picture>
-                            @if(str_ends_with(strtolower($maskImg), '.webp'))
+                            @if (str_ends_with(strtolower($maskImg), '.webp'))
                                 <source srcset="{{ $maskImg }}" type="image/webp">
-                                <img src="{{ str_replace('.webp', '.jpg', $maskImg) }}"
-                                    alt="{{ $maskTitle }}" class="bento-card__bg" loading="lazy">
+                                <img src="{{ str_replace('.webp', '.jpg', $maskImg) }}" alt="{{ $maskTitle }}"
+                                    class="bento-card__bg" loading="lazy">
                             @else
-                                <img src="{{ $maskImg }}"
-                                    alt="{{ $maskTitle }}" class="bento-card__bg" loading="lazy">
+                                <img src="{{ $maskImg }}" alt="{{ $maskTitle }}" class="bento-card__bg"
+                                    loading="lazy">
                             @endif
                         </picture>
                         <div class="bento-card__pill bento-card__pill--center">
@@ -123,13 +141,13 @@
                     <a href="{{ $accUrl }}" class="bento-card bento-card--accessories"
                         aria-label="{{ $accTitle }}">
                         <picture>
-                            @if(str_ends_with(strtolower($accImg), '.webp'))
+                            @if (str_ends_with(strtolower($accImg), '.webp'))
                                 <source srcset="{{ $accImg }}" type="image/webp">
-                                <img src="{{ str_replace('.webp', '.jpg', $accImg) }}"
-                                    alt="{{ $accTitle }}" class="bento-card__bg" loading="lazy">
+                                <img src="{{ str_replace('.webp', '.jpg', $accImg) }}" alt="{{ $accTitle }}"
+                                    class="bento-card__bg" loading="lazy">
                             @else
-                                <img src="{{ $accImg }}"
-                                    alt="{{ $accTitle }}" class="bento-card__bg" loading="lazy">
+                                <img src="{{ $accImg }}" alt="{{ $accTitle }}" class="bento-card__bg"
+                                    loading="lazy">
                             @endif
                         </picture>
                         <div class="bento-card__pill bento-card__pill--center">
@@ -141,13 +159,13 @@
                     <a href="{{ $purifierUrl }}" class="bento-card bento-card--purifiers"
                         aria-label="{{ $purifierTitle }}">
                         <picture>
-                            @if(str_ends_with(strtolower($purifierImg), '.webp'))
+                            @if (str_ends_with(strtolower($purifierImg), '.webp'))
                                 <source srcset="{{ $purifierImg }}" type="image/webp">
-                                <img src="{{ str_replace('.webp', '.jpg', $purifierImg) }}"
-                                    alt="{{ $purifierTitle }}" class="bento-card__bg" loading="lazy">
+                                <img src="{{ str_replace('.webp', '.jpg', $purifierImg) }}" alt="{{ $purifierTitle }}"
+                                    class="bento-card__bg" loading="lazy">
                             @else
-                                <img src="{{ $purifierImg }}"
-                                    alt="{{ $purifierTitle }}" class="bento-card__bg" loading="lazy">
+                                <img src="{{ $purifierImg }}" alt="{{ $purifierTitle }}" class="bento-card__bg"
+                                    loading="lazy">
                             @endif
                         </picture>
                         <div class="bento-card__pill bento-card__pill--center">
@@ -163,13 +181,13 @@
                 <a href="{{ $homeSolUrl }}" class="solution-banner-card solution-banner-card--home"
                     aria-label="{{ $homeSolTitle }}">
                     <picture>
-                        @if(str_ends_with(strtolower($homeSolImg), '.webp'))
+                        @if (str_ends_with(strtolower($homeSolImg), '.webp'))
                             <source srcset="{{ $homeSolImg }}" type="image/webp">
-                            <img src="{{ str_replace('.webp', '.jpg', $homeSolImg) }}"
-                                alt="{{ $homeSolTitle }}" class="solution-banner-card__bg" loading="lazy">
+                            <img src="{{ str_replace('.webp', '.jpg', $homeSolImg) }}" alt="{{ $homeSolTitle }}"
+                                class="solution-banner-card__bg" loading="lazy">
                         @else
-                            <img src="{{ $homeSolImg }}"
-                                alt="{{ $homeSolTitle }}" class="solution-banner-card__bg" loading="lazy">
+                            <img src="{{ $homeSolImg }}" alt="{{ $homeSolTitle }}" class="solution-banner-card__bg"
+                                loading="lazy">
                         @endif
                     </picture>
                     <div class="solution-banner-card__overlay"></div>
@@ -183,13 +201,13 @@
                 <a href="{{ $bizSolUrl }}" class="solution-banner-card solution-banner-card--business"
                     aria-label="{{ $bizSolTitle }}">
                     <picture>
-                        @if(str_ends_with(strtolower($bizSolImg), '.webp'))
+                        @if (str_ends_with(strtolower($bizSolImg), '.webp'))
                             <source srcset="{{ $bizSolImg }}" type="image/webp">
-                            <img src="{{ str_replace('.webp', '.jpg', $bizSolImg) }}"
-                                alt="{{ $bizSolTitle }}" class="solution-banner-card__bg" loading="lazy">
+                            <img src="{{ str_replace('.webp', '.jpg', $bizSolImg) }}" alt="{{ $bizSolTitle }}"
+                                class="solution-banner-card__bg" loading="lazy">
                         @else
-                            <img src="{{ $bizSolImg }}"
-                                alt="{{ $bizSolTitle }}" class="solution-banner-card__bg" loading="lazy">
+                            <img src="{{ $bizSolImg }}" alt="{{ $bizSolTitle }}"
+                                class="solution-banner-card__bg" loading="lazy">
                         @endif
                     </picture>
                     <div class="solution-banner-card__overlay"></div>
@@ -204,8 +222,9 @@
         <!-- Bottom Action Button -->
         <div class="home-showcase-action-wrapper text-center mt-5">
             <a href="{{ $actionUrl }}" class="home-showcase-btn" aria-label="{{ $actionText }}">
-                <svg class="home-showcase-btn__icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="home-showcase-btn__icon" viewBox="0 0 24 24" width="16" height="16"
+                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
                     <path d="M9 18h6"></path>
                     <path d="M10 22h4"></path>
                     <path

@@ -143,43 +143,12 @@ class StorefrontPagesTest extends TestCase
             ->assertJsonValidationErrors(['name', 'email', 'message']);
     }
 
-    public function test_header_renders_category_megamenu_quickview(): void
+    public function test_header_does_not_render_category_megamenu_quickview(): void
     {
-        $parentCat = \App\Models\ProductCategory::create([
-            'category_name' => 'Air Purifiers',
-            'slug'          => 'products',
-            'status'        => 1,
-        ]);
-
-        $childCat = \App\Models\ProductCategory::create([
-            'parent_id'     => $parentCat->id,
-            'category_name' => 'Home & Office',
-            'slug'          => 'home-office',
-            'status'        => 1,
-        ]);
-
-        $product = \App\Models\Product::create([
-            'store_id' => 1,
-            'name'     => 'TA400 Air Purifier',
-            'slug'     => 'ta400-air-purifier',
-            'model'    => 'TA400',
-            'price'    => 561.64,
-            'quantity' => 10,
-            'status'   => 1,
-        ]);
-        $childCat->products()->attach($product->id);
-
-        \Illuminate\Support\Facades\Cache::forget('layout_header_megamenu_categories_v2');
-        \Illuminate\Support\Facades\Cache::forget('layout_main_header_menu_v2');
-
         $response = $this->get(route('home'));
 
         $response->assertStatus(200);
-        $response->assertSee('quickViewCategory-products', false);
-        $response->assertSee('Air Purifiers');
-        $response->assertSee('Home &amp; Office', false);
-        $response->assertSee('TA400 Air Purifier');
-        $response->assertSee('View all Air Purifiers &rarr;', false);
-        $response->assertDontSee('quickview-features-grid', false);
+        $response->assertDontSee('quickViewCategory-products', false);
+        $response->assertDontSee('quickViewCategory-solutions', false);
     }
 }

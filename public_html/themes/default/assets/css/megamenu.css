@@ -479,35 +479,114 @@
    Category Showcase Page Quick View Overlays
    ========================================================================== */
 
+/* ==========================================================================
+   Quick View Modal Blurred Backdrop (Normal Modal Feel)
+   ========================================================================== */
+.quickview-backdrop {
+    position: fixed !important;
+    top: -50vh !important;
+    left: -50vw !important;
+    right: -50vw !important;
+    bottom: -50vh !important;
+    width: 200vw !important;
+    height: 200vh !important;
+    background: rgba(15, 23, 42, 0.65) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    z-index: 1055 !important;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.quickview-backdrop.is-active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+/* Ensure active modal overlays and their container sit above the backdrop */
+body.quickview-header-open .site-header {
+    z-index: 1060 !important;
+}
+
+body.quickview-modal-open {
+    overflow: hidden !important;
+}
+
+/* Hide mobile bottom dock completely when quickview modal is open */
+body.quickview-modal-open .mobile-bottom-dock {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
 .category-section-header.position-relative {
     position: relative;
 }
 
 .category-section-header.quickview-open {
-    z-index: 1060;
+    position: relative !important;
+    z-index: 1060 !important;
 }
 
+.megamenu-quickview-overlay.is-active {
+    z-index: 1065 !important;
+}
+
+/* Category Showcase Quick View: Normal Centered Modal Behavior */
 .category-showcase-quickview-overlay {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 1055;
-    padding-top: 10px;
-    padding-bottom: 20px;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1065 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 32px 20px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: none !important;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Invisible bridge buffer between category heading and quickview card */
+.category-showcase-quickview-overlay.is-active {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+}
+
+.category-showcase-quickview-overlay .air-purifiers-quickview-card {
+    width: 100% !important;
+    max-width: 1140px !important;
+    margin: auto !important;
+    max-height: min(100vh, calc(100vh - 64px)) !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
+    box-shadow: 0 35px 70px -15px rgba(15, 23, 42, 0.45), 0 15px 30px rgba(15, 23, 42, 0.2) !important;
+    transform: scale(0.96) translateY(12px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.category-showcase-quickview-overlay.is-active .air-purifiers-quickview-card {
+    transform: scale(1) translateY(0) !important;
+}
+
+/* Hide the hover bridge since category quickview is a true modal */
 .category-showcase-quickview-overlay::before {
-    content: '';
-    position: absolute;
-    top: -26px;
-    left: 0;
-    right: 0;
-    height: 36px;
-    background: transparent;
-    z-index: 5;
+    display: none !important;
 }
 
 /* Category Trigger Heading */

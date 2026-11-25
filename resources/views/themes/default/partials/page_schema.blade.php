@@ -1,7 +1,7 @@
 @php
     $canonicalUrl = $canonicalUrl ?? (!empty($page->slug) ? route('page.show', $page->slug) : url()->current());
     $plainText = $plainText ?? strip_tags($page->page_description ?? '');
-    $lastUpdatedIso = $lastUpdatedIso ?? ($page->updated_at ? $page->updated_at->toIso8601String() : now()->toIso8601String());
+    $lastUpdatedIso = $lastUpdatedIso ?? ((!empty($page->updated_at) && is_object($page->updated_at)) ? $page->updated_at->toIso8601String() : now()->toIso8601String());
     $pageTitle = $pageTitle ?? ($page->page_title ?? config('app.name', 'Aire'));
     $shortDes = $shortDes ?? ($page->short_des ?? \Illuminate\Support\Str::limit($plainText, 160));
     $featuredImg = !empty($page->f_image) ? getImageUrl($page->f_image, null, null, ['raw' => true]) : theme_asset('img/og-share-banner.jpg');
@@ -18,7 +18,7 @@
         'headline' => $pageTitle,
         'description' => $shortDes,
         'image' => $featuredImg,
-        'datePublished' => $page->created_at ? $page->created_at->toIso8601String() : $lastUpdatedIso,
+        'datePublished' => (!empty($page->created_at) && is_object($page->created_at)) ? $page->created_at->toIso8601String() : $lastUpdatedIso,
         'dateModified' => $lastUpdatedIso,
         'publisher' => [
             '@type' => 'Organization',

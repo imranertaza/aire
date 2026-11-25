@@ -549,15 +549,18 @@ Route::middleware(['auth:user'])->get('templates', function () {
 
     $templates = $templateNames->unique()->values()->toArray();
 
-    // Ensure default and legal templates are always present
+    // Ensure default, legal and contact templates are always present
     if (empty($templates)) {
-        $templates = ['default', 'legal'];
+        $templates = ['default', 'legal', 'contact'];
     } else {
         if (!in_array('default', $templates)) {
             array_unshift($templates, 'default');
         }
         if (!in_array('legal', $templates)) {
             $templates[] = 'legal';
+        }
+        if (!in_array('contact', $templates)) {
+            $templates[] = 'contact';
         }
     }
 

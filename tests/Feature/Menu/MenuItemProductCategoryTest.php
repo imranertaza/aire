@@ -98,7 +98,7 @@ class MenuItemProductCategoryTest extends TestCase
         $this->assertEquals(route('category.show', $category->slug), $menuItem->url);
     }
 
-    public function test_header_renders_dynamic_quick_view_when_has_quick_view_is_enabled(): void
+    public function test_header_renders_clean_navigation_link_without_megamenu(): void
     {
         Cache::forget('layout_main_header_menu_v2');
 
@@ -149,11 +149,9 @@ class MenuItemProductCategoryTest extends TestCase
         $response = $this->get(route('home'));
 
         $response->assertStatus(200);
-        $response->assertSee('data-megamenu-target="quickViewMenu-' . $menuItem->id . '"', false);
-        $response->assertSee('id="quickViewMenu-' . $menuItem->id . '"', false);
+        $response->assertDontSee('data-megamenu-target="quickViewMenu-' . $menuItem->id . '"', false);
+        $response->assertDontSee('id="quickViewMenu-' . $menuItem->id . '"', false);
         $response->assertSee('Commercial Purifiers');
-        $response->assertSee('Ceiling Mounted');
-        $response->assertSee('Aire Ultra Pro 5000');
     }
 
     public function test_header_does_not_render_quick_view_when_has_quick_view_is_disabled(): void

@@ -73,8 +73,8 @@
                                         </select>
                                     </div>
 
-                                    <!-- Associated Menu Dropdown (Shown when legal template is selected) -->
-                                    <div class="form-group" v-if="form.temp === 'legal'">
+                                    <!-- Associated Menu Dropdown (Shown when legal or contact template is selected) -->
+                                    <div class="form-group" v-if="form.temp === 'legal' || form.temp === 'contact'">
                                         <label>Select Associated Menu</label>
                                         <select v-model="form.menu_id" class="custom-select">
                                             <option :value="null">-- Default (Policies &amp; Legal) --</option>
@@ -122,7 +122,7 @@ import { generateSlug } from '../../../layouts/helpers/helpers';
 
 const toast = useToast();
 const imageFile = ref(null);
-const templates = ref(['default', 'legal']);
+const templates = ref(['default', 'legal', 'contact']);
 const activeMenus = ref([]);
 const form = reactive({
     page_title: '',

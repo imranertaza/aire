@@ -30,7 +30,8 @@ class SectionController extends Controller
     {
         $this->ensureDefaultSectionsExist();
 
-        $query = Section::query();
+        // Exclude system page layout pipeline mapping records (e.g. home_layout, about_layout)
+        $query = Section::query()->where('name', 'not like', '%_layout');
 
         // 1. Search filter (by identifier name or JSON content like title)
         if ($search = $request->input('search')) {
@@ -64,10 +65,17 @@ class SectionController extends Controller
                   ->orWhereIn('name', ['why_choose_aire', 'trust_badges', 'client_testimonials', 'banner_section', 'benefits', 'lifestyle', 'video']);
             });
         } elseif ($group === 'about') {
-            $query->where(function ($q) {
-                $q->where('name', 'like', 'about_%')
-                  ->orWhere('name', 'like', 'history_%');
-            });
+            $query->whereIn('name', [
+                'about_hero',
+                'about_story',
+                'about_mission_vision',
+                'about_leadership',
+                'about_innovation',
+                'about_quality',
+                'about_careers',
+                'about_news',
+                'about_global',
+            ]);
         } elseif ($group === 'custom') {
             $query->where(function ($q) {
                 $q->where('name', 'like', 'custom_%')
@@ -345,12 +353,6 @@ class SectionController extends Controller
             'video_file' => 'nullable|file|mimes:mp4,webm,ogg,mov|max:102400',
         ]);
 
-        if ($request->remove_image == 1) {
-            $request->validate([
-                'image' => 'required|image|mimes:jpeg,jpg,png,gif,svg,webp|max:2048',
-            ]);
-        }
-
         if (is_array($request->input('data'))) {
             $data = $request->input('data');
         } else {
@@ -361,21 +363,22 @@ class SectionController extends Controller
         }
 
         if ($request->hasFile('image')) {
-            $oldImage = $data['image'] ?? $section->data['image'] ?? null;
-            if ($oldImage && Storage::disk('public')->exists($oldImage)) {
-                Storage::disk('public')->delete($oldImage);
-            }
+            $oldImage = $section->data['image'] ?? null;
+            $this->deleteStorageFile($oldImage);
 
             $filename = uniqid('section_image_') . '.' . $request->file('image')->getClientOriginalExtension();
 
             $data['image'] = $request->file('image')
                 ->storeAs("sections/{$section->id}/images", $filename, 'public');
+        } elseif ($request->remove_image == 1) {
+            $oldImage = $section->data['image'] ?? null;
+            $this->deleteStorageFile($oldImage);
+            $data['image'] = null;
         }
+
         if ($request->hasFile('video_file')) {
-            $oldVideo = $data['video_file'] ?? $section->data['video_file'] ?? null;
-            if ($oldVideo && Storage::disk('public')->exists($oldVideo)) {
-                Storage::disk('public')->delete($oldVideo);
-            }
+            $oldVideo = $section->data['video_file'] ?? null;
+            $this->deleteStorageFile($oldVideo);
 
             $filename = uniqid('video_') . '.' . $request->file('video_file')->getClientOriginalExtension();
             $data['video_file'] = $request->file('video_file')
@@ -383,10 +386,8 @@ class SectionController extends Controller
         }
 
         if ($request->remove_video == 1) {
-            $oldVideo = $data['video_file'] ?? $section->data['video_file'] ?? null;
-            if ($oldVideo && Storage::disk('public')->exists($oldVideo)) {
-                Storage::disk('public')->delete($oldVideo);
-            }
+            $oldVideo = $section->data['video_file'] ?? null;
+            $this->deleteStorageFile($oldVideo);
             $data['video_file'] = null;
         }
 
@@ -396,6 +397,9 @@ class SectionController extends Controller
             foreach ($data['items'] as $index => &$item) {
                 $imageKey = "item_image_{$index}";
                 if ($request->hasFile($imageKey)) {
+                    $oldItemImage = $section->data['items'][$index]['image'] ?? null;
+                    $this->deleteStorageFile($oldItemImage);
+
                     $file = $request->file($imageKey);
                     $filename = uniqid('lifestyle_') . '.' . $file->getClientOriginalExtension();
                     $storedPath = $file->storeAs("sections/{$section->id}/lifestyle", $filename, 'public');
@@ -404,6 +408,9 @@ class SectionController extends Controller
 
                 $avatarKey = "item_avatar_{$index}";
                 if ($request->hasFile($avatarKey)) {
+                    $oldAvatar = $section->data['items'][$index]['avatar'] ?? null;
+                    $this->deleteStorageFile($oldAvatar);
+
                     $file = $request->file($avatarKey);
                     $filename = uniqid('avatar_') . '.' . $file->getClientOriginalExtension();
                     $storedPath = $file->storeAs("sections/{$section->id}/testimonials", $filename, 'public');
@@ -425,10 +432,31 @@ class SectionController extends Controller
         foreach ($gridImageKeys as $imgKey) {
             $fileKey = "{$imgKey}_file";
             if ($request->hasFile($fileKey)) {
+                $oldGridImg = $section->data[$imgKey] ?? null;
+                $this->deleteStorageFile($oldGridImg);
+
                 $file = $request->file($fileKey);
                 $filename = uniqid("grid_{$imgKey}_") . '.' . $file->getClientOriginalExtension();
                 $storedPath = $file->storeAs("sections/{$section->id}/category_grid", $filename, 'public');
                 $data[$imgKey] = 'storage/' . $storedPath;
+            }
+        }
+
+        // Handle About Section banner images
+        $aboutImageKeys = ['hero_image', 'impact_image', 'purpose_image', 'banner_image'];
+        foreach ($aboutImageKeys as $imgKey) {
+            $oldAboutImg = $section->data[$imgKey] ?? null;
+
+            if ($request->hasFile($imgKey)) {
+                $this->deleteStorageFile($oldAboutImg);
+
+                $file = $request->file($imgKey);
+                $filename = uniqid("about_{$imgKey}_") . '.' . $file->getClientOriginalExtension();
+                $storedPath = $file->storeAs("sections/{$section->id}/about", $filename, 'public');
+                $data[$imgKey] = 'storage/' . $storedPath;
+            } elseif ($request->input("remove_{$imgKey}") == 1 || (isset($data[$imgKey]) && empty($data[$imgKey]) && !empty($oldAboutImg))) {
+                $this->deleteStorageFile($oldAboutImg);
+                $data[$imgKey] = null;
             }
         }
 
@@ -437,6 +465,39 @@ class SectionController extends Controller
         $section->save();
 
         return ApiResponse::success($section, 'Section updated successfully');
+    }
+
+    /**
+     * Delete an existing section file from public storage if it exists.
+     *
+     * @param string|null $path
+     * @return void
+     */
+    protected function deleteStorageFile(?string $path): void
+    {
+        if (empty($path) || !is_string($path)) {
+            return;
+        }
+
+        $trimmed = trim($path);
+
+        // Do not delete static assets (themes, default assets, etc.)
+        if (
+            str_starts_with($trimmed, 'themes/') ||
+            str_starts_with($trimmed, '/themes/') ||
+            str_starts_with($trimmed, 'assets/') ||
+            str_starts_with($trimmed, '/assets/')
+        ) {
+            return;
+        }
+
+        // Strip leading slash, and leading storage/ or public/
+        $cleanPath = ltrim($trimmed, '/');
+        $cleanPath = preg_replace('#^(storage|public)/#', '', $cleanPath);
+
+        if (Storage::disk('public')->exists($cleanPath)) {
+            Storage::disk('public')->delete($cleanPath);
+        }
     }
 
 

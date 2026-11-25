@@ -375,11 +375,11 @@
     }
 
     /* Universal Parallax Plugin Styling */
-    .parallax-window {
+    /* .parallax-window {
         position: relative;
         overflow: hidden;
         clip-path: inset(0);
-    }
+    } */
 
     .parallax-slider {
         position: absolute;
@@ -478,10 +478,10 @@
     }
 
     /* Universal Parallax Window & Slider System */
-    .parallax-window {
+    /* .parallax-window {
         position: relative;
         overflow: hidden !important;
-    }
+    } */
 
     .parallax-slider {
         position: absolute;

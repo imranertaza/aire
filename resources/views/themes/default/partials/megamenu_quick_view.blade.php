@@ -3,343 +3,31 @@
         href="{{ theme_asset('css/megamenu.css') }}?v={{ @filemtime(public_path('themes/default/assets/css/megamenu.css')) ?: time() }}">
 @endpushOnce
 
-@php
-    $quickViewNavItems = collect($mainHeaderMenu?->menus ?? [])->filter(function ($item) {
-        return !empty($item->has_quick_view) && !empty($item->productCategory);
-    });
-    $categoriesMap = $headerMegaMenuCategories ?? collect();
-    $currencySymbol = '$';
-@endphp
-
-<!-- =========================================================================
-| Dynamic Quick View MegaMenus: Specific Menu Items (has_quick_view = 1)
-| ========================================================================= -->
-@foreach ($quickViewNavItems as $navItem)
-    @php
-        $parentCat = $navItem->productCategory;
-        $childCategories = $parentCat->children ?? collect();
-        $overlayId = 'quickViewMenu-' . $navItem->id;
-        $trackId = 'megamenuProductsTrack-' . $navItem->id;
-        $prevBtnId = 'megamenuScrollPrev-' . $navItem->id;
-        $nextBtnId = 'megamenuScrollNext-' . $navItem->id;
-    @endphp
-    <div id="{{ $overlayId }}" class="megamenu-quickview-overlay" role="dialog"
-        aria-label="{{ $navItem->name }} Quick View" aria-hidden="true" data-megamenu-id="{{ $overlayId }}">
-        <div class="container main-container position-relative">
-            <div class="air-purifiers-quickview-card">
-
-                <!-- Top Header Row -->
-                <div class="quickview-header">
-                    <div>
-                        <h2 class="quickview-title">
-                            {{ $navItem->name }}
-                            <span class="quickview-title-sep">|</span>
-                            <span class="quickview-title-sub">Quick View</span>
-                        </h2>
-                        <p class="quickview-desc">
-                            {{ $parentCat->description ?: $parentCat->category_name . ' provide clean, healthy and efficient indoor air solutions.' }}
-                        </p>
-                    </div>
-                    <button type="button" class="quickview-close-btn" aria-label="Close Quick View">
-                        <i class="bi bi-x-lg" aria-hidden="true"></i>
-                    </button>
-                </div>
-
-                <!-- Category-Wise Grouped Carousel Track -->
-                <div class="quickview-carousel-wrapper">
-                    <button type="button" class="quickview-scroll-btn prev" id="{{ $prevBtnId }}"
-                        aria-label="Scroll left">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-
-                    <div class="quickview-groups-track" id="{{ $trackId }}">
-                        @forelse ($childCategories as $cIndex => $childCat)
-                            @php
-                                $childProducts = $childCat->quick_products ?? ($childCat->products ?? collect());
-                                $visibleProducts = $childProducts->take(4);
-                                $cardCount = $visibleProducts->count();
-                                $groupWidth = $cardCount > 0 ? $cardCount * 168 + ($cardCount - 1) * 12 : 220;
-                                $pillStyle = match ($cIndex % 4) {
-                                    1 => 'active',
-                                    2 => 'green',
-                                    3 => 'red',
-                                    default => '',
-                                };
-                                $iconBgClass = match ($pillStyle) {
-                                    'green' => 'green',
-                                    'red' => 'red',
-                                    default => 'blue',
-                                };
-                                $defaultIcon = match ($cIndex % 4) {
-                                    0 => 'bi bi-person',
-                                    1 => 'bi bi-car-front',
-                                    2 => 'bi bi-house-door',
-                                    default => 'bi bi-grid',
-                                };
-                                $iconClass = $childCat->icon_class ?: $defaultIcon;
-                                $catDetailUrl = route('category.show', $childCat->slug);
-                            @endphp
-                            <div class="quickview-category-group"
-                                style="width: {{ $groupWidth }}px; max-width: {{ $groupWidth }}px;">
-                                <!-- Category Header Pill -->
-                                <a href="{{ $catDetailUrl }}" class="quickview-group-pill {{ $pillStyle }}">
-                                    @if ($pillStyle === 'red')
-                                        <div class="quickview-pill-text text-center w-100">
-                                            <span
-                                                class="quickview-pill-name red-badge-text">{{ $childCat->category_name }}</span>
-                                        </div>
-                                    @else
-                                        <div class="quickview-pill-icon-circle {{ $iconBgClass }}">
-                                            <i class="{{ $iconClass }}"></i>
-                                        </div>
-                                        <div class="quickview-pill-text w-100">
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <span class="quickview-pill-name">{{ $childCat->category_name }}</span>
-                                            </div>
-                                            <span
-                                                class="quickview-pill-desc">{{ $childCat->description ?: 'Explore ' . $childCat->category_name }}</span>
-                                        </div>
-                                    @endif
-                                </a>
-
-                                <!-- Product Cards Row: exactly 4 products per child category -->
-                                <div class="quickview-group-cards">
-                                    @forelse ($visibleProducts as $product)
-                                        @php
-                                            $detailUrl = route('products.detail', $product->slug ?: $product->id);
-                                            $displayImg = !empty($product->quickview_image)
-                                                ? $product->quickview_image
-                                                : $product->main_image;
-                                            $imgUrl = !empty($displayImg)
-                                                ? getImageCacheUrl($displayImg, 400, 400, 'webp')
-                                                : theme_asset('img/Air-Purify.png');
-                                            $brandName = $product->brand?->name ?? 'BROAD Fresh Air';
-                                            $priceFormatted =
-                                                $currencySymbol . number_format((float) ($product->price ?? 0), 2);
-                                        @endphp
-                                        <div class="quickview-product-card">
-                                            <div class="quickview-product-img-box">
-                                                <a href="{{ $detailUrl }}" tabindex="-1">
-                                                    <img src="{{ $imgUrl }}" alt="{{ $product->name }}"
-                                                        loading="lazy">
-                                                </a>
-                                            </div>
-                                            <span class="quickview-product-brand">{{ $brandName }}</span>
-                                            <h4 class="quickview-product-name" title="{{ $product->name }}">
-                                                <a href="{{ $detailUrl }}" class="text-decoration-none text-dark">
-                                                    {{ $product->name }}
-                                                </a>
-                                            </h4>
-                                            <div class="quickview-product-price">{{ $priceFormatted }}</div>
-                                            <a href="{{ $detailUrl }}" class="quickview-product-btn">View
-                                                details</a>
-                                        </div>
-                                    @empty
-                                        <div
-                                            class="quickview-product-card d-flex align-items-center justify-content-center text-muted p-4">
-                                            <span class="fs-13">No products available</span>
-                                        </div>
-                                    @endforelse
-                                </div>
-                            </div>
-                        @empty
-                            <div class="p-4 text-muted fs-14">
-                                No subcategories found for {{ $parentCat->category_name }}.
-                            </div>
-                        @endforelse
-                    </div>
-
-                    <button type="button" class="quickview-scroll-btn next" id="{{ $nextBtnId }}"
-                        aria-label="Scroll right">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
-                </div>
-
-                <!-- Bottom CTA Row -->
-                <div class="quickview-footer">
-                    <div class="quickview-cta-wrap mt-0">
-                        <a href="{{ route('category.show', $parentCat->slug) }}" class="quickview-cta-btn">
-                            View all {{ $navItem->name }} &rarr;
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-@endforeach
-
-<!-- =========================================================================
-| Fallback Quick View MegaMenus: Only when no custom menu items configured
-| ========================================================================= -->
-@if ($quickViewNavItems->isEmpty())
-    @foreach ($categoriesMap as $catSlug => $parentCat)
-        @php
-            $childCategories = $parentCat->children ?? collect();
-            if ($childCategories->isEmpty()) {
-                continue;
-            }
-
-            $overlayId = 'quickViewCategory-' . $catSlug;
-            $trackId = 'megamenuCategoryTrack-' . $catSlug;
-            $prevBtnId = 'megamenuCategoryPrev-' . $catSlug;
-            $nextBtnId = 'megamenuCategoryNext-' . $catSlug;
-        @endphp
-        <div id="{{ $overlayId }}" class="megamenu-quickview-overlay" role="dialog"
-            aria-label="{{ $parentCat->category_name }} Quick View" aria-hidden="true"
-            data-megamenu-id="{{ $overlayId }}"
-            @if ($catSlug === 'products') data-megamenu-alias="airPurifiersMegaMenu" @endif>
-            <div class="container main-container position-relative">
-                <div class="air-purifiers-quickview-card">
-
-                    <!-- Top Header Row -->
-                    <div class="quickview-header">
-                        <div>
-                            <h2 class="quickview-title">
-                                {{ $parentCat->category_name }}
-                                <span class="quickview-title-sep">|</span>
-                                <span class="quickview-title-sub">Quick View</span>
-                            </h2>
-                            <p class="quickview-desc">
-                                {{ $parentCat->description ?: $parentCat->category_name . ' provide clean, healthy and efficient solutions for homes, offices and commercial spaces.' }}
-                            </p>
-                        </div>
-                        <button type="button" class="quickview-close-btn" aria-label="Close Quick View">
-                            <i class="bi bi-x-lg" aria-hidden="true"></i>
-                        </button>
-                    </div>
-
-                    <!-- Category-Wise Grouped Carousel Track -->
-                    <div class="quickview-carousel-wrapper">
-                        <button type="button" class="quickview-scroll-btn prev" id="{{ $prevBtnId }}"
-                            aria-label="Scroll left">
-                            <i class="bi bi-chevron-left"></i>
-                        </button>
-
-                        <div class="quickview-groups-track" id="{{ $trackId }}">
-                            @foreach ($childCategories as $cIndex => $childCat)
-                                @php
-                                    $childProducts = $childCat->quick_products ?? ($childCat->products ?? collect());
-                                    $visibleProducts = $childProducts->take(4);
-                                    $cardCount = $visibleProducts->count();
-                                    $groupWidth = $cardCount > 0 ? $cardCount * 168 + ($cardCount - 1) * 12 : 220;
-                                    $pillStyle = match ($cIndex % 4) {
-                                        1 => 'active',
-                                        2 => 'green',
-                                        3 => 'red',
-                                        default => '',
-                                    };
-                                    $iconBgClass = match ($pillStyle) {
-                                        'green' => 'green',
-                                        'red' => 'red',
-                                        default => 'blue',
-                                    };
-                                    $defaultIcon = match ($cIndex % 4) {
-                                        0 => 'bi bi-person',
-                                        1 => 'bi bi-car-front',
-                                        2 => 'bi bi-house-door',
-                                        default => 'bi bi-grid',
-                                    };
-                                    $iconClass = $childCat->icon_class ?: $defaultIcon;
-                                    $catDetailUrl = route('category.show', $childCat->slug);
-                                @endphp
-                                <div class="quickview-category-group"
-                                    style="width: {{ $groupWidth }}px; max-width: {{ $groupWidth }}px;">
-                                    <!-- Category Header Pill -->
-                                    <a href="{{ $catDetailUrl }}" class="quickview-group-pill {{ $pillStyle }}">
-                                        @if ($pillStyle === 'red')
-                                            <div class="quickview-pill-text text-center w-100">
-                                                <span
-                                                    class="quickview-pill-name red-badge-text">{{ $childCat->category_name }}</span>
-                                            </div>
-                                        @else
-                                            <div class="quickview-pill-icon-circle {{ $iconBgClass }}">
-                                                <i class="{{ $iconClass }}"></i>
-                                            </div>
-                                            <div class="quickview-pill-text w-100">
-                                                <div class="d-flex align-items-center justify-content-between">
-                                                    <span
-                                                        class="quickview-pill-name">{{ $childCat->category_name }}</span>
-                                                </div>
-                                                <span
-                                                    class="quickview-pill-desc">{{ $childCat->description ?: 'Explore ' . $childCat->category_name }}</span>
-                                            </div>
-                                        @endif
-                                    </a>
-
-                                    <!-- Product Cards Row: exactly 4 products per child category -->
-                                    <div class="quickview-group-cards">
-                                        @forelse ($visibleProducts as $product)
-                                            @php
-                                                $detailUrl = route('products.detail', $product->slug ?: $product->id);
-                                                $displayImg = !empty($product->quickview_image)
-                                                    ? $product->quickview_image
-                                                    : $product->main_image;
-                                                $imgUrl = !empty($displayImg)
-                                                    ? getImageCacheUrl($displayImg, 400, 400, 'webp')
-                                                    : theme_asset('img/Air-Purify.png');
-                                                $brandName = $product->brand?->name ?? 'BROAD Fresh Air';
-                                                $priceFormatted =
-                                                    $currencySymbol . number_format((float) ($product->price ?? 0), 2);
-                                            @endphp
-                                            <div class="quickview-product-card">
-                                                <div class="quickview-product-img-box">
-                                                    <a href="{{ $detailUrl }}" tabindex="-1">
-                                                        <img src="{{ $imgUrl }}" alt="{{ $product->name }}"
-                                                            loading="lazy">
-                                                    </a>
-                                                </div>
-                                                <span class="quickview-product-brand">{{ $brandName }}</span>
-                                                <h4 class="quickview-product-name" title="{{ $product->name }}">
-                                                    <a href="{{ $detailUrl }}"
-                                                        class="text-decoration-none text-dark">
-                                                        {{ $product->name }}
-                                                    </a>
-                                                </h4>
-                                                <div class="quickview-product-price">{{ $priceFormatted }}</div>
-                                                <a href="{{ $detailUrl }}" class="quickview-product-btn">View
-                                                    details</a>
-                                            </div>
-                                        @empty
-                                            <div
-                                                class="quickview-product-card d-flex align-items-center justify-content-center text-muted p-4">
-                                                <span class="fs-13">No products available</span>
-                                            </div>
-                                        @endforelse
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <button type="button" class="quickview-scroll-btn next" id="{{ $nextBtnId }}"
-                            aria-label="Scroll right">
-                            <i class="bi bi-chevron-right"></i>
-                        </button>
-                    </div>
-
-                    <!-- Bottom CTA Row -->
-                    <div class="quickview-footer">
-                        <div class="quickview-cta-wrap mt-0">
-                            <a href="{{ route('category.show', $parentCat->slug) }}" class="quickview-cta-btn">
-                                View all {{ $parentCat->category_name }} &rarr;
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    @endforeach
-@endif
+<!-- Quick View Modal Blurred Backdrop -->
+<div id="quickviewBackdrop" class="quickview-backdrop" aria-hidden="true"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const overlays = document.querySelectorAll('.megamenu-quickview-overlay');
         if (!overlays.length) return;
 
+        // Ensure backdrop is a direct child of <body> to avoid stacking context traps
+        const backdrop = document.getElementById('quickviewBackdrop');
+        if (backdrop && backdrop.parentElement !== document.body) {
+            document.body.appendChild(backdrop);
+        }
+
+        // Move modal showcase overlays to document.body so they are not trapped inside containers or affected by ancestor styling
+        document.querySelectorAll('.category-showcase-quickview-overlay').forEach(ov => {
+            if (ov.parentElement !== document.body) {
+                document.body.appendChild(ov);
+            }
+        });
+
         let activeOverlay = null;
         let hideTimer = null;
         let isManuallyClosed = false;
+        let isPinnedByClick = false;
 
         function openOverlay(overlay, trigger) {
             if (isManuallyClosed && activeOverlay === overlay) return;
@@ -355,12 +43,20 @@
             overlay.classList.add('is-active');
             overlay.setAttribute('aria-hidden', 'false');
             overlay.closest('.category-section-header')?.classList.add('quickview-open');
+            if (overlay.closest('.site-header')) {
+                document.body.classList.add('quickview-header-open');
+            }
             if (trigger) {
                 trigger.setAttribute('aria-expanded', 'true');
             }
+            if (backdrop) {
+                backdrop.classList.add('is-active');
+            }
+            document.body.classList.add('quickview-modal-open');
         }
 
         function scheduleClose(delay = 180) {
+            if (isPinnedByClick) return;
             clearTimeout(hideTimer);
             hideTimer = setTimeout(function() {
                 if (activeOverlay) {
@@ -372,15 +68,32 @@
         function closeOverlay(overlay, instant = false) {
             if (!overlay) return;
             clearTimeout(hideTimer);
+            isPinnedByClick = false;
             overlay.classList.remove('is-active');
             overlay.setAttribute('aria-hidden', 'true');
             overlay.closest('.category-section-header')?.classList.remove('quickview-open');
+            document.body.classList.remove('quickview-header-open');
             const targetId = overlay.id;
             const triggers = document.querySelectorAll('[data-megamenu-target="' + targetId + '"]');
             triggers.forEach(t => t.setAttribute('aria-expanded', 'false'));
             if (activeOverlay === overlay) {
                 activeOverlay = null;
             }
+            if (backdrop) {
+                backdrop.classList.remove('is-active');
+            }
+            document.body.classList.remove('quickview-modal-open');
+        }
+
+        // Backdrop click closes the active modal
+        if (backdrop) {
+            backdrop.addEventListener('click', function(e) {
+                if (activeOverlay) {
+                    isManuallyClosed = true;
+                    isPinnedByClick = false;
+                    closeOverlay(activeOverlay, true);
+                }
+            });
         }
 
         // Attach listeners to all triggers
@@ -392,20 +105,29 @@
                 document.querySelector('[data-megamenu-id="' + targetId + '"]');
             if (!targetOverlay) return;
 
-            trigger.addEventListener('mouseenter', function() {
-                isManuallyClosed = false;
-                openOverlay(targetOverlay, trigger);
-            });
-            trigger.addEventListener('mouseleave', function() {
-                scheduleClose(220);
-            });
-            trigger.addEventListener('focus', function() {
-                isManuallyClosed = false;
-                openOverlay(targetOverlay, trigger);
-            });
-            trigger.addEventListener('blur', function() {
-                scheduleClose(220);
-            });
+            const isClickOnly = trigger.classList.contains('category-quickview-trigger') ||
+                                trigger.classList.contains('sidebar-quickview-btn') ||
+                                trigger.getAttribute('data-megamenu-click') === 'true' ||
+                                (targetId && targetId.startsWith('quickViewSectionCat-'));
+
+            // Only attach hover events if this trigger is NOT click-only
+            if (!isClickOnly) {
+                trigger.addEventListener('mouseenter', function() {
+                    isManuallyClosed = false;
+                    openOverlay(targetOverlay, trigger);
+                });
+                trigger.addEventListener('mouseleave', function() {
+                    scheduleClose(220);
+                });
+                trigger.addEventListener('focus', function() {
+                    isManuallyClosed = false;
+                    openOverlay(targetOverlay, trigger);
+                });
+                trigger.addEventListener('blur', function() {
+                    scheduleClose(220);
+                });
+            }
+
             trigger.addEventListener('click', function(e) {
                 const isAnchor = trigger.tagName.toLowerCase() === 'a';
                 const href = trigger.getAttribute('href');
@@ -414,16 +136,32 @@
                 }
                 if (activeOverlay === targetOverlay) {
                     isManuallyClosed = true;
+                    isPinnedByClick = false;
                     closeOverlay(targetOverlay, true);
                 } else {
                     isManuallyClosed = false;
+                    isPinnedByClick = true;
                     openOverlay(targetOverlay, trigger);
+                    if (trigger.classList.contains('sidebar-quickview-btn') || trigger.closest('.sidebar-quickview-wrapper')) {
+                        setTimeout(() => {
+                            targetOverlay.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }, 50);
+                    }
                 }
             });
         });
 
-        // Hover handling for each overlay so moving cursor into it keeps it open
+        // Hover & click handling for each overlay
         overlays.forEach(overlay => {
+            // Clicking directly on the backdrop area outside the card closes the modal
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    isManuallyClosed = true;
+                    isPinnedByClick = false;
+                    closeOverlay(overlay, true);
+                }
+            });
+
             overlay.addEventListener('mouseenter', function() {
                 clearTimeout(hideTimer);
                 activeOverlay = overlay;

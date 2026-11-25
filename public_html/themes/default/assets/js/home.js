@@ -215,9 +215,20 @@
                 end: '+=1200',
                 scrub: 1,
                 pin: true,
+                pinType: 'transform',
                 anticipatePin: 1,
                 invalidateOnRefresh: true,
-                refreshPriority: 1
+                refreshPriority: 1,
+                onRefresh: function (self) {
+                    if (self && self.spacer) {
+                        self.spacer.style.width = '100%';
+                        self.spacer.style.maxWidth = '100%';
+                    }
+                    if (stackedWrapper) {
+                        stackedWrapper.style.width = '100%';
+                        stackedWrapper.style.maxWidth = '100%';
+                    }
+                }
             }
         });
 

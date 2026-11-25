@@ -970,31 +970,64 @@
 /* ==========================================================================
    Quick View Detail Modal (Matches detail-modal-popup.png)
    ========================================================================== */
+/* Bootstrap Modal Backdrop Blur & Fullscreen Zoom Fix */
+.modal-backdrop {
+    position: fixed !important;
+    top: -50vh !important;
+    left: -50vw !important;
+    right: -50vw !important;
+    bottom: -50vh !important;
+    width: 200vw !important;
+    height: 200vh !important;
+    background-color: rgba(15, 23, 42, 0.65) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    z-index: 1050 !important;
+}
+
+.modal-backdrop.show {
+    opacity: 1 !important;
+}
+
+/* Hide mobile bottom dock completely when any modal is open */
+body.modal-open .mobile-bottom-dock {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
 .ductless-modal .modal-dialog {
-    max-width: 980px;
-    margin: 1.75rem auto;
-    width: auto;
+    max-width: 960px;
+    margin: 1.25rem auto;
+    min-height: calc(100% - 2.5rem);
+    display: flex;
+    align-items: center;
 }
 
 .ductless-modal__content {
     border-radius: 20px;
-    padding: 28px 30px;
+    padding: 24px 28px 20px;
     border: none;
     background: #ffffff;
-    box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.18), 0 0 1px 1px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.25), 0 0 1px 1px rgba(15, 23, 42, 0.05);
     position: relative;
-    max-height: calc(100dvh - 3rem);
+    max-height: min(88vh, calc(100vh - 40px)) !important;
+    max-height: min(88dvh, calc(100dvh - 40px)) !important;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    width: 100%;
 }
 
 .ductless-modal .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    padding: 0 !important;
+    padding: 0 4px 0 0 !important;
 }
 
 .ductless-modal__close-btn {
@@ -1029,7 +1062,7 @@
     background-position: center;
     background-repeat: no-repeat;
     border-radius: 14px;
-    min-height: 360px;
+    min-height: 280px;
     height: 100%;
     width: 100%;
     display: flex;

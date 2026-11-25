@@ -33,7 +33,7 @@
 
     <!-- 1. CATEGORIES -->
     @if (!empty($filterCategories))
-        <div class="filter-group ms-4 {{ $hasCatChecked ? '' : 'collapsed' }}">
+        <div class="filter-group ms-5 {{ $hasCatChecked ? '' : 'collapsed' }}">
             <div class="filter-group__header">
                 <h3 class="filter-group__title">CATEGORIES</h3>
                 <i class="bi bi-chevron-down filter-group__icon"></i>
@@ -62,7 +62,7 @@
     @if (!empty($dynamicFilterSections))
         @foreach ($dynamicFilterSections as $section)
             @if (!empty($section['options']))
-                <div class="filter-group ms-4 {{ $section['has_checked'] ? '' : 'collapsed' }}">
+                <div class="filter-group ms-5 {{ $section['has_checked'] ? '' : 'collapsed' }}">
                     <div class="filter-group__header">
                         <h3 class="filter-group__title">{{ strtoupper($section['name']) }}</h3>
                         <i class="bi bi-chevron-down filter-group__icon"></i>

@@ -27,6 +27,7 @@ Thumbs.db
 composer.lock
 package-lock.json
 *.zip
+/backup_v1
 aire-html-template
 /cCart
 cCart

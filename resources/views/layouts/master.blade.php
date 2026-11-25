@@ -28,7 +28,48 @@
     @stack('styles')
     <style>
         :root {
+            --site-zoom-xxl: 0.92;
+            --site-zoom-xl: 0.92;
+            --site-zoom-lg: 0.94;
+            --site-zoom-md: 1;
+            --site-zoom-sm: 1;
             --bs-pagination-border-radius: none !important;
+        }
+
+        /* Responsive Viewport Zoom Scaling */
+        @media (min-width: 1400px) {
+            html {
+                zoom: 0.92;
+                zoom: var(--site-zoom-xxl, 0.92);
+            }
+        }
+
+        @media (min-width: 1200px) and (max-width: 1399.98px) {
+            html {
+                zoom: 0.92;
+                zoom: var(--site-zoom-xl, 0.92);
+            }
+        }
+
+        @media (min-width: 992px) and (max-width: 1199.98px) {
+            html {
+                zoom: 0.94;
+                zoom: var(--site-zoom-lg, 0.94);
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 991.98px) {
+            html {
+                zoom: 1;
+                zoom: var(--site-zoom-md, 1);
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            html {
+                zoom: 1;
+                zoom: var(--site-zoom-sm, 1);
+            }
         }
 
 

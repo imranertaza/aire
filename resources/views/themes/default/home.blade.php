@@ -8,7 +8,8 @@
     <!-- Home Page Stylesheets -->
     <link rel="stylesheet"
         href="{{ theme_asset('css/home.css') }}?v={{ file_exists(public_path('themes/default/assets/css/home.css')) ? filemtime(public_path('themes/default/assets/css/home.css')) : time() }}">
-    <link rel="stylesheet" href="{{ theme_asset('css/product-filter.min.css') }}">
+    <link rel="stylesheet"
+        href="{{ theme_asset('css/product-filter.min.css') }}?v={{ file_exists(public_path('themes/default/assets/css/product-filter.min.css')) ? filemtime(public_path('themes/default/assets/css/product-filter.min.css')) : time() }}">
 @endpush
 
 @include('themes.default.partials.home_schema')
@@ -29,10 +30,10 @@
 
 @section('content')
 
-    <main class="container main-container product-filter-page__main">
+    <main class=" product-filter-page__main">
         @renderPageSlot('home', 'before:slider_section')
         <!-- Hero Slider Section matching Home.png -->
-        <div class="">
+        <div class="container-fluid">
             <section class="home-hero-section">
                 <div class="swiper home-hero-swiper">
                     <div class="swiper-wrapper">
@@ -73,7 +74,7 @@
                                     @if ($slideSrcset) srcset="{{ $slideSrcset }}" sizes="(max-width: 576px) 100vw, (max-width: 992px) 100vw, 1280px" @endif
                                     alt="{{ $slideTitle }}" class="home-hero-slide__bg-img" width="1280" height="520"
                                     @if ($loop->first) fetchpriority="high" loading="eager" decoding="async" @else loading="lazy" decoding="async" @endif>
-                                <div class="home-hero-slide__overlay"></div>
+                                {{-- <div class="home-hero-slide__overlay"></div> --}}
                                 <div class="home-hero-slide__content">
                                     <h1 class="home-hero-slide__title">{{ $slideTitle }}</h1>
                                     @if (!empty($slideSubtitle))
@@ -142,7 +143,7 @@
             $benefitsSrcset = getImageSrcset($benefitsRawImage, [600, 1200], 0.333, 'webp');
         @endphp
 
-        <section class="home-benefits-section py-4 my-3">
+        <section class="container main-container home-benefits-section py-4 my-3">
             <div class="">
                 <!-- Header matching Home.png -->
                 <div class="home-benefits__header">
@@ -230,7 +231,7 @@
             }
         @endphp
 
-        <section class="home-best-selling-section py-4 my-3">
+        <section class="container main-container home-best-selling-section py-4 my-3">
             <div class="">
                 <!-- Header matching Home.png -->
                 <div class="home-best-selling__header text-center mb-4">
@@ -288,7 +289,7 @@
                 ];
         @endphp
 
-        <section class="home-lifestyle-section" id="homeLifestyleSection">
+        <section class="container main-container home-lifestyle-section" id="homeLifestyleSection">
             <div class="">
                 <!-- Section Header -->
                 <div class="home-lifestyle__header">
@@ -392,7 +393,7 @@
             }
         @endphp
 
-        <section class="home-best-selling-section py-4 my-3">
+        <section class="container main-container home-best-selling-section py-4 my-3">
             <div class="">
                 <!-- Header matching Home.png -->
                 <div class="home-best-selling__header text-center mb-4">
@@ -418,43 +419,44 @@
             $whyChooseSection = getSection('why_choose_aire');
             $cardsList = $whyChooseSection['cards'] ?? [];
         @endphp
-
         @if (!empty($whyChooseSection))
-            <section class="why-choose-stacked-wrapper my-5" id="whyChooseStackedWrapper">
-                <div class="stacked-cards-sticky-pin">
-                    <div class="why-choose-stacked__header">
-                        <h2 class="why-choose-stacked__title home-lifestyle__title">
-                            {{ $whyChooseSection['title'] ?? 'Why Choose AIRE?' }}</h2>
-                        @if (!empty($whyChooseSection['subtitle']))
-                            <span
-                                class="why-choose-stacked__subtitle home-lifestyle__subtitle">{{ $whyChooseSection['subtitle'] }}</span>
-                        @endif
-                    </div>
+            <section class="container main-container">
+                <section class=" why-choose-stacked-wrapper my-5" id="whyChooseStackedWrapper">
+                    <div class="stacked-cards-sticky-pin">
+                        <div class="why-choose-stacked__header">
+                            <h2 class="why-choose-stacked__title home-lifestyle__title">
+                                {{ $whyChooseSection['title'] ?? 'Why Choose AIRE?' }}</h2>
+                            @if (!empty($whyChooseSection['subtitle']))
+                                <span
+                                    class="why-choose-stacked__subtitle home-lifestyle__subtitle">{{ $whyChooseSection['subtitle'] }}</span>
+                            @endif
+                        </div>
 
-                    <div class="stacked-cards-container">
-                        @foreach ($cardsList as $index => $card)
-                            @php
-                                $layerIndex = $index + 1;
-                                $cardClass = $card['card_class'] ?? 'card-layer-' . $layerIndex;
-                                $isDark = ($card['theme'] ?? '') === 'dark' || $index === 0;
-                                $titleColor = $isDark ? 'text-white' : 'text-dark';
-                                $dots = !empty($card['dots'])
-                                    ? $card['dots']
-                                    : str_repeat('&bull;', $layerIndex <= 3 ? 3 : 4);
-                            @endphp
-                            <!-- Layer {{ $layerIndex }} -->
-                            <div class="stacked-card {{ $cardClass }}">
-                                <div class="card-left-header">
-                                    <div class="why-dots mb-2">{!! $dots !!}</div>
-                                    <h3 class="tab-title {{ $titleColor }}">{!! $card['title'] ?? '' !!}</h3>
+                        <div class="stacked-cards-container">
+                            @foreach ($cardsList as $index => $card)
+                                @php
+                                    $layerIndex = $index + 1;
+                                    $cardClass = $card['card_class'] ?? 'card-layer-' . $layerIndex;
+                                    $isDark = ($card['theme'] ?? '') === 'dark' || $index === 0;
+                                    $titleColor = $isDark ? 'text-white' : 'text-dark';
+                                    $dots = !empty($card['dots'])
+                                        ? $card['dots']
+                                        : str_repeat('&bull;', $layerIndex <= 3 ? 3 : 4);
+                                @endphp
+                                <!-- Layer {{ $layerIndex }} -->
+                                <div class="stacked-card {{ $cardClass }}">
+                                    <div class="card-left-header">
+                                        <div class="why-dots mb-2">{!! $dots !!}</div>
+                                        <h3 class="tab-title {{ $titleColor }}">{!! $card['title'] ?? '' !!}</h3>
+                                    </div>
+                                    <div class="card-right-body">
+                                        <p class="mb-0">{!! $card['description'] ?? ($card['content'] ?? '') !!}</p>
+                                    </div>
                                 </div>
-                                <div class="card-right-body">
-                                    <p class="mb-0">{!! $card['description'] ?? ($card['content'] ?? '') !!}</p>
-                                </div>
-                            </div>
-                        @endforeach
+                            @endforeach
+                        </div>
                     </div>
-                </div>
+                </section>
             </section>
         @endif
         @renderPageSlot('home', 'after:why_choose_aire')
@@ -498,7 +500,7 @@
             }
         @endphp
 
-        <section class="home-best-selling-section py-4 my-3">
+        <section class="container main-container home-best-selling-section py-4 my-3">
             <div class="">
                 <!-- Header matching Home.png -->
                 <div class="home-best-selling__header text-center mb-4">
@@ -536,33 +538,36 @@
                     : getImageUrl('home/home-video.mp4'));
         @endphp
 
-        <section class="home-video-section mb-4 mb-lg-5" id="homeVideoSection">
-            <div class="">
-                <div class="home-video__box is-paused" id="homeVideoBox" role="region"
-                    aria-label="{{ $videoTitle }}">
-                    <!-- HTML5 Inline Video Player -->
-                    <video id="homeMainVideo" class="home-video__player" poster="{{ $videoPoster }}" preload="none"
-                        playsinline>
-                        <source src="{{ $videoUrl }}" type="video/mp4">
-                        <track kind="captions" label="English" srclang="en" src="data:text/vtt,WEBVTT%0A%0A" default>
-                        Your browser does not support the video tag.
-                    </video>
+        <section class="container main-container home-video-section mb-4 mb-lg-5" id="homeVideoSection">
+            <div class="row">
+                <div class="col-12">
+                    <div class="home-video__box is-paused" id="homeVideoBox" role="region"
+                        aria-label="{{ $videoTitle }}">
+                        <!-- HTML5 Inline Video Player -->
+                        <video id="homeMainVideo" class="home-video__player" poster="{{ $videoPoster }}"
+                            preload="none" playsinline>
+                            <source src="{{ $videoUrl }}" type="video/mp4">
+                            <track kind="captions" label="English" srclang="en" src="data:text/vtt,WEBVTT%0A%0A"
+                                default>
+                            Your browser does not support the video tag.
+                        </video>
 
-                    <!-- Initial Exploded View Poster (hides once video starts) -->
-                    <div class="home-video__poster" id="homeVideoPoster">
-                        <img src="{{ $videoPoster }}" alt="{{ $videoTitle }}" class="home-video__img"
-                            width="1200" height="600" loading="lazy" decoding="async">
-                    </div>
+                        <!-- Initial Exploded View Poster (hides once video starts) -->
+                        <div class="home-video__poster" id="homeVideoPoster">
+                            <img src="{{ $videoPoster }}" alt="{{ $videoTitle }}" class="home-video__img"
+                                width="1200" height="600" loading="lazy" decoding="async">
+                        </div>
 
-                    <!-- Glowing Play Button Overlay (always visible on pause, ended, or initial state) -->
-                    <div class="home-video__play-overlay" id="homeVideoPlayOverlay">
-                        <div class="home-video__play-pulse" id="homeVideoPlayPulse"></div>
-                        <button class="home-video__play-btn" type="button" id="homeVideoPlayBtn"
-                            aria-label="Play or Pause Video">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
-                        </button>
+                        <!-- Glowing Play Button Overlay (always visible on pause, ended, or initial state) -->
+                        <div class="home-video__play-overlay" id="homeVideoPlayOverlay">
+                            <div class="home-video__play-pulse" id="homeVideoPlayPulse"></div>
+                            <button class="home-video__play-btn" type="button" id="homeVideoPlayBtn"
+                                aria-label="Play or Pause Video">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -597,7 +602,7 @@
         @endphp
 
         @if ($livingHeroEnabled && $livingProduct)
-            <section class="living-hero" id="living-hero-section">
+            <section class="living-hero container main-container" id="living-hero-section">
                 <div class="living-hero__image-bg" id="living-hero-img-box">
                     <img src="{{ $livingBgImage }}" alt="Modern Living Room" class="living-hero__bg-img" width="1200"
                         height="600" loading="lazy" decoding="async">
@@ -666,7 +671,7 @@
                         ],
                     ];
         @endphp
-        <section id="faq" class="my-4">
+        <section id="faq container main-container" class="my-4">
             <div class="">
                 <div class="text-center mb-5">
                     @if (!empty($faqBadge))
@@ -718,5 +723,7 @@
 
 @push('scripts')
     <!-- AIRE Home Page Controller (Lightweight mobile-first & dynamic desktop engine) -->
-    <script src="{{ theme_asset('js/home.js') }}" defer></script>
+    <script
+        src="{{ theme_asset('js/home.js') }}?v={{ file_exists(public_path('themes/default/assets/js/home.js')) ? filemtime(public_path('themes/default/assets/js/home.js')) : time() }}"
+        defer></script>
 @endpush

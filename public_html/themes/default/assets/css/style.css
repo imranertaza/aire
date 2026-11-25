@@ -3,6 +3,13 @@
    Single source of truth for all colors, typography & spacing.
    ============================================================ */
 :root {
+    /* ── Viewport Zoom Tokens ────────────────────────────── */
+    --site-zoom-xxl: 0.92;
+    --site-zoom-xl: 0.92;
+    --site-zoom-lg: 0.94;
+    --site-zoom-md: 1;
+    --site-zoom-sm: 1;
+
     /* ── Brand / Primary ─────────────────────────────────── */
     --color-primary: #0095DA;
     --color-primary-hover: #047cc2;

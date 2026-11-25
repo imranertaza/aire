@@ -217,54 +217,55 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {{-- Bottom Footer Row: Health Highlights & CTA Buttons --}}
-                <div class="ductless-modal__footer">
-                    {{-- Left: Health Concern Tags --}}
-                    <div class="ductless-modal__health-tags">
-                        @if (!empty($showcase->health_tags) && is_array($showcase->health_tags))
-                            @foreach ($showcase->health_tags as $htag)
-                                <span class="ductless-modal__health-tag">
-                                    <i class="bi {{ $htag['icon'] ?? 'bi-check-circle' }}"></i>
-                                    {{ $htag['text'] ?? $htag }}
-                                </span>
-                            @endforeach
-                        @else
+            {{-- Bottom Footer Row: Health Highlights & CTA Buttons (Pinned at Bottom) --}}
+            <div class="ductless-modal__footer">
+                {{-- Left: Health Concern Tags --}}
+                <div class="ductless-modal__health-tags">
+                    @if (!empty($showcase->health_tags) && is_array($showcase->health_tags))
+                        @foreach ($showcase->health_tags as $htag)
                             <span class="ductless-modal__health-tag">
-                                <i class="bi bi-arrow-right"></i> Allergies &amp; Dust
+                                <i class="bi {{ $htag['icon'] ?? 'bi-check-circle' }}"></i>
+                                {{ $htag['text'] ?? $htag }}
                             </span>
-                            <span class="ductless-modal__health-tag">
-                                <i class="bi bi-file-earmark-medical"></i> Asthma
-                            </span>
-                            <span class="ductless-modal__health-tag">
-                                <i class="bi bi-house-door"></i> Mold &amp; Fog Window
-                            </span>
-                            <span class="ductless-modal__health-tag">
-                                <i class="bi bi-grid-3x3"></i> Pets &amp; Odor
-                            </span>
-                            <span class="ductless-modal__health-tag">
-                                <i class="bi bi-arrow-right"></i> Smoke &amp; Wildfire
-                            </span>
-                            <span class="ductless-modal__health-tag">
-                                <i class="bi bi-diagram-3"></i> VOCs
-                            </span>
-                        @endif
-                    </div>
+                        @endforeach
+                    @else
+                        <span class="ductless-modal__health-tag">
+                            <i class="bi bi-arrow-right"></i> Allergies &amp; Dust
+                        </span>
+                        <span class="ductless-modal__health-tag">
+                            <i class="bi bi-file-earmark-medical"></i> Asthma
+                        </span>
+                        <span class="ductless-modal__health-tag">
+                            <i class="bi bi-house-door"></i> Mold &amp; Fog Window
+                        </span>
+                        <span class="ductless-modal__health-tag">
+                            <i class="bi bi-grid-3x3"></i> Pets &amp; Odor
+                        </span>
+                        <span class="ductless-modal__health-tag">
+                            <i class="bi bi-arrow-right"></i> Smoke &amp; Wildfire
+                        </span>
+                        <span class="ductless-modal__health-tag">
+                            <i class="bi bi-diagram-3"></i> VOCs
+                        </span>
+                    @endif
+                </div>
 
-                    {{-- Right: CTA Buttons --}}
-                    <div class="ductless-modal__cta-wrap">
-                        <a href="{{ $productUrl }}" class="ductless-modal__btn-view">
-                            View Product
-                        </a>
-                        <button type="button"
-                            class="ductless-modal__btn-compare btn-add-to-compare {{ $inCompare ? 'active' : '' }}"
-                            data-product-id="{{ $product->id ?? '' }}"
-                            title="{{ $inCompare ? 'In Compare' : 'Compare' }}">
-                            {{ $inCompare ? 'In Compare' : 'Compare' }}
-                        </button>
-                    </div>
+                {{-- Right: CTA Buttons --}}
+                <div class="ductless-modal__cta-wrap">
+                    <a href="{{ $productUrl }}" class="ductless-modal__btn-view">
+                        View Product
+                    </a>
+                    <button type="button"
+                        class="ductless-modal__btn-compare btn-add-to-compare {{ $inCompare ? 'active' : '' }}"
+                        data-product-id="{{ $product->id ?? '' }}"
+                        title="{{ $inCompare ? 'In Compare' : 'Compare' }}">
+                        {{ $inCompare ? 'In Compare' : 'Compare' }}
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{{-- </div> --}}

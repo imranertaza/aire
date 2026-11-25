@@ -5,6 +5,66 @@
    ============================================================= */
 
 /* ----------------------------------------------------------------
+   RESPONSIVE VIEWPORT ZOOM SCALING
+   Provides 92% zoom on desktop displays with smooth device adaptation
+   ---------------------------------------------------------------- */
+@media (min-width: 1400px) {
+    html {
+        zoom: 0.92;
+        zoom: var(--site-zoom-xxl, 0.92);
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+    html {
+        zoom: 0.92;
+        zoom: var(--site-zoom-xl, 0.92);
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    html {
+        zoom: 0.94;
+        zoom: var(--site-zoom-lg, 0.94);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+    html {
+        zoom: 1;
+        zoom: var(--site-zoom-md, 1);
+    }
+}
+
+@media (max-width: 767.98px) {
+    html {
+        zoom: 1;
+        zoom: var(--site-zoom-sm, 1);
+    }
+}
+
+/* ----------------------------------------------------------------
+   WHY CHOOSE AIRE — Full Container Width Safety Across Zoom & Breakpoints
+   ---------------------------------------------------------------- */
+.why-choose-stacked-wrapper,
+#whyChooseStackedWrapper,
+.pin-spacer:has(> #whyChooseStackedWrapper),
+.pin-spacer:has(> .why-choose-stacked-wrapper),
+div.pin-spacer {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.stacked-cards-sticky-pin,
+.stacked-cards-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* ----------------------------------------------------------------
    LARGE DESKTOP+ (max-width: 1399px)
    ---------------------------------------------------------------- */
 @media (max-width: 1399px) {
@@ -508,6 +568,34 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 5px rgba(0, 102, 204, 0.35);
+}
+
+/* ----------------------------------------------------------------
+   GLOBAL MODAL BACKDROP BLUR & FULLSCREEN ZOOM SAFETY
+   ---------------------------------------------------------------- */
+.modal-backdrop {
+    position: fixed !important;
+    top: -50vh !important;
+    left: -50vw !important;
+    right: -50vw !important;
+    bottom: -50vh !important;
+    width: 200vw !important;
+    height: 200vh !important;
+    background-color: rgba(15, 23, 42, 0.65) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    z-index: 1050 !important;
+}
+
+.modal-backdrop.show {
+    opacity: 1 !important;
+}
+
+body.modal-open .mobile-bottom-dock {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
 }
 
 

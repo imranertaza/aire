@@ -52,7 +52,7 @@
 }
 
 /* Cinematic Dark Gradient Overlay matching Home.png */
-.home-hero-slide__overlay {
+/* .home-hero-slide__overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(180deg,
@@ -63,7 +63,7 @@
             #020816 100%);
     z-index: 1;
     pointer-events: none;
-}
+} */
 
 .home-hero-slide__content {
     position: relative;
@@ -1450,9 +1450,33 @@ h2.living-hero__title,
 
 
 /* ==========================================================================
-   Why Choose AIRE - Full Content 4-Column Grid Layout (No cutoff, No shaking)
+   Why Choose AIRE - GSAP ScrollTrigger Pinned Deck & Responsive Cards
    ========================================================================== */
+.why-choose-stacked-wrapper,
+#whyChooseStackedWrapper {
+    position: relative;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+    margin-top: 3rem;
+    margin-bottom: 4rem;
+}
 
+.pin-spacer:has(> #whyChooseStackedWrapper),
+.pin-spacer:has(> .why-choose-stacked-wrapper),
+div.pin-spacer {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.stacked-cards-sticky-pin {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
 
 .why-choose-stacked__header {
     text-align: center;
@@ -1471,6 +1495,171 @@ h2.living-hero__title,
     font-size: 13px;
     font-weight: 500;
     color: #475569;
+}
+
+.stacked-cards-container {
+    position: relative;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    height: 440px;
+    border-radius: 24px;
+    overflow: hidden;
+}
+
+@media (max-width: 1399.98px) {
+    .stacked-cards-container {
+        height: 400px;
+    }
+
+    .stacked-card {
+        height: 360px;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .stacked-cards-container {
+        height: 360px;
+    }
+
+    .stacked-card {
+        height: 330px;
+    }
+}
+
+.stacked-card {
+    position: absolute;
+    top: 0;
+    height: 350px;
+    border-radius: 24px;
+    padding: 32px 28px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: -8px 0 30px rgba(15, 23, 42, 0.08);
+    cursor: pointer;
+    user-select: none;
+    overflow: hidden;
+    will-change: transform;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Card 1: 100% width at left: 0% */
+.card-layer-1 {
+    width: 100%;
+    left: 0%;
+    z-index: 1;
+    transform: translateY(0%);
+    background-color: #24302b;
+    color: #ffffff;
+}
+
+/* Card 2: 79% width at left: 21% */
+.card-layer-2 {
+    width: 79%;
+    left: 21%;
+    z-index: 2;
+    transform: translateY(140%);
+    background-color: #dbe3e2;
+    color: var(--color-dark);
+}
+
+/* Card 3: 58% width at left: 42% */
+.card-layer-3 {
+    width: 58%;
+    left: 42%;
+    z-index: 3;
+    transform: translateY(140%);
+    background-color: #e2f97c;
+    color: var(--color-dark);
+}
+
+/* Card 4: 37% width at left: 63% */
+.card-layer-4 {
+    width: 37%;
+    left: 63%;
+    z-index: 4;
+    transform: translateY(140%);
+    background-color: #eaf5d3;
+    color: var(--color-dark);
+}
+
+.card-left-header {
+    width: 100%;
+    max-width: 100%;
+    flex-shrink: 0;
+}
+
+.card-left-header .tab-title {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-top: 10px;
+    margin-bottom: 0;
+    word-break: break-word;
+}
+
+.card-right-body {
+    width: 100%;
+    max-width: 100%;
+    font-size: 13px;
+    line-height: 1.55;
+    flex-shrink: 0;
+}
+
+.card-right-body p {
+    font-size: 13px;
+    margin-bottom: 0;
+}
+
+/* Responsive Overrides (Tablets & Mobile) */
+@media (max-width: 991.98px) {
+    .stacked-cards-container {
+        height: auto !important;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        position: relative;
+        z-index: auto;
+        isolation: auto;
+        overflow: visible;
+    }
+
+    .stacked-card {
+        position: relative !important;
+        width: 100% !important;
+        left: 0 !important;
+        transform: none !important;
+        box-shadow: none;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 24px 20px;
+        height: auto !important;
+        z-index: auto !important;
+    }
+
+    .card-layer-1,
+    .card-layer-2,
+    .card-layer-3,
+    .card-layer-4 {
+        z-index: auto !important;
+        position: relative !important;
+        width: 100% !important;
+        left: 0 !important;
+        transform: none !important;
+    }
+
+    .card-left-header {
+        width: 100%;
+        margin-bottom: 12px;
+    }
+
+    .card-right-body {
+        max-width: 100%;
+    }
 }
 
 /* ==========================================================================

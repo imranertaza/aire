@@ -1,7 +1,7 @@
 <template>
     <div class="tab-pane fade" id="custom-tabs-showcase" role="tabpanel"
         aria-labelledby="tab-showcase">
-        
+
         <div class="alert alert-info py-2 px-3 mb-3 d-flex flex-wrap align-items-center justify-content-between">
             <div class="d-flex align-items-center">
                 <i class="fas fa-info-circle mr-2 fa-lg"></i>

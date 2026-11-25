@@ -42,7 +42,8 @@
                     @if (!empty($page->short_des))
                         {{ $page->short_des }}
                     @else
-                        Discover comprehensive documentation, architectural overviews, and detailed resources by AIRE Industries.
+                        Discover comprehensive documentation, architectural overviews, and detailed resources by AIRE
+                        Industries.
                     @endif
                 </p>
             </div>
@@ -103,10 +104,10 @@
 | Main Content & Sidebar Layout
 | ========================================================================= -->
 <main class="container main-container legal-layout-wrap">
-    <div class="row g-4 g-lg-5">
+    <div class="row">
 
         <!-- Left Column: Page Body & Media -->
-        <div class="col-lg-8 col-xl-8">
+        <div class="col-lg-9 col-xl-9">
             <article class="legal-content-card">
 
                 <!-- Featured Image (if uploaded) -->
@@ -135,7 +136,8 @@
                 @else
                     <div class="alert alert-light border rounded-3 p-4 text-center text-muted mb-5">
                         <i class="bi bi-info-circle fs-3 d-block mb-2 text-primary"></i>
-                        <p class="mb-0">Page content is being updated by our editorial team. Please check back soon.</p>
+                        <p class="mb-0">Page content is being updated by our editorial team. Please check back soon.
+                        </p>
                     </div>
                 @endif
 
@@ -157,7 +159,7 @@
         </div>
 
         <!-- Right Column: Contextual Navigation & Support Widgets -->
-        <aside class="col-lg-4 col-xl-4">
+        <aside class="col-lg-3 col-xl-3">
             <div class="legal-sidebar-sticky" data-lenis-prevent>
 
                 @if (isset($otherPages) && $otherPages->isNotEmpty())
@@ -190,7 +192,8 @@
                         <i class="bi bi-headset"></i>
                     </div>
                     <h5>Need Expert Assistance?</h5>
-                    <p>Have questions about clean room air purification, smart building HVAC integration, or custom installations?</p>
+                    <p>Have questions about clean room air purification, smart building HVAC integration, or custom
+                        installations?</p>
                     <a href="{{ route('contact') }}" class="legal-support-btn">
                         <i class="bi bi-envelope-fill"></i> Speak With a Specialist
                     </a>
@@ -198,27 +201,31 @@
 
                 <!-- AIRE Quality Promise Card -->
                 <div class="card border border-light-subtle rounded-4 p-4 bg-white shadow-sm">
-                    <h6 class="fw-bold text-dark fs-13 text-uppercase mb-3" style="letter-spacing: 0.8px;">The AIRE Quality Promise</h6>
+                    <h6 class="fw-bold text-dark fs-13 text-uppercase mb-3" style="letter-spacing: 0.8px;">The AIRE
+                        Quality Promise</h6>
                     <div class="d-flex flex-column gap-3 fs-13 text-secondary">
                         <div class="d-flex align-items-start gap-3">
                             <i class="bi bi-patch-check-fill text-success fs-5 mt-1"></i>
                             <div>
                                 <strong class="d-block text-dark fw-semibold">Medical-Grade Standard</strong>
-                                <span class="text-muted fs-12">99.97% particulate capture efficiency down to 0.1 microns.</span>
+                                <span class="text-muted fs-12">99.97% particulate capture efficiency down to 0.1
+                                    microns.</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
                             <i class="bi bi-shield-lock-fill text-primary fs-5 mt-1"></i>
                             <div>
                                 <strong class="d-block text-dark fw-semibold">Verified IAQ Performance</strong>
-                                <span class="text-muted fs-12">Certified lab tested and continuous sensor calibration.</span>
+                                <span class="text-muted fs-12">Certified lab tested and continuous sensor
+                                    calibration.</span>
                             </div>
                         </div>
                         <div class="d-flex align-items-start gap-3">
                             <i class="bi bi-award-fill text-warning fs-5 mt-1"></i>
                             <div>
                                 <strong class="d-block text-dark fw-semibold">Full Manufacturer Coverage</strong>
-                                <span class="text-muted fs-12">Complete warranty protection and direct engineering support.</span>
+                                <span class="text-muted fs-12">Complete warranty protection and direct engineering
+                                    support.</span>
                             </div>
                         </div>
                     </div>

@@ -106,7 +106,8 @@
                                         <div class="quickview-product-img-box">
                                             <a href="{{ $detailUrl }}" tabindex="-1">
                                                 <img src="{{ $imgUrl }}" alt="{{ $product->name }}"
-                                                    loading="lazy">
+                                                    loading="lazy"
+                                                    onerror="this.onerror=null;this.src='{{ theme_asset('img/Air-Purify.png') }}';">
                                             </a>
                                         </div>
                                         <span class="quickview-product-brand">{{ $brandName }}</span>
@@ -189,7 +190,8 @@
                                         <div class="quickview-product-img-box">
                                             <a href="{{ $detailUrl }}" tabindex="-1">
                                                 <img src="{{ $imgUrl }}" alt="{{ $product->name }}"
-                                                    loading="lazy">
+                                                    loading="lazy"
+                                                    onerror="this.onerror=null;this.src='{{ theme_asset('img/Air-Purify.png') }}';">
                                             </a>
                                         </div>
                                         <span class="quickview-product-brand">{{ $brandName }}</span>
